@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 
 public interface TaskQueue {
-	public TaskSystem getSystem();
 	public String getName();
 	public int size();
 	
@@ -12,7 +11,7 @@ public interface TaskQueue {
 	public List<Task> getAllOpenTasks();
 	public List<Task> getSomeOpenTasks();
 
-	public void sendTask(TaskType type, String data);
-	public void sendTask(TaskType type, String data, Date scheduledTime);
-	public void sendTask(TaskType type, String data, long delay);
+	public void sendTask(TaskHandler type, String data);
+	public void sendTask(TaskHandler type, String data, Date scheduledTime);
+	public void sendTask(TaskHandler type, String data, long delay);
 }

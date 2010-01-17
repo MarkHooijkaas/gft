@@ -1,5 +1,5 @@
 package org.kisst.gft.task;
 
-public interface TaskType {
+public interface TaskHandler {
 	Object execute(Object data);
 }
