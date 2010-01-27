@@ -1,14 +1,17 @@
 package org.kisst.gft;
 
+import org.kisst.cfg4j.SimpleProps;
+import org.kisst.gft.filetransfer.Channel;
+import org.kisst.gft.filetransfer.RemoteScpAction;
 import org.kisst.gft.poller.QueuePoller;
 import org.kisst.gft.task.TaskQueue;
 import org.kisst.gft.task.file.FileSystem;
-import org.kisst.gft.tasks.EchoHandler;
 
 public class GftContainer {
-	FileSystem fs=new FileSystem("testdata");
-	TaskQueue incoming=fs.getQueue("incoming");
-	QueuePoller poller=new QueuePoller(incoming, new EchoHandler());
+	private FileSystem fs=new FileSystem("testdata");
+	private TaskQueue incoming=fs.getQueue("incoming");
+	private QueuePoller poller=new QueuePoller(incoming, new RemoteScpAction());
+	
 	
 	public void run() {
 		while (true) {
@@ -24,6 +27,11 @@ public class GftContainer {
 	}
 	
 	public static void main(String[] args) {
+		if (args.length!=1)
+			throw new RuntimeException("usage: GftContainer <config file>");
+		SimpleProps props=new SimpleProps();
+		props.load(args[0]);
+		Channel.init(props);
 		new GftContainer().run();
 	}
 }

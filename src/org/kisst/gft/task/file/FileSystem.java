@@ -8,7 +8,7 @@ import java.util.List;
 import org.kisst.gft.task.LockedBySomeoneElseException;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskQueue;
-import org.kisst.gft.task.TaskHandler;
+import org.kisst.gft.task.Action;
 
 public class FileSystem {
 	private final File basedir;
@@ -45,10 +45,10 @@ public class FileSystem {
 		public String getName() { return name;}
 		public FileSystem getSystem() { return system; }
 
-		public void sendTask(TaskHandler type, String data) { sendTask(type, data, 0); }
-		public void sendTask(TaskHandler type, String data, Date scheduledTime) {
+		public void sendTask(Action type, String data) { sendTask(type, data, 0); }
+		public void sendTask(Action type, String data, Date scheduledTime) {
 		}
-		public void sendTask(TaskHandler type, String data, long delay) {
+		public void sendTask(Action type, String data, long delay) {
 		}
 		public int size() { return getAllOpenTasks().size();}
 
@@ -75,6 +75,12 @@ public class FileSystem {
 		}
 		public List<Task> getSomeOpenTasks() {
 			return getAllOpenTasks();
+		}
+		public void lock(Task t) throws LockedBySomeoneElseException {
+			((FileTask)t).lock();
+		}
+		public void done(Task t) {
+			((FileTask)t).done();
 		}
 	}
 

@@ -11,7 +11,9 @@ public interface TaskQueue {
 	public List<Task> getAllOpenTasks();
 	public List<Task> getSomeOpenTasks();
 
-	public void sendTask(TaskHandler type, String data);
-	public void sendTask(TaskHandler type, String data, Date scheduledTime);
-	public void sendTask(TaskHandler type, String data, long delay);
+	public void sendTask(Action type, String data);
+	public void sendTask(Action type, String data, Date scheduledTime);
+	public void sendTask(Action type, String data, long delay);
+	public void lock(Task t) throws LockedBySomeoneElseException;
+	public void done(Task t);
 }

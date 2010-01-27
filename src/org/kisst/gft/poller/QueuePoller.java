@@ -4,14 +4,14 @@ import java.util.List;
 
 import org.kisst.gft.task.LockedBySomeoneElseException;
 import org.kisst.gft.task.Task;
-import org.kisst.gft.task.TaskHandler;
+import org.kisst.gft.task.Action;
 import org.kisst.gft.task.TaskQueue;
 
 public class QueuePoller {
 	private final TaskQueue queue;
-	private final TaskHandler handler;
+	private final Action handler;
 	
-	public QueuePoller(TaskQueue queue, TaskHandler handler) {
+	public QueuePoller(TaskQueue queue, Action handler) {
 		this.queue=queue;
 		this.handler=handler;
 	}
@@ -38,14 +38,14 @@ public class QueuePoller {
 	
 	private void handle(Task t) {
 		try {
-			t.lock();
+			queue.lock(t);
 		} catch (LockedBySomeoneElseException e) {
 			System.out.println("Could not lock "+t);
 			e.printStackTrace();
 			return;
 		}
 		System.out.println("handling "+t);
-		handler.execute(t.getData());
-		t.done();
+		handler.execute(t);
+		queue.done(t);
 	}
 }
