@@ -1,13 +1,13 @@
 package org.kisst.gft.filetransfer;
 
 
-public class SshUrl {
+public class ScpUrl {
 	public final String url;
 	public final String user;
 	public final String host;
 	public final String path;
 	
-	public SshUrl(String url) {
+	public ScpUrl(String url) {
 		if (url.startsWith("ssh:"))
 			url=url.substring(4);
 		this.url=url;

@@ -3,13 +3,13 @@ package org.kisst.gft;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.RemoteScpAction;
-import org.kisst.gft.poller.QueuePoller;
-import org.kisst.gft.task.TaskQueue;
-import org.kisst.gft.task.file.FileSystem;
+import org.kisst.gft.mq.MqQueue;
+import org.kisst.gft.mq.QueuePoller;
+import org.kisst.gft.mq.file.FileSystem;
 
 public class GftContainer {
 	private FileSystem fs=new FileSystem("testdata");
-	private TaskQueue incoming=fs.getQueue("incoming");
+	private MqQueue incoming=fs.getQueue("incoming");
 	private QueuePoller poller=new QueuePoller(incoming, new RemoteScpAction());
 	
 	

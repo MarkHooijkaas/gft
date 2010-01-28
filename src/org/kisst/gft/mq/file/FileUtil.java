@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with the Caas tool.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.kisst.gft.task.file;
+package org.kisst.gft.mq.file;
 
 import java.io.BufferedReader;
 import java.io.File;

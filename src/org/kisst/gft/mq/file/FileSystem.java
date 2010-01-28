@@ -1,14 +1,13 @@
-package org.kisst.gft.task.file;
+package org.kisst.gft.mq.file;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import org.kisst.gft.task.LockedBySomeoneElseException;
-import org.kisst.gft.task.Task;
-import org.kisst.gft.task.TaskQueue;
-import org.kisst.gft.task.Action;
+import org.kisst.gft.mq.LockedBySomeoneElseException;
+import org.kisst.gft.mq.MqMessage;
+import org.kisst.gft.mq.MqQueue;
 
 public class FileSystem {
 	private final File basedir;
@@ -26,7 +25,7 @@ public class FileSystem {
 		return new Queue(this, name);
 	}
 
-	public static class Queue implements TaskQueue {
+	public static class Queue implements MqQueue {
 		private final FileSystem system;
 		private final String name;
 		private final File fulldir;
@@ -41,65 +40,54 @@ public class FileSystem {
 			else
 				fulldir.mkdirs();
 		}
-		@Override public String toString() { return "FileTaskQueue("+name+")"; }
+		@Override public String toString() { return "FileSystemQueue("+name+")"; }
 		public String getName() { return name;}
 		public FileSystem getSystem() { return system; }
 
-		public void sendTask(Action type, String data) { sendTask(type, data, 0); }
-		public void sendTask(Action type, String data, Date scheduledTime) {
-		}
-		public void sendTask(Action type, String data, long delay) {
-		}
-		public int size() { return getAllOpenTasks().size();}
+		public int size() { return getAllMessages().size();}
 
 		File getFile(String filename) {
 			return new File(fulldir,filename);
 		}
-		public FileTask getOneOpenTask() {
-			List<Task> tasks=getAllOpenTasks();
-			if (tasks.size()==0)
+		public Message getOneMessage() {
+			List<MqMessage> messages=getAllMessages();
+			if (messages.size()==0)
 				return null;
-			return (FileTask) tasks.get(0);
+			return (Message) messages.get(0);
 		}
-		public List<Task> getAllOpenTasks() {
-			List<Task> tasks =new ArrayList<Task>();
+		public List<MqMessage> getAllMessages() {
+			List<MqMessage> messages =new ArrayList<MqMessage>();
 			File[] files=fulldir.listFiles();
 			for (File f :files) {
 				if (f.isFile() && ! f.getName().endsWith(".locked")) {
-					tasks.add(new FileTask(this,f.getName())); 
-					//System.out.println("adding task "+f);
+					messages.add(new Message(this,f.getName())); 
+					//System.out.println("adding message "+f);
 				}
 			}
-			//System.out.println("returning "+tasks.size()+" tasks");
-			return tasks;
+			//System.out.println("returning "+messages.size()+" messages");
+			return messages;
 		}
-		public List<Task> getSomeOpenTasks() {
-			return getAllOpenTasks();
-		}
-		public void lock(Task t) throws LockedBySomeoneElseException {
-			((FileTask)t).lock();
-		}
-		public void done(Task t) {
-			((FileTask)t).done();
+		public List<MqMessage> getSomeMessages() {
+			return getAllMessages();
 		}
 	}
 
-	public static class FileTask implements Task {
+	public static class Message implements MqMessage {
 		private final Queue queue;
 		private final String filename;
 		private File lockedFile=null;
 		
-		private FileTask(Queue queue, String filename){
+		private Message(Queue queue, String filename){
 			this.queue=queue;
 			this.filename=filename;
 		}
-		@Override public String toString() { return "FileTask("+queue+","+filename; }
+		@Override public String toString() { return "FileMessage("+queue+","+filename; }
 		public boolean isLocked() { return lockedFile!=null;}
 		public Queue getQueue() { return queue;}
 		
 		public void done() {
 			if (lockedFile==null)
-				throw new RuntimeException("Need to acquire lock before deleting task "+this);
+				throw new RuntimeException("Need to acquire lock before deleting message "+this);
 			lockedFile.delete();
 			lockedFile=null;
 		}
@@ -110,9 +98,9 @@ public class FileSystem {
 
 		public void lock() throws LockedBySomeoneElseException {
 			if (isLocked())
-				return; // it is not an error to lock a task twice
+				return; // it is not an error to lock a message twice
 			// To lock a file it is renamed to extension .locked plus
-			// an unique id of the task, so that only THIS task holds the lock
+			// an unique id of the message, so that only THIS message holds the lock
 			File f=getFile();
 			//System.out.println("locking "+f);
 			if (!f.exists())
@@ -129,21 +117,21 @@ public class FileSystem {
 			}
 		}
 
-		public void move(TaskQueue dest) { move(dest,0); }
-		public void move(TaskQueue dest, long delay) {
+		public void move(MqQueue dest) { move(dest,0); }
+		public void move(MqQueue dest, long delay) {
 			if (! isLocked())
-				throw new RuntimeException("Need to acquire lock before moving task "+this);
+				throw new RuntimeException("Need to acquire lock before moving message "+this);
 			if (! (dest instanceof Queue))
-				throw new RuntimeException("Can not move task "+this+" to queue of inncompatibe type "+dest);
+				throw new RuntimeException("Can not move message "+this+" to queue of inncompatibe type "+dest);
 			Queue dest2=(Queue)dest;
 			if (dest2.getSystem()!=queue.getSystem())
-				throw new RuntimeException("Can not move task "+this+" from queue "+queue+" on system "+queue.getSystem()
+				throw new RuntimeException("Can not move message "+this+" from queue "+queue+" on system "+queue.getSystem()
 						+" to queue "+dest+" on a different system "+dest2.getSystem());
 			Queue newq= (Queue) dest;
 			File newfile=newq.getFile(filename);
 			if (! lockedFile.renameTo(newfile))
-				throw new RuntimeException("could not move task "+this+" to queue "+dest);
-			lockedFile=null; // not really necessary because the task does not exist anymore
+				throw new RuntimeException("could not move message "+this+" to queue "+dest);
+			lockedFile=null; // not really necessary because the message does not exist anymore
 		}
 
 		private File getFile() {

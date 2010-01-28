@@ -21,14 +21,14 @@ public class Channel {
 		return ch;		
 	}
 
-	public final SshUrl from;
-	public final SshUrl to;
+	public final ScpUrl from;
+	public final ScpUrl to;
 	public final Ssh.Credentials cred;
 	public final boolean localToRemote=true;
 	
 	public Channel(String name, Props props) {
-		this.from=new SshUrl(props.getString("gft.channel."+name+".from"));
-		this.to=new SshUrl(props.getString("gft.channel."+name+".to"));
+		this.from=new ScpUrl(props.getString("gft.channel."+name+".from"));
+		this.to=new ScpUrl(props.getString("gft.channel."+name+".to"));
 		this.cred=new Ssh.Credentials(getUser(), props.getString("gft.channel."+name+".keyfile"));
 	}
 	
