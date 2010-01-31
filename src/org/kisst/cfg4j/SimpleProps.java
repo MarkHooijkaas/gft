@@ -113,17 +113,22 @@ public class SimpleProps extends PropsBase {
 			else if (ch == ' ' || ch == '\t' || ch == '\n')
 				continue;
 			else if (ch=='"')
-				return ch+readDoubleQuotedString(inp);
+				return readDoubleQuotedString(inp);
 			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':')
 				return ch+readUnquotedString(inp);
 		}
 	}
 	private String readDoubleQuotedString(BufferedReader inp) {
-		return readUntil("\"",inp);
+		String result=readUntil("\"",inp).trim();
+		return result.substring(0, result.length()-1);
 	}
 
 	private String readUnquotedString(BufferedReader inp) {
-		return readUntil(" \t\n,;}]",inp).trim();
+		String result=readUntil(" \t\n,;}]",inp).trim();
+		if (result.endsWith(";") || result.endsWith("}") || result.endsWith("]"))
+			return result.substring(0,result.length()-1);
+		else
+			return result;
 	}
 
 	
@@ -140,6 +145,8 @@ public class SimpleProps extends PropsBase {
 			str=str.trim();
 			if (str.length()==0) 
 				continue;
+			else if (str.startsWith("}")) 
+				return;
 			else if (str.startsWith("#")) 
 				skipLine(input);
 			else if (str.endsWith("=") || str.endsWith(":") )
