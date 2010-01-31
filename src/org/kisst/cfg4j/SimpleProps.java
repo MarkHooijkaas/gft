@@ -33,8 +33,23 @@ import java.util.Set;
 public class SimpleProps extends PropsBase {
 	private static final long serialVersionUID = 1L;
 
+	private final SimpleProps parent;
+	private final String name; 
 	private final Map<String, Object> map=new LinkedHashMap<String, Object>();
 
+	public SimpleProps() { this(null,""); }
+	public SimpleProps(SimpleProps parent, String name) {
+		this.parent=parent;
+		this.name=name;
+	}
+	public String getName() { return name; }
+	public String getFullName() {
+		if (parent==null)
+			return name;
+		else
+			return parent.getFullName()+"."+name;
+	}
+	
 	public Set<String> keySet() { return map.keySet(); }
 	
 	public void put(String key, Object value) {
