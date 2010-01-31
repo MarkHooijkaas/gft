@@ -19,8 +19,8 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.cfg4j;
 
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
+
 
 public interface Props {
 	public Object get(String key, Object defaultValue);
@@ -28,9 +28,9 @@ public interface Props {
 	public int    getInt(String string, int defaultValue);
 	public long   getLong(String string, long defaultValue);
 	public boolean getBoolean(String name, boolean defaultValue);
-	public Map<String, Object> getMap(String name);
-	public List<Object> getList(String name);
-
+	public Props getProps(String name);
+	public Set<String> keySet();
+	
 	public Object get(String key);
 	public String getString(String key);
 	public int    getInt(String string);

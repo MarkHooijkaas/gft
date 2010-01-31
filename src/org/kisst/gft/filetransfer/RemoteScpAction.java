@@ -1,6 +1,8 @@
 package org.kisst.gft.filetransfer;
 
-import org.kisst.gft.task.Action;
+import org.kisst.cfg4j.Props;
+import org.kisst.gft.GftContainer;
+import org.kisst.gft.action.Action;
 import org.kisst.gft.task.Task;
 
 public class RemoteScpAction implements Action {

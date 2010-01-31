@@ -10,6 +10,8 @@ public class ScpUrl {
 	public ScpUrl(String url) {
 		if (url.startsWith("ssh:"))
 			url=url.substring(4);
+		if (url.startsWith("scp:"))
+			url=url.substring(4);
 		this.url=url;
 		int pos=url.indexOf(":");
 		if (pos<0)
@@ -22,5 +24,7 @@ public class ScpUrl {
 		host=fullhost.substring(pos+1);
 		user=fullhost.substring(0,pos);
 	}
+	
+	public String toString() { return url; }
 
 }

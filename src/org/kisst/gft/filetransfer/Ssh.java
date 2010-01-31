@@ -1,5 +1,6 @@
 package org.kisst.gft.filetransfer;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -82,6 +83,11 @@ public class Ssh {
 		public Credentials(String user, String keyfile) {
 			this.user=user;
 			this.keyfile=keyfile;
+			File f=new File(keyfile);
+			if (! f.exists())
+				throw new RuntimeException("keyfile "+f+" does not exist");
+			if (! f.isFile())
+				throw new RuntimeException("keyfile "+f+" is not a file");
 		}
 
 		public void showMessage(String message){ System.out.println("Message: "+message); }

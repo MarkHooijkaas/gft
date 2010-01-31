@@ -19,11 +19,6 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.cfg4j;
 
-import java.util.List;
-import java.util.Map;
-
-
-
 public abstract class PropsBase implements Props {
 	private static final long serialVersionUID = 1L;
 	abstract public Object get(String key, Object defaultValue);
@@ -80,11 +75,7 @@ public abstract class PropsBase implements Props {
 			throw new RuntimeException("property "+name+" should be true or false, not "+value);
 	}
 
-	@SuppressWarnings("unchecked")
-	public List<Object> getList(String name) { return (List<Object>) get(name); }
-	
-	@SuppressWarnings("unchecked")
-	public Map<String, Object> getMap(String name) { return (Map<String, Object>) get(name); }
+	public Props getProps(String name) { return (Props) get(name); }
 
 
 }

@@ -1,36 +1,26 @@
 package org.kisst.gft.filetransfer;
 
-import java.util.HashMap;
-
 import org.kisst.cfg4j.Props;
+import org.kisst.gft.GftContainer;
+import org.kisst.gft.action.Action;
+import org.kisst.gft.action.ActionList;
+import org.kisst.gft.task.Task;
 
-public class Channel {
-	private final static HashMap<String, Channel> channels= new HashMap<String, Channel>();
-
-	private static Props props;
-	public static void init(Props props) {
-		Channel.props=props;
-		channels.clear();
-	}
-	public static Channel getChannel(String name) {
-		Channel ch=channels.get(name);
-		if (ch==null) { 
-			ch=new Channel(name,props);
-			channels.put(name, ch);
-		}
-		return ch;		
-	}
-
+public class Channel implements Action {
 	public final ScpUrl from;
 	public final ScpUrl to;
 	public final Ssh.Credentials cred;
+	public final Action action;
 	public final boolean localToRemote=true;
 	
-	public Channel(String name, Props props) {
-		this.from=new ScpUrl(props.getString("gft.channel."+name+".from"));
-		this.to=new ScpUrl(props.getString("gft.channel."+name+".to"));
-		this.cred=new Ssh.Credentials(getUser(), props.getString("gft.channel."+name+".keyfile"));
+	public Channel(GftContainer gft, Props props) {
+		this.from=new ScpUrl(props.getString("from"));
+		this.to=new ScpUrl(props.getString("to"));
+		this.cred=new Ssh.Credentials(getUser(), props.getString("keyfile"));
+		this.action=new ActionList(gft, props);
 	}
+	public String toString() { return "Channel(scp "+from+" "+to+")";}
+	public Object execute(Task task) { action.execute(task); return null; }
 	
 	public String getUser() {
 		if (localToRemote)

@@ -2,15 +2,18 @@ package org.kisst.gft.mq;
 
 import java.util.List;
 
+import org.kisst.gft.GftContainer;
+import org.kisst.gft.action.Action;
 import org.kisst.gft.filetransfer.FileTransferTask;
-import org.kisst.gft.task.Action;
 import org.kisst.gft.task.Task;
 
 public class QueuePoller {
+	private final GftContainer gft;
 	private final MqQueue queue;
 	private final Action handler;
 	
-	public QueuePoller(MqQueue queue, Action handler) {
+	public QueuePoller(GftContainer gft, MqQueue queue, Action handler) {
+		this.gft=gft;
 		this.queue=queue;
 		this.handler=handler;
 	}
@@ -44,7 +47,7 @@ public class QueuePoller {
 			return;
 		}
 		System.out.println("handling "+msg);
-		Task tsk=new FileTransferTask(msg.getData());
+		Task tsk=new FileTransferTask(gft, msg.getData());
 		handler.execute(tsk);
 		msg.done();
 	}
