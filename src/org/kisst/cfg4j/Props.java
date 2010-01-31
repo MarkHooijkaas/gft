@@ -19,12 +19,17 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.cfg4j;
 
+import java.util.List;
+import java.util.Map;
+
 public interface Props {
 	public Object get(String key, Object defaultValue);
 	public String getString(String key, String defaultValue);
 	public int    getInt(String string, int defaultValue);
 	public long   getLong(String string, long defaultValue);
 	public boolean getBoolean(String name, boolean defaultValue);
+	public Map<String, Object> getMap(String name);
+	public List<Object> getList(String name);
 
 	public Object get(String key);
 	public String getString(String key);
