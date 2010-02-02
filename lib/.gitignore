@@ -1,1 +1,4 @@
 jsch-0.1.42.jar
+commons-httpclient-3.1.jar
+commons-logging-1.0.4.jar
+jdom-1.0.jar

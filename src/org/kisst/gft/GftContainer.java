@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.action.Action;
+import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.ChannelAction;
 import org.kisst.gft.filetransfer.RemoteScpAction;
@@ -22,19 +23,24 @@ public class GftContainer {
 	public Props props;
 	
 	private final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
-	private final HashMap<String, Action> actions= new LinkedHashMap<String, Action>();
+	private final HashMap<String, Action>   actions= new LinkedHashMap<String, Action>();
+	private final HashMap<String, HttpHost>   hosts= new LinkedHashMap<String, HttpHost>();
 
 	public void init(Props props) {
 		this.props=props;
 		channels.clear();
 		actions.put("copy", new RemoteScpAction());
 
+		Props hostProps=props.getProps("gft.http.host");
+		for (String name: hostProps.keySet())
+			hosts.put(name, new HttpHost(hostProps.getProps(name)));
+
 		Props actionProps=props.getProps("gft.action");
 		for (String name: actionProps.keySet()) {
 			Props p=actionProps.getProps(name);
 			String classname=p.getString("class", null);
 			if (classname==null)
-				classname="org.kisst.gft.action."+name+"Action";
+				classname="org.kisst.gft.action."+name;
 			Constructor<?> c=ReflectionUtil.getConstructor(classname, new Class<?>[] {GftContainer.class, Props.class} );
 			Action act;
 			if (c==null)
@@ -56,6 +62,7 @@ public class GftContainer {
 	}
 	public Channel getChannel(String name) { return channels.get(name); }
 	public Action getAction(String name) { return actions.get(name); }
+	public HttpHost getHost(String name) { return hosts.get(name); }
 
 	public void run() {
 		while (true) {
