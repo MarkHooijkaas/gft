@@ -29,6 +29,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import org.kisst.util.XmlNode;
+
 
 public class SimpleProps extends PropsBase {
 	private static final long serialVersionUID = 1L;
@@ -108,7 +110,7 @@ public class SimpleProps extends PropsBase {
 	public void read(InputStream inp)  {
 		readMap(new BufferedReader(new InputStreamReader(inp)));
 	}
-	
+
 	private Object readObject(BufferedReader inp)  {
 		int c;
 		while (true){
@@ -193,9 +195,23 @@ public class SimpleProps extends PropsBase {
 				break;
 			}
 			char ch=(char) c;
-			result.append(ch);
-			if (endchars.indexOf(ch)>=0)
-				break;
+			if (ch=='\\') {
+				try {
+					c=inp.read();
+				} catch (IOException e) { throw new RuntimeException(e); }
+				if (c<0) {
+					if (result.length()==0)
+						return null;
+					break;
+				}
+				ch=(char)c;					
+				result.append(ch);
+			}
+			else {
+				result.append(ch);
+				if (endchars.indexOf(ch)>=0)
+					break;
+			}
 		}
 		return result.toString();
 	}
@@ -231,4 +247,22 @@ public class SimpleProps extends PropsBase {
 		result.append(indent+"}\n");
 		return result.toString();
 	}
+	
+	
+	public void readXml(XmlNode node)  {
+		for (XmlNode child : node.getChildren()) {
+			String name=child.getName();
+			if (child.getChildren().size()>0) {
+				SimpleProps p=(SimpleProps) getProps(name);
+				if (p==null) {
+					p=new SimpleProps(this,name);
+					put(name,p);
+				}
+				p.readXml(child);
+			}
+			else 
+				put(name, child.getText());
+		}
+	}
+
 }

@@ -3,11 +3,9 @@ package org.kisst.gft.action;
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.action.Action;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.filetransfer.Ssh;
 import org.kisst.gft.task.Task;
-import org.kisst.util.FileUtil;
 import org.kisst.util.StringUtil;
 
 public class SshAction implements Action {
@@ -17,7 +15,7 @@ public class SshAction implements Action {
 	
 	public SshAction(GftContainer gft, Props props) {
 		this.actionProps=props;
-		commandTemplate =FileUtil.loadString(props.getString("command"));
+		commandTemplate =props.getString("command");
 	}
 
 	public Object execute(Task task) {

@@ -31,16 +31,18 @@ public class GftContainer {
 		channels.clear();
 		actions.put("copy", new RemoteScpAction());
 
-		Props hostProps=props.getProps("gft.http.host");
-		for (String name: hostProps.keySet())
-			hosts.put(name, new HttpHost(hostProps.getProps(name)));
-
+		if (props.get("gft.http.host",null)!=null) {
+			Props hostProps=props.getProps("gft.http.host");
+			for (String name: hostProps.keySet())
+				hosts.put(name, new HttpHost(hostProps.getProps(name)));
+		}
+		
 		Props actionProps=props.getProps("gft.action");
 		for (String name: actionProps.keySet()) {
 			Props p=actionProps.getProps(name);
-			String classname=p.getString("class", null);
-			if (classname==null)
-				classname="org.kisst.gft.action."+name;
+			String classname=p.getString("class", name);
+			if (classname.indexOf('.')<0)
+				classname="org.kisst.gft.action."+classname;
 			Constructor<?> c=ReflectionUtil.getConstructor(classname, new Class<?>[] {GftContainer.class, Props.class} );
 			Action act;
 			if (c==null)
