@@ -59,7 +59,7 @@ public class HttpAction  implements Action {
 		for (String hostname: hostnames)
 			hosts[i++]=gft.getHost(hostname.trim());
 		timeout = props.getInt("timeout", 30000);
-		template=FileUtil.loadString(props.getString("template"));
+		template=props.getString("template");
 	}
 
         

@@ -20,6 +20,7 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 package org.kisst.cfg4j;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -133,6 +134,8 @@ public class SimpleProps extends PropsBase {
 				return readDoubleQuotedString(inp);
 			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':')
 				return ch+readUnquotedString(inp);
+			else if (ch=='@')
+				return readSpecialObject(inp);
 		}
 	}
 	private String readDoubleQuotedString(BufferedReader inp) {
@@ -146,6 +149,17 @@ public class SimpleProps extends PropsBase {
 			return result.substring(0,result.length()-1);
 		else
 			return result;
+	}
+	private Object readSpecialObject(BufferedReader inp) {
+		String type=readUntil("(", inp);
+		type=type.substring(0,type.length()-1).trim();
+		if (type.equals("file")) {
+			String filename=readUntil(")",inp);
+			filename=filename.substring(0,filename.length()-1);
+			return new File(filename);
+		}
+		else
+			throw new RuntimeException("Unknown special object type @"+type);
 	}
 
 	

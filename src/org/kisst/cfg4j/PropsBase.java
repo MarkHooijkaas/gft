@@ -19,11 +19,14 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.cfg4j;
 
+import java.io.File;
+
+import org.kisst.gft.mq.file.FileUtil;
+
 public abstract class PropsBase implements Props {
 	private static final long serialVersionUID = 1L;
 	abstract public Object get(String key, Object defaultValue);
 
-	public String getString(String key) { return (String) get(key); }
 	public int getInt(String key) { return Integer.parseInt(getString(key)); }
 	public long getLong(String key) { return Long.parseLong(getString(key)); }
 
@@ -35,8 +38,23 @@ public abstract class PropsBase implements Props {
 			throw new RuntimeException("Could not find property "+key);
 	}
 
+	public String getString(String key) { 
+		String result=getString(key,null);
+		if (result!=null)
+			return result;
+		else
+			throw new RuntimeException("Could not find property "+key);
+	}
+
 	public String getString(String key, String defaultValue) {
-		return (String) get(key,defaultValue);
+		Object result = get(key,defaultValue);
+		if (result==null)
+			return null;
+		if (result instanceof String)
+			return (String) result;
+		if (result instanceof File)
+			return FileUtil.loadString((File) result);
+		throw new RuntimeException("type of key "+key+" is not a String but a "+result.getClass().getSimpleName());
 	}
 
 	public int getInt(String key, int defaultValue) {
