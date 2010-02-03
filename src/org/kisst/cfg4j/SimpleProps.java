@@ -94,11 +94,12 @@ public class SimpleProps extends PropsBase {
 			throw new RuntimeException("key "+key+" has a value that should be a map");
 	}
 	
-	public void load(String filename)  {
+	public void load(String filename)  { load(new File(filename));	}
+	public void load(File f)  {
 		FileInputStream inp = null;
 		try {
 			try {
-				inp = new FileInputStream(filename);
+				inp = new FileInputStream(f);
 				read(inp);
 			}
 			finally {
@@ -180,6 +181,8 @@ public class SimpleProps extends PropsBase {
 				return;
 			else if (str.startsWith("#")) 
 				skipLine(input);
+			else if (str.startsWith("@include")) 
+				include(str.substring(8).trim());
 			else if (str.endsWith("=") || str.endsWith(":") )
 				put(str.substring(0,str.length()-1).trim(), readObject(input));
 			else if (str.endsWith("+")) {
@@ -196,6 +199,19 @@ public class SimpleProps extends PropsBase {
 
 	
 	
+	private void include(String path) {
+		File f=new File(path);
+		if (f.isFile())
+			load(f);
+		else if (f.isDirectory()) {
+			File[] files = f.listFiles(); // TODO: filter
+			for (File f2: files) {
+				if (f2.isFile())
+					load(f2);
+			}
+		}
+		
+	}
 	private String readUntil(String endchars, Reader inp) {
 		StringBuilder result=new StringBuilder();
 		int c;
