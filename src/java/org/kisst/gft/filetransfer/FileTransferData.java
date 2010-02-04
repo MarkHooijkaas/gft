@@ -10,7 +10,7 @@ public class FileTransferData {
 	public final Channel channel;
 	public final String file;
 	public final Props props;
-	public XmlNode message;
+	public final XmlNode message;
 	
 	public FileTransferData(GftContainer gft, String data) {
 		this.gft=gft;
