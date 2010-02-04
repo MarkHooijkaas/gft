@@ -9,17 +9,19 @@ import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.filetransfer.Channel;
-import org.kisst.gft.filetransfer.ChannelAction;
 import org.kisst.gft.filetransfer.RemoteScpAction;
+import org.kisst.gft.filetransfer.StartFileTransferTask;
+import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.MqQueue;
 import org.kisst.gft.mq.QueuePoller;
 import org.kisst.gft.mq.file.FileSystem;
 import org.kisst.util.ReflectionUtil;
 
 public class GftContainer {
-	private FileSystem fs=new FileSystem("testdata");
-	private MqQueue incoming=fs.getQueue("incoming");
-	private QueuePoller poller=new QueuePoller(this, incoming, new ChannelAction());
+	private final FileSystem fs=new FileSystem("testdata");
+	private final MqQueue incoming=fs.getQueue("incoming");
+	private final MessageHandler starter = new StartFileTransferTask(this); 
+	private QueuePoller poller=new QueuePoller(incoming, starter);
 	public Props props;
 	
 	private final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();

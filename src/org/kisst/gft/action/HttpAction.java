@@ -29,13 +29,11 @@ import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
-
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.filetransfer.FileTransferData;
 import org.kisst.gft.task.Task;
-import org.kisst.util.FileUtil;
 import org.kisst.util.StringUtil;
 
 
@@ -64,11 +62,11 @@ public class HttpAction  implements Action {
 
         
 	public Object execute(Task t) {
-		FileTransferTask task = (FileTransferTask) t;
+		FileTransferData ftdata = (FileTransferData) t.getData();
 		SimpleProps props=new SimpleProps();
 		props.put("action", actionProps);
-		props.put("file", task.file);
-		props.put("channel", task.channel.props);
+		props.put("file", ftdata.file);
+		props.put("channel", ftdata.channel.props);
 		
 		String body=StringUtil.substitute(template, props);
 

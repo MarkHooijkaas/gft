@@ -6,7 +6,7 @@ import org.kisst.gft.task.Task;
 public class ChannelAction implements Action {
 
 	public Object execute(Task task) {
-		FileTransferTask t= (FileTransferTask) task;
+		FileTransferData t= (FileTransferData) task;
 		return t.channel.execute(task);
 	}
 

@@ -5,8 +5,9 @@ import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.task.Task;
+import org.kisst.gft.task.TaskDefinition;
 
-public class Channel implements Action {
+public class Channel implements TaskDefinition {
 	public final ScpUrl from;
 	public final ScpUrl to;
 	public final Ssh.Credentials cred;
@@ -49,5 +50,9 @@ public class Channel implements Action {
 			return to.url;
 		else
 			return to.path;
+	}
+	public void run(Task task) {
+		action.execute(task);
+		task.setStatus(Task.DONE);
 	}
 }

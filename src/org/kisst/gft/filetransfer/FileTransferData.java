@@ -3,17 +3,16 @@ package org.kisst.gft.filetransfer;
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.task.Task;
 import org.kisst.util.XmlNode;
 
-public class FileTransferTask implements Task {
+public class FileTransferData {
 	public final GftContainer gft;
 	public final Channel channel;
 	public final String file;
 	public final Props props;
 	public XmlNode message;
 	
-	public FileTransferTask(GftContainer gft, String data) {
+	public FileTransferData(GftContainer gft, String data) {
 		this.gft=gft;
 		message=new XmlNode(data);
 		XmlNode input=message.getChild("Body/FileTransferRequest");
