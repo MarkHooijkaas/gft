@@ -54,6 +54,7 @@ public class GftContainer {
 			actions.put(name, act);
 		}
 
+		System.out.println(props);
 		Props channelProps=props.getProps("gft.channel");
 		for (String name: channelProps.keySet())
 			channels.put(name, new Channel(this, channelProps.getProps(name)));
