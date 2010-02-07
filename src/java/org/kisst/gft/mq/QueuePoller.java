@@ -2,15 +2,22 @@ package org.kisst.gft.mq;
 
 import java.util.List;
 
-public class QueuePoller {
+import org.kisst.cfg4j.Props;
+
+public class QueuePoller implements Runnable {
+	private final String name;
 	private final MqQueue queue;
 	private final MessageHandler handler;
+	private long delay;
+	private boolean running=false;
 	
-	public QueuePoller(MqQueue queue, MessageHandler handler) {
-		this.queue=queue;
+	public QueuePoller(String name, MqSystem sys, MessageHandler handler, Props props) {
+		this.name=name;
+		this.queue=sys.getQueue(props.getString("queue"));
 		this.handler=handler;
+		this.delay=props.getLong("delay");
 	}
-	
+
 	public void pollOneItem() {
 		handle (queue.getOneMessage());
 	}
@@ -39,8 +46,24 @@ public class QueuePoller {
 			e.printStackTrace();
 			return;
 		}
-		System.out.println("handling "+msg);
+		System.out.println(name+" handling "+msg);
 		handler.handle(msg);
 		msg.done();
 	}
+	
+	public void stop() { running=false; }
+	public void run() {
+		running=true;
+		while (running) {
+			//System.out.println("polling");
+			pollTillEmpty();
+			try {
+				Thread.sleep(delay);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				return;
+			}
+		}
+	}
+
 }

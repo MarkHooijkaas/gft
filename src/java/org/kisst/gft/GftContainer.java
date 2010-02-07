@@ -19,14 +19,13 @@ import org.kisst.util.ReflectionUtil;
 
 public class GftContainer {
 	private final FileSystem fs=new FileSystem("testdata");
-	private final MqQueue incoming=fs.getQueue("incoming");
 	private final MessageHandler starter = new StartFileTransferTask(this); 
-	private QueuePoller poller=new QueuePoller(incoming, starter);
 	public Props props;
 	
 	private final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
 	private final HashMap<String, Action>   actions= new LinkedHashMap<String, Action>();
 	private final HashMap<String, HttpHost>   hosts= new LinkedHashMap<String, HttpHost>();
+	private final HashMap<String, QueuePoller> pollers= new LinkedHashMap<String, QueuePoller>();
 
 	public void init(Props props) {
 		this.props=props;
@@ -37,6 +36,13 @@ public class GftContainer {
 			Props hostProps=props.getProps("gft.http.host");
 			for (String name: hostProps.keySet())
 				hosts.put(name, new HttpHost(hostProps.getProps(name)));
+		}
+
+		if (props.get("gft.poller",null)!=null) {
+			Props pollerProps=props.getProps("gft.poller");
+			for (String name: pollerProps.keySet()) {
+				pollers.put(name, new QueuePoller(name, fs,starter, pollerProps.getProps(name)));
+			}
 		}
 		
 		Props actionProps=props.getProps("gft.action");
@@ -63,23 +69,18 @@ public class GftContainer {
 			System.out.println(name+"\t"+channels.get(name));
 		for (String name: actions.keySet())
 			System.out.println(name+"\t"+actions.get(name));
-			
+		for (String name: hosts.keySet())
+			System.out.println(name+"\t"+hosts.get(name));			
+		for (String name: pollers.keySet())
+			System.out.println(name+"\t"+pollers.get(name));			
 	}
 	public Channel getChannel(String name) { return channels.get(name); }
 	public Action getAction(String name) { return actions.get(name); }
 	public HttpHost getHost(String name) { return hosts.get(name); }
 
 	public void run() {
-		while (true) {
-			//System.out.println("polling");
-			poller.pollTillEmpty();
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				return;
-			}
-		}
+		for (QueuePoller p : pollers.values() )
+			new Thread(p).start();
 	}
 	
 	public static void main(String[] args) {

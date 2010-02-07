@@ -8,8 +8,9 @@ import java.util.List;
 import org.kisst.gft.mq.LockedBySomeoneElseException;
 import org.kisst.gft.mq.MqMessage;
 import org.kisst.gft.mq.MqQueue;
+import org.kisst.gft.mq.MqSystem;
 
-public class FileSystem {
+public class FileSystem implements MqSystem {
 	private final File basedir;
 	public FileSystem(String basedir) {
 		this.basedir=new File(basedir);
