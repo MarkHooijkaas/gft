@@ -3,3 +3,5 @@ commons-httpclient-3.1.jar
 commons-logging-1.0.4.jar
 jdom-1.0.jar
 commons-codec-1.2.jar
+jetty-all-7.0.1.v20091125.jar
+servlet-api-2.5.jar

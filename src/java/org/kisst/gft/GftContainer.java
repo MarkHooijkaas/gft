@@ -8,11 +8,11 @@ import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.HttpHost;
+import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.RemoteScpAction;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
 import org.kisst.gft.mq.MessageHandler;
-import org.kisst.gft.mq.MqQueue;
 import org.kisst.gft.mq.QueuePoller;
 import org.kisst.gft.mq.file.FileSystem;
 import org.kisst.util.ReflectionUtil;
@@ -20,12 +20,13 @@ import org.kisst.util.ReflectionUtil;
 public class GftContainer {
 	private final FileSystem fs=new FileSystem("testdata");
 	private final MessageHandler starter = new StartFileTransferTask(this); 
+	private final AdminServer admin=new AdminServer(this);
 	public Props props;
 	
-	private final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
-	private final HashMap<String, Action>   actions= new LinkedHashMap<String, Action>();
-	private final HashMap<String, HttpHost>   hosts= new LinkedHashMap<String, HttpHost>();
-	private final HashMap<String, QueuePoller> pollers= new LinkedHashMap<String, QueuePoller>();
+	public final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
+	public final HashMap<String, Action>   actions= new LinkedHashMap<String, Action>();
+	public final HashMap<String, HttpHost>   hosts= new LinkedHashMap<String, HttpHost>();
+	public final HashMap<String, QueuePoller> pollers= new LinkedHashMap<String, QueuePoller>();
 
 	public void init(Props props) {
 		this.props=props;
@@ -81,6 +82,7 @@ public class GftContainer {
 	public void run() {
 		for (QueuePoller p : pollers.values() )
 			new Thread(p).start();
+		admin.run();
 	}
 	
 	public static void main(String[] args) {
