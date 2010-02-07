@@ -1,7 +1,7 @@
 package org.kisst.gft.admin;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.util.HashMap;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -20,27 +20,30 @@ public class AdminServer extends AbstractHandler {
 	}
 	
 	public void run() {
-		Server server = new Server(gft.props.getInt("gft.admin.port",8080));
-		server.setHandler(this);
+		int port=gft.props.getInt("gft.admin.port",8080);
+		System.out.println("admin site running on port "+port);
+		Server server = new Server(port);
+        server.setHandler(this);
+        handlerMap.put("default", new HomeServlet(gft));
+        handlerMap.put("/channel", new ChannelServlet(gft));
 		try {
 			server.start();
 			server.join();
 		} catch (Exception e) { throw new RuntimeException(e);}
 	}
 
+	private HashMap<String, BaseServlet> handlerMap=new HashMap<String, BaseServlet>();
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
 	throws IOException, ServletException
 	{
-		response.setContentType("text/html;charset=utf-8");
-		response.setStatus(HttpServletResponse.SC_OK);
-		baseRequest.setHandled(true);
-		PrintWriter out = response.getWriter();
-		out.println("<h1>GFT</h1>");
-		out.println("<h2>Channels</h2>");
-		out.println("<table>");
-		for (String name : gft.channels.keySet()) {
-			out.println("<tr><td>"+name+"</td></tr>");
+		String path=request.getRequestURI();
+        baseRequest.setHandled(true);
+        for (String prefix : handlerMap.keySet()) {
+			if (path.startsWith(prefix)) {
+				handlerMap.get(prefix).handle(request, response);
+				return;
+			}
 		}
-		out.println("</table>");
+		handlerMap.get("default").handle(request, response);
 	}
 }
