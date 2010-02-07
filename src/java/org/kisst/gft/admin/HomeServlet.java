@@ -17,13 +17,36 @@ public class HomeServlet extends BaseServlet {
 		response.setStatus(HttpServletResponse.SC_OK);
 		PrintWriter out = response.getWriter();
 		out.println("<h1>GFT</h1>");
-		out.println("URI: "+request.getRequestURI());
+
+		out.println("<a href=\"config\">Configuration</a><br>");
 		out.println("<h2>Channels</h2>");
 		out.println("<table>");
 		for (String name : gft.channels.keySet()) {
-			out.println("<tr><td>"+name+"</td></tr>");
+			out.println("<tr><td><a href=\"channel/"+name+"\">"+name+"</a></td><td>"+gft.channels.get(name)+"</td></tr>");
 		}
 		out.println("</table>");
+		
+		out.println("<h2>Actions</h2>");
+		out.println("<table>");
+		for (String name : gft.actions.keySet()) {
+			out.println("<tr><td>"+name+"</td><td>"+gft.actions.get(name)+"</td></tr>");
+		}
+		out.println("</table>");
+
+		out.println("<h2>Pollers</h2>");
+		out.println("<table>");
+		for (String name : gft.pollers.keySet()) {
+			out.println("<tr><td>"+name+"</td><td>"+gft.pollers.get(name)+"</td></tr>");
+		}
+		out.println("</table>");
+
+		out.println("<h2>HTTP Hosts</h2>");
+		out.println("<table>");
+		for (String name : gft.hosts.keySet()) {
+			out.println("<tr><td>"+name+"</td><td>"+gft.hosts.get(name)+"</td></tr>");
+		}
+		out.println("</table>");
+
 	}
 
 }
