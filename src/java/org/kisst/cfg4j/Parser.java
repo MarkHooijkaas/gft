@@ -77,12 +77,10 @@ public class Parser {
 	}
 
 	public void skipLine() {
-		System.out.print("SKipping");
 		while (! eof()){
 			char ch=read();
 			if (ch=='\n')
 				break;
-			System.out.print(ch);
 		}
 	}
 

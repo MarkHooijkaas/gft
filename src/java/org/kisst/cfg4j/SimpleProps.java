@@ -56,7 +56,10 @@ public class SimpleProps extends PropsBase {
 		int pos=key.indexOf('.');
 		if (pos<0) {
 			//System.out.println(key+"="+value);
-			map.put(key, value);
+			if (value==null)
+				map.remove(key);
+			else
+				map.put(key, value);
 			return;
 		}
 		String keystart=key.substring(0,pos);
