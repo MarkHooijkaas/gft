@@ -84,5 +84,13 @@ public class FileUtil {
 			catch (java.io.IOException e) { throw new RuntimeException(e);  }
 		}
 	}
+	
+	public static FileInputStream open(File f)  {
+		try {
+				return new FileInputStream(f);
+		}
+		catch (IOException e) { throw new RuntimeException(e); }
+	}
+
 
 }

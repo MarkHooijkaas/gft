@@ -19,12 +19,8 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.cfg4j;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -60,7 +56,10 @@ public class SimpleProps extends PropsBase {
 		int pos=key.indexOf('.');
 		if (pos<0) {
 			//System.out.println(key+"="+value);
-			map.put(key, value);
+			if (value==null)
+				map.remove(key);
+			else
+				map.put(key, value);
 			return;
 		}
 		String keystart=key.substring(0,pos);
@@ -94,34 +93,16 @@ public class SimpleProps extends PropsBase {
 			throw new RuntimeException("key "+key+" has a value that should be a map");
 	}
 	
-	public void load(String filename)  { load(new File(filename));	}
-	public void load(File f)  {
-		FileInputStream inp = null;
-		try {
-			try {
-				inp = new FileInputStream(f);
-				read(inp);
-			}
-			finally {
-				if (inp!=null) inp.close();
-			}
-		}
-		catch (IOException e) { throw new RuntimeException(e); }
-	}
+	public void load(String filename)  { readMap(new Parser(filename));	}
+	public void load(File file)        { readMap(new Parser(file));	}
+	public void read(Reader inp)       { readMap(new Parser(inp)); }
+	public void read(InputStream inp)  { readMap(new Parser(inp)); }
 
-	public void read(InputStream inp)  {
-		readMap(new BufferedReader(new InputStreamReader(inp)));
-	}
-
-	private Object readObject(BufferedReader inp)  {
-		int c;
-		while (true){
-			try {
-				c=inp.read();
-			} catch (IOException e) { throw new RuntimeException(e); }
-			if (c<0)
+	private Object readObject(Parser inp)  {
+		while (! inp.eof()){
+			char ch=inp.read();
+			if (inp.eof())
 				return null;
-			char ch=(char) c;
 			if (ch == '{' ) {
 				SimpleProps result=new SimpleProps();
 				result.readMap(inp);
@@ -132,64 +113,49 @@ public class SimpleProps extends PropsBase {
 			else if (ch == ' ' || ch == '\t' || ch == '\n')
 				continue;
 			else if (ch=='"')
-				return readDoubleQuotedString(inp);
+				return inp.readDoubleQuotedString();
 			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':')
-				return ch+readUnquotedString(inp);
+				return ch+inp.readUnquotedString();
 			else if (ch=='@')
 				return readSpecialObject(inp);
 		}
+		return null;
 	}
-	private String readDoubleQuotedString(BufferedReader inp) {
-		String result=readUntil("\"",inp).trim();
-		return result.substring(0, result.length()-1);
-	}
-
-	private String readUnquotedString(BufferedReader inp) {
-		String result=readUntil(" \t\n,;}]",inp).trim();
-		if (result.endsWith(";") || result.endsWith("}") || result.endsWith("]"))
-			return result.substring(0,result.length()-1);
-		else
-			return result;
-	}
-	private Object readSpecialObject(BufferedReader inp) {
-		String type=readUntil("(", inp);
-		type=type.substring(0,type.length()-1).trim();
+	private Object readSpecialObject(Parser inp) {
+		String type=inp.readUntil("(;").trim();
 		if (type.equals("file")) {
-			String filename=readUntil(")",inp);
-			filename=filename.substring(0,filename.length()-1);
+			String filename=inp.readUntil(")").trim();
 			return new File(filename);
 		}
+		else if (type.equals("null")) 
+			return null;
 		else
 			throw new RuntimeException("Unknown special object type @"+type);
 	}
 
 	
-	private Object readList(BufferedReader inp) {
+	private Object readList(Parser inp) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
-	private void readMap(BufferedReader input)  {
-		while (true) {
-			String str=readUntil("+=:}\n#",input);
+	private void readMap(Parser inp)  {
+		while (! inp.eof()) {
+			String str=inp.readUntil("+=:}\n");
 			if (str==null)
 				return;
 			str=str.trim();
-			if (str.length()==0) 
-				continue;
-			else if (str.startsWith("}")) 
+			if (str.startsWith("#")) { 
+				inp.skipLine();
+			}
+			else if (inp.getLastChar() == '}') 
 				return;
-			else if (str.startsWith("#")) 
-				skipLine(input);
 			else if (str.startsWith("@include")) 
 				include(str.substring(8).trim());
-			else if (str.endsWith("=") || str.endsWith(":") )
-				put(str.substring(0,str.length()-1).trim(), readObject(input));
-			else if (str.endsWith("+")) {
-				char ch;
-				try {
-					ch = (char) input.read();
-				} catch (IOException e) { throw new RuntimeException(e);}
+			else if (inp.getLastChar() == '=' || inp.getLastChar() ==':' )
+				put(str.trim(), readObject(inp));
+			else if (inp.getLastChar() == '+') {
+				char ch = (char) inp.read();
 				if (ch != '=')
 					throw new RuntimeException("+ should only be used in +=");
 				throw new RuntimeException("+= not yet supported");
@@ -212,53 +178,7 @@ public class SimpleProps extends PropsBase {
 		}
 		
 	}
-	private String readUntil(String endchars, Reader inp) {
-		StringBuilder result=new StringBuilder();
-		int c;
-		while (true){
-			try {
-				c=inp.read();
-			} catch (IOException e) { throw new RuntimeException(e); }
-			if (c<0) {
-				if (result.length()==0)
-					return null;
-				break;
-			}
-			char ch=(char) c;
-			if (ch=='\\') {
-				try {
-					c=inp.read();
-				} catch (IOException e) { throw new RuntimeException(e); }
-				if (c<0) {
-					if (result.length()==0)
-						return null;
-					break;
-				}
-				ch=(char)c;					
-				result.append(ch);
-			}
-			else {
-				result.append(ch);
-				if (endchars.indexOf(ch)>=0)
-					break;
-			}
-		}
-		return result.toString();
-	}
 
-	private void skipLine(Reader inp) {
-		int c;
-		while (true){
-			try {
-				c=inp.read();
-			} catch (IOException e) { throw new RuntimeException(e); }
-			if (c<0)
-				break;
-			char ch=(char) c;
-			if (ch=='\n')
-				break;
-		}
-	}
 
 	public String toString() { return toString("");	}
 	public String toString(String indent) {

@@ -8,25 +8,27 @@ import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.HttpHost;
+import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.RemoteScpAction;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
 import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.MqQueue;
-import org.kisst.gft.mq.QueuePoller;
-import org.kisst.gft.mq.file.FileSystem;
+import org.kisst.gft.mq.MqSystem;
+import org.kisst.gft.mq.file.FileQueueSystem;
+import org.kisst.gft.mq.jms.JmsSystem;
 import org.kisst.util.ReflectionUtil;
 
 public class GftContainer {
-	private final FileSystem fs=new FileSystem("testdata");
-	private final MqQueue incoming=fs.getQueue("incoming");
 	private final MessageHandler starter = new StartFileTransferTask(this); 
-	private QueuePoller poller=new QueuePoller(incoming, starter);
+	private final AdminServer admin=new AdminServer(this);
 	public Props props;
 	
-	private final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
-	private final HashMap<String, Action>   actions= new LinkedHashMap<String, Action>();
-	private final HashMap<String, HttpHost>   hosts= new LinkedHashMap<String, HttpHost>();
+	public final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
+	public final HashMap<String, Action>   actions= new LinkedHashMap<String, Action>();
+	public final HashMap<String, HttpHost>   hosts= new LinkedHashMap<String, HttpHost>();
+	//public final HashMap<String, MqSystem> queuemngrs= new LinkedHashMap<String, MqSystem>();
+	public final HashMap<String, MqQueue>  queues= new LinkedHashMap<String, MqQueue>();
 
 	public void init(Props props) {
 		this.props=props;
@@ -38,7 +40,24 @@ public class GftContainer {
 			for (String name: hostProps.keySet())
 				hosts.put(name, new HttpHost(hostProps.getProps(name)));
 		}
-		
+
+		if (props.get("gft.mq",null)!=null) {
+			Props pollerProps=props.getProps("gft.mq");
+			for (String name: pollerProps.keySet()) {
+				MqSystem sys=null;
+				Props p=pollerProps.getProps(name);
+				if ("File".equals(p.getString("type")))
+					sys=new FileQueueSystem(p);
+				else if ("Jms".equals(p.getString("type")))
+					sys=new JmsSystem(p);
+				//queuemngrs.put(name, sys);
+				for (String queue: p.getProps("queue").keySet()) {
+					queues.put(queue, sys.getQueue(queue));
+				}
+			}
+		}
+
+
 		Props actionProps=props.getProps("gft.action");
 		for (String name: actionProps.keySet()) {
 			Props p=actionProps.getProps(name);
@@ -58,27 +77,26 @@ public class GftContainer {
 		for (String name: channelProps.keySet())
 			channels.put(name, new Channel(this, channelProps.getProps(name)));
 
+/*		
+		System.out.println(props);
 		for (String name: channels.keySet())
 			System.out.println(name+"\t"+channels.get(name));
 		for (String name: actions.keySet())
 			System.out.println(name+"\t"+actions.get(name));
-			
+		for (String name: hosts.keySet())
+			System.out.println(name+"\t"+hosts.get(name));			
+		for (String name: pollers.keySet())
+			System.out.println(name+"\t"+pollers.get(name));
+*/						
 	}
 	public Channel getChannel(String name) { return channels.get(name); }
 	public Action getAction(String name) { return actions.get(name); }
 	public HttpHost getHost(String name) { return hosts.get(name); }
 
 	public void run() {
-		while (true) {
-			//System.out.println("polling");
-			poller.pollTillEmpty();
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-				return;
-			}
-		}
+		for (MqQueue q : queues.values() )
+			q.listen(starter);
+		admin.run();
 	}
 	
 	public static void main(String[] args) {
