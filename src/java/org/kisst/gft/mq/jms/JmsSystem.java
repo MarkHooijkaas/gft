@@ -15,8 +15,8 @@ public class JmsSystem implements MqSystem {
 	
 	public JmsSystem(Props props) {
 		this.props=props;
-		String user=props.getString("user");
-		String password=props.getString("password");
+		String user=props.getString("user",null);
+		String password=props.getString("password",null);
 		String url=props.getString("url");
 		try {
 			ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(user, password, url);
