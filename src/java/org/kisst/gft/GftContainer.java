@@ -13,12 +13,13 @@ import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.RemoteScpAction;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
 import org.kisst.gft.mq.MessageHandler;
-import org.kisst.gft.mq.QueuePoller;
-import org.kisst.gft.mq.file.FileSystem;
+import org.kisst.gft.mq.MqQueue;
+import org.kisst.gft.mq.MqSystem;
+import org.kisst.gft.mq.file.FileQueueSystem;
+import org.kisst.gft.mq.jms.JmsSystem;
 import org.kisst.util.ReflectionUtil;
 
 public class GftContainer {
-	private final FileSystem fs=new FileSystem("testdata");
 	private final MessageHandler starter = new StartFileTransferTask(this); 
 	private final AdminServer admin=new AdminServer(this);
 	public Props props;
@@ -26,7 +27,8 @@ public class GftContainer {
 	public final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
 	public final HashMap<String, Action>   actions= new LinkedHashMap<String, Action>();
 	public final HashMap<String, HttpHost>   hosts= new LinkedHashMap<String, HttpHost>();
-	public final HashMap<String, QueuePoller> pollers= new LinkedHashMap<String, QueuePoller>();
+	//public final HashMap<String, MqSystem> queuemngrs= new LinkedHashMap<String, MqSystem>();
+	public final HashMap<String, MqQueue>  queues= new LinkedHashMap<String, MqQueue>();
 
 	public void init(Props props) {
 		this.props=props;
@@ -39,13 +41,23 @@ public class GftContainer {
 				hosts.put(name, new HttpHost(hostProps.getProps(name)));
 		}
 
-		if (props.get("gft.poller",null)!=null) {
-			Props pollerProps=props.getProps("gft.poller");
+		if (props.get("gft.mq",null)!=null) {
+			Props pollerProps=props.getProps("gft.mq");
 			for (String name: pollerProps.keySet()) {
-				pollers.put(name, new QueuePoller(name, fs,starter, pollerProps.getProps(name)));
+				MqSystem sys=null;
+				Props p=pollerProps.getProps(name);
+				if ("File".equals(p.getString("type")))
+					sys=new FileQueueSystem(p);
+				else if ("Jms".equals(p.getString("type")))
+					sys=new JmsSystem(p);
+				//queuemngrs.put(name, sys);
+				for (String queue: p.getProps("queue").keySet()) {
+					queues.put(queue, sys.getQueue(queue));
+				}
 			}
 		}
-		
+
+
 		Props actionProps=props.getProps("gft.action");
 		for (String name: actionProps.keySet()) {
 			Props p=actionProps.getProps(name);
@@ -61,11 +73,12 @@ public class GftContainer {
 			actions.put(name, act);
 		}
 
-		System.out.println(props);
 		Props channelProps=props.getProps("gft.channel");
 		for (String name: channelProps.keySet())
 			channels.put(name, new Channel(this, channelProps.getProps(name)));
 
+/*		
+		System.out.println(props);
 		for (String name: channels.keySet())
 			System.out.println(name+"\t"+channels.get(name));
 		for (String name: actions.keySet())
@@ -73,15 +86,16 @@ public class GftContainer {
 		for (String name: hosts.keySet())
 			System.out.println(name+"\t"+hosts.get(name));			
 		for (String name: pollers.keySet())
-			System.out.println(name+"\t"+pollers.get(name));			
+			System.out.println(name+"\t"+pollers.get(name));
+*/						
 	}
 	public Channel getChannel(String name) { return channels.get(name); }
 	public Action getAction(String name) { return actions.get(name); }
 	public HttpHost getHost(String name) { return hosts.get(name); }
 
 	public void run() {
-		for (QueuePoller p : pollers.values() )
-			new Thread(p).start();
+		for (MqQueue q : queues.values() )
+			q.listen(starter);
 		admin.run();
 	}
 	

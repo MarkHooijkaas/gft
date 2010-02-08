@@ -33,10 +33,10 @@ public class HomeServlet extends BaseServlet {
 		}
 		out.println("</table>");
 
-		out.println("<h2>Pollers</h2>");
+		out.println("<h2>Queues</h2>");
 		out.println("<table>");
-		for (String name : gft.pollers.keySet()) {
-			out.println("<tr><td>"+name+"</td><td>"+gft.pollers.get(name)+"</td></tr>");
+		for (String name : gft.queues.keySet()) {
+			out.println("<tr><td>"+name+"</td><td>"+gft.queues.get(name)+"</td></tr>");
 		}
 		out.println("</table>");
 

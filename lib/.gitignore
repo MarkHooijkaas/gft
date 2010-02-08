@@ -5,3 +5,5 @@ jdom-1.0.jar
 commons-codec-1.2.jar
 jetty-all-7.0.1.v20091125.jar
 servlet-api-2.5.jar
+activemq-core-5.3.0.jar
+geronimo-jms_1.1_spec-1.1.jar
