@@ -33,6 +33,7 @@ public class JmsQueue implements Runnable, MqQueue {
 	private final JmsSystem system;
 	private final Props props;
 	private final String queue;
+	private final String errorqueue;
 	private boolean running=false;
 	private MessageHandler handler=null;
 	
@@ -40,6 +41,7 @@ public class JmsQueue implements Runnable, MqQueue {
 		this.system=system;
 		this.props=props;
 		this.queue=props.getString("queue");
+		this.errorqueue=props.getString("errorqueue");
 	}
 	
 	public void stop() { running=false; }
@@ -47,14 +49,26 @@ public class JmsQueue implements Runnable, MqQueue {
 		long interval=props.getLong("interval",5000);
 		try {
 			Session session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
+			System.out.println("Opening queue "+queue);
 
 			Destination destination = session.createQueue(queue);
 			MessageConsumer consumer = session.createConsumer(destination);
 			running=true;
 			while (running) {
 				Message message = consumer.receive(interval);
-				if (message!=null)
-					handler.handle(new JmsMessage(message));
+				try {
+					if (message!=null)
+						handler.handle(new JmsMessage(message));
+					session.commit();
+				}
+				catch (Exception e) {
+					e.printStackTrace();
+					Destination errordestination = session.createQueue(errorqueue);
+					MessageProducer producer = session.createProducer(errordestination);
+					producer.send(message);
+					session.commit();
+					producer.close();
+				}
 			}
 			consumer.close();
 			session.close();
