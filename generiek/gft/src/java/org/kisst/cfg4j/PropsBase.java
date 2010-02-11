@@ -29,13 +29,15 @@ public abstract class PropsBase implements Props {
 
 	public int getInt(String key) { return Integer.parseInt(getString(key)); }
 	public long getLong(String key) { return Long.parseLong(getString(key)); }
-
+	public String getName() {return ""; } 
+	public String getFullName() {return ""; } 
+	
 	public Object get(String key) {
 		Object result=get(key, null);
 		if (result!=null)
 			return result;
 		else
-			throw new RuntimeException("Could not find property "+key);
+			throw new RuntimeException("Could not find property "+key+" in context "+getFullName());
 	}
 
 	public String getString(String key) { 
@@ -43,7 +45,7 @@ public abstract class PropsBase implements Props {
 		if (result!=null)
 			return result;
 		else
-			throw new RuntimeException("Could not find property "+key);
+			throw new RuntimeException("Could not find property "+key+" in context "+getFullName());
 	}
 
 	public String getString(String key, String defaultValue) {

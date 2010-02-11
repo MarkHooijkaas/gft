@@ -13,12 +13,9 @@ public class StartFileTransferTask implements MessageHandler {
 	public void handle(MqMessage msg) {
 		FileTransferData obj =new FileTransferData(gft, msg.getData());
 		Task t=new FileBasedTask(obj.channel, obj);
-		try {
-			t.run();
-			if (! t.isDone())
-				t.save();
-		}
-		catch(Exception e) { t.save(); }
+		t.run();
+		//if (! t.isDone())
+		//	t.save();
 	}
 
 }
