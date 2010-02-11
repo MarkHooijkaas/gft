@@ -16,7 +16,9 @@ import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.MqQueue;
 import org.kisst.gft.mq.MqSystem;
 import org.kisst.gft.mq.file.FileQueueSystem;
-import org.kisst.gft.mq.jms.JmsSystem;
+import org.kisst.gft.mq.jms.ActiveMqSystem;
+import org.kisst.gft.mq.jms.MqSeriesJmsSystem;
+import org.kisst.gft.mq.mqseries.MqSeriesSystem;
 import org.kisst.util.ReflectionUtil;
 
 public class GftContainer {
@@ -46,10 +48,17 @@ public class GftContainer {
 			for (String name: pollerProps.keySet()) {
 				MqSystem sys=null;
 				Props p=pollerProps.getProps(name);
-				if ("File".equals(p.getString("type")))
+				String type=p.getString("type");
+				if ("File".equals(type))
 					sys=new FileQueueSystem(p);
-				else if ("Jms".equals(p.getString("type")))
-					sys=new JmsSystem(p);
+				else if ("ActiveMq".equals(type))
+					sys=new ActiveMqSystem(p);
+				else if ("MqSeries".equals(type))
+					sys=new MqSeriesSystem(p);
+				else if ("MqSeriesJms".equals(type))
+					sys=new MqSeriesJmsSystem(p);
+				else 
+					throw new RuntimeException("Unknown type of queueing system "+type);
 				//queuemngrs.put(name, sys);
 				for (String queue: p.getProps("queue").keySet()) {
 					queues.put(queue, sys.getQueue(queue));

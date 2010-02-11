@@ -38,7 +38,7 @@
 				<attribute name="Implementation-Vendor" value="kisst.org"/>
 				<attribute name="Implementation-Title" value="${projectname}"/>
 				<attribute name="Implementation-Version" value="${project.version}"/> 
-				<attribute name="Class-Path" value="lib/jsch-0.1.42.jar lib/log4j-1.2.13.jar lib/commons-httpclient-3.1.jar lib/commons-logging-1.0.4.jar lib/commons-codec-1.2.jar lib/jdom-1.0.jar lib/jetty-all-7.0.1.v20091125.jar lib/servlet-api-2.5.jar lib//geronimo-jms_1.1_spec-1.1.jar lib/activemq-core-5.3.0.jar lib/geronimo-j2ee-management_1.0_spec-1.0.jar"/>
+				<attribute name="Class-Path" value="lib/jsch-0.1.42.jar lib/log4j-1.2.13.jar lib/commons-httpclient-3.1.jar lib/commons-logging-1.0.4.jar lib/commons-codec-1.2.jar lib/jdom-1.0.jar lib/jetty-all-7.0.1.v20091125.jar lib/servlet-api-2.5.jar lib//geronimo-jms_1.1_spec-1.1.jar lib/activemq-core-5.3.0.jar lib/geronimo-j2ee-management_1.0_spec-1.0.jar lib/com.ibm.mq.jar lib/com.ibm.mqjms.jar lib/dhbcore.jar lib/connector.jar lib/fscontext.jar lib/providerutil.jar lib/jta.jar"/>
 				<attribute name="Main-Class" value="org.kisst.gft.GftContainer"/>
 			</manifest>
 	    </jar>
