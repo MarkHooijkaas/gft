@@ -47,8 +47,9 @@ public class JmsQueue implements MqQueue {
 	public String getName() {return null; }
 
 	public void send(String data) {
+		Session session=null;
 		try {
-			Session session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
+			session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
 
 			Destination destination = session.createQueue(queue);
 			MessageProducer producer = session.createProducer(destination);
@@ -58,6 +59,13 @@ public class JmsQueue implements MqQueue {
 			session.close();
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
+		finally {
+			try {
+				if (session!=null)
+					session.close();
+			}
+			catch (JMSException e) {throw new RuntimeException(e); }
+		}
 	}
 
 }

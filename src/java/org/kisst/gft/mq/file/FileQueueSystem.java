@@ -8,9 +8,9 @@ import org.kisst.gft.mq.QueueSystem;
 
 public class FileQueueSystem implements QueueSystem {
 	private final File basedir;
-	private final Props props;
+	//private final Props props;
 	public FileQueueSystem(Props props) {
-		this.props=props;
+		//this.props=props;
 		this.basedir=new File(props.getString("basedir","queues"));
 		if (this.basedir.exists()) {
 			if (! this.basedir.isDirectory())
