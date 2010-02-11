@@ -1,14 +1,19 @@
 package org.kisst.gft.mq.jms;
 
+import java.util.Hashtable;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.mq.MqQueue;
-import org.kisst.gft.mq.MqSystem;
+import org.kisst.gft.mq.QueueListener;
+import org.kisst.gft.mq.QueueSystem;
 
-public abstract class JmsSystem implements MqSystem {
+public class JmsSystem implements QueueSystem {
 	protected final Props props;
 	private final Connection connection;
 	
@@ -26,9 +31,29 @@ public abstract class JmsSystem implements MqSystem {
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
 	}
+	public QueueListener createListener(Props props) { return new JmsListener(this,props); }
 
-	abstract protected ConnectionFactory createConnectionFactory();
-	
+	protected ConnectionFactory createConnectionFactory() {
+        Hashtable<String, String> env= new Hashtable<String,String>();
+        env.put( "java.naming.factory.initial", "com.sun.jndi.fscontext.RefFSContextFactory" );
+        env.put( "java.naming.provider.url", props.getString("jndifile"));
+        env.put( "java.naming.security.authentication", "none" );
+        if( !"none".equals( env.get("java.naming.security.authentication"))) {
+            env.put( "java.naming.security.principal", props.getString("username",null));
+            env.put( "java.naming.security.credentials", props.getString("password",null));
+        }
+        
+		InitialContext jndiContext;
+		try {
+			String name=props.getString("name");
+			jndiContext = new InitialContext( env);
+			System.out.println("Looking up "+name);
+			return (ConnectionFactory) jndiContext.lookup( name );
+		} catch (NamingException e) { throw new RuntimeException(e); }
+
+	}
+
+
 	public MqQueue getQueue(String name) { return new JmsQueue(this, props.getProps("queue."+name)); }
 	public Connection getConnection() { return connection;	}
 	public void close() {

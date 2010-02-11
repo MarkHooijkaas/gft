@@ -13,12 +13,11 @@ import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.RemoteScpAction;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
 import org.kisst.gft.mq.MessageHandler;
-import org.kisst.gft.mq.MqQueue;
-import org.kisst.gft.mq.MqSystem;
+import org.kisst.gft.mq.QueueSystem;
+import org.kisst.gft.mq.QueueListener;
 import org.kisst.gft.mq.file.FileQueueSystem;
 import org.kisst.gft.mq.jms.ActiveMqSystem;
-import org.kisst.gft.mq.jms.MqSeriesJmsSystem;
-import org.kisst.gft.mq.mqseries.MqSeriesSystem;
+import org.kisst.gft.mq.jms.JmsSystem;
 import org.kisst.util.ReflectionUtil;
 
 public class GftContainer {
@@ -29,8 +28,8 @@ public class GftContainer {
 	public final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
 	public final HashMap<String, Action>   actions= new LinkedHashMap<String, Action>();
 	public final HashMap<String, HttpHost>   hosts= new LinkedHashMap<String, HttpHost>();
-	//public final HashMap<String, MqSystem> queuemngrs= new LinkedHashMap<String, MqSystem>();
-	public final HashMap<String, MqQueue>  queues= new LinkedHashMap<String, MqQueue>();
+	public final HashMap<String, QueueSystem> queuemngrs= new LinkedHashMap<String, QueueSystem>();
+	public final HashMap<String, QueueListener>  listeners= new LinkedHashMap<String, QueueListener>();
 
 	public void init(Props props) {
 		this.props=props;
@@ -43,25 +42,23 @@ public class GftContainer {
 				hosts.put(name, new HttpHost(hostProps.getProps(name)));
 		}
 
-		if (props.get("gft.mq",null)!=null) {
-			Props pollerProps=props.getProps("gft.mq");
+		if (props.get("gft.qmgr",null)!=null) {
+			Props pollerProps=props.getProps("gft.qmgr");
 			for (String name: pollerProps.keySet()) {
-				MqSystem sys=null;
+				QueueSystem sys=null;
 				Props p=pollerProps.getProps(name);
 				String type=p.getString("type");
 				if ("File".equals(type))
 					sys=new FileQueueSystem(p);
 				else if ("ActiveMq".equals(type))
 					sys=new ActiveMqSystem(p);
-				else if ("MqSeries".equals(type))
-					sys=new MqSeriesSystem(p);
-				else if ("MqSeriesJms".equals(type))
-					sys=new MqSeriesJmsSystem(p);
+				else if ("Jms".equals(type))
+					sys=new JmsSystem(p);
 				else 
 					throw new RuntimeException("Unknown type of queueing system "+type);
-				//queuemngrs.put(name, sys);
-				for (String queue: p.getProps("queue").keySet()) {
-					queues.put(queue, sys.getQueue(queue));
+				queuemngrs.put(name, sys);
+				for (String lname: p.getProps("listener").keySet()) {
+					listeners.put(lname, sys.createListener(p.getProps("listener."+lname)));
 				}
 			}
 		}
@@ -103,7 +100,7 @@ public class GftContainer {
 	public HttpHost getHost(String name) { return hosts.get(name); }
 
 	public void run() {
-		for (MqQueue q : queues.values() )
+		for (QueueListener q : listeners.values() )
 			q.listen(starter);
 		admin.run();
 	}

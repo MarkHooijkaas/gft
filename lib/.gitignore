@@ -16,3 +16,4 @@ fscontext.jar
 jta.jar
 log4j-1.2.13.jar
 providerutil.jar
+freemarker-2.3.15.jar
