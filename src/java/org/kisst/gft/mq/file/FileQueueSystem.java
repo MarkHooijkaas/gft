@@ -3,9 +3,10 @@ package org.kisst.gft.mq.file;
 import java.io.File;
 
 import org.kisst.cfg4j.Props;
-import org.kisst.gft.mq.MqSystem;
+import org.kisst.gft.mq.QueueListener;
+import org.kisst.gft.mq.QueueSystem;
 
-public class FileQueueSystem implements MqSystem {
+public class FileQueueSystem implements QueueSystem {
 	private final File basedir;
 	private final Props props;
 	public FileQueueSystem(Props props) {
@@ -21,6 +22,9 @@ public class FileQueueSystem implements MqSystem {
 	File getBaseDir() {return basedir; }
 	
 	public FileQueue getQueue(String name) {
-		return new FileQueue(this,props.getProps("queue."+name));
+		return new FileQueue(this,name);
+	}
+	public QueueListener createListener(Props props) {
+		return new FileListener(this, props);
 	}
 }

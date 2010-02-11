@@ -10,9 +10,10 @@ import javax.naming.NamingException;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.mq.MqQueue;
-import org.kisst.gft.mq.MqSystem;
+import org.kisst.gft.mq.QueueListener;
+import org.kisst.gft.mq.QueueSystem;
 
-public class JmsSystem implements MqSystem {
+public class JmsSystem implements QueueSystem {
 	protected final Props props;
 	private final Connection connection;
 	
@@ -30,6 +31,7 @@ public class JmsSystem implements MqSystem {
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
 	}
+	public QueueListener createListener(Props props) { return new JmsListener(this,props); }
 
 	protected ConnectionFactory createConnectionFactory() {
         Hashtable<String, String> env= new Hashtable<String,String>();
