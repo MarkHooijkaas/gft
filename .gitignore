@@ -1,2 +1,5 @@
 build
 .settings
+CVS
+.cvsignore
+gft.jar

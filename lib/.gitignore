@@ -8,3 +8,11 @@ servlet-api-2.5.jar
 activemq-core-5.3.0.jar
 geronimo-jms_1.1_spec-1.1.jar
 geronimo-j2ee-management_1.0_spec-1.0.jar
+com.ibm.mq.jar
+com.ibm.mqjms.jar
+connector.jar
+dhbcore.jar
+fscontext.jar
+jta.jar
+log4j-1.2.13.jar
+providerutil.jar
