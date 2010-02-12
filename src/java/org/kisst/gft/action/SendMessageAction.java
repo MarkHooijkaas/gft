@@ -48,6 +48,7 @@ public class SendMessageAction  implements Action {
 		props.put("action", actionProps);
 		props.put("file", ftdata.file);
 		props.put("channel", ftdata.channel.props);
+		System.out.println("Sending message to "+queue);
 		
 		String body=StringUtil.substitute(template, props);
 		qmgr.getQueue(queue).send(body);

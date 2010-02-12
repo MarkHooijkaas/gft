@@ -45,7 +45,7 @@ public class JmsSystem implements QueueSystem {
         
 		InitialContext jndiContext;
 		try {
-			String name=props.getString("name");
+			String name=props.getString("jndiName");
 			jndiContext = new InitialContext( env);
 			System.out.println("Looking up "+name);
 			return (ConnectionFactory) jndiContext.lookup( name );
@@ -53,8 +53,8 @@ public class JmsSystem implements QueueSystem {
 
 	}
 
-	
-	public MqQueue getQueue(String name) { return new JmsQueue(this, props.getProps("queue."+name)); }
+
+	public MqQueue getQueue(String name) { return new JmsQueue(this, name); }
 	public Connection getConnection() { return connection;	}
 	public void close() {
 		try {
