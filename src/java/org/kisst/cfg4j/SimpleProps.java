@@ -154,7 +154,7 @@ public class SimpleProps extends PropsBase {
 		String type=inp.readUntil("(;").trim();
 		if (type.equals("file")) {
 			String filename=inp.readUntil(")").trim();
-			return new File(filename);
+			return inp.getPath(filename);
 		}
 		else if (type.equals("null")) 
 			return null;
@@ -180,7 +180,7 @@ public class SimpleProps extends PropsBase {
 			else if (inp.getLastChar() == '}') 
 				return;
 			else if (str.startsWith("@include")) 
-				include(str.substring(8).trim());
+				include(inp, str.substring(8).trim());
 			else if (inp.getLastChar() == '=' || inp.getLastChar() ==':' )
 				put(str.trim(), readObject(inp, str.trim()));
 			else if (inp.getLastChar() == '+') {
@@ -194,8 +194,8 @@ public class SimpleProps extends PropsBase {
 
 
 
-	private void include(String path) {
-		File f=new File(path);
+	private void include(Parser inp, String path) {
+		File f=inp.getPath(path);
 		if (f.isFile())
 			load(f);
 		else if (f.isDirectory()) {
