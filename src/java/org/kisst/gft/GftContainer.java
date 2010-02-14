@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
+import org.apache.log4j.PropertyConfigurator;
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.action.Action;
@@ -13,14 +14,19 @@ import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.RemoteScpAction;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
 import org.kisst.gft.mq.MessageHandler;
-import org.kisst.gft.mq.QueueSystem;
 import org.kisst.gft.mq.QueueListener;
+import org.kisst.gft.mq.QueueSystem;
 import org.kisst.gft.mq.file.FileQueueSystem;
 import org.kisst.gft.mq.jms.ActiveMqSystem;
 import org.kisst.gft.mq.jms.JmsSystem;
 import org.kisst.util.ReflectionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 
 public class GftContainer {
+	private final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
+
 	private final MessageHandler starter = new StartFileTransferTask(this); 
 	private final AdminServer admin=new AdminServer(this);
 	public Props props;
@@ -83,17 +89,17 @@ public class GftContainer {
 		for (String name: channelProps.keySet())
 			channels.put(name, new Channel(this, channelProps.getProps(name)));
 
-/*		
-		System.out.println(props);
-		for (String name: channels.keySet())
-			System.out.println(name+"\t"+channels.get(name));
-		for (String name: actions.keySet())
-			System.out.println(name+"\t"+actions.get(name));
-		for (String name: hosts.keySet())
-			System.out.println(name+"\t"+hosts.get(name));			
-		for (String name: pollers.keySet())
-			System.out.println(name+"\t"+pollers.get(name));
-*/						
+		if (logger.isDebugEnabled()) {
+			logger.debug("Using props "+props);
+			for (String name: channels.keySet())
+				logger.info("Channel {}\t{}",name,channels.get(name));
+			for (String name: actions.keySet())
+				logger.info("Action {}\t{}",name,actions.get(name));
+			for (String name: hosts.keySet())
+				logger.info("Host {}\t{}",name,hosts.get(name));			
+			for (String name: listeners.keySet())
+				logger.info("Listener {}\t{}",name,listeners.get(name));
+		}
 	}
 	public Channel getChannel(String name) { return channels.get(name); }
 	public Action getAction(String name) { return actions.get(name); }
@@ -108,8 +114,13 @@ public class GftContainer {
 	public static void main(String[] args) {
 		if (args.length!=1)
 			throw new RuntimeException("usage: GftContainer <config file>");
+		PropertyConfigurator.configure(args[0]);
 		SimpleProps props=new SimpleProps();
 		props.load(args[0]);
+		logger.info("Starting GftContainer");
+		if (logger.isDebugEnabled()){
+			logger.debug("Starting GftContainer with props {}", props.toString());
+		}
 		GftContainer gft= new GftContainer();
 		gft.init(props);
 		gft.run();

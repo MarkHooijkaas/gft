@@ -11,8 +11,12 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.kisst.gft.GftContainer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class AdminServer extends AbstractHandler {
+	private final static Logger logger=LoggerFactory.getLogger(AdminServer.class); 
+
 	private final GftContainer gft;
 	public AdminServer(GftContainer gft)
 	{
@@ -21,7 +25,7 @@ public class AdminServer extends AbstractHandler {
 	
 	public void run() {
 		int port=gft.props.getInt("gft.admin.port",8080);
-		System.out.println("admin site running on port "+port);
+		logger.info("admin site running on port {}",port);
 		Server server = new Server(port);
         server.setHandler(this);
         handlerMap.put("default", new HomeServlet(gft));

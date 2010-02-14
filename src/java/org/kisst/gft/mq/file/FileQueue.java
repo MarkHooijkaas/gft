@@ -38,10 +38,8 @@ public class FileQueue implements MqQueue {
 		for (File f :files) {
 			if (f.isFile() && ! f.getName().endsWith(".locked")) {
 				messages.add(new FileMessage(this,f.getName())); 
-				//System.out.println("adding message "+f);
 			}
 		}
-		//System.out.println("returning "+messages.size()+" messages");
 		return messages;
 	}
 

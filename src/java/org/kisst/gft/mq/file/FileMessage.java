@@ -6,8 +6,12 @@ import java.util.Date;
 import org.kisst.gft.mq.LockedBySomeoneElseException;
 import org.kisst.gft.mq.MqMessage;
 import org.kisst.gft.mq.MqQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileMessage implements MqMessage {
+	private final static Logger logger=LoggerFactory.getLogger(FileMessage.class);
+	
 	private final FileQueue queue;
 	private final String filename;
 	private File lockedFile=null;
@@ -37,7 +41,7 @@ public class FileMessage implements MqMessage {
 		// To lock a file it is renamed to extension .locked plus
 		// an unique id of the message, so that only THIS message holds the lock
 		File f=getFile();
-		//System.out.println("locking "+f);
+		logger.info("locking file {}",f);
 		if (!f.exists())
 			throw new LockedBySomeoneElseException(this);
 		try {

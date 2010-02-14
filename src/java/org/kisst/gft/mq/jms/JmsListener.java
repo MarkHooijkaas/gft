@@ -10,8 +10,11 @@ import javax.jms.Session;
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.QueueListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JmsListener implements Runnable, QueueListener {
+	private final static Logger logger=LoggerFactory.getLogger(JmsListener.class); 
 	
 	private final JmsSystem system;
 	private final Props props;
@@ -32,7 +35,7 @@ public class JmsListener implements Runnable, QueueListener {
 		long interval=props.getLong("interval",5000);
 		try {
 			Session session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
-			System.out.println("Opening queue "+queue);
+			logger.info("Opening queue {}",queue);
 
 			Destination destination = session.createQueue(queue);
 			MessageConsumer consumer = session.createConsumer(destination);
