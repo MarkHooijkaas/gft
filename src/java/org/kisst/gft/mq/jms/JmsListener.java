@@ -47,9 +47,10 @@ public class JmsListener implements Runnable, QueueListener {
 			while (running) {
 				Message message = consumer.receive(interval);
 				try {
-					if (message!=null)
+					if (message!=null) {
 						handler.handle(new JmsQueue.JmsMessage(message));
-					session.commit();
+						session.commit();
+					}
 				}
 				catch (Exception e) {
 					e.printStackTrace();
