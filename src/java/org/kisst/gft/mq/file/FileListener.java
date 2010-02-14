@@ -68,11 +68,11 @@ public class FileListener implements QueueListener, Runnable {
 		}
 	}
 
+	public boolean listening() { return false;}
 	public void stopListening() { running=false; }
 	public void listen(MessageHandler handler) {
 		this.handler=handler;
 		new Thread(this).start();
 	}
-	
 }
 
