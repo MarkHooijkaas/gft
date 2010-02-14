@@ -28,7 +28,7 @@ public class AdminServer extends AbstractHandler {
 		logger.info("admin site running on port {}",port);
 		Server server = new Server(port);
         server.setHandler(this);
-        handlerMap.put("default", new HomeServlet(gft));
+        handlerMap.put("default", new TemplateServlet(gft));  //new HomeServlet(gft));
         handlerMap.put("/channel", new ChannelServlet(gft));
         handlerMap.put("/config", new ConfigServlet(gft));
 		try {

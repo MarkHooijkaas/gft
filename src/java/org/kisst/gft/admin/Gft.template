@@ -1,0 +1,23 @@
+<h1>GFT volgens template in classloader</h1> 
+<a href="config">Configuration</a><br> 
+<h2>Channels</h2> 
+<table> 
+<#list channels?keys as name>
+  <tr><td><a href="channel/${name}"><b>${name}</b></a></td><td>TODO</td></tr>
+</#list> 
+</table> 
+<h2>Actions</h2> 
+<table> 
+<tr><td>copy</td><td>org.kisst.gft.filetransfer.RemoteScpAction@10ab323</td></tr> 
+<tr><td>Echo</td><td>org.kisst.gft.action.EchoAction@176e552</td></tr> 
+<tr><td>Echo2</td><td>org.kisst.gft.action.EchoAction@c980c9</td></tr> 
+</table> 
+<h2>Listener</h2> 
+<table> 
+<tr><td>mainfile</td><td>FileListener(FileQueue(incoming))</td></tr> 
+<tr><td>main3</td><td>org.kisst.gft.mq.jms.JmsListener@51052d</td></tr> 
+</table> 
+<h2>HTTP Hosts</h2> 
+<table> 
+<tr><td>esb1</td><td>org.kisst.gft.action.HttpHost@12611a7</td></tr> 
+</table> 
