@@ -22,6 +22,7 @@ public class JmsListener implements Runnable, QueueListener {
 	private final String errorqueue;
 	private boolean running=false;
 	private MessageHandler handler=null;
+	private Thread thread=null;
 	
 	public JmsListener(JmsSystem system, Props props) {
 		this.system=system;
@@ -32,7 +33,10 @@ public class JmsListener implements Runnable, QueueListener {
 	
 	public void stop() { running=false; }
 	public void run()  {
+		if (thread!=null)
+			throw new RuntimeException("Listener already running");
 		long interval=props.getLong("interval",5000);
+		thread=Thread.currentThread();
 		try {
 			Session session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
 			logger.info("Opening queue {}",queue);
@@ -60,10 +64,14 @@ public class JmsListener implements Runnable, QueueListener {
 			session.close();
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
+		finally {
+			thread=null;
+			running=false;
+		}
 	}
 
 
-
+	public boolean listening() { return thread!=null; }
 	public void stopListening() { running=false; }
 	public void listen(MessageHandler handler) {
 		this.handler=handler;
