@@ -10,6 +10,7 @@ import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.admin.rest.MappedResource;
+import org.kisst.gft.admin.rest.ObjectResource;
 import org.kisst.gft.admin.rest.RestServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,12 +34,13 @@ public class AdminServer extends AbstractHandler {
         handlerMap.put("/config", new ConfigServlet(gft));
         
         RestServlet rest=new RestServlet(gft, "/rest/");
+        rest.map("gft",new ObjectResource(gft));
         rest.map("channel",new MappedResource(gft.channels));
         rest.map("action",new MappedResource(gft.actions));
         rest.map("listener",new MappedResource(gft.listeners));
         rest.map("host",new MappedResource(gft.hosts));
         
-        handlerMap.put(rest.getPath(), rest);
+        handlerMap.put(rest.getPrefix(), rest);
 		try {
 			server.start();
 			server.join();
