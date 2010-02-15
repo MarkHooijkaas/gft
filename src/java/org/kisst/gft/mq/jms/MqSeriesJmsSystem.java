@@ -7,8 +7,12 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.kisst.cfg4j.Props;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MqSeriesJmsSystem extends JmsSystem {
+	private final static Logger logger=LoggerFactory.getLogger(MqSeriesJmsSystem.class);
+
 	public MqSeriesJmsSystem(Props props) { super(props); }
 
 	@Override protected ConnectionFactory createConnectionFactory() {
@@ -44,7 +48,7 @@ public class MqSeriesJmsSystem extends JmsSystem {
 		InitialContext jndiContext;
 		try {
 			jndiContext = new InitialContext( env);
-			System.out.println("Looking up "+name);
+			logger.debug("Looking up {}",name);
 			return (ConnectionFactory) jndiContext.lookup( name );
 		} catch (NamingException e) { throw new RuntimeException(e); }
 

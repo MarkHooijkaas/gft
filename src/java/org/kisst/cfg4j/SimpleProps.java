@@ -15,28 +15,33 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with the RelayConnector framework.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package org.kisst.cfg4j;
 
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.kisst.util.XmlNode;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory; 
 
 public class SimpleProps extends PropsBase {
+	private static final Logger logger = LoggerFactory.getLogger(SimpleProps.class);
 	private static final long serialVersionUID = 1L;
 
 	private final SimpleProps parent;
 	private final String name; 
-	private final Map<String, Object> map=new LinkedHashMap<String, Object>();
+	private final Map<String, Object> values=new LinkedHashMap<String, Object>();
+	private final Map<String, SimpleProps> subkeys=new LinkedHashMap<String, SimpleProps>();
 
-	public SimpleProps() { this(null,""); }
+	public SimpleProps() { this(null,null); }
 	public SimpleProps(SimpleProps parent, String name) {
 		this.parent=parent;
 		this.name=name;
@@ -45,54 +50,78 @@ public class SimpleProps extends PropsBase {
 	public String getFullName() {
 		if (parent==null)
 			return name;
-		else
-			return parent.getFullName()+"."+name;
+		else { 
+			String prefix=parent.getFullName();
+			if (prefix==null)
+				return name;
+			else
+				return prefix+"."+name;
+		}
 	}
-	
-	public Set<String> keySet() { return map.keySet(); }
-	
+
+	public Set<String> keySet() { 
+		Set<String> result= new HashSet<String>(values.keySet());
+		result.addAll(subkeys.keySet());
+		if (logger.isDebugEnabled()) {
+			String tmp="keyset of "+getFullName()+":";
+			for (String key: result)
+				tmp+=" "+key;
+			logger.debug(tmp);
+		}
+		return result;
+	}
+
 	public void put(String key, Object value) {
-		//System.out.println("put "+key+"="+value);
 		int pos=key.indexOf('.');
 		if (pos<0) {
-			//System.out.println(key+"="+value);
-			if (value==null)
-				map.remove(key);
-			else
-				map.put(key, value);
-			return;
+			if (value==null) {
+				if (logger.isInfoEnabled())
+					logger.info("removing {}",getFullName()+"."+key);
+				values.remove(key);
+			}
+			else {
+				if (value instanceof SimpleProps)
+					subkeys.put(key,(SimpleProps) value);
+				else {
+					if (logger.isInfoEnabled())
+						logger.info("put {} = {}",getFullName()+"."+key,value);
+					values.put(key, value);
+				}
+				return;
+			}
 		}
 		String keystart=key.substring(0,pos);
 		String keyremainder=key.substring(pos+1);
-		Object o=map.get(keystart);
-		//System.out.print(keystart+"->");
-		if (o instanceof SimpleProps)
-			((SimpleProps)o).put(keyremainder, value);
-		else if (o==null) {
-				SimpleProps props=new SimpleProps(this,keyremainder);
-				map.put(keystart, props);
-				props.put(keyremainder, value);
+		SimpleProps o=subkeys.get(keystart);
+		if (o==null) {
+			SimpleProps props=new SimpleProps(this,keyremainder);
+			subkeys.put(keystart, props);
+			props.put(keyremainder, value);
 		}
 		else 
-			throw new RuntimeException("key "+key+" already has a value");
+			o.put(keyremainder, value);
 	}
 
 	public Object get(String key, Object defaultValue) {
+		logger.debug("getting {}",key);
 		int pos=key.indexOf('.');
-		if (pos<0)
-			return map.get(key);
+		if (pos<0) {
+			Object result=values.get(key);
+			if (result==null)
+				result=subkeys.get(key);
+			if (logger.isInfoEnabled())
+				logger.info("returned prop {} with value {}",getFullName()+"."+key,result);
+			return result;
+		}
 		String keystart=key.substring(0,pos);
 		String keyremainder=key.substring(pos+1);
-		Object o=map.get(keystart);
-		//System.out.print(keystart+"->");
-		if (o instanceof SimpleProps)
-			return ((SimpleProps)o).get(keyremainder,null);
-		else if (o==null)
+		SimpleProps o=subkeys.get(keystart);
+		if (o==null)
 			return defaultValue;
-		else 
-			throw new RuntimeException("key "+key+" has a value that should be a map");
+		else
+			return ((SimpleProps)o).get(keyremainder,null);
 	}
-	
+
 	public void load(String filename)  { readMap(new Parser(filename));	}
 	public void load(File file)        { readMap(new Parser(file));	}
 	public void read(Reader inp)       { readMap(new Parser(inp)); }
@@ -125,7 +154,7 @@ public class SimpleProps extends PropsBase {
 		String type=inp.readUntil("(;").trim();
 		if (type.equals("file")) {
 			String filename=inp.readUntil(")").trim();
-			return new File(filename);
+			return inp.getPath(filename);
 		}
 		else if (type.equals("null")) 
 			return null;
@@ -133,7 +162,7 @@ public class SimpleProps extends PropsBase {
 			throw new RuntimeException("Unknown special object type @"+type);
 	}
 
-	
+
 	private Object readList(Parser inp) {
 		// TODO Auto-generated method stub
 		return null;
@@ -151,7 +180,7 @@ public class SimpleProps extends PropsBase {
 			else if (inp.getLastChar() == '}') 
 				return;
 			else if (str.startsWith("@include")) 
-				include(str.substring(8).trim());
+				include(inp, str.substring(8).trim());
 			else if (inp.getLastChar() == '=' || inp.getLastChar() ==':' )
 				put(str.trim(), readObject(inp, str.trim()));
 			else if (inp.getLastChar() == '+') {
@@ -163,10 +192,10 @@ public class SimpleProps extends PropsBase {
 		}
 	}
 
-	
-	
-	private void include(String path) {
-		File f=new File(path);
+
+
+	private void include(Parser inp, String path) {
+		File f=inp.getPath(path);
 		if (f.isFile())
 			load(f);
 		else if (f.isDirectory()) {
@@ -176,16 +205,16 @@ public class SimpleProps extends PropsBase {
 					load(f2);
 			}
 		}
-		
+
 	}
 
 
 	public String toString() { return toString("");	}
 	public String toString(String indent) {
 		StringBuilder result=new StringBuilder("{\n");
-		for (String key: map.keySet()) {
+		for (String key: values.keySet()) {
 			result.append(indent+"\t"+key+": ");
-			Object o=map.get(key);
+			Object o=values.get(key);
 			if (o instanceof SimpleProps)
 				result.append(((SimpleProps)o).toString(indent+"\t"));
 			else if (o instanceof String)
@@ -194,11 +223,20 @@ public class SimpleProps extends PropsBase {
 				result.append(o.toString());
 			//result.append("\n");
 		}
+		for (String key: subkeys.keySet()) {
+			result.append(indent+"\t"+key+": ");
+			Object o=subkeys.get(key);
+			if (o instanceof SimpleProps)
+				result.append(((SimpleProps)o).toString(indent+"\t"));
+			else
+				result.append(o.toString());
+			//result.append("\n");
+		}
 		result.append(indent+"}\n");
 		return result.toString();
 	}
-	
-	
+
+
 	public void readXml(XmlNode node)  {
 		for (XmlNode child : node.getChildren()) {
 			String name=child.getName();

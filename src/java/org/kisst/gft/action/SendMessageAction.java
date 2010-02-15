@@ -26,9 +26,12 @@ import org.kisst.gft.filetransfer.FileTransferData;
 import org.kisst.gft.mq.QueueSystem;
 import org.kisst.gft.task.Task;
 import org.kisst.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class SendMessageAction  implements Action {
+	private final static Logger logger=LoggerFactory.getLogger(SendMessageAction.class);
 
 	private final Props actionProps;
 	private final QueueSystem qmgr;
@@ -48,7 +51,7 @@ public class SendMessageAction  implements Action {
 		props.put("action", actionProps);
 		props.put("file", ftdata.file);
 		props.put("channel", ftdata.channel.props);
-		System.out.println("Sending message to "+queue);
+		logger.info("Sending message to queue {}",queue);
 		
 		String body=StringUtil.substitute(template, props);
 		qmgr.getQueue(queue).send(body);

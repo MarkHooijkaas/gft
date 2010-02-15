@@ -20,6 +20,7 @@ along with the Caas tool.  If not, see <http://www.gnu.org/licenses/>.
 package org.kisst.util;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
@@ -32,6 +33,26 @@ public class ReflectionUtil {
 		} catch (ClassNotFoundException e) { throw new RuntimeException(e); }
 	}
 
+	public static Field getField(Class<?> cls, String name) {
+		try {
+			return cls.getDeclaredField(name);
+		} 
+		catch (SecurityException e) {throw new RuntimeException(e); }
+		catch (NoSuchFieldException e) { return null; }
+	}
+
+	public static Method getMethod(Class<?> cls, String name, Class<?>[] signature) {
+		Method[] metharr = cls.getDeclaredMethods();
+		for (Method meth :metharr) {
+			if (name.equals(meth.getName())) {
+				Class<?>[] paramtypes = meth.getParameterTypes();
+				if (java.util.Arrays.equals(signature, paramtypes))
+					return meth;
+			}
+		}
+		return null;
+	}
+	
 	public static Constructor<?> getConstructor(Class<?> cls, Class<?>[] signature) {
 		Constructor<?>[] consarr = cls.getDeclaredConstructors();
 		for (int i=0; i<consarr.length; i++) {

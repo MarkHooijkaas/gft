@@ -9,10 +9,8 @@
 	<classpathentry kind="lib" path="lib/servlet-api-2.5.jar"/>
 	<classpathentry kind="lib" path="lib/activemq-core-5.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/geronimo-jms_1.1_spec-1.1.jar"/>
-	<classpathentry kind="lib" path="lib/com.ibm.mqjms.jar"/>
-	<classpathentry kind="lib" path="lib/com.ibm.mq.jar"/>
-	<classpathentry kind="lib" path="lib/connector.jar"/>
-	<classpathentry kind="lib" path="lib/dhbcore.jar"/>
+	<classpathentry kind="lib" path="lib/slf4j-api-1.5.10.jar"/>
 	<classpathentry kind="lib" path="lib/log4j-1.2.13.jar"/>
+	<classpathentry kind="lib" path="lib/freemarker-2.3.15.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

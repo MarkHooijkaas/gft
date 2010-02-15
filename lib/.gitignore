@@ -17,3 +17,5 @@ jta.jar
 log4j-1.2.13.jar
 providerutil.jar
 freemarker-2.3.15.jar
+slf4j-log4j12-1.5.10.jar
+slf4j-api-1.5.10.jar
