@@ -7,9 +7,11 @@ import org.kisst.gft.filetransfer.FileTransferData;
 import org.kisst.gft.filetransfer.Ssh;
 import org.kisst.gft.task.Task;
 import org.kisst.util.StringUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class SshAction implements Action {
-	
+	private final static Logger logger=LoggerFactory.getLogger(SshAction.class);
 	private final Props actionProps;
 	private final String commandTemplate;
 	
@@ -28,7 +30,7 @@ public class SshAction implements Action {
 		String command=StringUtil.substitute(commandTemplate, props);
 
 		String result=Ssh.ssh(ft.channel.cred, ft.channel.getHost(), command);
-		System.out.println(result);
+		logger.info("ssh result {}",result);
 		return null;
 	}
 

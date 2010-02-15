@@ -12,8 +12,11 @@ import org.kisst.cfg4j.Props;
 import org.kisst.gft.mq.MqQueue;
 import org.kisst.gft.mq.QueueListener;
 import org.kisst.gft.mq.QueueSystem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JmsSystem implements QueueSystem {
+	private final static Logger logger=LoggerFactory.getLogger(JmsSystem.class); 
 	protected final Props props;
 	private final Connection connection;
 	
@@ -47,7 +50,7 @@ public class JmsSystem implements QueueSystem {
 		try {
 			String name=props.getString("jndiName");
 			jndiContext = new InitialContext( env);
-			System.out.println("Looking up "+name);
+			logger.debug("Looking up {}",name);
 			return (ConnectionFactory) jndiContext.lookup( name );
 		} catch (NamingException e) { throw new RuntimeException(e); }
 

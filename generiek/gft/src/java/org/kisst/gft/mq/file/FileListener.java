@@ -7,8 +7,11 @@ import org.kisst.gft.mq.LockedBySomeoneElseException;
 import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.MqMessage;
 import org.kisst.gft.mq.QueueListener;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class FileListener implements QueueListener, Runnable {
+	private final static Logger logger=LoggerFactory.getLogger(FileListener.class); 
 	private final FileQueueSystem system;
 	private final Props props;
 	private final FileQueue queue;
@@ -40,11 +43,11 @@ public class FileListener implements QueueListener, Runnable {
 		try {
 			msg.lock();
 		} catch (LockedBySomeoneElseException e) {
-			System.out.println("Could not lock "+msg);
+			logger.warn("Could not lock {}",msg);
 			e.printStackTrace();
 			return;
 		}
-		System.out.println(queue+" handling "+msg);
+		logger.info("queue {} handling {}",queue, msg);
 		handler.handle(msg);
 		msg.done();
 	}
@@ -54,7 +57,7 @@ public class FileListener implements QueueListener, Runnable {
 		long delay=props.getLong("delay",1000);
 		running=true;
 		while (running) {
-			//System.out.println("polling");
+			logger.debug("polling {}",queue);
 			pollTillEmpty();
 			try {
 				Thread.sleep(delay);
@@ -65,11 +68,11 @@ public class FileListener implements QueueListener, Runnable {
 		}
 	}
 
+	public boolean listening() { return false;}
 	public void stopListening() { running=false; }
 	public void listen(MessageHandler handler) {
 		this.handler=handler;
 		new Thread(this).start();
 	}
-	
 }
 

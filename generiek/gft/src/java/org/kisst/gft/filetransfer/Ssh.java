@@ -5,6 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelExec;
 import com.jcraft.jsch.JSch;
@@ -14,9 +17,10 @@ import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
 public class Ssh {
+	private static final Logger logger=LoggerFactory.getLogger(Ssh.class);
 	public static void main(String[] arg){
 		if(arg.length!=2){
-			System.err.println("usage: java FileTransfer user@remotehost cmd");
+			logger.error("usage: java FileTransfer user@remotehost cmd");
 			System.exit(-1);
 		}      
 		String user=arg[0].substring(0, arg[0].indexOf('@'));
@@ -90,13 +94,13 @@ public class Ssh {
 				throw new RuntimeException("keyfile "+f+" is not a file");
 		}
 
-		public void showMessage(String message){ System.out.println("Message: "+message); }
-		public boolean promptYesNo(String str){ System.out.println("YesOrNo: "+str); return true;  }
+		public void showMessage(String message){ logger.info("Message: {}",message); }
+		public boolean promptYesNo(String str){ logger.info("YesOrNo: {}",str); return true;  }
 
-		public boolean promptPassphrase(String message){ System.out.println("prompt Passphrase: "+message); return true; }
+		public boolean promptPassphrase(String message){ logger.info("prompt Passphrase: {}",message); return true; }
 		public String getPassphrase(){ return ""; }
 
-		public boolean promptPassword(String message) { System.out.println("prompt Password: "+message); return true; }
+		public boolean promptPassword(String message) { logger.info("prompt Password: {}",message); return true; }
 		public String getPassword(){ return ""; }
 
 		public String[] promptKeyboardInteractive(String destination,
@@ -104,13 +108,13 @@ public class Ssh {
 				String instruction,
 				String[] prompt,
 				boolean[] echo) {
-			System.out.println("destination: "+destination); 
-			System.out.println("name : "+name);
-			System.out.println("instruction : "+instruction);
+			logger.info("destination: {}",destination); 
+			logger.info("name: {}",name);
+			logger.info("instruction: {}",instruction);
 			for (String s: prompt)
-				System.out.println("prompt[i]: "+s);
+				logger.info("prompt[i]: {}",s);
 			for (boolean b: echo)
-				System.out.println("echo[i]: "+b); 
+				logger.info("echo[i]: {}",b); 
 			return null;
 		}
 	}
