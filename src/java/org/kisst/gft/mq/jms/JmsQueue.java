@@ -55,8 +55,11 @@ public class JmsQueue implements MqQueue {
 			MessageProducer producer = session.createProducer(destination);
 			TextMessage message = session.createTextMessage();
 			message.setText(data);
+			message.setJMSCorrelationID("1234");
+			//message.setJMSReplyTo(arg0)
+			message.setJMSType("mijntype");
 			producer.send(message);
-			session.close();
+			session.commit();
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
 		finally {

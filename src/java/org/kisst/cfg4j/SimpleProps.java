@@ -69,7 +69,7 @@ public class SimpleProps extends PropsBase {
 		if (o instanceof SimpleProps)
 			((SimpleProps)o).put(keyremainder, value);
 		else if (o==null) {
-				SimpleProps props=new SimpleProps();
+				SimpleProps props=new SimpleProps(this,keyremainder);
 				map.put(keystart, props);
 				props.put(keyremainder, value);
 		}
@@ -98,13 +98,13 @@ public class SimpleProps extends PropsBase {
 	public void read(Reader inp)       { readMap(new Parser(inp)); }
 	public void read(InputStream inp)  { readMap(new Parser(inp)); }
 
-	private Object readObject(Parser inp)  {
+	private Object readObject(Parser inp, String name)  {
 		while (! inp.eof()){
 			char ch=inp.read();
 			if (inp.eof())
 				return null;
 			if (ch == '{' ) {
-				SimpleProps result=new SimpleProps();
+				SimpleProps result=new SimpleProps(this, name);
 				result.readMap(inp);
 				return result;
 			}
@@ -153,7 +153,7 @@ public class SimpleProps extends PropsBase {
 			else if (str.startsWith("@include")) 
 				include(str.substring(8).trim());
 			else if (inp.getLastChar() == '=' || inp.getLastChar() ==':' )
-				put(str.trim(), readObject(inp));
+				put(str.trim(), readObject(inp, str.trim()));
 			else if (inp.getLastChar() == '+') {
 				char ch = (char) inp.read();
 				if (ch != '=')
