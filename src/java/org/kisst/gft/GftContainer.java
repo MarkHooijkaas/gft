@@ -4,8 +4,6 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
-import java.util.Map.Entry;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.kisst.cfg4j.Props;
@@ -40,9 +38,15 @@ public class GftContainer {
 	public final HashMap<String, QueueSystem> queuemngrs= new LinkedHashMap<String, QueueSystem>();
 	public final HashMap<String, QueueListener>  listeners= new LinkedHashMap<String, QueueListener>();
 
+	private final File configfile;
+	private final GftRunner runner;
+
+	public GftContainer(GftRunner runner, File configfile) {
+		this.runner=runner;
+		this.configfile = configfile;
+	}
 	public void init(Props props) {
 		this.props=props;
-		channels.clear();
 		actions.put("copy", new RemoteScpAction());
 
 		if (props.get("gft.http.host",null)!=null) {
@@ -109,6 +113,13 @@ public class GftContainer {
 	public HttpHost getHost(String name) { return hosts.get(name); }
 
 	public void run() {
+		SimpleProps props=new SimpleProps();
+		props.load(configfile);
+		init(props);
+		logger.info("Starting GftContainer");
+		if (logger.isDebugEnabled()){
+			logger.debug("Starting GftContainer with props {}", props.toString());
+		}
 		for (QueueListener q : listeners.values() )
 			q.listen(starter);
 		admin.run();
@@ -122,22 +133,17 @@ public class GftContainer {
 		admin.stopListening();
 	}
 
-	
+	public void shutdown() { runner.shutdown();	}
+	public void restart() { runner.restart(); }
+
 	
 	public static void main(String[] args) {
 		if (args.length!=1)
 			throw new RuntimeException("usage: GftContainer <config file>");
 		File configfile=new File(args[0]);
 		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
-		SimpleProps props=new SimpleProps();
-		props.load(configfile);
-		logger.info("Starting GftContainer");
-		if (logger.isDebugEnabled()){
-			logger.debug("Starting GftContainer with props {}", props.toString());
-		}
-		GftContainer gft= new GftContainer();
-		gft.init(props);
-		gft.run();
+		GftRunner runner= new GftRunner(configfile);
+		runner.start();
 		logger.info("GFT stopped");
 	}
 }

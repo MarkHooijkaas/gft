@@ -34,7 +34,8 @@ public class AdminServer extends AbstractHandler {
         handlerMap.put("default", new TemplateServlet(gft));  //new HomeServlet(gft));
         handlerMap.put("/channel", new ChannelServlet(gft));
         handlerMap.put("/config", new ConfigServlet(gft));
-        handlerMap.put("/stop", new StopServlet(gft));
+        handlerMap.put("/restart", new RestartServlet(gft));
+        handlerMap.put("/shutdown", new ShutdownServlet(gft));
         
         RestServlet rest=new RestServlet(gft, "/rest/");
         rest.map("gft",new ObjectResource(gft));
