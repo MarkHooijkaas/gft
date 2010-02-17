@@ -217,7 +217,7 @@ public class SimpleProps extends PropsBase {
 		for (XmlNode child : node.getChildren()) {
 			String name=child.getName();
 			if (child.getChildren().size()>0) {
-				SimpleProps p=(SimpleProps) getProps(name);
+				SimpleProps p=(SimpleProps) get(name,null);
 				if (p==null) {
 					p=new SimpleProps(this,name);
 					put(name,p);
