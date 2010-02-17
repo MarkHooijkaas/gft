@@ -65,4 +65,10 @@ public class JmsSystem implements QueueSystem {
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
 	}
+	
+	public void stop() {
+		try {
+			connection.close();
+		} catch (JMSException e) { throw new RuntimeException(e);}
+	}
 }

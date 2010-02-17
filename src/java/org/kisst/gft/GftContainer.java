@@ -4,6 +4,8 @@ import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.log4j.PropertyConfigurator;
 import org.kisst.cfg4j.Props;
@@ -115,6 +117,8 @@ public class GftContainer {
 	public void stop() {
 		for (QueueListener q : listeners.values() )
 			q.stopListening();
+		for (QueueSystem sys: queuemngrs.values())
+			sys.stop();
 		admin.stopListening();
 	}
 
@@ -134,5 +138,6 @@ public class GftContainer {
 		GftContainer gft= new GftContainer();
 		gft.init(props);
 		gft.run();
+		logger.info("GFT stopped");
 	}
 }
