@@ -8,17 +8,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
 
-public class ConfigServlet extends BaseServlet {
-	public ConfigServlet(GftContainer gft) { super(gft);	}
+public class StopServlet extends BaseServlet {
+	public StopServlet(GftContainer gft) { super(gft);	}
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
 		response.setContentType("text/html;charset=utf-8");
 		PrintWriter out = response.getWriter();
 		out.println("<pre>");
-		out.println(gft.props);
+		out.println("stopping GFT");
 		out.println("</pre>");
 		response.setStatus(HttpServletResponse.SC_OK);
+		gft.stop();
 	}
 
 }

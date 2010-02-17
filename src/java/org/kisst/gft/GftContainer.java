@@ -111,6 +111,14 @@ public class GftContainer {
 			q.listen(starter);
 		admin.run();
 	}
+
+	public void stop() {
+		for (QueueListener q : listeners.values() )
+			q.stopListening();
+		admin.stopListening();
+	}
+
+	
 	
 	public static void main(String[] args) {
 		if (args.length!=1)
