@@ -24,7 +24,6 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Set;
 
 import org.kisst.util.XmlNode;
 import org.slf4j.Logger;
@@ -56,7 +55,7 @@ public class SimpleProps extends PropsBase {
 		}
 	}
 
-	public Set<String> keySet() { return values.keySet(); }
+	public Iterable<String> keys() { return values.keySet(); }
 
 	public void put(String key, Object value) {
 		int pos=key.indexOf('.');

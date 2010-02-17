@@ -19,7 +19,6 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.cfg4j;
 
-import java.util.Set;
 
 
 public interface Props {
@@ -29,7 +28,7 @@ public interface Props {
 	public long   getLong(String string, long defaultValue);
 	public boolean getBoolean(String name, boolean defaultValue);
 	public Props getProps(String name);
-	public Set<String> keySet();
+	public Iterable<String> keys();
 	
 	public Object get(String key);
 	public String getString(String key);
