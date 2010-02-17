@@ -21,12 +21,12 @@ public class StringUtil {
 				throw new RuntimeException("Unbounded ${");
 			String key=str.substring(pos+2,pos2);
 			result.append(str.substring(prevpos,pos));
-			String value=vars.getString(key);
+			Object value=vars.get(key,null);
 			if (value==null && key.equals("dollar"))
 				value="$";
 			if (value==null)
 				throw new RuntimeException("Unknown variable ${"+key+"}");
-			result.append(value);
+			result.append(value.toString());
 			prevpos=pos2+1;
 			pos=str.indexOf("${",prevpos);
 		}
