@@ -22,15 +22,13 @@ package org.kisst.cfg4j;
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 
 import org.kisst.util.XmlNode;
-
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory; 
+import org.slf4j.LoggerFactory;
 
 public class SimpleProps extends PropsBase {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleProps.class);
@@ -39,7 +37,6 @@ public class SimpleProps extends PropsBase {
 	private final SimpleProps parent;
 	private final String name; 
 	private final Map<String, Object> values=new LinkedHashMap<String, Object>();
-	private final Map<String, SimpleProps> subkeys=new LinkedHashMap<String, SimpleProps>();
 
 	public SimpleProps() { this(null,null); }
 	public SimpleProps(SimpleProps parent, String name) {
@@ -59,17 +56,7 @@ public class SimpleProps extends PropsBase {
 		}
 	}
 
-	public Set<String> keySet() { 
-		Set<String> result= new HashSet<String>(values.keySet());
-		result.addAll(subkeys.keySet());
-		if (logger.isDebugEnabled()) {
-			String tmp="keyset of "+getFullName()+":";
-			for (String key: result)
-				tmp+=" "+key;
-			logger.debug(tmp);
-		}
-		return result;
-	}
+	public Set<String> keySet() { return values.keySet(); }
 
 	public void put(String key, Object value) {
 		int pos=key.indexOf('.');
@@ -80,26 +67,24 @@ public class SimpleProps extends PropsBase {
 				values.remove(key);
 			}
 			else {
-				if (value instanceof SimpleProps)
-					subkeys.put(key,(SimpleProps) value);
-				else {
-					if (logger.isInfoEnabled())
-						logger.info("put {} = {}",getFullName()+"."+key,value);
-					values.put(key, value);
-				}
+				if (logger.isInfoEnabled())
+					logger.info("put {} = {}",getFullName()+"."+key,value);
+				values.put(key, value);
 				return;
 			}
 		}
 		String keystart=key.substring(0,pos);
 		String keyremainder=key.substring(pos+1);
-		SimpleProps o=subkeys.get(keystart);
+		Object o=values.get(keystart);
 		if (o==null) {
 			SimpleProps props=new SimpleProps(this,keyremainder);
-			subkeys.put(keystart, props);
+			values.put(keystart, props);
 			props.put(keyremainder, value);
 		}
-		else 
-			o.put(keyremainder, value);
+		else if (o instanceof SimpleProps)
+			((SimpleProps)o).put(keyremainder, value);
+		else
+			throw new RuntimeException("key "+getFullName()+"."+key+" already has value "+o+" when adding subkey "+keyremainder);
 	}
 
 	public Object get(String key, Object defaultValue) {
@@ -107,19 +92,19 @@ public class SimpleProps extends PropsBase {
 		int pos=key.indexOf('.');
 		if (pos<0) {
 			Object result=values.get(key);
-			if (result==null)
-				result=subkeys.get(key);
 			if (logger.isInfoEnabled())
 				logger.info("returned prop {} with value {}",getFullName()+"."+key,result);
 			return result;
 		}
 		String keystart=key.substring(0,pos);
 		String keyremainder=key.substring(pos+1);
-		SimpleProps o=subkeys.get(keystart);
+		Object o=values.get(keystart);
 		if (o==null)
 			return defaultValue;
-		else
+		else if (o instanceof SimpleProps)
 			return ((SimpleProps)o).get(keyremainder,null);
+		else
+			return defaultValue;
 	}
 
 	public void load(String filename)  { readMap(new Parser(filename));	}
@@ -219,15 +204,6 @@ public class SimpleProps extends PropsBase {
 				result.append(((SimpleProps)o).toString(indent+"\t"));
 			else if (o instanceof String)
 				result.append("\""+o+"\";\n");
-			else
-				result.append(o.toString());
-			//result.append("\n");
-		}
-		for (String key: subkeys.keySet()) {
-			result.append(indent+"\t"+key+": ");
-			Object o=subkeys.get(key);
-			if (o instanceof SimpleProps)
-				result.append(((SimpleProps)o).toString(indent+"\t"));
 			else
 				result.append(o.toString());
 			//result.append("\n");

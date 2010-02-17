@@ -17,8 +17,9 @@ import org.slf4j.LoggerFactory;
 
 public class AdminServer extends AbstractHandler {
 	private final static Logger logger=LoggerFactory.getLogger(AdminServer.class); 
-
 	private final GftContainer gft;
+	private Server server=null;
+
 	public AdminServer(GftContainer gft)
 	{
 		this.gft=gft;
@@ -27,11 +28,12 @@ public class AdminServer extends AbstractHandler {
 	public void run() {
 		int port=gft.props.getInt("gft.admin.port",8080);
 		logger.info("admin site running on port {}",port);
-		Server server = new Server(port);
+		server = new Server(port);
         server.setHandler(this);
         handlerMap.put("default", new TemplateServlet(gft));  //new HomeServlet(gft));
         handlerMap.put("/channel", new ChannelServlet(gft));
         handlerMap.put("/config", new ConfigServlet(gft));
+        handlerMap.put("/stop", new StopServlet(gft));
         
         RestServlet rest=new RestServlet(gft, "/rest/");
         rest.map("gft",new ObjectResource(gft));
@@ -45,8 +47,17 @@ public class AdminServer extends AbstractHandler {
 			server.start();
 			server.join();
 		} catch (Exception e) { throw new RuntimeException(e);}
+		server=null;
+	}
+	public void stopListening() {
+		logger.info("Stopping web server");
+		try {
+			server.getServer().stop();
+		} catch (Exception e) { throw new RuntimeException(e); }
+		server.destroy();
 	}
 
+	
 	private HashMap<String, BaseServlet> handlerMap=new HashMap<String, BaseServlet>();
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
 	{
