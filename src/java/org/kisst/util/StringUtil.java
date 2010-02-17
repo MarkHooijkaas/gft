@@ -17,8 +17,8 @@ public class StringUtil {
 		int pos=str.indexOf("${");
 		while (pos>=0) {
 			int pos2=str.indexOf("}", pos);
-			if (pos<0)
-				throw new RuntimeException("Unbounded ${");
+			if (pos2<0)
+				throw new RuntimeException("Unbounded ${ starting with "+str.substring(pos,pos+10));
 			String key=str.substring(pos+2,pos2);
 			result.append(str.substring(prevpos,pos));
 			Object value=vars.get(key,null);
