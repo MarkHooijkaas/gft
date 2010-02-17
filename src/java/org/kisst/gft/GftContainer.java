@@ -1,5 +1,6 @@
 package org.kisst.gft;
 
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -114,9 +115,10 @@ public class GftContainer {
 	public static void main(String[] args) {
 		if (args.length!=1)
 			throw new RuntimeException("usage: GftContainer <config file>");
-		PropertyConfigurator.configure(args[0]);
+		File configfile=new File(args[0]);
+		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
 		SimpleProps props=new SimpleProps();
-		props.load(args[0]);
+		props.load(configfile);
 		logger.info("Starting GftContainer");
 		if (logger.isDebugEnabled()){
 			logger.debug("Starting GftContainer with props {}", props.toString());
