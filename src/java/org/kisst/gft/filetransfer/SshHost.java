@@ -15,13 +15,14 @@ public class SshHost {
 		this.host=props.getString("host");
 		this.user=props.getString("user");
 		this.port=props.getInt("port",22);
-		Object keyfile=props.get("keyfile");
+		String password=props.getString("password",null);
+		Object keyfile=props.get("keyfile",null);
 		String f=null;
 		if (keyfile instanceof File)
 			f=((File) keyfile).getAbsolutePath();
 		else
 			f=(String) keyfile;
-		this.cred=new Ssh.Credentials(host, f); // TODO: use port
+		this.cred=new Ssh.Credentials(user, password, f); // TODO: use port
 	}
 	
 	public String call(String command) {
