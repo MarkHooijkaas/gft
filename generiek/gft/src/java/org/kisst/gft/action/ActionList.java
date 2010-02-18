@@ -26,8 +26,6 @@ public class ActionList  implements Action {
 			lprops.addLayer(gft.actions.get(name));
 			lprops.addLayer(props);
 				
-			for (String key : lprops.keys())
-				System.out.println(key+"->"+lprops.get(key));
 			Action a=ActionFactory.createAction(gft, lprops);
 			this.actions[i++]=a;
 			if (a==null)
