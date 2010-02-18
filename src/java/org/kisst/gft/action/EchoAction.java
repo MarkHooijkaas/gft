@@ -1,7 +1,6 @@
 package org.kisst.gft.action;
 
 import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferData;
 import org.kisst.gft.task.Task;
@@ -19,12 +18,7 @@ public class EchoAction implements Action {
 
 	public Object execute(Task task) {
 		FileTransferData ft= (FileTransferData) task.getData();
-		SimpleProps props=new SimpleProps();
-		props.put("action", actionProps);
-		props.put("file", ft.file);
-		props.put("channel", ft.channel.props);
-
-		String result=StringUtil.substitute(template, props);
+		String result=StringUtil.substitute(template, ft.getProps(actionProps));
 
 		System.out.println(result);
 		return null;

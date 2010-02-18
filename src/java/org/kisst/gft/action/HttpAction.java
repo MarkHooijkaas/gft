@@ -30,7 +30,6 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferData;
 import org.kisst.gft.task.Task;
@@ -63,12 +62,7 @@ public class HttpAction  implements Action {
         
 	public Object execute(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();
-		SimpleProps props=new SimpleProps();
-		props.put("action", actionProps);
-		props.put("file", ftdata.file);
-		props.put("channel", ftdata.channel.props);
-		
-		String body=StringUtil.substitute(template, props);
+		String body=StringUtil.substitute(template, ftdata.getProps(actionProps));
 
 		for (int i=0; i<hosts.length; i++) {
 			HttpHost host=hosts[i];

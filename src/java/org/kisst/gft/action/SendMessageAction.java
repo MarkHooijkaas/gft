@@ -20,7 +20,6 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 package org.kisst.gft.action;
 
 import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferData;
 import org.kisst.gft.mq.QueueSystem;
@@ -47,13 +46,9 @@ public class SendMessageAction  implements Action {
         
 	public Object execute(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();
-		SimpleProps props=new SimpleProps();
-		props.put("action", actionProps);
-		props.put("file", ftdata.file);
-		props.put("channel", ftdata.channel.props);
 		logger.info("Sending message to queue {}",queue);
 		
-		String body=StringUtil.substitute(template, props);
+		String body=StringUtil.substitute(template, ftdata.getProps(actionProps));
 		qmgr.getQueue(queue).send(body);
 		return null;
 	}
