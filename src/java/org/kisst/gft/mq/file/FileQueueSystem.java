@@ -27,4 +27,5 @@ public class FileQueueSystem implements QueueSystem {
 	public QueueListener createListener(Props props) {
 		return new FileListener(this, props);
 	}
+	public void stop() { }
 }

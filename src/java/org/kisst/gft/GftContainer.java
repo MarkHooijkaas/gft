@@ -38,20 +38,26 @@ public class GftContainer {
 	public final HashMap<String, QueueSystem> queuemngrs= new LinkedHashMap<String, QueueSystem>();
 	public final HashMap<String, QueueListener>  listeners= new LinkedHashMap<String, QueueListener>();
 
+	private final File configfile;
+	private final GftRunner runner;
+
+	public GftContainer(GftRunner runner, File configfile) {
+		this.runner=runner;
+		this.configfile = configfile;
+	}
 	public void init(Props props) {
 		this.props=props;
-		channels.clear();
 		actions.put("copy", new RemoteScpAction());
 
 		if (props.get("gft.http.host",null)!=null) {
 			Props hostProps=props.getProps("gft.http.host");
-			for (String name: hostProps.keySet())
+			for (String name: hostProps.keys())
 				hosts.put(name, new HttpHost(hostProps.getProps(name)));
 		}
 
 		if (props.get("gft.qmgr",null)!=null) {
 			Props pollerProps=props.getProps("gft.qmgr");
-			for (String name: pollerProps.keySet()) {
+			for (String name: pollerProps.keys()) {
 				QueueSystem sys=null;
 				Props p=pollerProps.getProps(name);
 				String type=p.getString("type");
@@ -64,7 +70,7 @@ public class GftContainer {
 				else 
 					throw new RuntimeException("Unknown type of queueing system "+type);
 				queuemngrs.put(name, sys);
-				for (String lname: p.getProps("listener").keySet()) {
+				for (String lname: p.getProps("listener").keys()) {
 					listeners.put(lname, sys.createListener(p.getProps("listener."+lname)));
 				}
 			}
@@ -72,7 +78,7 @@ public class GftContainer {
 
 
 		Props actionProps=props.getProps("gft.action");
-		for (String name: actionProps.keySet()) {
+		for (String name: actionProps.keys()) {
 			Props p=actionProps.getProps(name);
 			String classname=p.getString("class", name);
 			if (classname.indexOf('.')<0)
@@ -87,7 +93,7 @@ public class GftContainer {
 		}
 
 		Props channelProps=props.getProps("gft.channel");
-		for (String name: channelProps.keySet())
+		for (String name: channelProps.keys())
 			channels.put(name, new Channel(this, channelProps.getProps(name)));
 
 		if (logger.isDebugEnabled()) {
@@ -107,6 +113,13 @@ public class GftContainer {
 	public HttpHost getHost(String name) { return hosts.get(name); }
 
 	public void run() {
+		SimpleProps props=new SimpleProps();
+		props.load(configfile);
+		init(props);
+		logger.info("Starting GftContainer");
+		if (logger.isDebugEnabled()){
+			logger.debug("Starting GftContainer with props {}", props.toString());
+		}
 		for (QueueListener q : listeners.values() )
 			q.listen(starter);
 		admin.run();
@@ -115,24 +128,22 @@ public class GftContainer {
 	public void stop() {
 		for (QueueListener q : listeners.values() )
 			q.stopListening();
+		for (QueueSystem sys: queuemngrs.values())
+			sys.stop();
 		admin.stopListening();
 	}
 
-	
+	public void shutdown() { runner.shutdown();	}
+	public void restart() { runner.restart(); }
+
 	
 	public static void main(String[] args) {
 		if (args.length!=1)
 			throw new RuntimeException("usage: GftContainer <config file>");
 		File configfile=new File(args[0]);
 		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
-		SimpleProps props=new SimpleProps();
-		props.load(configfile);
-		logger.info("Starting GftContainer");
-		if (logger.isDebugEnabled()){
-			logger.debug("Starting GftContainer with props {}", props.toString());
-		}
-		GftContainer gft= new GftContainer();
-		gft.init(props);
-		gft.run();
+		GftRunner runner= new GftRunner(configfile);
+		runner.start();
+		logger.info("GFT stopped");
 	}
 }
