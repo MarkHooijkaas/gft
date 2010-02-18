@@ -31,7 +31,10 @@ public class JmsListener implements Runnable, QueueListener {
 		this.errorqueue=props.getString("errorqueue");
 	}
 	
-	public void stop() { running=false; }
+	public void stop() {
+		logger.info("Stopping listening to queue {}", queue);
+		running=false;
+	}
 	public void run()  {
 		if (thread!=null)
 			throw new RuntimeException("Listener already running");
@@ -63,6 +66,7 @@ public class JmsListener implements Runnable, QueueListener {
 			}
 			consumer.close();
 			session.close();
+			logger.info("Stopped listening to queue {}", queue);
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
 		finally {
