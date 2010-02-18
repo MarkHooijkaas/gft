@@ -13,6 +13,7 @@ import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.RemoteScpAction;
+import org.kisst.gft.filetransfer.SshHost;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
 import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.QueueListener;
@@ -34,7 +35,8 @@ public class GftContainer {
 	
 	public final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
 	public final HashMap<String, Action>   actions= new LinkedHashMap<String, Action>();
-	public final HashMap<String, HttpHost>   hosts= new LinkedHashMap<String, HttpHost>();
+	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
+	public final HashMap<String, SshHost>    sshhosts= new LinkedHashMap<String, SshHost>();
 	public final HashMap<String, QueueSystem> queuemngrs= new LinkedHashMap<String, QueueSystem>();
 	public final HashMap<String, QueueListener>  listeners= new LinkedHashMap<String, QueueListener>();
 
@@ -52,7 +54,13 @@ public class GftContainer {
 		if (props.get("gft.http.host",null)!=null) {
 			Props hostProps=props.getProps("gft.http.host");
 			for (String name: hostProps.keys())
-				hosts.put(name, new HttpHost(hostProps.getProps(name)));
+				httphosts.put(name, new HttpHost(hostProps.getProps(name)));
+		}
+
+		if (props.get("gft.ssh.host",null)!=null) {
+			Props hostProps=props.getProps("gft.ssh.host");
+			for (String name: hostProps.keys())
+				sshhosts.put(name, new SshHost(hostProps.getProps(name)));
 		}
 
 		if (props.get("gft.qmgr",null)!=null) {
@@ -102,15 +110,17 @@ public class GftContainer {
 				logger.info("Channel {}\t{}",name,channels.get(name));
 			for (String name: actions.keySet())
 				logger.info("Action {}\t{}",name,actions.get(name));
-			for (String name: hosts.keySet())
-				logger.info("Host {}\t{}",name,hosts.get(name));			
+			for (String name: httphosts.keySet())
+				logger.info("HttpHost {}\t{}",name,httphosts.get(name));			
+			for (String name: sshhosts.keySet())
+				logger.info("SshHost {}\t{}",name,sshhosts.get(name));			
 			for (String name: listeners.keySet())
 				logger.info("Listener {}\t{}",name,listeners.get(name));
 		}
 	}
 	public Channel getChannel(String name) { return channels.get(name); }
 	public Action getAction(String name) { return actions.get(name); }
-	public HttpHost getHost(String name) { return hosts.get(name); }
+	public HttpHost getHost(String name) { return httphosts.get(name); }
 
 	public void run() {
 		SimpleProps props=new SimpleProps();
