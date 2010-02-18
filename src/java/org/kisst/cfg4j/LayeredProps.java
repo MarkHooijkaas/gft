@@ -1,6 +1,7 @@
 package org.kisst.cfg4j;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class LayeredProps extends PropsBase {
 	private final ArrayList<Props> layers= new ArrayList<Props>();
@@ -18,7 +19,12 @@ public class LayeredProps extends PropsBase {
 	public void addLayer(Props props) { layers.add(props); }
 
 	public Iterable<String> keys() {
-		throw new RuntimeException("not implemented"); // TODO
+		HashSet<String> result= new HashSet<String>();
+		for (Props layer: layers) {
+			for (String key: layer.keys())
+				result.add(key);
+		}
+		return result; 
 	}
 
 }
