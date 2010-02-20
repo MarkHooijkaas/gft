@@ -33,7 +33,6 @@ import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferData;
 import org.kisst.gft.task.Task;
-import org.kisst.util.StringUtil;
 
 
 public class HttpAction  implements Action {
@@ -44,9 +43,11 @@ public class HttpAction  implements Action {
 	private final long closeIdleConnections;
 	private final HttpHost[] hosts;
 	private final int timeout;
-	private final String template;
+	private final String templateName;
+	private final GftContainer gft;
 	
 	public HttpAction(GftContainer gft, Props props) {
+		this.gft=gft;
 		this.actionProps=props;
 		closeIdleConnections=props.getLong("closeIdleConnections",-1);
 		
@@ -56,13 +57,14 @@ public class HttpAction  implements Action {
 		for (String hostname: hostnames)
 			hosts[i++]=gft.getHost(hostname.trim());
 		timeout = props.getInt("timeout", 30000);
-		template=props.getString("template");
+		templateName=props.getString("template");
 	}
 
         
 	public Object execute(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();
-		String body=StringUtil.substitute(template, ftdata.getProps(actionProps));
+		String body=gft.processTemplate(templateName, ftdata.getProps(actionProps));
+		//String body=StringUtil.substitute(template, ftdata.getProps(actionProps));
 
 		for (int i=0; i<hosts.length; i++) {
 			HttpHost host=hosts[i];
