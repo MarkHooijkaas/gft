@@ -25,6 +25,7 @@ import java.io.Reader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.kisst.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -188,7 +189,6 @@ public class SimpleProps extends PropsBase {
 					load(f2);
 			}
 		}
-
 	}
 
 	public String toString() { return toString("");	}
@@ -200,12 +200,33 @@ public class SimpleProps extends PropsBase {
 			if (o instanceof SimpleProps)
 				result.append(((SimpleProps)o).toString(indent+"\t"));
 			else if (o instanceof String)
-				result.append("\""+o+"\";\n");
+				result.append(StringUtil.doubleQuotedString((String)o)+";");
+			else if (o instanceof File)
+				result.append("@file("+o.toString()+")");
 			else
 				result.append(o.toString());
-			//result.append("\n");
+			result.append("\n");
 		}
-		result.append(indent+"}\n");
+		result.append(indent+"}");
 		return result.toString();
 	}
+	public String toPropertiesString() {
+		StringBuilder result=new StringBuilder();
+		for (String key: values.keySet()) {
+			Object o=values.get(key);
+			if (o instanceof SimpleProps) {
+				result.append(((SimpleProps)o).toPropertiesString());
+				continue;
+			}
+			result.append(getFullName()+"."+key+"=");
+			if (o instanceof String)
+				result.append(StringUtil.doubleQuotedString((String)o)+"\n");
+			else if (o instanceof File)
+				result.append("@file("+o.toString()+")\n");
+			else
+				result.append(o.toString()+"\n");
+		}
+		return result.toString();
+	}
+
 }
