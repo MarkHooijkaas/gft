@@ -25,7 +25,6 @@ import java.io.Reader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.kisst.util.XmlNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -192,7 +191,6 @@ public class SimpleProps extends PropsBase {
 
 	}
 
-
 	public String toString() { return toString("");	}
 	public String toString(String indent) {
 		StringBuilder result=new StringBuilder("{\n");
@@ -209,22 +207,5 @@ public class SimpleProps extends PropsBase {
 		}
 		result.append(indent+"}\n");
 		return result.toString();
-	}
-
-
-	public void readXml(XmlNode node)  {
-		for (XmlNode child : node.getChildren()) {
-			String name=child.getName();
-			if (child.getChildren().size()>0) {
-				SimpleProps p=(SimpleProps) get(name,null);
-				if (p==null) {
-					p=new SimpleProps(this,name);
-					put(name,p);
-				}
-				p.readXml(child);
-			}
-			else 
-				put(name, child.getText());
-		}
 	}
 }

@@ -12,7 +12,7 @@ public class StartFileTransferTask implements MessageHandler {
 	public StartFileTransferTask(GftContainer gft) { this.gft=gft; }
 	public void handle(MqMessage msg) {
 		FileTransferData obj =new FileTransferData(gft, msg.getData());
-		Task t=new FileBasedTask(obj.channel, obj);
+		Task t=new FileBasedTask(obj.kanaal, obj);
 		t.run();
 		//if (! t.isDone())
 		//	t.save();

@@ -7,7 +7,7 @@ public class ChannelAction implements Action {
 
 	public Object execute(Task task) {
 		FileTransferData t= (FileTransferData) task;
-		return t.channel.execute(task);
+		return t.kanaal.execute(task);
 	}
 
 }
