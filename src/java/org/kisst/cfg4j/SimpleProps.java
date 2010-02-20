@@ -36,7 +36,7 @@ public class SimpleProps extends PropsBase {
 	private final SimpleProps parent;
 	private final String name; 
 	private final Map<String, Object> values=new LinkedHashMap<String, Object>();
-
+	
 	public SimpleProps() { this(null,null); }
 	public SimpleProps(SimpleProps parent, String name) {
 		this.parent=parent;
@@ -69,8 +69,8 @@ public class SimpleProps extends PropsBase {
 				if (logger.isInfoEnabled())
 					logger.info("put {} = {}",getFullName()+"."+key,value);
 				values.put(key, value);
-				return;
 			}
+			return;
 		}
 		String keystart=key.substring(0,pos);
 		String keyremainder=key.substring(pos+1);
@@ -227,5 +227,4 @@ public class SimpleProps extends PropsBase {
 				put(name, child.getText());
 		}
 	}
-
 }
