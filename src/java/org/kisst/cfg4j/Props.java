@@ -22,6 +22,9 @@ package org.kisst.cfg4j;
 
 
 public interface Props {
+	public String getLocalName();
+	public String getFullName();
+	
 	public Object get(String key, Object defaultValue);
 	public String getString(String key, String defaultValue);
 	public int    getInt(String string, int defaultValue);

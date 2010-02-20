@@ -29,8 +29,8 @@ public abstract class PropsBase implements Props {
 
 	public int getInt(String key) { return Integer.parseInt(getString(key)); }
 	public long getLong(String key) { return Long.parseLong(getString(key)); }
-	public String getName() {return ""; } 
-	public String getFullName() {return ""; } 
+	public String getLocalName() {return null; } 
+	public String getFullName() {return null; } 
 	
 	public Object get(String key) {
 		Object result=get(key, null);

@@ -42,7 +42,7 @@ public class SimpleProps extends PropsBase {
 		this.parent=parent;
 		this.name=name;
 	}
-	public String getName() { return name; }
+	public String getLocalName() { return name; }
 	public String getFullName() {
 		if (parent==null)
 			return name;
