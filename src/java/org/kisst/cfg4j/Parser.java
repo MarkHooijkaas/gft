@@ -15,6 +15,8 @@ public class Parser {
 	private char lastchar;
 	private boolean eof=false;
 	private boolean useLastChar=false;
+	private int line=1;
+	private int pos=0;
 
 
 	private Parser(Reader inp, File f) {
@@ -49,20 +51,55 @@ public class Parser {
 		}
 		int ch;
 		try {
-			ch = inp.read();
-		} catch (IOException e) { throw new RuntimeException(e); }
+			do {
+				ch = inp.read();
+			}
+			while (ch=='\r'); // ignore all carriage returns
+		} catch (IOException e) { throw new ParseException(e); }
+		if (ch=='\n') {
+			line++; pos=0;
+		}
+		else
+			pos++;
 		if (ch<0)
 			eof=true;
 		else
 			lastchar=(char)ch;
 		return lastchar;
 	}
+
 	
-	
-	
-	
+	public String readIdentifier() {
+		skipWhitespaceAndComments();
+		StringBuilder result=new StringBuilder();
+		while (! eof()){
+			char ch=read();
+			if (Character.isLetterOrDigit(ch) || ch=='_')
+				result.append(ch);
+			else {
+				unread();
+				break;
+			}
+		}
+		return result.toString();
+	}
+	public String readIdentifierPath() {
+		skipWhitespaceAndComments();
+		StringBuilder result=new StringBuilder();
+		while (! eof()){
+			char ch=read();
+			if (Character.isLetterOrDigit(ch) || ch=='.' || ch=='_')
+				result.append(ch);
+			else {
+				unread();
+				break;
+			}
+		}
+		return result.toString();
+	}
 	public String readDoubleQuotedString() { return readUntil("\"").trim(); }
-	public String readUnquotedString() { return readUntil(" \t\n,;}]").trim(); }
+	public String readSingleQuotedString() { return readUntil("\'").trim(); }
+	public String readUnquotedString() { return readUntil("\n").trim(); }
 
 	public String readUntil(String endchars) {
 		StringBuilder result=new StringBuilder();
@@ -74,7 +111,8 @@ public class Parser {
 				ch=read();
 				if (eof())
 					break;
-				result.append(ch);
+				if (ch!='\n')
+					result.append(ch);
 			}
 			else {
 				if (endchars.indexOf(ch)>=0)
@@ -89,11 +127,34 @@ public class Parser {
 		return result.toString();
 	}
 
+	public void skipWhitespaceAndComments() {
+		while (! eof()){
+			char ch=read();
+			if (ch=='#') {
+				skipLine();
+				continue;
+			}
+			if (ch!=' ' && ch!='\t' && ch!='\n' && ch!='\r') {
+				unread(); 
+				return;
+			}
+		}
+	}
 	public void skipLine() {
 		while (! eof()){
 			char ch=read();
 			if (ch=='\n')
 				break;
+		}
+	}
+	
+	public class ParseException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+		public ParseException(String message) {
+			super("Parse exception: file "+file+", line:"+line+" pos: "+pos+": "+message);
+		}
+		public ParseException(Exception e) {
+			super("Parse exception: file "+file+", line:"+line+" pos: "+pos+": "+e.getMessage(), e);
 		}
 	}
 }
