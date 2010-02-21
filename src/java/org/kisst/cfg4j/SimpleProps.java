@@ -38,7 +38,7 @@ public class SimpleProps extends PropsBase {
 	private final Map<String, Object> values=new LinkedHashMap<String, Object>();
 	
 	public SimpleProps() { this(null,null); }
-	private SimpleProps(SimpleProps parent, String name) {
+	public SimpleProps(SimpleProps parent, String name) {
 		this.parent=parent;
 		this.name=name;
 	}
@@ -106,123 +106,11 @@ public class SimpleProps extends PropsBase {
 			return defaultValue;
 	}
 
-	public void load(String filename)  { readMap(new Parser(filename));	}
-	public void load(File file)        { readMap(new Parser(file));	}
-	public void read(Reader inp)       { readMap(new Parser(inp)); }
-	public void read(InputStream inp)  { readMap(new Parser(inp)); }
+	public void load(String filename)  { new Parser(filename).fillMap(this);	}
+	public void load(File file)        { new Parser(file).fillMap(this); }
+	public void read(Reader inp)       { new Parser(inp).fillMap(this);}
+	public void read(InputStream inp)  { new Parser(inp).fillMap(this);} 
 
-	private Object readObject(Parser inp, String name)  {
-		inp.skipWhitespaceAndComments();
-		while (! inp.eof()){
-			char ch=inp.read();
-			if (inp.eof())
-				return null;
-			if (ch == '{' ) {
-				SimpleProps result=new SimpleProps(this, name);
-				result.readMap(inp);
-				return result;
-			}
-			else if (ch == '[' )
-				return readList(inp);
-			else if (ch == '(' )
-				return readParamList(inp);
-			else if (ch == ' ' || ch == '\t' || ch == '\n')
-				continue;
-			else if (ch=='"')
-				return inp.readDoubleQuotedString();
-			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':')
-				return ch+inp.readUnquotedString();
-			else if (ch=='@')
-				return readSpecialObject(inp);
-		}
-		return null;
-	}
-	private Object readSpecialObject(Parser inp) {
-		String type=inp.readUntil("(;").trim();
-		if (type.equals("file")) {
-			String filename=inp.readUntil(")").trim();
-			return inp.getPath(filename);
-		}
-		else if (type.equals("null")) 
-			return null;
-		else
-			throw inp.new ParseException("Unknown special object type @"+type);
-	}
-
-
-	private Object readList(Parser inp) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	
-	private Object readParamList(Parser inp) {
-		// A paramlist is like a list, but may also contain keyword parameters
-		// TODO: currently it is just like an object with parenthesis
-		Object result=readObject(inp,null);
-		inp.skipWhitespaceAndComments();
-		if (inp.getLastChar()!=')')
-			throw inp.new ParseException("parameter list should end with )");
-		return result;
-	}
-
-	private void readMap(Parser inp)  {
-		while (! inp.eof()) {
-			inp.skipWhitespaceAndComments();
-			char ch=inp.read();
-			if (ch=='}')
-				return; // map has ended
-			else if (ch=='@'){
-				String cmd=inp.readIdentifierPath();
-				if (cmd.equals("include")) 
-					include(inp);
-				continue;
-			}
-			else if (ch==';')
-				continue; // ignore
-			else if (Character.isLetter(ch) || ch=='_') {
-				inp.unread();
-				String key=inp.readIdentifierPath();
-				inp.skipWhitespaceAndComments();
-				if (inp.getLastChar() == '=' || inp.getLastChar() ==':' )
-					put(key, readObject(inp, key));
-				else if (inp.getLastChar() == '+') {
-					char ch2 = (char) inp.read();
-					if (ch2 != '=')
-						throw inp.new ParseException("+ should only be used in +=");
-					throw inp.new ParseException("+= not yet supported");
-				}
-				else 
-					throw inp.new ParseException("field assignment "+key+" in map "+getFullName()+" should have =, : or +=, not "+ch);
-			}
-			else if (inp.eof())
-				return;
-			else
-				throw inp.new ParseException("when parsing map "+getFullName()+" unexpected character "+inp.getLastChar());
-		}
-	}
-
-
-
-	private void include(Parser inp) {
-		Object o=readObject(inp, null);
-		File f=null;
-		if (o instanceof File)
-			f=(File) o;
-		else if (o instanceof String)
-			f=inp.getPath(o.toString());
-		else
-			throw inp.new ParseException("unknown type of object to include "+o);
-		if (f.isFile())
-			load(f);
-		else if (f.isDirectory()) {
-			File[] files = f.listFiles(); // TODO: filter
-			for (File f2: files) {
-				if (f2.isFile())
-					load(f2);
-			}
-		}
-	}
 
 	public String toString() { return toString("");	}
 	public String toString(String indent) {
