@@ -158,7 +158,9 @@ public class Parser {
 		}
 	}
 	
-	
+
+	private Object readObject()  { return readObject(null,null); }
+
 	private Object readObject(SimpleProps parent, String name)  {
 		skipWhitespaceAndComments();
 		while (! eof()){
@@ -171,7 +173,7 @@ public class Parser {
 			else if (ch == '[' )
 				return readList();
 			else if (ch == '(' )
-				return readParamList(parent, name);
+				return readParamList();
 			else if (ch == ' ' || ch == '\t' || ch == '\n')
 				continue;
 			else if (ch=='"')
@@ -202,10 +204,10 @@ public class Parser {
 	}
 
 	
-	private Object readParamList(SimpleProps parent, String name) {
+	private Object readParamList() {
 		// A paramlist is like a list, but may also contain keyword parameters
 		// TODO: currently it is just like an object with parenthesis
-		Object result=readObject(parent, name);
+		Object result=readObject();
 		skipWhitespaceAndComments();
 		if (getLastChar()!=')')
 			throw new ParseException("parameter list should end with )");
@@ -256,7 +258,7 @@ public class Parser {
 
 
 	private void include(SimpleProps map, Parser inp) {
-		Object o=readObject(map, null);// TODO: name needed???
+		Object o=readObject();
 		File f=null;
 		if (o instanceof File)
 			f=(File) o;
