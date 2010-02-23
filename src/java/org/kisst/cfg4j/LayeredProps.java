@@ -16,7 +16,7 @@ public class LayeredProps extends PropsBase {
 		return defaultValue;
 	}
 	
-	public void addLayer(Props props) { layers.add(props); }
+	public void addLayer(Props props) { if (props!=null) layers.add(props); }
 
 	public Iterable<String> keys() {
 		HashSet<String> result= new HashSet<String>();
@@ -25,6 +25,13 @@ public class LayeredProps extends PropsBase {
 				result.add(key);
 		}
 		return result; 
+	}
+
+	public String toString() {
+		StringBuilder result=new StringBuilder();
+		for (Props layer: layers)
+			result.append(layer.toString()).append("\n");
+		return result.toString(); 
 	}
 
 }
