@@ -12,9 +12,11 @@ import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.admin.AdminServer;
+import org.kisst.gft.filetransfer.As400SshHost;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.SshHost;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
+import org.kisst.gft.filetransfer.WindowsSshHost;
 import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.QueueListener;
 import org.kisst.gft.mq.QueueSystem;
@@ -65,8 +67,18 @@ public class GftContainer {
 
 		if (props.get("gft.ssh.host",null)!=null) {
 			Props hostProps=props.getProps("gft.ssh.host");
-			for (String name: hostProps.keys())
-				sshhosts.put(name, new SshHost(hostProps.getProps(name)));
+			for (String name: hostProps.keys()) {
+				Props p=hostProps.getProps(name);
+				String type=p.getString("type",null);
+				if ("WINDOWS".equals(type))
+					sshhosts.put(name, new WindowsSshHost(p));
+				else if ("UNIX".equals(type))
+					sshhosts.put(name, new SshHost(p));
+				else if ("AS400".equals(type))
+					sshhosts.put(name, new As400SshHost(p));
+				else 
+					throw new RuntimeException("property type for gft.ssh.host."+name+" should be WINDOWS, AS400 or UNIX, not "+type);
+			}
 		}
 
 		if (props.get("gft.qmgr",null)!=null) {

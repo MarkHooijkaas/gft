@@ -17,21 +17,33 @@ import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
 public class Ssh {
+	public static class ExitCodeException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+		public ExitCodeException (SshHost host, String command, int exitvalue, String result) { 
+			super("On host "+host.host+" when running command \""+command+"\" resulted in exitcode "+exitvalue+"\noutput was:"+result);
+		}
+	}
+
 	private static final Logger logger=LoggerFactory.getLogger(Ssh.class);
 	static {
 		JSch.setLogger(new MyLogger());
 	}
+	
+	//public static String ssh(Credentials cred, String host, String command) {
 
-	public static String ssh(Credentials cred, String host, String command) {
+	public static String ssh(SshHost host, Ssh.Credentials cred, String command) {
+		logger.info("Calling {} with command [{}]", host, command);
 		FileOutputStream fos=null;
 		try{
 			JSch jsch=new JSch();
+			if (host.known_hosts!=null)
+				jsch.setKnownHosts(host.known_hosts);
 
 			if (cred.keyfile!=null) {
-				logger.info("Using keyfile {}",cred.keyfile);
+				logger.debug("Using keyfile {}",cred.keyfile);
 				jsch.addIdentity(cred.keyfile);
 			}
-			Session session=jsch.getSession(cred.user, host, 22);
+			Session session=jsch.getSession(cred.user, host.host, 22);
 
 			// username and password will be given via UserInfo interface.
 			session.setUserInfo(cred);
@@ -58,10 +70,11 @@ public class Ssh {
 			if(channel.isClosed()){
 				int exitvalue = channel.getExitStatus();
 				if (exitvalue!=0)
-					throw new RuntimeException("Exit value of command ["+command+"]  is "+exitvalue+"\noutput was:"+result.toString());
+					throw new ExitCodeException(host, command, exitvalue, result.toString());
 			}
 			//channel.disconnect();
 			session.disconnect();
+			logger.info("Call to {} returned [{}]", host, result);
 			return result.toString();
 		}
 		catch(JSchException e) { throw new RuntimeException(e); }
@@ -76,16 +89,16 @@ public class Ssh {
 
 	public static class MyLogger implements com.jcraft.jsch.Logger {
 		public boolean isEnabled(int level){
-			if (level==DEBUG) return logger.isDebugEnabled();
-			if (level==INFO)  return logger.isInfoEnabled();
+			if (level==DEBUG) return logger.isTraceEnabled();
+			if (level==INFO)  return logger.isDebugEnabled();
 			if (level==WARN)  return logger.isWarnEnabled();
 			if (level==ERROR) return logger.isErrorEnabled();
 			if (level==FATAL) return true;
 			return false;
 		}
 		public void log(int level, String message){
-			if (level==DEBUG) logger.debug(message);
-			if (level==INFO)  logger.info(message);
+			if (level==DEBUG) logger.trace(message);
+			if (level==INFO)  logger.debug(message);
 			if (level==WARN)  logger.warn(message);
 			if (level==ERROR) logger.error(message);
 			if (level==FATAL) logger.error(message);
@@ -111,27 +124,27 @@ public class Ssh {
 			}
 		}
 
-		public void showMessage(String message){ logger.info("Message: {}",message); }
-		public boolean promptYesNo(String str){ logger.info("YesOrNo: {}",str); return true;  }
+		public void showMessage(String message){ logger.debug("Message: {}",message); }
+		public boolean promptYesNo(String str){ logger.debug("YesOrNo: {}",str); return true;  }
 
-		public boolean promptPassphrase(String message){ logger.info("prompt Passphrase: {}",message); return true; }
+		public boolean promptPassphrase(String message){ logger.debug("prompt Passphrase: {}",message); return true; }
 		public String getPassphrase(){ return ""; }
 
-		public boolean promptPassword(String message) { logger.info("prompt Password: {}",message); return true; }
-		public String getPassword(){ logger.info("using Password: {}",password); return password; }
+		public boolean promptPassword(String message) { logger.debug("prompt Password: {}",message); return true; }
+		public String getPassword(){ logger.debug("using Password: {}",password); return password; }
 
 		public String[] promptKeyboardInteractive(String destination,
 				String name,
 				String instruction,
 				String[] prompt,
 				boolean[] echo) {
-			logger.info("destination: {}",destination); 
-			logger.info("name: {}",name);
-			logger.info("instruction: {}",instruction);
+			logger.debug("destination: {}",destination); 
+			logger.debug("name: {}",name);
+			logger.debug("instruction: {}",instruction);
 			for (String s: prompt)
-				logger.info("prompt[i]: {}",s);
+				logger.debug("prompt[i]: {}",s);
 			for (boolean b: echo)
-				logger.info("echo[i]: {}",b); 
+				logger.debug("echo[i]: {}",b); 
 			return null;
 		}
 	}

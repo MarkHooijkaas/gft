@@ -9,7 +9,9 @@ import org.kisst.util.ReflectionUtil;
 public class ActionFactory {
 
 	public static Action createAction(GftContainer gft, Props props) {
-		String classname=props.getString("class");
+		String classname=props.getString("class",null);
+		if (classname==null)
+			return null;
 		if (classname.indexOf('.')<0)
 			classname="org.kisst.gft.action."+classname;
 		if (classname.startsWith(".")) // Prefix a class in the default package with a .

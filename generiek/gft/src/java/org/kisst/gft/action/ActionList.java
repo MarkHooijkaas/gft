@@ -16,6 +16,7 @@ public class ActionList  implements Action {
 		this.actions=new Action[parts.length];
 		int i=0;
 		for (String name: parts) {
+			name=name.trim();
 			LayeredProps lprops=new LayeredProps();
 			SimpleProps top=new SimpleProps();
 			top.put("action",gft.actions.get(name));
@@ -27,9 +28,9 @@ public class ActionList  implements Action {
 			lprops.addLayer(props);
 				
 			Action a=ActionFactory.createAction(gft, lprops);
-			this.actions[i++]=a;
 			if (a==null)
 				throw new RuntimeException("Unknown action "+name);
+			this.actions[i++]=a;
 		}
 	}
 

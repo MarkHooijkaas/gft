@@ -93,7 +93,10 @@ public class SimpleProps extends PropsBase {
 			Object result=values.get(key);
 			if (logger.isInfoEnabled())
 				logger.info("returned prop {} with value {}",getFullName()+"."+key,result);
-			return result;
+			if (result==null)
+				return defaultValue;
+			else
+				return result;
 		}
 		String keystart=key.substring(0,pos);
 		String keyremainder=key.substring(pos+1);
