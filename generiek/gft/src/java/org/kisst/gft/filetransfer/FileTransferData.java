@@ -9,8 +9,8 @@ import org.kisst.util.XmlNode;
 
 public class FileTransferData {
 	public final GftContainer gft;
-	public final Channel channel;
-	public final String file;
+	public final Channel kanaal;
+	public final String bestand;
 	public final Props props;
 	public final XmlNode message;
 	
@@ -19,23 +19,24 @@ public class FileTransferData {
 		message=new XmlNode(data);
 		XmlNode input=message.getChild("Body/FileTransferRequest");
 		
-		this.channel=gft.getChannel(input.getChildText("kanaal"));
-		this.file=input.getChildText("bestand");
+		this.kanaal=gft.getChannel(input.getChildText("kanaal"));
+		this.bestand=input.getChildText("bestand");
 		SimpleProps p = new SimpleProps();
-		p.readXml(input);
+		p.put("message", message);
+		p.put("bestand", bestand);
+		p.put("kanaal", kanaal.props);
+		p.put("soap", new XmlNodeProps(message));
 		props=p;
 	}
 	
 	public Props getProps(Props actionProps) {
-		SimpleProps props=new SimpleProps();
-		props.put("action", actionProps);
-		props.put("file", file);
-		props.put("channel", channel.props);
-		props.put("soap", new XmlNodeProps(message));
+		SimpleProps p=new SimpleProps();
+		p.put("action", actionProps);
 		LayeredProps result = new LayeredProps();
+		result.addLayer(p);
 		result.addLayer(props);
 		result.addLayer(actionProps);
-		result.addLayer(channel.props);
+		result.addLayer(kanaal.props);
 		return result;
 	}
 

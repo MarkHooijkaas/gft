@@ -24,7 +24,6 @@ import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferData;
 import org.kisst.gft.mq.QueueSystem;
 import org.kisst.gft.task.Task;
-import org.kisst.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,23 +31,25 @@ import org.slf4j.LoggerFactory;
 public class SendMessageAction  implements Action {
 	private final static Logger logger=LoggerFactory.getLogger(SendMessageAction.class);
 
+	private final GftContainer gft;
 	private final Props actionProps;
 	private final QueueSystem qmgr;
 	private final String queue;
-	private final String template;
+	private final String templateName;
 	
 	public SendMessageAction(GftContainer gft, Props props) {
+		this.gft=gft;
 		this.actionProps=props;
 		this.qmgr=gft.queuemngrs.get(props.getString("qmgr"));
 		this.queue=props.getString("queue");
-		this.template=props.getString("template");
+		this.templateName=props.getString("template");
 	}
         
 	public Object execute(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();
 		logger.info("Sending message to queue {}",queue);
 		
-		String body=StringUtil.substitute(template, ftdata.getProps(actionProps));
+		String body=gft.processTemplate(templateName, ftdata.getProps(actionProps));
 		qmgr.getQueue(queue).send(body);
 		return null;
 	}

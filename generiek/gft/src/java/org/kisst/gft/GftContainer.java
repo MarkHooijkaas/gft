@@ -1,6 +1,9 @@
 package org.kisst.gft;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -21,6 +24,11 @@ import org.kisst.gft.mq.jms.JmsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import freemarker.template.Configuration;
+import freemarker.template.DefaultObjectWrapper;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
 
 public class GftContainer {
 	private final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
@@ -38,15 +46,17 @@ public class GftContainer {
 
 	private final File configfile;
 	private final GftRunner runner;
+	private final Configuration freemarkerConfig= new Configuration();
 
 	public GftContainer(GftRunner runner, File configfile) {
 		this.runner=runner;
 		this.configfile = configfile;
+		freemarkerConfig.setTemplateLoader(new GftTemplateLoader(configfile.getParentFile()));
+		freemarkerConfig.setObjectWrapper(new DefaultObjectWrapper());
 	}
 	public void init(Props props) {
 		this.props=props;
 		//actions.put("copy", new RemoteScpAction());
-
 		if (props.get("gft.http.host",null)!=null) {
 			Props hostProps=props.getProps("gft.http.host");
 			for (String name: hostProps.keys())
@@ -107,7 +117,26 @@ public class GftContainer {
 	}
 	public Channel getChannel(String name) { return channels.get(name); }
 	public HttpHost getHost(String name) { return httphosts.get(name); }
-
+	public Template getTemplate(String name) { 
+		try {
+			return freemarkerConfig.getTemplate(name);
+		}
+		catch (IOException e) { throw new RuntimeException(e);}
+	}
+	public void processTemplate(String templateName, Object context, Writer out) {
+		try {
+			Template templ=freemarkerConfig.getTemplate(templateName);
+			templ.process(context, out);
+		}
+		catch (IOException e) { throw new RuntimeException(e);} 
+		catch (TemplateException e) {  throw new RuntimeException(e);}
+	}
+	public String processTemplate(String templateName, Object context) {
+		StringWriter out=new StringWriter();
+		processTemplate(templateName, context, out);
+		return out.toString();
+	}
+	
 	public void run() {
 		SimpleProps props=new SimpleProps();
 		props.load(configfile);

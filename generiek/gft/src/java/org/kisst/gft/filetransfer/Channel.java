@@ -1,7 +1,6 @@
 package org.kisst.gft.filetransfer;
 
 import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
@@ -17,10 +16,7 @@ public class Channel implements TaskDefinition {
 	public Channel(GftContainer gft, Props props) {
 		this.action=new ActionList(gft, props);
 		this.props=props;
-		if (props instanceof SimpleProps)
-			this.name=((SimpleProps) props).getName();
-		else
-			this.name="unknown";
+		this.name=props.getLocalName();
 	}
 	public String toString() { return "Channel("+name+")";}
 	public Object execute(Task task) { action.execute(task); return null; }

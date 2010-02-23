@@ -25,7 +25,7 @@ import java.io.Reader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import org.kisst.util.XmlNode;
+import org.kisst.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,13 +36,13 @@ public class SimpleProps extends PropsBase {
 	private final SimpleProps parent;
 	private final String name; 
 	private final Map<String, Object> values=new LinkedHashMap<String, Object>();
-
+	
 	public SimpleProps() { this(null,null); }
 	public SimpleProps(SimpleProps parent, String name) {
 		this.parent=parent;
 		this.name=name;
 	}
-	public String getName() { return name; }
+	public String getLocalName() { return name; }
 	public String getFullName() {
 		if (parent==null)
 			return name;
@@ -69,14 +69,14 @@ public class SimpleProps extends PropsBase {
 				if (logger.isInfoEnabled())
 					logger.info("put {} = {}",getFullName()+"."+key,value);
 				values.put(key, value);
-				return;
 			}
+			return;
 		}
 		String keystart=key.substring(0,pos);
 		String keyremainder=key.substring(pos+1);
 		Object o=values.get(keystart);
 		if (o==null) {
-			SimpleProps props=new SimpleProps(this,keyremainder);
+			SimpleProps props=new SimpleProps(this,keystart);
 			values.put(keystart, props);
 			props.put(keyremainder, value);
 		}
@@ -106,91 +106,10 @@ public class SimpleProps extends PropsBase {
 			return defaultValue;
 	}
 
-	public void load(String filename)  { readMap(new Parser(filename));	}
-	public void load(File file)        { readMap(new Parser(file));	}
-	public void read(Reader inp)       { readMap(new Parser(inp)); }
-	public void read(InputStream inp)  { readMap(new Parser(inp)); }
-
-	private Object readObject(Parser inp, String name)  {
-		while (! inp.eof()){
-			char ch=inp.read();
-			if (inp.eof())
-				return null;
-			if (ch == '{' ) {
-				SimpleProps result=new SimpleProps(this, name);
-				result.readMap(inp);
-				return result;
-			}
-			else if (ch == '[' )
-				return readList(inp);
-			else if (ch == ' ' || ch == '\t' || ch == '\n')
-				continue;
-			else if (ch=='"')
-				return inp.readDoubleQuotedString();
-			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':')
-				return ch+inp.readUnquotedString();
-			else if (ch=='@')
-				return readSpecialObject(inp);
-		}
-		return null;
-	}
-	private Object readSpecialObject(Parser inp) {
-		String type=inp.readUntil("(;").trim();
-		if (type.equals("file")) {
-			String filename=inp.readUntil(")").trim();
-			return inp.getPath(filename);
-		}
-		else if (type.equals("null")) 
-			return null;
-		else
-			throw new RuntimeException("Unknown special object type @"+type);
-	}
-
-
-	private Object readList(Parser inp) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	private void readMap(Parser inp)  {
-		while (! inp.eof()) {
-			String str=inp.readUntil("+=:}\n");
-			if (str==null)
-				return;
-			str=str.trim();
-			if (str.startsWith("#")) { 
-				inp.skipLine();
-			}
-			else if (inp.getLastChar() == '}') 
-				return;
-			else if (str.startsWith("@include")) 
-				include(inp, str.substring(8).trim());
-			else if (inp.getLastChar() == '=' || inp.getLastChar() ==':' )
-				put(str.trim(), readObject(inp, str.trim()));
-			else if (inp.getLastChar() == '+') {
-				char ch = (char) inp.read();
-				if (ch != '=')
-					throw new RuntimeException("+ should only be used in +=");
-				throw new RuntimeException("+= not yet supported");
-			}
-		}
-	}
-
-
-
-	private void include(Parser inp, String path) {
-		File f=inp.getPath(path);
-		if (f.isFile())
-			load(f);
-		else if (f.isDirectory()) {
-			File[] files = f.listFiles(); // TODO: filter
-			for (File f2: files) {
-				if (f2.isFile())
-					load(f2);
-			}
-		}
-
-	}
+	public void load(String filename)  { new Parser(filename).fillMap(this);	}
+	public void load(File file)        { new Parser(file).fillMap(this); }
+	public void read(Reader inp)       { new Parser(inp).fillMap(this);}
+	public void read(InputStream inp)  { new Parser(inp).fillMap(this);} 
 
 
 	public String toString() { return toString("");	}
@@ -202,30 +121,33 @@ public class SimpleProps extends PropsBase {
 			if (o instanceof SimpleProps)
 				result.append(((SimpleProps)o).toString(indent+"\t"));
 			else if (o instanceof String)
-				result.append("\""+o+"\";\n");
+				result.append(StringUtil.doubleQuotedString((String)o)+";");
+			else if (o instanceof File)
+				result.append("@file("+o.toString()+")");
 			else
 				result.append(o.toString());
-			//result.append("\n");
+			result.append("\n");
 		}
-		result.append(indent+"}\n");
+		result.append(indent+"}");
 		return result.toString();
 	}
-
-
-	public void readXml(XmlNode node)  {
-		for (XmlNode child : node.getChildren()) {
-			String name=child.getName();
-			if (child.getChildren().size()>0) {
-				SimpleProps p=(SimpleProps) get(name,null);
-				if (p==null) {
-					p=new SimpleProps(this,name);
-					put(name,p);
-				}
-				p.readXml(child);
+	public String toPropertiesString() {
+		StringBuilder result=new StringBuilder();
+		for (String key: values.keySet()) {
+			Object o=values.get(key);
+			if (o instanceof SimpleProps) {
+				result.append(((SimpleProps)o).toPropertiesString());
+				continue;
 			}
-			else 
-				put(name, child.getText());
+			result.append(getFullName()+"."+key+"=");
+			if (o instanceof String)
+				result.append(StringUtil.doubleQuotedString((String)o)+"\n");
+			else if (o instanceof File)
+				result.append("@file("+o.toString()+")\n");
+			else
+				result.append(o.toString()+"\n");
 		}
+		return result.toString();
 	}
 
 }

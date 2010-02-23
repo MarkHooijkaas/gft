@@ -33,4 +33,32 @@ public class StringUtil {
 		result.append(str.substring(prevpos));
 		return result.toString();
 	}
+	
+	public static String doubleQuotedString(String str) {
+		StringBuilder result= new StringBuilder("\""); 
+		for (int i=0; i<str.length(); i++) {
+			char ch=str.charAt(i);
+			if (ch=='\n') { result.append("\\n"); continue; }
+			if (ch=='\r') { result.append("\\r"); continue; }
+			if (ch=='\t') { result.append("\\t"); continue; }
+			if (ch=='"' || ch=='\\' || ch=='$') result.append('\\');
+			result.append(ch);
+		}
+		result.append('"');
+		return result.toString();
+	}
+
+	public static String singleQuotedString(String str) {
+		StringBuilder result= new StringBuilder("'"); 
+		for (int i=0; i<str.length(); i++) {
+			char ch=str.charAt(i);
+			if (ch=='\n') { result.append("\\n"); continue; }
+			if (ch=='\r') { result.append("\\r"); continue; }
+			if (ch=='\t') { result.append("\\t"); continue; }
+			if (ch=='\'' || ch=='\\' ) result.append('\\');
+			result.append(ch);
+		}
+		result.append("'");
+		return result.toString();
+	}
 }

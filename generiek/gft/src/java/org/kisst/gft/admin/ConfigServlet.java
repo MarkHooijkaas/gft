@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 
 public class ConfigServlet extends BaseServlet {
@@ -17,6 +18,7 @@ public class ConfigServlet extends BaseServlet {
 		PrintWriter out = response.getWriter();
 		out.println("<pre>");
 		out.println(gft.props);
+		out.println(((SimpleProps)gft.props).toPropertiesString());
 		out.println("</pre>");
 		response.setStatus(HttpServletResponse.SC_OK);
 	}
