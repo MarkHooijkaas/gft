@@ -14,8 +14,9 @@ public class History {
 	public static class Item {
 		public final long timestamp;
 		public final String msg;
-		Item(String msg) { this.msg=msg; this.timestamp=System.currentTimeMillis();}
-		Item(String msg, long timestamp) { this.msg=msg; this.timestamp=timestamp;}
+		public final String subject;
+		Item(String subject, String msg) { this.subject=subject; this.msg=msg; this.timestamp=System.currentTimeMillis();}
+		Item(String subject, String msg, long timestamp) { this.subject=subject; this.msg=msg; this.timestamp=timestamp;}
 	}
 	private final ArrayList<Item> items=new ArrayList<Item>();
 
@@ -23,12 +24,13 @@ public class History {
 	public History(Sequence items) {
 		for (Object o: items) {
 			Props p=(Props) o;
-			this.items.add(new Item(p.getString("message"), p.getLong("timestamp")));
+			this.items.add(new Item(p.getString("subject",null),p.getString("message"), p.getLong("timestamp")));
 		}
 	}
 
 
-	public synchronized void trace(String msg) { trace(new Item(msg)); }
+	public synchronized void trace(String subject, String msg) { trace(new Item(subject, msg)); }
+	public synchronized void trace(String msg) { trace(new Item(null, msg)); }
 	public synchronized void trace(Item item) { items.add(item); } 
 
 	public String getTraceAsString(Props props) {

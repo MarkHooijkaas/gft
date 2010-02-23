@@ -1,7 +1,6 @@
 package org.kisst.flow4j;
 
 public interface Flow {
-	Iterable<FlowStep> getSteps();
-
-	Object getName();
+	String getName();
+	Step getStep(String name);
 }
