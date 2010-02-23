@@ -27,6 +27,8 @@ public abstract class PropsBase implements Props {
 	private static final long serialVersionUID = 1L;
 	abstract public Object get(String key, Object defaultValue);
 
+	public boolean hasKey(String key) { return get(key,null)!=null;	}
+
 	public int getInt(String key) { return Integer.parseInt(getString(key)); }
 	public long getLong(String key) { return Long.parseLong(getString(key)); }
 	public String getLocalName() {return null; } 
@@ -96,6 +98,7 @@ public abstract class PropsBase implements Props {
 	}
 
 	public Props getProps(String name) { return (Props) get(name); }
+	public Sequence getSequence(String name) { return (Sequence) get(name); }
 
 
 }
