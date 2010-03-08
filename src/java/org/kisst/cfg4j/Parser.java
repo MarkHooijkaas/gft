@@ -240,7 +240,7 @@ public class Parser {
 				if (getLastChar() == '=' || getLastChar() ==':' )
 					map.put(key, readObject(map, key));
 				else if (getLastChar() == '+') {
-					char ch2 = (char) read();
+					char ch2 = read();
 					if (ch2 != '=')
 						throw new ParseException("+ should only be used in +=");
 					throw new ParseException("+= not yet supported");
