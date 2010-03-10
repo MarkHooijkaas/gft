@@ -1,5 +1,6 @@
 package org.kisst.gft.filetransfer;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -52,7 +53,8 @@ public class Ssh {
 			// exec 'scp -f rfile' remotely
 			Channel channel=session.openChannel("exec");
 			((ChannelExec)channel).setCommand(command);
-
+			ByteArrayOutputStream err = new ByteArrayOutputStream();
+			((ChannelExec)channel).setErrStream(err);
 			channel.setInputStream(null);
 			InputStream in=channel.getInputStream();
 
@@ -74,6 +76,7 @@ public class Ssh {
 			}
 			//channel.disconnect();
 			session.disconnect();
+			result.append(err.toString());
 			logger.info("Call to {} returned [{}]", host, result);
 			return result.toString();
 		}
