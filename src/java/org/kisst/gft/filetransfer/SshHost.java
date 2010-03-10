@@ -45,8 +45,8 @@ public class SshHost {
 	public void copyFileTo(String srcpath, SshHost dest, String destdir)  {
 		call("scp "+srcpath+" "+dest.host+":"+dest.convertPath(destdir));
 	}
-	public void copyFileFrom(SshHost src, String srcpath, String destdir)  {
-		call("scp "+src.host+":"+src.convertPath(srcpath)+" "+destdir);
+	public void copyFileFrom(SshHost src, String srcpath, String filename, String destdir)  {
+		call("scp "+src.host+":"+src.convertPath(srcpath+"/"+filename)+" "+destdir);
 	}
 
 }
