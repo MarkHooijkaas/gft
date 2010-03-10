@@ -53,6 +53,8 @@ public class Ssh {
 			// exec 'scp -f rfile' remotely
 			Channel channel=session.openChannel("exec");
 			((ChannelExec)channel).setCommand(command);
+			((ChannelExec)channel).setAgentForwarding(true);
+
 			ByteArrayOutputStream err = new ByteArrayOutputStream();
 			((ChannelExec)channel).setErrStream(err);
 			channel.setInputStream(null);

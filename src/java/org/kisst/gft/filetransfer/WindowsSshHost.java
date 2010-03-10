@@ -20,9 +20,11 @@ public class WindowsSshHost extends SshHost {
 	@Override public void deleteFile(String path) { call("del "+convertPath(path)); }
 	
 	@Override public void copyFileTo(String srcpath, SshHost dest, String destdir)  {
-		call(scpCommand+" "+convertPath(srcpath)+" "+dest.host+":"+dest.convertPath(destdir));
+		String command=scpCommand+" "+convertPath(srcpath)+" "+dest.host+":"+dest.convertPath(destdir);
+		//command=command.replace("\\","\\\\");
+		call(command);
 	}
-	@Override public void copyFileFrom(SshHost src, String srcpath, String destdir)  {
+	@Override public void copyFileFrom(SshHost src, String srcpath, String filename, String destdir)  {
 		call(scpCommand+" "+src.host+":"+src.convertPath(srcpath)+" "+convertPath(destdir));
 	}
 }
