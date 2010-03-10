@@ -28,7 +28,7 @@ public class CopyFile implements Action {
 		if ("push".equals(mode))
 			src.copyFileTo(srcdir+"/"+ft.bestand, dest, destdir);
 		else if ("pull".equals(mode))
-			dest.copyFileFrom(src, srcdir+"/"+ft.bestand, destdir);
+			dest.copyFileFrom(src, srcdir,ft.bestand, destdir);
 		return null;
 	}
 
