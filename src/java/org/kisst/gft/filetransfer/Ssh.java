@@ -18,6 +18,16 @@ import com.jcraft.jsch.UIKeyboardInteractive;
 import com.jcraft.jsch.UserInfo;
 
 public class Ssh {
+	public static class ExecResult {
+		public final int exitcode;
+		public final String stdout;
+		public final String stderr;
+		public ExecResult(int exitcode, String stdout, String stderr) {
+			this.exitcode=exitcode;
+			this.stdout=stdout;
+			this.stderr=stderr;
+		}
+	}
 	public static class ExitCodeException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
 		public ExitCodeException (SshHost host, String command, int exitvalue, String result) { 
@@ -31,8 +41,14 @@ public class Ssh {
 	}
 	
 	//public static String ssh(Credentials cred, String host, String command) {
-
 	public static String ssh(SshHost host, Ssh.Credentials cred, String command) {
+		ExecResult result=exec(host, cred, command);
+		if (result.exitcode!=0)
+			throw new ExitCodeException(host, command, result.exitcode, result.stdout+result.stderr);
+		return result.stdout+result.stderr;
+	}
+	
+	public static ExecResult exec(SshHost host, Ssh.Credentials cred, String command) {
 		logger.info("Calling {} with command [{}]", host, command);
 		FileOutputStream fos=null;
 		try{
@@ -71,16 +87,13 @@ public class Ssh {
 					result.append(new String(tmp, 0, i));
 			} while (i>=0);
 
-			if(channel.isClosed()){
+			//if(channel.isClosed()){
 				int exitvalue = channel.getExitStatus();
-				if (exitvalue!=0)
-					throw new ExitCodeException(host, command, exitvalue, result.toString());
-			}
+			//}
 			//channel.disconnect();
 			session.disconnect();
-			result.append(err.toString());
 			logger.info("Call to {} returned [{}]", host, result);
-			return result.toString();
+			return new ExecResult(exitvalue, result.toString(), err.toString());
 		}
 		catch(JSchException e) { throw new RuntimeException(e); }
 		catch(IOException e)   { throw new RuntimeException(e); }
