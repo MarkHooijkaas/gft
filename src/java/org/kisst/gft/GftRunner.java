@@ -15,8 +15,13 @@ public class GftRunner {
 		if (gft!=null)
 			throw new RuntimeException("Gft already running");
 		running=true;
+		gft=new GftContainer(this,configfile);
+		gft.start();
+	}
+
+	public void run() {
+		start();
 		while (running) {
-			gft=new GftContainer(this,configfile);
 			gft.run();
 		}
 		gft=null;

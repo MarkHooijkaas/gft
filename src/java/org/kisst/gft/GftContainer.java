@@ -149,7 +149,7 @@ public class GftContainer {
 		return out.toString();
 	}
 	
-	public void run() {
+	public void start() {
 		SimpleProps props=new SimpleProps();
 		props.load(configfile);
 		init(props);
@@ -159,6 +159,10 @@ public class GftContainer {
 		}
 		for (QueueListener q : listeners.values() )
 			q.listen(starter);
+		admin.startListening();
+	}
+	public void run() {
+		start();
 		admin.run();
 	}
 
@@ -180,7 +184,7 @@ public class GftContainer {
 		File configfile=new File(args[0]);
 		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
 		GftRunner runner= new GftRunner(configfile);
-		runner.start();
+		runner.run();
 		logger.info("GFT stopped");
 	}
 }
