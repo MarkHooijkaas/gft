@@ -17,7 +17,7 @@ public class Channel implements TaskDefinition {
 		this.action=new ActionList(gft, props);
 		this.props=props;
 		this.name=props.getLocalName();
-		Object errorProps=props.get("error");
+		Object errorProps=props.get("error",null);
 		if (errorProps instanceof Props) 
 			this.errorAction=new ActionList(gft, (Props) errorProps);
 		else if (errorProps==null)
