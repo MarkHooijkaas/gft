@@ -16,4 +16,5 @@ public interface Task {
 	public void setStatus(Status status);
 	public Status getStatus();
 	public boolean isDone();
+	public void setLastError(Exception e);
 }
