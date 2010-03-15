@@ -35,8 +35,14 @@ public class ActionList  implements Action {
 	}
 
 	public Object execute(Task task) {
-		for (Action a: actions)
-			a.execute(task);
+		for (Action a: actions) {
+			try {
+				a.execute(task);
+			}
+			catch (RuntimeException e) {
+				throw new RuntimeException("Error while executing "+a.toString()+": "+e.getMessage());
+			}
+		}
 		return null;
 	}
 }

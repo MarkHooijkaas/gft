@@ -1,5 +1,7 @@
 package org.kisst.gft.task;
 
+import org.kisst.cfg4j.SimpleProps;
+
 public class FileBasedTask implements Task {
 	private final TaskDefinition definition;
 	private Object data;
@@ -17,5 +19,10 @@ public class FileBasedTask implements Task {
 	public Status getStatus() { return status; }
 	public boolean isDone() { return status==DONE; }
 	public void setStatus(Status status) { this.status=status;}
+
+	public void setLastError(Exception e) {
+		if (data instanceof SimpleProps)
+			((SimpleProps) data).put("errormsg", e.getMessage());
+	}
 	
 }
