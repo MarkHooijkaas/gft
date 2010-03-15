@@ -3,3 +3,5 @@ build
 CVS
 .cvsignore
 gft.jar
+logs
+bin
