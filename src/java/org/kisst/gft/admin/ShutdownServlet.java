@@ -21,8 +21,8 @@ public class ShutdownServlet extends BaseServlet {
 		response.setStatus(HttpServletResponse.SC_OK);
 		// The stopping is done in a separate thread, because it will also stop
 		// the webserver running this servlet
-		Runnable r=new Runnable() {	public void run() {	gft.shutdown();	}};
-		new Thread(r).start();
+		//Runnable r=new Runnable() {	public void run() {	gft.shutdown();	}};
+		//new Thread(r).start();
 	}
 
 }

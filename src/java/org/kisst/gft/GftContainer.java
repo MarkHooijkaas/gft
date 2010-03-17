@@ -7,7 +7,6 @@ import java.io.Writer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
-import org.apache.log4j.PropertyConfigurator;
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.action.HttpHost;
@@ -33,7 +32,7 @@ import freemarker.template.TemplateException;
 
 
 public class GftContainer {
-	private final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
+	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
 
 	private final MessageHandler starter = new StartFileTransferTask(this); 
 	private final AdminServer admin=new AdminServer(this);
@@ -47,11 +46,9 @@ public class GftContainer {
 	public final HashMap<String, QueueListener>  listeners= new LinkedHashMap<String, QueueListener>();
 
 	private final File configfile;
-	private final GftRunner runner;
 	private final Configuration freemarkerConfig= new Configuration();
 
-	public GftContainer(GftRunner runner, File configfile) {
-		this.runner=runner;
+	public GftContainer(File configfile) {
 		this.configfile = configfile;
 		freemarkerConfig.setTemplateLoader(new GftTemplateLoader(configfile.getParentFile()));
 		freemarkerConfig.setObjectWrapper(new DefaultObjectWrapper());
@@ -161,9 +158,8 @@ public class GftContainer {
 			q.listen(starter);
 		admin.startListening();
 	}
-	public void run() {
-		start();
-		admin.run();
+	public void join() {
+		admin.join();
 	}
 
 	public void stop() {
@@ -172,19 +168,5 @@ public class GftContainer {
 		for (QueueSystem sys: queuemngrs.values())
 			sys.stop();
 		admin.stopListening();
-	}
-
-	public void shutdown() { runner.shutdown();	}
-	public void restart() { runner.restart(); }
-
-	
-	public static void main(String[] args) {
-		if (args.length!=1)
-			throw new RuntimeException("usage: GftContainer <config file>");
-		File configfile=new File(args[0]);
-		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
-		GftRunner runner= new GftRunner(configfile);
-		runner.run();
-		logger.info("GFT stopped");
 	}
 }

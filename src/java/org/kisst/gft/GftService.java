@@ -21,7 +21,6 @@ public class GftService  implements WrapperListener  {
 		File configfile;
 		if (args.length==0)
 			configfile=new File("../conf/gft.props");
-			//throw new RuntimeException("usage: GftContainer <config file>");
 		else
 			configfile=new File(args[0]);
 		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
