@@ -40,6 +40,7 @@ public class HttpHost {
 		ntlmdomain=props.getString("ntlmdomain", null);
 	}
 	
+	public String toString() { return "HttpHost("+username+","+url+")"; }
 	public  Credentials getCredentials(){
 		if (ntlmdomain==null)
 			return new UsernamePasswordCredentials(username, password);

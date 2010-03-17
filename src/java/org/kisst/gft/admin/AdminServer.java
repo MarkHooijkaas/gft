@@ -42,7 +42,8 @@ public class AdminServer extends AbstractHandler {
         rest.map("channel",new MappedResource(gft.channels));
         rest.map("action",new MappedResource(gft.actions));
         rest.map("listener",new MappedResource(gft.listeners));
-        rest.map("host",new MappedResource(gft.httphosts));
+        rest.map("httphost",new MappedResource(gft.httphosts));
+        rest.map("sshhost",new MappedResource(gft.sshhosts));
         
         handlerMap.put(rest.getPrefix(), rest);
 		try {
