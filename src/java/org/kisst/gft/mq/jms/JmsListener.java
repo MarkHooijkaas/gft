@@ -8,12 +8,13 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 import org.kisst.cfg4j.Props;
+import org.kisst.gft.admin.rest.Representable;
 import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.QueueListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JmsListener implements Runnable, QueueListener {
+public class JmsListener implements Runnable, QueueListener, Representable {
 	private final static Logger logger=LoggerFactory.getLogger(JmsListener.class); 
 	
 	private final JmsSystem system;
@@ -31,6 +32,8 @@ public class JmsListener implements Runnable, QueueListener {
 		this.errorqueue=props.getString("errorqueue");
 	}
 	
+	public String toString() { return "JmsListener("+queue+")"; }
+	public String getRepresentation() { return props.toString(); }
 	public void stop() {
 		logger.info("Stopping listening to queue {}", queue);
 		running=false;
