@@ -50,8 +50,7 @@ public class AdminServer extends AbstractHandler {
 		} catch (Exception e) { throw new RuntimeException(e);}
 	}
 
-	public void run() {
-		startListening();
+	public void join() {
 		try {
 			server.join();
 		} catch (Exception e) { throw new RuntimeException(e);}
