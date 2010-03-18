@@ -35,7 +35,8 @@ public class Channel implements TaskDefinition {
 		}
 		catch (RuntimeException e) {
 			task.setLastError(e);
-			errorAction.execute(task);
+			if (errorAction!=null)
+				errorAction.execute(task);
 			throw e;
 		}
 	}
