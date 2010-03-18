@@ -17,7 +17,7 @@ public class FileTransferData {
 	public FileTransferData(GftContainer gft, String data) {
 		this.gft=gft;
 		message=new XmlNode(data);
-		XmlNode input=message.getChild("Body/FileTransferRequest");
+		XmlNode input=message.getChild("Body/transferFile");
 		
 		this.kanaal=gft.getChannel(input.getChildText("kanaal"));
 		this.bestand=input.getChildText("bestand");
