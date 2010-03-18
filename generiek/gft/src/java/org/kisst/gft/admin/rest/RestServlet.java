@@ -67,11 +67,15 @@ public class RestServlet extends BaseServlet {
 	protected void doGet(Resource res, String path, HttpServletRequest request, HttpServletResponse response) {
 		PrintWriter out = getWriter(response);
 		try {
+			Object obj=res;
+			if (path!=null || path.length()!=0)
+				obj=res.get(path);				
+
 			out.write("<pre>\n");
-			if (path==null || path.length()==0) 
-				out.write(res.toString());
+			if (obj instanceof Representable)
+				out.write( ((Representable)obj).getRepresentation());
 			else
-				out.write(res.get(path).toString());
+				out.write(""+obj);
 			out.write("</pre>\n");
 		}
 		finally { out.close(); }

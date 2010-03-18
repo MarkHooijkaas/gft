@@ -3,30 +3,31 @@ package org.kisst.gft.filetransfer;
 import java.io.File;
 
 import org.kisst.cfg4j.Props;
+import org.kisst.gft.admin.rest.Representable;
 
 import com.jcraft.jsch.HostKey;
 
 
-public class SshHost {
+public class SshHost implements Representable {
 	public final String user;
 	public final String host;
 	public final int port;
 	public final HostKey hostKey=null;
 	public final String known_hosts;
 	private final Ssh.Credentials cred;
+	private final String keyfile;
 	
 	public SshHost(Props props) {
 		this.host=props.getString("host");
 		this.user=props.getString("user");
 		this.port=props.getInt("port",22);
 		String password=props.getString("password",null);
-		Object keyfile=props.get("keyfile",null);
-		String f=null;
-		if (keyfile instanceof File)
-			f=((File) keyfile).getAbsolutePath();
+		Object tmpkeyfile=props.get("keyfile",null);
+		if (tmpkeyfile instanceof File)
+			keyfile=((File) tmpkeyfile).getAbsolutePath();
 		else
-			f=(String) keyfile;
-		this.cred=new Ssh.Credentials(user, password, f); // TODO: use port
+			keyfile=(String) tmpkeyfile;
+		this.cred=new Ssh.Credentials(user, password, keyfile); // TODO: use port
 		this.known_hosts=props.getString("known_hosts", null);
 	}
 	public String toString() { return "ssh:"+user+"@"+host+(port==22? "" : ":"+port); }
@@ -47,6 +48,16 @@ public class SshHost {
 	}
 	public void copyFileFrom(SshHost src, String srcpath, String filename, String destdir)  {
 		call("scp "+src.host+":"+src.convertPath(srcpath+"/"+filename)+" "+destdir);
+	}
+	public String getRepresentation() {
+		StringBuilder result=new StringBuilder();
+		result.append("SshHost {\n");
+		result.append("\tuser="+user+"\n");
+		result.append("\thost="+host+"\n");
+		result.append("\tport="+port+"\n");
+		result.append("\tkeyfile="+keyfile+"\n");
+		result.append("}\n");
+		return result.toString();
 	}
 
 }

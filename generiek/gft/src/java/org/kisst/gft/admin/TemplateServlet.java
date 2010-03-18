@@ -31,7 +31,12 @@ public class TemplateServlet extends BaseServlet {
 	public void handle(HttpServletRequest request, HttpServletResponse response) {
 		try {
 			HashMap<String, Object> root=new HashMap<String, Object>();
+			root.put("gft", gft);
 			root.put("channels", gft.channels);
+			root.put("sshhosts", gft.sshhosts);
+			root.put("httphosts", gft.httphosts);
+			root.put("actions", gft.actions);
+			root.put("listeners", gft.listeners);
 			Template temp = cfg.getTemplate("org/kisst/gft/admin/Gft.template");
 			Writer out = response.getWriter();
 			temp.process(root, out);
