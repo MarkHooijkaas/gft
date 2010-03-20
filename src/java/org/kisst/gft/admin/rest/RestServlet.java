@@ -68,7 +68,7 @@ public class RestServlet extends BaseServlet {
 		PrintWriter out = getWriter(response);
 		try {
 			Object obj=res;
-			if (path!=null || path.length()!=0)
+			if (path!=null && path.length()!=0)
 				obj=res.get(path);				
 
 			out.write("<pre>\n");
