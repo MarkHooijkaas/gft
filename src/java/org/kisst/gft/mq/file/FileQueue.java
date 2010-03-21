@@ -46,5 +46,9 @@ public class FileQueue implements MqQueue {
 	public void send(String data) {
 		// TODO Auto-generated method stub
 	}
+	public void send(String data, String replyTo, String correlationId) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 

@@ -26,6 +26,21 @@ public class JmsQueue implements MqQueue {
 				return ((TextMessage) msg).getText();
 			} catch (JMSException e) { throw new RuntimeException(e); }
 		}
+		public String getReplyTo() { 
+			try {
+				return msg.getJMSReplyTo().toString();
+			} catch (JMSException e) { throw new RuntimeException(e); } 
+		}
+		public String getMessageId() { 
+			try {
+				return msg.getJMSMessageID();
+			} catch (JMSException e) { throw new RuntimeException(e); } 
+		}
+		public String getCorrelationId() { 
+			try {
+				return msg.getJMSCorrelationID();
+			} catch (JMSException e) { throw new RuntimeException(e); } 
+		}
 	}
 	
 	private final JmsSystem system;
@@ -46,7 +61,9 @@ public class JmsQueue implements MqQueue {
 	
 	public String getName() {return null; }
 
-	public void send(String data) {
+	public void send(String data) { send(data,null,null); }
+
+	public void send(String data, String replyTo, String correlationId) {
 		Session session=null;
 		try {
 			session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
@@ -55,9 +72,11 @@ public class JmsQueue implements MqQueue {
 			MessageProducer producer = session.createProducer(destination);
 			TextMessage message = session.createTextMessage();
 			message.setText(data);
-			message.setJMSCorrelationID("1234");
-			//message.setJMSReplyTo(arg0)
-			message.setJMSType("mijntype");
+			if (replyTo!=null)
+				message.setJMSReplyTo(session.createQueue(replyTo));
+			if (correlationId!=null)
+				message.setJMSCorrelationID(correlationId);
+			//message.setJMSType("mijntype");
 			producer.send(message);
 			session.commit();
 		}
