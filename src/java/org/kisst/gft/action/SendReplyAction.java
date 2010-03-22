@@ -32,14 +32,14 @@ public class SendReplyAction  implements Action {
 	private final static Logger logger=LoggerFactory.getLogger(SendReplyAction.class);
 
 	private final GftContainer gft;
-	private final Props actionProps;
+	public final Props props;
 	private final QueueSystem qmgr;
 	private final String templateName;
 	
 	public SendReplyAction(GftContainer gft, Props props) {
 		this.gft=gft;
-		this.actionProps=props;
-		this.qmgr=gft.queuemngrs.get(props.getString("qmgr"));
+		this.props=props;
+		this.qmgr=gft.getQueueSystem();
 		this.templateName=props.getString("template");
 	}
         
@@ -51,7 +51,7 @@ public class SendReplyAction  implements Action {
 		if (logger.isInfoEnabled())
 			logger.info("Sending reply with correlationId {} to queue {}",ftdata.correlationId, queue);
 		
-		String body=gft.processTemplate(templateName, ftdata.getProps(actionProps));
+		String body=gft.processTemplate(templateName, ftdata.getActionContext(this));
 		qmgr.getQueue(queue).send(body, null, ftdata.correlationId);
 		return null;
 	}

@@ -1,17 +1,16 @@
 package org.kisst.gft.filetransfer;
 
-import org.kisst.cfg4j.LayeredProps;
-import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
-import org.kisst.cfg4j.XmlNodeProps;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.action.Action;
 import org.kisst.util.XmlNode;
 
 public class FileTransferData {
 	public final GftContainer gft;
-	public final Channel kanaal;
-	public final String bestand;
-	public final Props props;
+	public final Channel channel;
+	public final String file;
 	public final XmlNode message;
 	public final String replyTo;
 	public final String correlationId;
@@ -21,27 +20,18 @@ public class FileTransferData {
 		message=new XmlNode(data);
 		XmlNode input=message.getChild("Body/transferFile");
 		
-		this.kanaal=gft.getChannel(input.getChildText("kanaal"));
-		this.bestand=input.getChildText("bestand");
+		this.channel=gft.getChannel(input.getChildText("kanaal"));
+		this.file=input.getChildText("bestand");
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
-		SimpleProps p = new SimpleProps();
-		p.put("message", message);
-		p.put("bestand", bestand);
-		p.put("kanaal", kanaal.props);
-		p.put("soap", new XmlNodeProps(message));
-		props=p;
 	}
-	
-	public Props getProps(Props actionProps) {
-		SimpleProps p=new SimpleProps();
-		p.put("action", actionProps);
-		LayeredProps result = new LayeredProps();
-		result.addLayer(p);
-		result.addLayer(props);
-		result.addLayer(actionProps);
-		result.addLayer(kanaal.props);
+
+	public Map<String, Object> getActionContext(Action action) {
+		HashMap<String, Object> result=new HashMap<String, Object>();
+		result.put("action", action);
+		result.put("task", this);
 		return result;
 	}
 
+	public String getBestand() { return file; }
 }

@@ -32,15 +32,15 @@ public class SendMessageAction  implements Action {
 	private final static Logger logger=LoggerFactory.getLogger(SendMessageAction.class);
 
 	private final GftContainer gft;
-	private final Props actionProps;
+	public final Props props;
 	private final QueueSystem qmgr;
 	private final String queue;
 	private final String templateName;
 	
 	public SendMessageAction(GftContainer gft, Props props) {
 		this.gft=gft;
-		this.actionProps=props;
-		this.qmgr=gft.queuemngrs.get(props.getString("qmgr"));
+		this.props=props;
+		this.qmgr=gft.getQueueSystem();
 		this.queue=props.getString("queue");
 		this.templateName=props.getString("template");
 	}
@@ -49,7 +49,7 @@ public class SendMessageAction  implements Action {
 		FileTransferData ftdata = (FileTransferData) t.getData();
 		logger.info("Sending message to queue {}",queue);
 		
-		String body=gft.processTemplate(templateName, ftdata.getProps(actionProps));
+		String body=gft.processTemplate(templateName, ftdata.getActionContext(this));
 		qmgr.getQueue(queue).send(body);
 		return null;
 	}

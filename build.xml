@@ -30,6 +30,7 @@
 				<pathelement path="${libdir}/geronimo-j2ee-management_1.0_spec-1.0.jar"/>
 				<pathelement path="${libdir}/slf4j-api-1.5.10.jar"/>
 				<pathelement path="${libdir}/freemarker-2.3.15.jar"/>
+				<pathelement path="${libdir}/wrapper.jar"/>
 			</classpath>
 		</javac>
 	</target>

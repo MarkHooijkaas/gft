@@ -8,18 +8,18 @@ import org.kisst.gft.task.Task;
 
 public class EchoAction implements Action {
 	private final GftContainer gft;
-	private final Props actionProps;
+	public final Props props;
 	private final String template;
 	
 	public EchoAction(GftContainer gft, Props props) {
 		this.gft=gft;
-		this.actionProps=props;
+		this.props=props;
 		template =props.getString("template");
 	}
 
 	public Object execute(Task task) {
 		FileTransferData ft= (FileTransferData) task.getData();
-		String result=gft.processTemplate(template, ft.getProps(actionProps));
+		String result=gft.processTemplate(template, ft.getActionContext(this));
 
 		System.out.println(result);
 		return null;
