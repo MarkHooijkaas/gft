@@ -107,6 +107,11 @@ public class XmlNode {
 		String[] parts=path.split("/");
 		Element e=element;
 		for (String part:parts) {
+			boolean optional=false;
+			if (part.startsWith("?")) {
+				part=part.substring(1);
+				optional=true;
+			}
 			if (part.equals(".."))
 				e=e.getParentElement();
 			else if (part.equals("text()"))
@@ -115,8 +120,10 @@ public class XmlNode {
 				return e.getAttribute(part.substring(1)).getValue();
 			else
 				e=e.getChild(part,null);
-			if (e==null)
+			if (e==null && optional)
 				return null;
+			if (e==null)
+				throw new RuntimeException("Could not find non-optional element "+part+" in path "+path);
 		}
 		return new XmlNode(e);
 	}

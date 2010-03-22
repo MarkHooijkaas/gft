@@ -1,9 +1,10 @@
 package org.kisst.gft;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
-import java.io.Writer;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -126,24 +127,22 @@ public class GftContainer {
 	}
 	public Channel getChannel(String name) { return channels.get(name); }
 	public HttpHost getHost(String name) { return httphosts.get(name); }
-	public Template getTemplate(String name) { 
+
+	public String processTemplate(Object template, Object context) {
 		try {
-			return freemarkerConfig.getTemplate(name);
-		}
-		catch (IOException e) { throw new RuntimeException(e);}
-	}
-	public void processTemplate(String templateName, Object context, Writer out) {
-		try {
-			Template templ=freemarkerConfig.getTemplate(templateName);
+			StringWriter out=new StringWriter();
+			Template templ;
+			if (template instanceof File)
+				templ=new Template(((File) template).getName(), new FileReader((File) template),freemarkerConfig);
+			else if (template instanceof String)
+				templ=new Template("InternalString", new StringReader((String) template),freemarkerConfig);
+			else
+				throw new RuntimeException("Unsupported template type "+template.getClass());
 			templ.process(context, out);
+			return out.toString();
 		}
 		catch (IOException e) { throw new RuntimeException(e);} 
 		catch (TemplateException e) {  throw new RuntimeException(e);}
-	}
-	public String processTemplate(String templateName, Object context) {
-		StringWriter out=new StringWriter();
-		processTemplate(templateName, context, out);
-		return out.toString();
 	}
 	
 	public void start() {

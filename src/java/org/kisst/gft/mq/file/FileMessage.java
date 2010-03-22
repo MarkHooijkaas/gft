@@ -23,7 +23,10 @@ public class FileMessage implements MqMessage {
 	@Override public String toString() { return "FileMessage("+queue+","+filename; }
 	public boolean isLocked() { return lockedFile!=null;}
 	public FileQueue getQueue() { return queue;}
-
+	public String getReplyTo() { return null; }
+	public String getMessageId() { return null; }
+	public String getCorrelationId() { return null; }
+	
 	public void done() {
 		if (lockedFile==null)
 			throw new RuntimeException("Need to acquire lock before deleting message "+this);
