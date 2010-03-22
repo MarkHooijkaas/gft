@@ -28,7 +28,11 @@ public class JmsQueue implements MqQueue {
 		}
 		public String getReplyTo() { 
 			try {
-				return msg.getJMSReplyTo().toString();
+				Destination dest = msg.getJMSReplyTo();
+				if (dest==null)
+					return null;
+				else
+					return msg.getJMSReplyTo().toString();
 			} catch (JMSException e) { throw new RuntimeException(e); } 
 		}
 		public String getMessageId() { 
