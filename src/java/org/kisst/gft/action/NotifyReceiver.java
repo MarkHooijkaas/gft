@@ -28,30 +28,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class SendReplyAction  implements Action {
-	private final static Logger logger=LoggerFactory.getLogger(SendReplyAction.class);
+public class NotifyReceiver  implements Action {
+	private final static Logger logger=LoggerFactory.getLogger(NotifyReceiver.class);
 
-	private final GftContainer gft;
-	public final Props props;
+	private final String queue;
 	
-	public SendReplyAction(GftContainer gft, Props props) {
-		this.gft=gft;
-		this.props=props;
+	public NotifyReceiver(GftContainer gft, Props props) {
+		this.queue=props.getString("queue");
 	}
         
 	public Object execute(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();
-		String queue=ftdata.replyTo;
-		if (queue==null)
-			throw new RuntimeException("No replyTo address given for task "+t);
-		if (logger.isInfoEnabled())
-			logger.info("Sending reply with correlationId {} to queue {}",ftdata.correlationId, queue);
-		
 		XmlNode msg=ftdata.message.clone();
-		msg.getChild("Body/transferFile").element.setName("transferFileResponse");
+		msg.getChild("Body/transferFile").element.setName("transferFileNotification");
+		
+		logger.info("Sending message to queue {}",queue);
 		
 		String body=msg.toString();
-		gft.getQueueSystem().getQueue(queue).send(body, null, ftdata.correlationId);
+		ftdata.channel.gft.getQueueSystem().getQueue(queue).send(body);
 		return null;
 	}
 }

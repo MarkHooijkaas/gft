@@ -35,7 +35,7 @@ import org.jdom.output.Format;
 import org.jdom.output.XMLOutputter;
 
 public class XmlNode {
-	private final Element element;
+	public final Element element;
 	
 	public XmlNode(Element element) { this.element = element; }
 	public XmlNode(String name, String namespace) {

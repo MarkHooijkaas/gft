@@ -50,12 +50,26 @@ public class GftContainer {
 
 	private QueueSystem queueSystem;
 
+	private void addAction(String name, String classname) {
+		SimpleProps props=new SimpleProps();
+		props.put("class", classname);
+		actions.put(name, props);
+	}
 	public GftContainer(File configfile) {
 		this.configfile = configfile;
 		freemarkerConfig.setTemplateLoader(new GftTemplateLoader(configfile.getParentFile()));
 		DefaultObjectWrapper wrapper = new DefaultObjectWrapper();
 		wrapper.setExposeFields(true);
 		freemarkerConfig.setObjectWrapper(wrapper);
+		addAction("check_src","CheckSourceFile");
+		addAction("check_dest","CheckDestFileDoesNotExist");
+		addAction("copy","CopyFile");
+		addAction("check_copy","CheckCopiedFile");
+		addAction("remove","DeleteSourceFile");
+		addAction("notify","NotifyReceiver");
+		addAction("reply","SendReplyAction");
+		addAction("log_completed","LogCompleted");
+		addAction("log_error","LogError");
 	}
 	public QueueSystem getQueueSystem() { return queueSystem; }
 	public void init(Props props) {
