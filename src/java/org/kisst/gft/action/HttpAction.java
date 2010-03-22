@@ -44,7 +44,7 @@ public class HttpAction  implements Action {
 	private final HttpHost[] hosts;
 	private final int timeout;
 	private final String templateName;
-	private final GftContainer gft;
+	protected final GftContainer gft;
 	
 	public HttpAction(GftContainer gft, Props props) {
 		this.gft=gft;
@@ -57,14 +57,17 @@ public class HttpAction  implements Action {
 		for (String hostname: hostnames)
 			hosts[i++]=gft.getHost(hostname.trim());
 		timeout = props.getInt("timeout", 30000);
-		templateName=props.getString("template");
+		templateName=props.getString("template",null);
 	}
 
-        
-	public Object execute(Task t) {
+
+	protected String getBody(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();
-		String body=gft.processTemplate(templateName, ftdata.getActionContext(this));
-		//String body=StringUtil.substitute(template, ftdata.getProps(actionProps));
+		return gft.processTemplate(templateName, ftdata.getActionContext(this));
+	}
+
+	public Object execute(Task t) {
+		String body=getBody(t);
 
 		for (int i=0; i<hosts.length; i++) {
 			HttpHost host=hosts[i];
