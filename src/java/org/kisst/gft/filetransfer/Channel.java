@@ -9,8 +9,12 @@ import org.kisst.gft.action.ActionList;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskDefinition;
 import org.kisst.util.ReflectionUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Channel implements TaskDefinition {
+	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
+
 	public final GftContainer gft;
 	public final String name;
 	public final Action action;
@@ -35,6 +39,8 @@ public class Channel implements TaskDefinition {
 		this.name=props.getLocalName();
 		this.action=new ActionList(this, props);
 		Object errorProps=props.get("error",null);
+		if (errorProps==null)
+			errorProps=gft.props.get("gft.global.error",null); // TODO: this is a dirty hack
 		if (errorProps instanceof Props) 
 			this.errorAction=new ActionList(this, (Props) errorProps);
 		else if (errorProps==null)
@@ -43,7 +49,10 @@ public class Channel implements TaskDefinition {
 			throw new RuntimeException("property error should be a map in channel "+name);
 	}
 	public String toString() { return "Channel("+name+")";}
-	public Object execute(Task task) { action.execute(task); return null; }
+	public Object execute(Task task) { 
+		action.execute(task);
+		return null;
+	}
 	
 	public void run(Task task) {
 		try {
@@ -52,8 +61,14 @@ public class Channel implements TaskDefinition {
 		}
 		catch (RuntimeException e) {
 			task.setLastError(e);
-			if (errorAction!=null)
-				errorAction.execute(task);
+			try {
+				if (errorAction!=null)
+					errorAction.execute(task);
+			}
+			catch(RuntimeException e2) { 
+				logger.error("Could not perform the error actions ",e);
+				// ignore this error which occurred 
+			}
 			throw e;
 		}
 	}
