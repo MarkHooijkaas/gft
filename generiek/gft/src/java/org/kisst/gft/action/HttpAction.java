@@ -39,7 +39,7 @@ public class HttpAction  implements Action {
 	private static final MultiThreadedHttpConnectionManager connmngr = new MultiThreadedHttpConnectionManager();
 	private static final HttpClient client = new HttpClient(connmngr);
 
-	private final Props actionProps;
+	public final Props props;
 	private final long closeIdleConnections;
 	private final HttpHost[] hosts;
 	private final int timeout;
@@ -48,7 +48,7 @@ public class HttpAction  implements Action {
 	
 	public HttpAction(GftContainer gft, Props props) {
 		this.gft=gft;
-		this.actionProps=props;
+		this.props=props;
 		closeIdleConnections=props.getLong("closeIdleConnections",-1);
 		
 		String[] hostnames = props.getString("hosts").split(",");
@@ -63,7 +63,7 @@ public class HttpAction  implements Action {
         
 	public Object execute(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();
-		String body=gft.processTemplate(templateName, ftdata.getProps(actionProps));
+		String body=gft.processTemplate(templateName, ftdata.getActionContext(this));
 		//String body=StringUtil.substitute(template, ftdata.getProps(actionProps));
 
 		for (int i=0; i<hosts.length; i++) {
