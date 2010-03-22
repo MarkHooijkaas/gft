@@ -43,17 +43,21 @@ public class GftContainer {
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
 	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	public final HashMap<String, SshHost>    sshhosts= new LinkedHashMap<String, SshHost>();
-	public final HashMap<String, QueueSystem> queuemngrs= new LinkedHashMap<String, QueueSystem>();
 	public final HashMap<String, QueueListener>  listeners= new LinkedHashMap<String, QueueListener>();
 
 	private final File configfile;
 	private final Configuration freemarkerConfig= new Configuration();
 
+	private QueueSystem queueSystem;
+
 	public GftContainer(File configfile) {
 		this.configfile = configfile;
 		freemarkerConfig.setTemplateLoader(new GftTemplateLoader(configfile.getParentFile()));
-		freemarkerConfig.setObjectWrapper(new DefaultObjectWrapper());
+		DefaultObjectWrapper wrapper = new DefaultObjectWrapper();
+		wrapper.setExposeFields(true);
+		freemarkerConfig.setObjectWrapper(wrapper);
 	}
+	public QueueSystem getQueueSystem() { return queueSystem; }
 	public void init(Props props) {
 		this.props=props;
 		//actions.put("copy", new RemoteScpAction());
@@ -79,25 +83,19 @@ public class GftContainer {
 			}
 		}
 
-		if (props.get("gft.qmgr",null)!=null) {
-			Props pollerProps=props.getProps("gft.qmgr");
-			for (String name: pollerProps.keys()) {
-				QueueSystem sys=null;
-				Props p=pollerProps.getProps(name);
-				String type=p.getString("type");
-				if ("File".equals(type))
-					sys=new FileQueueSystem(p);
-				else if ("ActiveMq".equals(type))
-					sys=new ActiveMqSystem(p);
-				else if ("Jms".equals(type))
-					sys=new JmsSystem(p);
-				else 
-					throw new RuntimeException("Unknown type of queueing system "+type);
-				queuemngrs.put(name, sys);
-				for (String lname: p.getProps("listener").keys()) {
-					listeners.put(lname, sys.createListener(p.getProps("listener."+lname)));
-				}
-			}
+		Props qmprops=props.getProps("gft.queueSystem");
+		String type=qmprops.getString("type");
+		if ("File".equals(type))
+			queueSystem=new FileQueueSystem(qmprops);
+		else if ("ActiveMq".equals(type))
+			queueSystem=new ActiveMqSystem(qmprops);
+		else if ("Jms".equals(type))
+			queueSystem=new JmsSystem(qmprops);
+		else 
+			throw new RuntimeException("Unknown type of queueing system "+type);
+
+		for (String lname: props.getProps("gft.listener").keys()) {
+			listeners.put(lname, queueSystem.createListener(props.getProps("gft.listener."+lname)));
 		}
 
 
@@ -164,8 +162,7 @@ public class GftContainer {
 	public void stop() {
 		for (QueueListener q : listeners.values() )
 			q.stopListening();
-		for (QueueSystem sys: queuemngrs.values())
-			sys.stop();
+		queueSystem.stop();
 		admin.stopListening();
 	}
 }
