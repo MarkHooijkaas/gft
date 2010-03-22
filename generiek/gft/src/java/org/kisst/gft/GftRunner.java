@@ -40,16 +40,27 @@ public class GftRunner {
 		gft.stop();
 	}
 	
+
+	private static Cli cli=new Cli();
+	private static Cli.StringOption config = cli.stringOption("c","config","configuration file", "conf/gft.props");
+	private static Cli.Flag help =cli.flag("h", "help", "show this help");
 	public static void main(String[] args) {
-		System.out.println("starting GFT");
-		if (args.length!=1)
-			throw new RuntimeException("usage: GftRunner <config file>");
-		File configfile=new File(args[0]);
+		cli.parse(args);
+		if (help.isSet()) {
+			showHelp();
+			return;
+		}
+		File configfile=new File(config.get());
 		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
 		GftRunner runner= new GftRunner(configfile);
 		runner.run();
 		
 		System.out.println("GFT stopped");
+	}
+
+	private static void showHelp() {
+		System.out.println("usage: java -jar gft.jar [options]");
+		System.out.println(cli.getSyntax(""));
 	}
 
 

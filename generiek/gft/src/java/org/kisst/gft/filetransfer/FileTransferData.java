@@ -13,14 +13,18 @@ public class FileTransferData {
 	public final String bestand;
 	public final Props props;
 	public final XmlNode message;
+	public final String replyTo;
+	public final String correlationId;
 	
-	public FileTransferData(GftContainer gft, String data) {
+	public FileTransferData(GftContainer gft, String data, String replyTo, String correlationId) {
 		this.gft=gft;
 		message=new XmlNode(data);
 		XmlNode input=message.getChild("Body/transferFile");
 		
 		this.kanaal=gft.getChannel(input.getChildText("kanaal"));
 		this.bestand=input.getChildText("bestand");
+		this.replyTo=replyTo;
+		this.correlationId=correlationId;
 		SimpleProps p = new SimpleProps();
 		p.put("message", message);
 		p.put("bestand", bestand);
