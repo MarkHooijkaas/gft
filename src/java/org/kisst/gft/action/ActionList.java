@@ -1,5 +1,7 @@
 package org.kisst.gft.action;
 
+import java.util.LinkedHashMap;
+
 import org.kisst.cfg4j.LayeredProps;
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
@@ -11,14 +13,13 @@ import org.slf4j.LoggerFactory;
 public class ActionList  implements Action {
 	final static Logger logger=LoggerFactory.getLogger(ActionList.class); 
 	
-	private final Action[] actions;
+	private final LinkedHashMap<String,Action> actions=new LinkedHashMap<String,Action>();
 	
 	public ActionList(Channel chan, Props props) {
 
 		String actions=props.getString("actions");
 		String[] parts=actions.split(",");
-		this.actions=new Action[parts.length];
-		int i=0;
+		//this.actions=new Action[parts.length];
 		for (String name: parts) {
 			name=name.trim();
 			LayeredProps lprops=new LayeredProps();
@@ -35,21 +36,23 @@ public class ActionList  implements Action {
 			Action a=chan.createAction(lprops);
 			if (a==null)
 				throw new RuntimeException("Unknown action "+name);
-			this.actions[i++]=a;
+			this.actions.put(name,a);
 		}
 	}
 
 	public Object execute(Task task) {
-		for (Action a: actions) {
+		for (String name: actions.keySet()) {
 			try {
+				Action a=actions.get(name);
 				if (logger.isDebugEnabled())
-					logger.debug("starting action "+a);
+					logger.debug("starting action "+name);
 				a.execute(task);
 				if (logger.isInfoEnabled())
-					logger.info("succesful action "+a);
+					logger.info("succesful action "+name);
 			}
 			catch (RuntimeException e) {
-				throw new RuntimeException("Error while executing "+a.toString(),e);
+				logger.error("error during action "+name+": "+e.getMessage());
+				throw e;
 			}
 		}
 		return null;

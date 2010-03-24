@@ -4,6 +4,7 @@ import java.io.File;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.admin.rest.Representable;
+import org.kisst.gft.filetransfer.Ssh.ExecResult;
 
 import com.jcraft.jsch.HostKey;
 
@@ -32,6 +33,8 @@ public class SshHost implements Representable {
 	}
 	public String toString() { return "ssh:"+user+"@"+host+(port==22? "" : ":"+port); }
 	
+
+	public ExecResult exec(String command) { return Ssh.exec(this, cred, command); }
 	public String call(String command) { return Ssh.ssh(this, cred, command); }
 	public String convertPath(String path) { return path; }
 	public boolean fileExists(String dir, String file) {
@@ -44,7 +47,9 @@ public class SshHost implements Representable {
 	}
 	public void deleteFile(String path) { call("rm "+path); }
 	public void copyFileTo(String srcpath, SshHost dest, String destdir)  {
-		call("scp "+srcpath+" "+dest.host+":"+dest.convertPath(destdir));
+		String command="scp "+srcpath+" "+dest.user+"@"+dest.host+":"+dest.convertPath(destdir);
+		command=command.replace("\\","\\\\");
+		call(command);
 	}
 	public void copyFileFrom(SshHost src, String srcpath, String filename, String destdir)  {
 		call("scp "+src.host+":"+src.convertPath(srcpath+"/"+filename)+" "+destdir);
