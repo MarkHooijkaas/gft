@@ -92,8 +92,14 @@ public class Ssh {
 			//}
 			//channel.disconnect();
 			session.disconnect();
-			result.append(err.toString());
-			logger.info("Call to {} returned [{}]", host, result);
+			if (logger.isWarnEnabled()){
+				if (exitvalue!=0 )
+					logger.warn("Call to {} returned exitvalue "+exitvalue, host);
+				if (err.size()>0)
+					logger.warn("Call to {} returned stderr {}", host, err.toString());
+				if (logger.isInfoEnabled())
+					logger.info("Call to {} returned stdout [{}]", host, result);
+			}
 			return new ExecResult(exitvalue, result.toString(), err.toString());
 		}
 		catch(JSchException e) { throw new RuntimeException(e); }

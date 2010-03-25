@@ -1,6 +1,7 @@
 package org.kisst.gft.filetransfer;
 
 import org.kisst.cfg4j.Props;
+import org.kisst.gft.filetransfer.Ssh.ExecResult;
 
 public class As400SshHost extends SshHost {
 	private final String scpCommand;
@@ -10,14 +11,13 @@ public class As400SshHost extends SshHost {
 		this.scpCommand=props.getString("scp_command","scp");
 	}
 
-	@Override public String convertPath(String path) { return path.replace('/','\\'); }
 	@Override public boolean fileExists(String dir, String file) {
-		String path=convertPath(dir+"\\"+file);
-		String result=call("dir "+path);
-		return (result.indexOf(file)>0);
+		String path=convertPath(dir+"/"+file);
+		ExecResult result=exec("ls -l "+path);
+		return (result.stdout.indexOf(file)>0);
 	}
 
-	@Override public void deleteFile(String path) { call("del "+convertPath(path)); }
+	@Override public void deleteFile(String path) { call("rm "+convertPath(path)); }
 	
 	@Override public void copyFileTo(String srcpath, SshHost dest, String destdir)  {
 		String command=scpCommand+" "+srcpath+" "+dest.user+"@"+dest.host+":"+dest.convertPath(destdir);
