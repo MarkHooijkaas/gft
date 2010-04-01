@@ -45,13 +45,13 @@ public class ActionList  implements Action {
 			try {
 				Action a=actions.get(name);
 				if (logger.isDebugEnabled())
-					logger.debug("starting action "+name);
+					logger.debug("action "+name+" started");
 				a.execute(task);
 				if (logger.isInfoEnabled())
-					logger.info("succesful action "+name);
+					logger.info("action "+name+" succesful");
 			}
 			catch (RuntimeException e) {
-				logger.error("error during action "+name+": "+e.getMessage());
+				logger.error("action "+name+" had error: "+e.getMessage());
 				throw e;
 			}
 		}
