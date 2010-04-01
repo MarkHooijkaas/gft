@@ -1,5 +1,7 @@
 package org.kisst.gft.mq.jms;
 
+import java.io.File;
+import java.net.MalformedURLException;
 import java.util.Hashtable;
 
 import javax.jms.Connection;
@@ -39,7 +41,16 @@ public class JmsSystem implements QueueSystem {
 	protected ConnectionFactory createConnectionFactory() {
         Hashtable<String, String> env= new Hashtable<String,String>();
         env.put( "java.naming.factory.initial", "com.sun.jndi.fscontext.RefFSContextFactory" );
-        env.put( "java.naming.provider.url", props.getString("jndifile"));
+        Object jndifile = props.get("jndifile");
+        if (jndifile instanceof File) {
+			try {
+				env.put( "java.naming.provider.url", ((File)jndifile).toURL().toString());
+			} catch (MalformedURLException e) { throw new RuntimeException(e); }
+        }
+		else if (jndifile instanceof String )
+        	env.put( "java.naming.provider.url", (String) jndifile);
+		else 
+			throw new RuntimeException("Unknown configuration type "+jndifile+" for property jndifile");
         env.put( "java.naming.security.authentication", "none" );
         if( !"none".equals( env.get("java.naming.security.authentication"))) {
             env.put( "java.naming.security.principal", props.getString("username",null));
