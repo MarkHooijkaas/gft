@@ -29,7 +29,11 @@ public class SshHost implements Representable {
 		else
 			keyfile=(String) tmpkeyfile;
 		this.cred=new Ssh.Credentials(user, password, keyfile); // TODO: use port
-		this.known_hosts=props.getString("known_hosts", null);
+		Object tmp=props.getString("known_hosts", null);
+		if (tmp instanceof File)
+			this.known_hosts=((File) tmp).getAbsolutePath();
+		else
+			this.known_hosts=(String) tmp;
 	}
 	public String toString() { return "ssh:"+user+"@"+host+(port==22? "" : ":"+port); }
 	
