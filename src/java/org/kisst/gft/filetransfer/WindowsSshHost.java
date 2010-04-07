@@ -1,6 +1,7 @@
 package org.kisst.gft.filetransfer;
 
 import org.kisst.cfg4j.Props;
+import org.kisst.gft.filetransfer.Ssh.ExecResult;
 
 public class WindowsSshHost extends SshHost {
 	private final String scpCommand;
@@ -12,9 +13,10 @@ public class WindowsSshHost extends SshHost {
 
 	@Override public String convertPath(String path) { return path.replace('/','\\'); }
 	@Override public boolean fileExists(String dir, String file) {
-		String path=convertPath(dir+"\\"+file);
-		String result=call("dir "+path);
-		return (result.indexOf(file)>0);
+		String command="dir /b "+convertPath(dir+"\\"+file);
+		//command=command.replace("\\","\\\\");
+		ExecResult result=exec(command);
+		return (result.stdout.indexOf(file)>=0);
 	}
 
 	@Override public void deleteFile(String path) { call("del "+convertPath(path)); }
