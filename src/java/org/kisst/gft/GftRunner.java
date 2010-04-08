@@ -40,6 +40,7 @@ public class GftRunner {
 		gft.stop();
 	}
 	
+
 	private static Cli cli=new Cli();
 	private static Cli.StringOption config = cli.stringOption("c","config","configuration file", "conf/gft.props");
 	private static Cli.Flag help =cli.flag("h", "help", "show this help");
