@@ -6,6 +6,7 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
+import javax.jms.TextMessage;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.admin.rest.Representable;
@@ -59,7 +60,7 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 					}
 				}
 				catch (Exception e) {
-					e.printStackTrace();
+					logger.error("Error when handling JMS message "+((TextMessage) message).getText(),e);
 					Destination errordestination = session.createQueue(errorqueue);
 					MessageProducer producer = session.createProducer(errordestination);
 					producer.send(message);
