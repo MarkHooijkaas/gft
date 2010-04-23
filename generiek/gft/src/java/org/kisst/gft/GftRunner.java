@@ -3,6 +3,7 @@ package org.kisst.gft;
 import java.io.File;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.kisst.gft.ssh.GenerateKey;
 
 public class GftRunner {
 	private final File configfile;
@@ -44,6 +45,7 @@ public class GftRunner {
 	private static Cli cli=new Cli();
 	private static Cli.StringOption config = cli.stringOption("c","config","configuration file", "conf/gft.props");
 	private static Cli.Flag help =cli.flag("h", "help", "show this help");
+	private static Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
 	public static void main(String[] args) {
 		cli.parse(args);
 		if (help.isSet()) {
@@ -51,6 +53,11 @@ public class GftRunner {
 			return;
 		}
 		File configfile=new File(config.get());
+		if (keygen.isSet()) {
+			GenerateKey.generateKey(configfile.getParentFile().getAbsolutePath()+"/keyfiles/id_dsa_gft");
+			return;
+		}
+
 		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
 		GftRunner runner= new GftRunner(configfile);
 		runner.run();

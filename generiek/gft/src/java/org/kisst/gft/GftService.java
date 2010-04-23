@@ -20,7 +20,7 @@ public class GftService  implements WrapperListener  {
 	public Integer start(String[] args) {
 		File configfile;
 		if (args.length==0)
-			configfile=new File("../conf/gft.props");
+			configfile=new File("../config/gft.properties");
 		else
 			configfile=new File(args[0]);
 		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");

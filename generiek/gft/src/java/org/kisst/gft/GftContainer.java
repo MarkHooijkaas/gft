@@ -70,6 +70,7 @@ public class GftContainer {
 		addAction("reply","SendReplyAction");
 		addAction("log_completed","LogCompleted");
 		addAction("log_error","LogError");
+		addAction("fix_permissions","FixPermissions");
 	}
 	public QueueSystem getQueueSystem() { return queueSystem; }
 	public void init(Props props) {
