@@ -18,6 +18,7 @@ public class GftService  implements WrapperListener  {
 	}
 
 	public Integer start(String[] args) {
+		System.out.println("Starting GFT service with working dir "+System.getProperty("user.dir"));
 		File configfile;
 		if (args.length==0)
 			configfile=new File("../conf/gft.props");
