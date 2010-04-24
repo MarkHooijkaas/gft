@@ -14,13 +14,15 @@ public class FileTransferData {
 	public final XmlNode message;
 	public final String replyTo;
 	public final String correlationId;
-	
+
 	public FileTransferData(GftContainer gft, String data, String replyTo, String correlationId) {
 		this.gft=gft;
 		message=new XmlNode(data);
 		XmlNode input=message.getChild("Body/transferFile");
-		
+
 		this.channel=gft.getChannel(input.getChildText("kanaal"));
+		if (channel==null)
+			throw new RuntimeException("Could not find channel with name "+input.getChildText("kanaal"));
 		this.file=input.getChildText("bestand");
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
