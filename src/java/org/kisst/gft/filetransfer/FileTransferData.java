@@ -21,6 +21,8 @@ public class FileTransferData {
 		XmlNode input=message.getChild("Body/transferFile");
 		
 		this.channel=gft.getChannel(input.getChildText("kanaal"));
+		if (channel==null)
+			throw new RuntimeException("Could not find channel with name "+input.getChildText("kanaal"));
 		this.file=input.getChildText("bestand");
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
