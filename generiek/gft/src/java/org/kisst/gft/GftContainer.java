@@ -68,6 +68,7 @@ public class GftContainer {
 		addAction("remove","DeleteSourceFile");
 		addAction("notify","NotifyReceiver");
 		addAction("reply","SendReplyAction");
+		addAction("log_start","LogStart");
 		addAction("log_completed","LogCompleted");
 		addAction("log_error","LogError");
 		addAction("fix_permissions","FixPermissions");
