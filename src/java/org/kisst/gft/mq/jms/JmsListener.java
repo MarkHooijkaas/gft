@@ -16,12 +16,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JmsListener implements Runnable, QueueListener, Representable {
-	private final static Logger logger=LoggerFactory.getLogger(JmsListener.class);
+	private final static Logger logger=LoggerFactory.getLogger(JmsListener.class); 
 	
 	private final JmsSystem system;
 	private final Props props;
 	private final String queue;
 	private final String errorqueue;
+	private final int receiveErrorRetries;
+	private final int receiveErrorRetryDelay;
+	
 	private boolean running=false;
 	private MessageHandler handler=null;
 	private Thread thread=null;
@@ -31,6 +34,8 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 		this.props=props;
 		this.queue=props.getString("queue");
 		this.errorqueue=props.getString("errorqueue");
+		this.receiveErrorRetries = props.getInt("receiveErrorRetries", 1000);
+		this.receiveErrorRetryDelay = props.getInt("receiveErrorRetryDelay", 60000);
 	}
 	
 	public String toString() { return "JmsListener("+queue+")"; }
@@ -51,8 +56,23 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 			Destination destination = session.createQueue(queue);
 			MessageConsumer consumer = session.createConsumer(destination);
 			running=true;
+			int retryCount=0;
 			while (running) {
-				Message message = consumer.receive(interval);
+				Message message=null;
+				try {
+					message = consumer.receive(interval);
+					retryCount=0;
+				}
+				catch (Exception e) {
+					logger.error("Error when receiving JMS message on queue "+queue, e);
+					if (retryCount++ > receiveErrorRetries)
+						throw new RuntimeException("too many receive retries for queue "+queue);
+					try {
+						logger.info("sleeping for "+receiveErrorRetryDelay/1000+" secs for retrying listening to "+queue);
+						Thread.sleep(receiveErrorRetryDelay);
+					}
+					catch (InterruptedException e1) { throw new RuntimeException(e1); }
+				}
 				try {
 					if (message!=null) {
 						handler.handle(new JmsQueue.JmsMessage(message));
@@ -61,7 +81,6 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 				}
 				catch (Exception e) {
 					logger.error("Error when handling JMS message "+((TextMessage) message).getText(),e);
-
 					Destination errordestination = session.createQueue(errorqueue);
 					MessageProducer producer = session.createProducer(errordestination);
 					producer.send(message);

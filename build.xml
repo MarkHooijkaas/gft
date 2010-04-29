@@ -55,6 +55,13 @@
 			<zipfileset dir="bin" prefix="bin"/>
 		</zip>
 	</target>
+	
+	<target name="dist-config" description="creates a zip file with example configuration" depends="init">
+		<zip destfile="${builddir}/${projectname}-config-${project.version}.zip" >
+			<fileset dir="." includes="COPYING"/>
+			<zipfileset dir="config" prefix="config"/>
+		</zip>
+	</target>
 
 	<target name="dist-full" description="creates a zip file for distribution" depends="dist">
 		<zip destfile="${builddir}/${projectname}-${project.version}-full.zip" >
@@ -65,7 +72,7 @@
 		</zip>
 	</target>
 
-	<target name="dist-all" description="creates all distribution files" depends="dist, dist-full"/>
+	<target name="dist-all" description="creates all distribution files" depends="dist, dist-full, dist-config"/>
 
 	<target name="proxy" if="proxy.host">
 		<property name="proxy.port" value="80"/>
