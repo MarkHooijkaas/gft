@@ -115,10 +115,12 @@ public class GftContainer {
 		}
 
 
-		Props actionProps=props.getProps("gft.action");
-		for (String name: actionProps.keys()) {
-			Props p=actionProps.getProps(name);
-			actions.put(name, p);
+		if (props.hasKey("gft.action")) {
+			Props actionProps=props.getProps("gft.action");
+			for (String name: actionProps.keys()) {
+				Props p=actionProps.getProps(name);
+				actions.put(name, p);
+			}
 		}
 
 		Props channelProps=props.getProps("gft.channel");
