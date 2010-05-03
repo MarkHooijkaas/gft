@@ -43,7 +43,7 @@ public class GftRunner {
 	
 
 	private static Cli cli=new Cli();
-	private static Cli.StringOption config = cli.stringOption("c","config","configuration file", "conf/gft.props");
+	private static Cli.StringOption config = cli.stringOption("c","config","configuration file", "config/gft.properties");
 	private static Cli.Flag help =cli.flag("h", "help", "show this help");
 	private static Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
 	public static void main(String[] args) {
@@ -54,7 +54,7 @@ public class GftRunner {
 		}
 		File configfile=new File(config.get());
 		if (keygen.isSet()) {
-			GenerateKey.generateKey(configfile.getParentFile().getAbsolutePath()+"/config/ssh/id_dsa_gft"); // TODO: should be from config file
+			GenerateKey.generateKey(configfile.getParentFile().getAbsolutePath()+"/ssh/id_dsa_gft"); // TODO: should be from config file
 			return;
 		}
 
