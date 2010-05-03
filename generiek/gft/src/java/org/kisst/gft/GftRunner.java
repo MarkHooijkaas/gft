@@ -54,7 +54,7 @@ public class GftRunner {
 		}
 		File configfile=new File(config.get());
 		if (keygen.isSet()) {
-			GenerateKey.generateKey(configfile.getParentFile().getAbsolutePath()+"/keyfiles/id_dsa_gft");
+			GenerateKey.generateKey(configfile.getParentFile().getAbsolutePath()+"/config/ssh/id_dsa_gft"); // TODO: should be from config file
 			return;
 		}
 
