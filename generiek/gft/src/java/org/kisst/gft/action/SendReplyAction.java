@@ -33,11 +33,15 @@ public class SendReplyAction  implements Action {
 
 	private final GftContainer gft;
 	public final Props props;
+	private final boolean safeToRetry;
 	
 	public SendReplyAction(GftContainer gft, Props props) {
 		this.gft=gft;
 		this.props=props;
+		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
+
+	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();

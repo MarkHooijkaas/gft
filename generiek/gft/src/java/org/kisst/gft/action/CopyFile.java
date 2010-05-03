@@ -6,6 +6,7 @@ import org.kisst.gft.filetransfer.SshHost;
 import org.kisst.gft.task.Task;
 
 public class CopyFile implements Action {
+	public boolean safeToRetry() { return true; }
 
 	public Object execute(Task task) {
 		FileTransferData ft= (FileTransferData) task.getData();

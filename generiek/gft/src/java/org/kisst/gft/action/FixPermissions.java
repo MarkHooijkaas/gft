@@ -5,6 +5,8 @@ import org.kisst.gft.task.Task;
 
 public class FixPermissions implements Action {
 
+	public boolean safeToRetry() { return true; }
+
 	public Object execute(Task task) {
 		FileTransferData ft= (FileTransferData) task.getData();
 		String s=ft.channel.dest.call("system dspaut \"obj('"+ft.channel.destdir+"/')\"");

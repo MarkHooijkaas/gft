@@ -36,6 +36,7 @@ public class SendMessageAction  implements Action {
 	private final QueueSystem qmgr;
 	private final String queue;
 	private final String templateName;
+	private final boolean safeToRetry;
 	
 	public SendMessageAction(GftContainer gft, Props props) {
 		this.gft=gft;
@@ -43,7 +44,10 @@ public class SendMessageAction  implements Action {
 		this.qmgr=gft.getQueueSystem();
 		this.queue=props.getString("queue");
 		this.templateName=props.getString("template");
+		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
+
+	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();

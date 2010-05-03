@@ -10,6 +10,8 @@ public class CheckDestFileDoesNotExist implements Action {
 		public Problem(SshHost host, String path) { super("On host "+host.host+" there already is a file "+path); }
 	}
 
+	public boolean safeToRetry() { return true; }
+
 	public Object execute(Task task) {
 		FileTransferData ft= (FileTransferData) task.getData();
 		if (ft.channel.dest.fileExists(ft.channel.destdir, ft.file))
