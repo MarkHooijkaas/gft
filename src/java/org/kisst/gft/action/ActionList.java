@@ -14,7 +14,7 @@ public class ActionList  implements Action {
 	final static Logger logger=LoggerFactory.getLogger(ActionList.class); 
 	
 	private final LinkedHashMap<String,Action> actions=new LinkedHashMap<String,Action>();
-	
+
 	public ActionList(Channel chan, Props props) {
 
 		String actions=props.getString("actions");
@@ -39,6 +39,7 @@ public class ActionList  implements Action {
 			this.actions.put(name,a);
 		}
 	}
+	public boolean safeToRetry() { return false; } // TODO: 
 
 	public Object execute(Task task) {
 		for (String name: actions.keySet()) {

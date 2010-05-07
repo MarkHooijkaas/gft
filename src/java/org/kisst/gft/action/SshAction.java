@@ -13,12 +13,16 @@ public class SshAction implements Action {
 	private final GftContainer gft;
 	private final String commandTemplate;
 	private final SshHost host;
+	private final boolean safeToRetry;
 	
 	public SshAction(GftContainer gft, Props props) {
 		this.gft=gft;
 		commandTemplate =props.getString("command");
 		host=gft.sshhosts.get(props.getString("host"));
+		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
+
+	public boolean safeToRetry() { return safeToRetry; }
 
 	public Object execute(Task task) {
 		FileTransferData ft= (FileTransferData) task.getData();

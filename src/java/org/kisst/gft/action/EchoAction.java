@@ -17,6 +17,8 @@ public class EchoAction implements Action {
 		template =props.getString("template");
 	}
 
+	public boolean safeToRetry() { return true; }
+
 	public Object execute(Task task) {
 		FileTransferData ft= (FileTransferData) task.getData();
 		String result=gft.processTemplate(template, ft.getActionContext(this));

@@ -32,10 +32,14 @@ public class NotifyReceiver  implements Action {
 	private final static Logger logger=LoggerFactory.getLogger(NotifyReceiver.class);
 
 	private final String queue;
+	private final boolean safeToRetry;
 	
 	public NotifyReceiver(GftContainer gft, Props props) {
 		this.queue=props.getString("queue");
+		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
+
+	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();

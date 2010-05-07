@@ -45,6 +45,7 @@ public class HttpAction  implements Action {
 	private final int timeout;
 	private final String templateName;
 	protected final GftContainer gft;
+	private final boolean safeToRetry;
 	
 	public HttpAction(GftContainer gft, Props props) {
 		this.gft=gft;
@@ -58,8 +59,10 @@ public class HttpAction  implements Action {
 			hosts[i++]=gft.getHost(hostname.trim());
 		timeout = props.getInt("timeout", 30000);
 		templateName=props.getString("template",null);
+		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 
+	public boolean safeToRetry() { return safeToRetry; }
 
 	protected String getBody(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();

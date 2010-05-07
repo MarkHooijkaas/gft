@@ -4,6 +4,8 @@ import org.kisst.gft.filetransfer.FileTransferData;
 import org.kisst.gft.task.Task;
 
 public class CheckSourceFile implements Action {
+	public boolean safeToRetry() { return true; }
+
 	public Object execute(Task task) {
 		FileTransferData ft= (FileTransferData) task.getData();
 		// TODO: remember filesize
