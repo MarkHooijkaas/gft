@@ -23,7 +23,12 @@ public class FileTransferData {
 		this.channel=gft.getChannel(input.getChildText("kanaal"));
 		if (channel==null)
 			throw new RuntimeException("Could not find channel with name "+input.getChildText("kanaal"));
-		this.file=input.getChildText("bestand");
+		// Strip preceding slashes to normalize the path.
+		String tmp=input.getChildText("bestand");
+		while (tmp.startsWith("/"))
+			tmp=tmp.substring(1);
+		// TODO: check for unsafe constructs such as ..
+		this.file=tmp;
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
 	}
