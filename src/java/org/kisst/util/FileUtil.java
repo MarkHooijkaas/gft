@@ -92,5 +92,12 @@ public class FileUtil {
 		catch (IOException e) { throw new RuntimeException(e); }
 	}
 
+	public static String filename(String path) {
+		int idx=path.lastIndexOf("/");
+		if (idx>=0)
+			return path.substring(idx+1);
+		else
+			return path;
+	}
 
 }
