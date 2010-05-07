@@ -68,6 +68,7 @@ public class GftContainer {
 		addAction("remove","DeleteSourceFile");
 		addAction("notify","NotifyReceiver");
 		addAction("reply","SendReplyAction");
+		addAction("log_start","LogStart");
 		addAction("log_completed","LogCompleted");
 		addAction("log_error","LogError");
 		addAction("fix_permissions","FixPermissions");
@@ -114,10 +115,12 @@ public class GftContainer {
 		}
 
 
-		Props actionProps=props.getProps("gft.action");
-		for (String name: actionProps.keys()) {
-			Props p=actionProps.getProps(name);
-			actions.put(name, p);
+		if (props.hasKey("gft.action")) {
+			Props actionProps=props.getProps("gft.action");
+			for (String name: actionProps.keys()) {
+				Props p=actionProps.getProps(name);
+				actions.put(name, p);
+			}
 		}
 
 		Props channelProps=props.getProps("gft.channel");

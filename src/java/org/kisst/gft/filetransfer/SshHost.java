@@ -5,6 +5,7 @@ import java.io.File;
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.admin.rest.Representable;
 import org.kisst.gft.filetransfer.Ssh.ExecResult;
+import org.kisst.util.FileUtil;
 
 import com.jcraft.jsch.HostKey;
 
@@ -45,7 +46,7 @@ public class SshHost implements Representable {
 		String path=dir+"/"+file;
 		try {
 			String result=call("ls -l "+path);
-			return (result.trim().endsWith(path));
+			return (result.trim().endsWith(FileUtil.filename(file)));
 		}
 		catch (Ssh.ExitCodeException e) { return false; } // TODO: exitcode could be due to something else 
 	}
