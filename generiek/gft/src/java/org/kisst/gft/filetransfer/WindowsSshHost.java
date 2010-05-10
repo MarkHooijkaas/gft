@@ -48,7 +48,7 @@ public class WindowsSshHost extends SshHost {
 			return;
 		throw new RuntimeException("Ssh call of command ["+command+"] returned exit code "+result.exitcode+" and stderr ["+result.stderr+"] and stoput "+result.stdout);
 	}
-	@Override public void copyFileFrom(SshHost src, String srcpath, String filename, String destdir)  {
-		call(scpCommand+" "+src.host+":"+src.convertPath(srcpath)+" "+convertPath(destdir));
+	@Override public void copyFileFrom(SshHost src, String srcpath, String destpath)  {
+		call(scpCommand+" "+src.host+":"+src.convertPath(srcpath)+" "+convertPath(destpath));
 	}
 }

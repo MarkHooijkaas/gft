@@ -18,9 +18,9 @@ public class CopyFile implements Action {
 		String mode=chan.mode;
 		
 		if ("push".equals(mode))
-			src.copyFileTo(srcdir+"/"+ft.file, dest, destdir);
+			src.copyFileTo(srcdir+"/"+ft.srcpath, dest, destdir+"/"+ft.destpath);
 		else if ("pull".equals(mode))
-			dest.copyFileFrom(src, srcdir,ft.file, destdir);
+			dest.copyFileFrom(src, srcdir+"/"+ft.srcpath, destdir+"/"+ft.destpath);
 		return null;
 	}
 

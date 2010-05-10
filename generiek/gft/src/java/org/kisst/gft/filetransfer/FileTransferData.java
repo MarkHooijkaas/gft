@@ -5,12 +5,14 @@ import java.util.Map;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
+import org.kisst.util.FileUtil;
 import org.kisst.util.XmlNode;
 
 public class FileTransferData {
 	public final GftContainer gft;
 	public final Channel channel;
-	public final String file;
+	public final String srcpath;
+	public final String destpath;
 	public final XmlNode message;
 	public final String replyTo;
 	public final String correlationId;
@@ -28,7 +30,8 @@ public class FileTransferData {
 		while (tmp.startsWith("/"))
 			tmp=tmp.substring(1);
 		// TODO: check for unsafe constructs such as ..
-		this.file=tmp;
+		this.srcpath=tmp;
+		this.destpath=FileUtil.filename(tmp);
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
 	}
@@ -40,5 +43,5 @@ public class FileTransferData {
 		return result;
 	}
 
-	public String getBestand() { return file; }
+	//public String getBestand() { return file; }
 }

@@ -17,7 +17,7 @@ public class StartFileTransferTask implements MessageHandler {
 	public void handle(MqMessage msg) {
 		FileTransferData obj =new FileTransferData(gft, msg.getData(), msg.getReplyTo(), msg.getCorrelationId());
 		if (logger.isInfoEnabled())
-			logger.info("file "+obj.file+" transfer task started");
+			logger.info("file "+obj.srcpath+" transfer task started");
 		
 		Task t=new FileBasedTask(obj.channel, obj);
 		t.run();

@@ -32,7 +32,7 @@ public class LogError  extends LogCompleted {
 	}
 	
 	@Override protected void fillContext(HashMap<String,Object> context, FileTransferData ftdata) {
-		context.put("details", "Fout bij GFT filetransfer, kanaal: "+ftdata.channel.name+", bestand: "+ftdata.file+" fout:");// TODO ftdata.props.get(""));
+		context.put("details", "Fout bij GFT filetransfer, kanaal: "+ftdata.channel.name+", bestand: "+ftdata.srcpath+" fout:");// TODO ftdata.props.get(""));
 		context.put("niveau", "error");
 		context.put("event", "error");
 		context.put("tech", "TODO:action");
