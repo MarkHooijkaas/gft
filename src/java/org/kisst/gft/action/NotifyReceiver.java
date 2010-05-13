@@ -44,6 +44,7 @@ public class NotifyReceiver  implements Action {
 	public Object execute(Task t) {
 		FileTransferData ftdata = (FileTransferData) t.getData();
 		XmlNode msg=ftdata.message.clone();
+		msg.getChild("Body/transferFile/bestand").element.setText(ftdata.destpath);
 		msg.getChild("Body/transferFile").element.setName("transferFileNotification");
 		
 		logger.info("Sending message to queue {}",queue);

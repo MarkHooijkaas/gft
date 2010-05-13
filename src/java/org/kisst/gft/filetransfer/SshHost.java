@@ -51,13 +51,13 @@ public class SshHost implements Representable {
 		catch (Ssh.ExitCodeException e) { return false; } // TODO: exitcode could be due to something else 
 	}
 	public void deleteFile(String path) { call("rm "+path); }
-	public void copyFileTo(String srcpath, SshHost dest, String destdir)  {
-		String command="scp "+srcpath+" "+dest.user+"@"+dest.host+":"+dest.convertPath(destdir);
+	public void copyFileTo(String srcpath, SshHost dest, String destpath)  {
+		String command="scp "+srcpath+" "+dest.user+"@"+dest.host+":"+dest.convertPath(destpath);
 		command=command.replace("\\","\\\\");
 		call(command);
 	}
-	public void copyFileFrom(SshHost src, String srcpath, String filename, String destdir)  {
-		call("scp "+src.host+":"+src.convertPath(srcpath+"/"+filename)+" "+destdir);
+	public void copyFileFrom(SshHost src, String srcpath, String destpath)  {
+		call("scp "+src.host+":"+src.convertPath(srcpath)+" "+destpath);
 	}
 	public String getRepresentation() {
 		StringBuilder result=new StringBuilder();

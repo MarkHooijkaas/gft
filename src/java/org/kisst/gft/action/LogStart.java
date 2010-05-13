@@ -33,7 +33,7 @@ public class LogStart  extends LogCompleted {
 	
 	@Override protected void fillContext(HashMap<String,Object> context, FileTransferData ftdata) {
 		context.put("details", "Starting GFT filetransfer, channel: "+ftdata.channel.name+
-				", from: "+ftdata.channel.src.host+":"+ftdata.channel.srcdir+"/"+ftdata.file
+				", from: "+ftdata.channel.src.host+":"+ftdata.channel.srcdir+"/"+ftdata.srcpath
 				+", to:"+ftdata.channel.dest.host+":"+ftdata.channel.destdir);
 		context.put("niveau", "info");
 		context.put("event", "started");
