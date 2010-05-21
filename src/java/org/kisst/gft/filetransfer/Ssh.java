@@ -124,7 +124,7 @@ public class Ssh {
 		public void log(int level, String message){
 			// Dirty hack to prevent all the Warnings in the log
 			if (level==WARN && message.trim().startsWith("Permanently added") && message.trim().endsWith("to the list of known hosts."))
-				level=INFO;
+				level=DEBUG;
 			if (level==DEBUG) logger.trace(message);
 			if (level==INFO)  logger.debug(message);
 			if (level==WARN)  logger.warn(message);
