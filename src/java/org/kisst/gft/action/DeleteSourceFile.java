@@ -8,7 +8,7 @@ public class DeleteSourceFile implements Action {
 
 	public Object execute(Task task) {
 		FileTransferData ft= (FileTransferData) task.getData();
-		ft.channel.src.deleteFile(ft.channel.srcdir+"/"+ft.file);
+		ft.channel.src.deleteFile(ft.channel.srcdir+"/"+ft.srcpath);
 		return null;
 	}
 

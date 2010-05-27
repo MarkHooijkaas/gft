@@ -69,6 +69,7 @@
 			<zipfileset dir="build" includes="${projectname}.jar"/>
 			<zipfileset dir="bin" prefix="bin"/>
 			<zipfileset dir="lib" prefix="lib" includes="*.jar"/>
+			<zipfileset dir="lib" prefix="lib" includes="*.dll"/>
 		</zip>
 	</target>
 

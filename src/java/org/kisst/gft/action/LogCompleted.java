@@ -82,7 +82,7 @@ public class LogCompleted  extends HttpAction {
 	}
 
 	protected void fillContext(HashMap<String,Object> context, FileTransferData ftdata) {
-		context.put("details", "GFT geslaagd, kanaal: "+ftdata.channel.name+", bestand: "+ftdata.file);
+		context.put("details", "GFT geslaagd, kanaal: "+ftdata.channel.name+", bestand: "+ftdata.srcpath);
 		context.put("event", "completed");
 		context.put("niveau", "info");
 		context.put("tech", "done");

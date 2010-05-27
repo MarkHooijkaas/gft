@@ -18,7 +18,7 @@ public class FixPermissions implements Action {
 		if (pos<=0 || pos2<=0 || pos>pos2)
 			throw new RuntimeException("Problem parsing dspaut output: "+s);
 		String autlist=s.substring(pos+1, pos2).trim();
-		ft.channel.dest.call("system chgaut \"obj('"+ft.channel.destdir+"/"+ft.file+"') autl("+autlist+")\"");
+		ft.channel.dest.call("system chgaut \"obj('"+ft.channel.destdir+"/"+ft.destpath+"') autl("+autlist+")\"");
 		return null;
 	}
 

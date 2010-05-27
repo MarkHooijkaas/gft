@@ -27,8 +27,8 @@ public class As400SshHost extends SshHost {
 		command=command.replace("\\","\\\\");
 		call(command);
 	}
-	@Override public void copyFileFrom(SshHost src, String srcpath, String filename, String destdir)  {
-		String command=scpCommand+" "+src.user+"@"+src.host+":"+src.convertPath(srcpath+"/"+filename)+" "+destdir+"/"+filename;
+	@Override public void copyFileFrom(SshHost src, String srcpath, String destpath)  {
+		String command=scpCommand+" "+src.user+"@"+src.host+":"+src.convertPath(srcpath)+" "+destpath;
 		command=command.replace("\\","\\\\");
 		call(command);
 	}
