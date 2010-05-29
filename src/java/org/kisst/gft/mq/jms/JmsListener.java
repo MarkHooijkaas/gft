@@ -12,6 +12,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 
 import org.kisst.cfg4j.Props;
+import org.kisst.gft.RetryableException;
 import org.kisst.gft.admin.rest.Representable;
 import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.QueueListener;
@@ -26,6 +27,7 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 	private final Props props;
 	private final String queue;
 	private final String errorqueue;
+	private final String retryqueue;
 	private final int receiveErrorRetries;
 	private final int receiveErrorRetryDelay;
 	
@@ -39,6 +41,7 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 		this.props=props;
 		this.queue=props.getString("queue");
 		this.errorqueue=props.getString("errorqueue");
+		this.retryqueue=props.getString("retryqueue");
 		this.receiveErrorRetries = props.getInt("receiveErrorRetries", 1000);
 		this.receiveErrorRetryDelay = props.getInt("receiveErrorRetryDelay", 60000);
 		this.pool = Executors.newFixedThreadPool(props.getInt("threadPoolSize",10));
@@ -92,11 +95,15 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 							catch (Exception e) {
 								try {
 									logger.error("Error when handling JMS message "+msg.getData(),e);
-									Destination errordestination = session.createQueue(errorqueue);
+									String queue=errorqueue;
+									if (e instanceof RetryableException)
+										queue=retryqueue;
+									Destination errordestination = session.createQueue(queue);
 									MessageProducer producer = session.createProducer(errordestination);
 									producer.send(msg2);
 									session.commit();
 									producer.close();
+									logger.info("message send to queue {}",queue);
 								}
 								catch (JMSException e2) {throw new RuntimeException(e2); }
 							}
