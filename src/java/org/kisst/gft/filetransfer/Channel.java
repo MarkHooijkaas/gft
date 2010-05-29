@@ -4,6 +4,7 @@ import java.lang.reflect.Constructor;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.RetryableException;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.task.Task;
@@ -49,7 +50,14 @@ public class Channel implements TaskDefinition {
 			throw new RuntimeException("property error should be a map in channel "+name);
 	}
 	public String toString() { return "Channel("+name+")";}
-	public Object execute(Task task) { 
+	public Object execute(Task task) {
+		FileTransferData t= (FileTransferData) task;
+
+		if (! src.isAvailable())
+			throw new RetryableException("Source system "+src+" is not available tot transfer file "+t.srcpath+" for channel "+name);
+		if (! dest.isAvailable())
+			throw new RetryableException("Destination system "+dest+" is not available tot transfer file "+t.destpath+" for channel "+name);
+
 		action.execute(task);
 		return null;
 	}
