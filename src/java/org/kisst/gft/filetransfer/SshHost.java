@@ -6,6 +6,7 @@ import org.kisst.cfg4j.Props;
 import org.kisst.gft.admin.rest.Representable;
 import org.kisst.gft.filetransfer.Ssh.ExecResult;
 import org.kisst.util.FileUtil;
+import org.kisst.util.TimeWindowList;
 
 import com.jcraft.jsch.HostKey;
 
@@ -18,6 +19,8 @@ public class SshHost implements Representable {
 	public final String known_hosts;
 	private final Ssh.Credentials cred;
 	private final String keyfile;
+	private final TimeWindowList forbiddenTimes;
+
 	
 	public SshHost(Props props) {
 		this.host=props.getString("host");
@@ -35,10 +38,16 @@ public class SshHost implements Representable {
 			this.known_hosts=((File) tmp).getAbsolutePath();
 		else
 			this.known_hosts=(String) tmp;
+		String timewindow=props.getString("forbiddenTimes", null);
+		if (timewindow==null)
+			this.forbiddenTimes=null;
+		else
+			this.forbiddenTimes=new TimeWindowList(timewindow);
 	}
 	public String toString() { return "ssh:"+user+"@"+host+(port==22? "" : ":"+port); }
 	
-
+	public boolean isAvailable() { return ! forbiddenTimes.isTimeInWindow(); }
+	
 	public ExecResult exec(String command) { return Ssh.exec(this, cred, command); }
 	public String call(String command) { return Ssh.ssh(this, cred, command); }
 	public String convertPath(String path) { return path; }
