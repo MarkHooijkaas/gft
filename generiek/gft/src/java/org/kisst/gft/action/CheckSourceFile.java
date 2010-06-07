@@ -10,7 +10,7 @@ public class CheckSourceFile implements Action {
 		FileTransferData ft= (FileTransferData) task.getData();
 		// TODO: remember filesize
 		if (! ft.channel.src.fileExists(ft.channel.srcdir, ft.srcpath))
-				throw new RuntimeException("Source file "+ft.channel.srcdir+"/"+ft.srcpath+" does not exist");
+				throw new RuntimeException("Source file "+ft.channel.srcdir+"/"+ft.srcpath+" does not exist or is not accessible");
 		return null;
 	}
 
