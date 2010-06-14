@@ -33,7 +33,7 @@ public class LogError  extends LogCompleted {
 	}
 	
 	@Override protected void fillContext(HashMap<String,Object> context, Task task, FileTransferData ftdata) {
-		context.put("details", "Fout bij GFT filetransfer, kanaal: "+ftdata.channel.name+", bestand: "+ftdata.srcpath+" fout:"+task.getLastError().getMessage());
+		context.put("details", "Fout bij GFT filetransfer, kanaal: "+ftdata.channel.name+", van: "+ftdata.channel.src+"/"+ftdata.srcpath+" naar: "+ftdata.channel.dest+"/"+ftdata.destpath+" fout:"+task.getLastError().getMessage());
 		context.put("niveau", "error");
 		context.put("event", "error");
 		context.put("tech", "TODO:action");
