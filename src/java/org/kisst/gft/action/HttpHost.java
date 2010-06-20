@@ -23,6 +23,7 @@ import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.kisst.cfg4j.Props;
+import org.kisst.util.CryptoUtil;
 
 public class HttpHost {
 	public final String url; 
@@ -38,7 +39,7 @@ public class HttpHost {
 		if (props.getString("password", null)!=null)
 			password=props.getString("password");
 		else
-			password=props.getString("encryptedPassword");
+			password=CryptoUtil.decrypt(props.getString("encryptedPassword"));
 		ntlmhost=props.getString("ntlmhost", null);
 		ntlmdomain=props.getString("ntlmdomain", null);
 	}

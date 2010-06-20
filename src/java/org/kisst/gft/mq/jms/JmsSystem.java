@@ -14,6 +14,7 @@ import org.kisst.cfg4j.Props;
 import org.kisst.gft.mq.MqQueue;
 import org.kisst.gft.mq.QueueListener;
 import org.kisst.gft.mq.QueueSystem;
+import org.kisst.util.CryptoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,11 +28,14 @@ public class JmsSystem implements QueueSystem {
 		try {
 			ConnectionFactory connectionFactory = createConnectionFactory();
 			String username=props.getString("username", null);
-			String password=props.getString("password", null);
 			if (username==null)
 				connection = connectionFactory.createConnection();
-			else
+			else {
+				String password=props.getString("password", null);
+				if (password==null)
+					password=CryptoUtil.decrypt(props.getString("encryptedPassword"));
 				connection = connectionFactory.createConnection(username, password);
+			}
 			connection.start();
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
