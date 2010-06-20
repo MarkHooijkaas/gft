@@ -30,9 +30,8 @@ public class Ssh {
 	}
 	public static class ExitCodeException extends RuntimeException {
 		private static final long serialVersionUID = 1L;
-		public ExitCodeException (SshHost host, String command, int exitvalue, String result) {
+		public ExitCodeException (SshHost host, String command, int exitvalue, String result) { 
 			super("On host "+host.host+" when running command \""+command+"\" resulted in exitcode "+exitvalue+"\noutput was:"+result);
-
 		}
 	}
 
@@ -40,7 +39,7 @@ public class Ssh {
 	static {
 		JSch.setLogger(new MyLogger());
 	}
-
+	
 	//public static String ssh(Credentials cred, String host, String command) {
 	public static String ssh(SshHost host, Ssh.Credentials cred, String command) {
 		ExecResult result=exec(host, cred, command);
@@ -48,7 +47,7 @@ public class Ssh {
 			throw new ExitCodeException(host, command, result.exitcode, result.stdout+result.stderr);
 		return result.stdout+result.stderr;
 	}
-
+	
 	public static ExecResult exec(SshHost host, Ssh.Credentials cred, String command) {
 		logger.info("Calling {} with command [{}]", host, command);
 		FileOutputStream fos=null;
@@ -92,7 +91,6 @@ public class Ssh {
 			while (! channel.isClosed()) {
 				if (count>=50)
 					throw new RuntimeException("SSH Channel was not closed after "+count+" waiting attempts");
-
 				logger.info("Sleeping some time because channel is not yet closed, attempt "+count++);
 				try{Thread.sleep(200);}catch(Exception ee){}
 			}
@@ -133,7 +131,6 @@ public class Ssh {
 		public void log(int level, String message){
 			// Dirty hack to prevent all the Warnings in the log
 			if (level==WARN && message.trim().startsWith("Permanently added") && message.trim().endsWith("to the list of known hosts."))
-
 				level=DEBUG;
 			if (level==DEBUG) logger.trace(message);
 			if (level==INFO)  logger.debug(message);
@@ -142,6 +139,7 @@ public class Ssh {
 			if (level==FATAL) logger.error(message);
 		}
 	}
+
 
 	public static class Credentials implements UserInfo , UIKeyboardInteractive{
 		private final String user;
@@ -165,11 +163,9 @@ public class Ssh {
 		public boolean promptYesNo(String str){ logger.debug("YesOrNo: {}",str); return true;  }
 
 		public boolean promptPassphrase(String message){ logger.debug("prompt Passphrase: {}",message); return true; }
-
 		public String getPassphrase(){ return ""; }
 
 		public boolean promptPassword(String message) { logger.debug("prompt Password: {}",message); return true; }
-
 		public String getPassword(){ logger.debug("using Password: {}",password); return password; }
 
 		public String[] promptKeyboardInteractive(String destination,
@@ -177,15 +173,14 @@ public class Ssh {
 				String instruction,
 				String[] prompt,
 				boolean[] echo) {
-			logger.debug("destination: {}",destination);
+			logger.debug("destination: {}",destination); 
 			logger.debug("name: {}",name);
 			logger.debug("instruction: {}",instruction);
 			for (String s: prompt)
 				logger.debug("prompt[i]: {}",s);
 			for (boolean b: echo)
-				logger.debug("echo[i]: {}",b);
+				logger.debug("echo[i]: {}",b); 
 			return null;
 		}
 	}
 }
-

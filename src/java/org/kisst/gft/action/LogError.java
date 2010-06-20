@@ -24,6 +24,7 @@ import java.util.HashMap;
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferData;
+import org.kisst.gft.task.Task;
 
 
 public class LogError  extends LogCompleted {
@@ -31,8 +32,8 @@ public class LogError  extends LogCompleted {
 		super(gft, props);
 	}
 	
-	@Override protected void fillContext(HashMap<String,Object> context, FileTransferData ftdata) {
-		context.put("details", "Fout bij GFT filetransfer, kanaal: "+ftdata.channel.name+", bestand: "+ftdata.srcpath+" fout:");// TODO ftdata.props.get(""));
+	@Override protected void fillContext(HashMap<String,Object> context, Task task, FileTransferData ftdata) {
+		context.put("details", "Fout bij GFT filetransfer, kanaal: "+ftdata.channel.name+", van: "+ftdata.channel.src+"/"+ftdata.srcpath+" naar: "+ftdata.channel.dest+"/"+ftdata.destpath+" fout:"+task.getLastError().getMessage());
 		context.put("niveau", "error");
 		context.put("event", "error");
 		context.put("tech", "TODO:action");
