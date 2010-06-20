@@ -36,6 +36,6 @@ public class LogError  extends LogCompleted {
 		context.put("details", "Fout bij GFT filetransfer, kanaal: "+ftdata.channel.name+", van: "+ftdata.channel.src+"/"+ftdata.srcpath+" naar: "+ftdata.channel.dest+"/"+ftdata.destpath+" fout:"+task.getLastError().getMessage());
 		context.put("niveau", "error");
 		context.put("event", "error");
-		context.put("tech", "TODO:action");
+		context.put("tech", task.getLastAction());
 	}
 }

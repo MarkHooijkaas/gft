@@ -1,11 +1,13 @@
 package org.kisst.gft.task;
 
 
+
 public class FileBasedTask implements Task {
 	private final TaskDefinition definition;
 	private Object data;
 	private Task.Status status=null;
 	private Exception lastError=null;
+	private String lastAction=null;
 	
 	public FileBasedTask(TaskDefinition definition, Object data) {
 		this.definition=definition;
@@ -21,8 +23,8 @@ public class FileBasedTask implements Task {
 	public void setStatus(Status status) { this.status=status;}
 
 	public Exception getLastError() { return lastError; }
-	public void setLastError(Exception e) {
-		this.lastError=e;
-	}
+	public void setLastError(Exception e) {	this.lastError=e; }
 	
+	public String getLastAction() { return lastAction; }
+	public void setLastAction(String act) {	this.lastAction=act; }
 }
