@@ -35,7 +35,10 @@ public class HttpHost {
 	public HttpHost(Props props) {
 		url=props.getString("url", null);
 		username=props.getString("username", null);
-		password=props.getString("password", null);
+		if (props.getString("password", null)!=null)
+			password=props.getString("password");
+		else
+			password=props.getString("encryptedPassword");
 		ntlmhost=props.getString("ntlmhost", null);
 		ntlmdomain=props.getString("ntlmdomain", null);
 	}
