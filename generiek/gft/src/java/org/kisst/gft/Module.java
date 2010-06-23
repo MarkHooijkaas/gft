@@ -17,26 +17,13 @@ You should have received a copy of the GNU General Public License
 along with the RelayConnector framework.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.kisst.gft.action;
-
-import java.util.HashMap;
+package org.kisst.gft;
 
 import org.kisst.cfg4j.Props;
-import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferTask;
 
-
-public class LogStart  extends LogCompleted {
-	public LogStart(GftContainer gft, Props props) {
-		super(gft, props);
-	}
-	
-	@Override protected void fillContext(HashMap<String,Object> context, FileTransferTask ft) {
-		context.put("details", "Start GFT filetransfer, kanaal: "+ft.channel.name+
-				", van: "+ft.channel.src.host+":"+ft.srcpath
-				+", naar:"+ft.channel.dest.host+":"+ft.destpath);
-		context.put("niveau", "info");
-		context.put("event", "started");
-		context.put("tech", "start");
-	}
+public interface Module {
+	public String getName();
+	public void init(Props props);
+	public void reset(Props props);
+	public void destroy();
 }

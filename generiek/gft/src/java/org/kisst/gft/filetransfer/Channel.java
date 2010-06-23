@@ -1,6 +1,8 @@
 package org.kisst.gft.filetransfer;
 
 import java.lang.reflect.Constructor;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
@@ -30,8 +32,12 @@ public class Channel implements TaskDefinition {
 	private final String srcdir;
 	private final String destdir;
 	public final String mode;
-	
+	private final HashMap<String, Object> context;
+
 	public Channel(GftContainer gft, Props props) {
+		context=new HashMap<String, Object>();
+		context.put("global", gft.props.get("gft.global", null));
+		
 		this.gft=gft;
 		this.src=gft.sshhosts.get(props.getString("src.host"));
 		this.dest=gft.sshhosts.get(props.getString("dest.host"));
@@ -55,7 +61,7 @@ public class Channel implements TaskDefinition {
 		this.endAction=new ActionList(this, actprops);
 	}
 	
-	
+	public Map<String,Object> getContext() { return context;}
 	public String toString() { return "Channel("+name+")";}
 	public void checkSystemsAvailable(FileTransferTask ft) {
 		if (! src.isAvailable())
@@ -124,4 +130,6 @@ public class Channel implements TaskDefinition {
 			return (Action) ReflectionUtil.createObject(c, new Object[] {gft, props} );
 		
 	}
+
+
 }
