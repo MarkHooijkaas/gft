@@ -3,6 +3,7 @@ package org.kisst.gft.filetransfer;
 import java.lang.reflect.Constructor;
 
 import org.kisst.cfg4j.Props;
+import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.action.Action;
@@ -18,8 +19,10 @@ public class Channel implements TaskDefinition {
 
 	public final GftContainer gft;
 	public final String name;
-	public final Action action;
-	public final Action errorAction;
+	private final Action action;
+	private final Action startAction;
+	private final Action endAction;
+	private final Action errorAction;
 	public final Props props;
 	public final SshHost src;
 	public final SshHost dest;
@@ -39,32 +42,35 @@ public class Channel implements TaskDefinition {
 		this.props=props;
 		this.name=props.getLocalName();
 		this.action=new ActionList(this, props);
-		Object errorProps=props.get("error",null);
-		if (errorProps==null)
-			errorProps=gft.props.get("gft.global.error",null); // TODO: this is a dirty hack
-		if (errorProps instanceof Props) 
-			this.errorAction=new ActionList(this, (Props) errorProps);
-		else if (errorProps==null)
-			this.errorAction=null;
-		else
-			throw new RuntimeException("property error should be a map in channel "+name);
-	}
-	public String toString() { return "Channel("+name+")";}
-	public Object execute(Task task) {
-		FileTransferTask ft= (FileTransferTask) task;
+		SimpleProps actprops=new SimpleProps();
 
+		actprops.put("action", "log_error");
+		this.errorAction=new ActionList(this, actprops);
+
+		actprops.put("action", "log_start");
+		this.startAction=new ActionList(this, actprops);
+		
+		actprops.put("action", "log_completed");
+		this.endAction=new ActionList(this, actprops);
+	}
+	
+	
+	public String toString() { return "Channel("+name+")";}
+	public void checkSystemsAvailable(FileTransferTask ft) {
 		if (! src.isAvailable())
 			throw new RetryableException("Source system "+src+" is not available tot transfer file "+ft.srcpath+" for channel "+name);
 		if (! dest.isAvailable())
 			throw new RetryableException("Destination system "+dest+" is not available tot transfer file "+ft.destpath+" for channel "+name);
-
-		action.execute(task);
-		return null;
 	}
 	
 	public void run(Task task) {
+		FileTransferTask ft= (FileTransferTask) task;
+		checkSystemsAvailable(ft);
+		
 		try {
+			startAction.execute(task);
 			action.execute(task);
+			endAction.execute(task);
 			task.setStatus(Task.DONE);
 		}
 		catch (RuntimeException e) {
