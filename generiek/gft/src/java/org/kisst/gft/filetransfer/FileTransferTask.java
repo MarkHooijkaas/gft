@@ -31,8 +31,8 @@ public class FileTransferTask extends BasicTask {
 			throw new RuntimeException("Could not find channel with name "+input.getChildText("kanaal"));
 		// Strip preceding slashes to normalize the path.
 		String file=input.getChildText("bestand");
-		this.srcpath=channel.getSrcPath(file);
-		this.destpath=channel.getDestPath(file);
+		this.srcpath=channel.getSrcPath(file, this);
+		this.destpath=channel.getDestPath(file, this);
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
 		context=new HashMap<String, Object>(channel.getContext());

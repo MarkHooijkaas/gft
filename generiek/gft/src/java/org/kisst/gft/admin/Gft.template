@@ -4,7 +4,7 @@
 <h2>Channels</h2> 
 <table> 
 <#list channels?keys as name>
-  <tr><td><a href="channel/${name}"><b>${name}</b></a></td><td>TODO</td></tr>
+  <tr><td><a href="channel/${name}"><b>${name}</b></a></td><td>${channels[name]}</td></tr>
 </#list> 
 </table> 
 

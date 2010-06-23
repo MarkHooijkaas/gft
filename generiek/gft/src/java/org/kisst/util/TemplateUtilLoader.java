@@ -1,4 +1,4 @@
-package org.kisst.gft;
+package org.kisst.util;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -10,7 +10,7 @@ import java.io.StringReader;
 
 import freemarker.cache.TemplateLoader;
 
-public class GftTemplateLoader implements TemplateLoader {
+public class TemplateUtilLoader implements TemplateLoader {
 	public static class Source {
 		private final String name;
 		private final File file;
@@ -27,7 +27,7 @@ public class GftTemplateLoader implements TemplateLoader {
 	}
 
 	private final File baseDir;
-	public GftTemplateLoader(File baseDir) { 
+	public TemplateUtilLoader(File baseDir) { 
 		this.baseDir=baseDir;
 		if (! baseDir.exists())
 			throw new RuntimeException("Template base directory "+baseDir.getName()+" does not exist");

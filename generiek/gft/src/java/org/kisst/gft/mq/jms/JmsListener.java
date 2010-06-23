@@ -17,6 +17,7 @@ import org.kisst.gft.RetryableException;
 import org.kisst.gft.admin.rest.Representable;
 import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.QueueListener;
+import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,10 +38,10 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 	private Thread thread=null;
 	private final ExecutorService pool;
 	
-	public JmsListener(JmsSystem system, Props props) {
+	public JmsListener(JmsSystem system, Props props, Object context) {
 		this.system=system;
 		this.props=props;
-		this.queue=props.getString("queue");
+		this.queue=TemplateUtil.processTemplate(props.getString("queue"), context);
 		this.errorqueue=props.getString("errorqueue");
 		this.retryqueue=props.getString("retryqueue");
 		this.receiveErrorRetries = props.getInt("receiveErrorRetries", 1000);

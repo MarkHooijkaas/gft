@@ -23,6 +23,7 @@ import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
+import org.kisst.util.TemplateUtil;
 import org.kisst.util.XmlNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,7 +36,7 @@ public class NotifyReceiver  implements Action {
 	private final boolean safeToRetry;
 	
 	public NotifyReceiver(GftContainer gft, Props props) {
-		this.queue=props.getString("queue");
+		this.queue=TemplateUtil.processTemplate(props.getString("queue"), gft.getContext()); // TODO: use channel context
 		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 
@@ -46,6 +47,10 @@ public class NotifyReceiver  implements Action {
 		XmlNode msg=ft.message.clone();
 		msg.getChild("Body/transferFile/bestand").element.setText(ft.destpath);
 		msg.getChild("Body/transferFile").element.setName("transferFileNotification");
+		
+		String queue=this.queue;
+		if (queue.startsWith("dynamic:"))
+			queue=TemplateUtil.processTemplate(queue.substring(8), ft.getActionContext(this));
 		
 		logger.info("Sending message to queue {}",queue);
 		
