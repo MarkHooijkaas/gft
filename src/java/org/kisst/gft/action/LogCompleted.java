@@ -25,7 +25,7 @@ import java.util.HashMap;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferData;
+import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
 
 
@@ -66,7 +66,7 @@ public class LogCompleted  extends HttpAction {
 	private static SimpleDateFormat timeFormatter=new SimpleDateFormat("HHmmss"); 
 	
 	public String getBody(Task task) {
-		FileTransferData ftdata = (FileTransferData) task.getData();
+		FileTransferTask ft= (FileTransferTask) task;
 		HashMap<String,Object> context=new HashMap<String,Object>();
 		Date now=new Date();
 		synchronized (momentFormatter) {
@@ -75,14 +75,14 @@ public class LogCompleted  extends HttpAction {
 			context.put("moment", momentFormatter.format(now));
 		}
 		context.put("omgeving", props.get("omgeving"));
-		context.put("func", ftdata.channel.name);
-		fillContext(context, task, ftdata); 
+		context.put("func", ft.channel.name);
+		fillContext(context, ft); 
 		
 		return gft.processTemplate(template, context);
 	}
 
-	protected void fillContext(HashMap<String,Object> context, Task task, FileTransferData ftdata) {
-		context.put("details", "GFT geslaagd, kanaal: "+ftdata.channel.name+", bestand: "+ftdata.srcpath+ ", van: "+ftdata.channel.src+"/"+ftdata.srcpath+" naar: "+ftdata.channel.dest+"/"+ftdata.destpath);
+	protected void fillContext(HashMap<String,Object> context, FileTransferTask ft) {
+		context.put("details", "GFT geslaagd, kanaal: "+ft.channel.name+", bestand: "+ft.srcpath+ ", van: "+ft.channel.src+"/"+ft.srcpath+" naar: "+ft.channel.dest+"/"+ft.destpath);
 		context.put("event", "completed");
 		context.put("niveau", "info");
 		context.put("tech", "done");
