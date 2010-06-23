@@ -87,9 +87,16 @@ public class Ssh {
 					result.append(new String(tmp, 0, i));
 			} while (i>=0);
 
-			//if(channel.isClosed()){
-				int exitvalue = channel.getExitStatus();
-			//}
+			int count=0;
+			while (! channel.isClosed()) {
+				if (count>=50)
+					throw new RuntimeException("SSH Channel was not closed after "+count+" waiting attempts");
+				logger.info("Sleeping some time because channel is not yet closed, attempt "+count++);
+				try{Thread.sleep(200);}catch(Exception ee){}
+			}
+
+			int exitvalue = channel.getExitStatus();
+
 			//channel.disconnect();
 			session.disconnect();
 			if (logger.isWarnEnabled()){

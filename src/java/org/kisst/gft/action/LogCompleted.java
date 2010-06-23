@@ -65,8 +65,8 @@ public class LogCompleted  extends HttpAction {
 	private static SimpleDateFormat dateFormatter=new SimpleDateFormat("yyyyMMdd"); 
 	private static SimpleDateFormat timeFormatter=new SimpleDateFormat("HHmmss"); 
 	
-	public String getBody(Task t) {
-		FileTransferData ftdata = (FileTransferData) t.getData();
+	public String getBody(Task task) {
+		FileTransferData ftdata = (FileTransferData) task.getData();
 		HashMap<String,Object> context=new HashMap<String,Object>();
 		Date now=new Date();
 		synchronized (momentFormatter) {
@@ -76,13 +76,13 @@ public class LogCompleted  extends HttpAction {
 		}
 		context.put("omgeving", props.get("omgeving"));
 		context.put("func", ftdata.channel.name);
-		fillContext(context, ftdata); 
+		fillContext(context, task, ftdata); 
 		
 		return gft.processTemplate(template, context);
 	}
 
-	protected void fillContext(HashMap<String,Object> context, FileTransferData ftdata) {
-		context.put("details", "GFT geslaagd, kanaal: "+ftdata.channel.name+", bestand: "+ftdata.srcpath);
+	protected void fillContext(HashMap<String,Object> context, Task task, FileTransferData ftdata) {
+		context.put("details", "GFT geslaagd, kanaal: "+ftdata.channel.name+", bestand: "+ftdata.srcpath+ ", van: "+ftdata.channel.src+"/"+ftdata.srcpath+" naar: "+ftdata.channel.dest+"/"+ftdata.destpath);
 		context.put("event", "completed");
 		context.put("niveau", "info");
 		context.put("tech", "done");

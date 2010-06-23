@@ -45,6 +45,7 @@ public class ActionList  implements Action {
 		for (String name: actions.keySet()) {
 			try {
 				Action a=actions.get(name);
+				task.setLastAction(name);
 				if (logger.isDebugEnabled())
 					logger.debug("action "+name+" started");
 				a.execute(task);
