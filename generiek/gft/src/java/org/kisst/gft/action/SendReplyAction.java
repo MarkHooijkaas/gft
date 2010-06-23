@@ -21,7 +21,7 @@ package org.kisst.gft.action;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferData;
+import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
 import org.kisst.util.XmlNode;
 import org.slf4j.Logger;
@@ -43,19 +43,19 @@ public class SendReplyAction  implements Action {
 
 	public boolean safeToRetry() { return safeToRetry; }
         
-	public Object execute(Task t) {
-		FileTransferData ftdata = (FileTransferData) t.getData();
-		String queue=ftdata.replyTo;
+	public Object execute(Task task) {
+		FileTransferTask ft= (FileTransferTask) task;
+		String queue=ft.replyTo;
 		if (queue==null)
-			throw new RuntimeException("No replyTo address given for task "+t);
+			throw new RuntimeException("No replyTo address given for task "+ft);
 		if (logger.isInfoEnabled())
-			logger.info("Sending reply with correlationId {} to queue {}",ftdata.correlationId, queue);
+			logger.info("Sending reply with correlationId {} to queue {}",ft.correlationId, queue);
 		
-		XmlNode msg=ftdata.message.clone();
+		XmlNode msg=ft.message.clone();
 		msg.getChild("Body/transferFile").element.setName("transferFileResponse");
 		
 		String body=msg.toString();
-		gft.getQueueSystem().getQueue(queue).send(body, null, ftdata.correlationId);
+		gft.getQueueSystem().getQueue(queue).send(body, null, ft.correlationId);
 		return null;
 	}
 }
