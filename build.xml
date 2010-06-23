@@ -51,7 +51,6 @@
 		<zip destfile="${builddir}/${projectname}-${project.version}.zip" >
 			<fileset dir="." includes="COPYING"/>
 			<zipfileset dir="build" includes="${projectname}.jar"/>
-			<zipfileset dir="bin" prefix="bin"/>
 		</zip>
 	</target>
 	
