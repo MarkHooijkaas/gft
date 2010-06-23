@@ -5,10 +5,11 @@ import java.util.Map;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
+import org.kisst.gft.task.BasicTask;
 import org.kisst.util.FileUtil;
 import org.kisst.util.XmlNode;
 
-public class FileTransferData {
+public class FileTransferTask extends BasicTask {
 	public final GftContainer gft;
 	public final Channel channel;
 	public final String srcpath;
@@ -17,7 +18,7 @@ public class FileTransferData {
 	public final String replyTo;
 	public final String correlationId;
 	
-	public FileTransferData(GftContainer gft, String data, String replyTo, String correlationId) {
+	public FileTransferTask(GftContainer gft, String data, String replyTo, String correlationId) {
 		this.gft=gft;
 		message=new XmlNode(data);
 		XmlNode input=message.getChild("Body/transferFile");
@@ -36,6 +37,8 @@ public class FileTransferData {
 		this.correlationId=correlationId;
 	}
 
+	public void run() { channel.run(this); }
+	
 	public Map<String, Object> getActionContext(Action action) {
 		HashMap<String, Object> result=new HashMap<String, Object>();
 		result.put("action", action);

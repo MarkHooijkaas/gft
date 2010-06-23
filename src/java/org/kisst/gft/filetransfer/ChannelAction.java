@@ -8,8 +8,8 @@ public class ChannelAction implements Action {
 	public boolean safeToRetry() { return false; } // TODO: 
 
 	public Object execute(Task task) {
-		FileTransferData t= (FileTransferData) task;
-		return t.channel.execute(task);
+		FileTransferTask ft= (FileTransferTask) task;
+		return ft.channel.execute(task);
 	}
 
 }

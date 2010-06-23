@@ -21,7 +21,7 @@ package org.kisst.gft.action;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferData;
+import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
 import org.kisst.util.XmlNode;
 import org.slf4j.Logger;
@@ -41,16 +41,16 @@ public class NotifyReceiver  implements Action {
 
 	public boolean safeToRetry() { return safeToRetry; }
         
-	public Object execute(Task t) {
-		FileTransferData ftdata = (FileTransferData) t.getData();
-		XmlNode msg=ftdata.message.clone();
-		msg.getChild("Body/transferFile/bestand").element.setText(ftdata.destpath);
+	public Object execute(Task task) {
+		FileTransferTask ft= (FileTransferTask) task;
+		XmlNode msg=ft.message.clone();
+		msg.getChild("Body/transferFile/bestand").element.setText(ft.destpath);
 		msg.getChild("Body/transferFile").element.setName("transferFileNotification");
 		
 		logger.info("Sending message to queue {}",queue);
 		
 		String body=msg.toString();
-		ftdata.channel.gft.getQueueSystem().getQueue(queue).send(body);
+		ft.channel.gft.getQueueSystem().getQueue(queue).send(body);
 		return null;
 	}
 }

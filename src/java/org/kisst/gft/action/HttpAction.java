@@ -31,7 +31,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferData;
+import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
 
 
@@ -64,9 +64,9 @@ public class HttpAction  implements Action {
 
 	public boolean safeToRetry() { return safeToRetry; }
 
-	protected String getBody(Task t) {
-		FileTransferData ftdata = (FileTransferData) t.getData();
-		return gft.processTemplate(templateName, ftdata.getActionContext(this));
+	protected String getBody(Task task) {
+		FileTransferTask ft= (FileTransferTask) task;
+		return gft.processTemplate(templateName, ft.getActionContext(this));
 	}
 
 	public Object execute(Task t) {

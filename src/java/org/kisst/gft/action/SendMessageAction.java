@@ -21,7 +21,7 @@ package org.kisst.gft.action;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferData;
+import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.mq.QueueSystem;
 import org.kisst.gft.task.Task;
 import org.slf4j.Logger;
@@ -49,11 +49,11 @@ public class SendMessageAction  implements Action {
 
 	public boolean safeToRetry() { return safeToRetry; }
         
-	public Object execute(Task t) {
-		FileTransferData ftdata = (FileTransferData) t.getData();
+	public Object execute(Task task) {
+		FileTransferTask ft= (FileTransferTask) task;
 		logger.info("Sending message to queue {}",queue);
 		
-		String body=gft.processTemplate(templateName, ftdata.getActionContext(this));
+		String body=gft.processTemplate(templateName, ft.getActionContext(this));
 		qmgr.getQueue(queue).send(body);
 		return null;
 	}

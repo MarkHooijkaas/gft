@@ -51,12 +51,12 @@ public class Channel implements TaskDefinition {
 	}
 	public String toString() { return "Channel("+name+")";}
 	public Object execute(Task task) {
-		FileTransferData t= (FileTransferData) task;
+		FileTransferTask ft= (FileTransferTask) task;
 
 		if (! src.isAvailable())
-			throw new RetryableException("Source system "+src+" is not available tot transfer file "+t.srcpath+" for channel "+name);
+			throw new RetryableException("Source system "+src+" is not available tot transfer file "+ft.srcpath+" for channel "+name);
 		if (! dest.isAvailable())
-			throw new RetryableException("Destination system "+dest+" is not available tot transfer file "+t.destpath+" for channel "+name);
+			throw new RetryableException("Destination system "+dest+" is not available tot transfer file "+ft.destpath+" for channel "+name);
 
 		action.execute(task);
 		return null;

@@ -23,8 +23,7 @@ import java.util.HashMap;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferData;
-import org.kisst.gft.task.Task;
+import org.kisst.gft.filetransfer.FileTransferTask;
 
 
 public class LogStart  extends LogCompleted {
@@ -32,10 +31,10 @@ public class LogStart  extends LogCompleted {
 		super(gft, props);
 	}
 	
-	@Override protected void fillContext(HashMap<String,Object> context, Task task, FileTransferData ftdata) {
-		context.put("details", "Start GFT filetransfer, kanaal: "+ftdata.channel.name+
-				", van: "+ftdata.channel.src.host+":"+ftdata.srcpath
-				+", naar:"+ftdata.channel.dest.host+":"+ftdata.destpath);
+	@Override protected void fillContext(HashMap<String,Object> context, FileTransferTask ft) {
+		context.put("details", "Start GFT filetransfer, kanaal: "+ft.channel.name+
+				", van: "+ft.channel.src.host+":"+ft.srcpath
+				+", naar:"+ft.channel.dest.host+":"+ft.destpath);
 		context.put("niveau", "info");
 		context.put("event", "started");
 		context.put("tech", "start");
