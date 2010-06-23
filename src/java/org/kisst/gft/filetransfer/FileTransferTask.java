@@ -3,6 +3,7 @@ package org.kisst.gft.filetransfer;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.task.BasicTask;
@@ -10,6 +11,9 @@ import org.kisst.util.XmlNode;
 
 public class FileTransferTask extends BasicTask {
 	public final GftContainer gft;
+	private final SimpleProps vars=new SimpleProps();;
+	private final HashMap<String, Object> context=new HashMap<String, Object>();
+
 	public final Channel channel;
 	public final String srcpath;
 	public final String destpath;
@@ -31,16 +35,17 @@ public class FileTransferTask extends BasicTask {
 		this.destpath=channel.getDestPath(file);
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
+		context.put("global", gft.props.get("gft.global", null));
+		context.put("var", vars);
+		context.put("task", this);
 	}
 
 	public void run() { channel.run(this); }
 	
+	public Map<String, Object> getContext() { return context; }
 	public Map<String, Object> getActionContext(Action action) {
-		HashMap<String, Object> result=new HashMap<String, Object>();
+		Map<String, Object> result=new HashMap<String, Object>(context);
 		result.put("action", action);
-		result.put("task", this);
 		return result;
 	}
-
-	//public String getBestand() { return file; }
 }
