@@ -13,14 +13,12 @@ public class CopyFile implements Action {
 		Channel chan=ft.channel;
 		SshHost src=chan.src;
 		SshHost dest=chan.dest;
-		String srcdir=chan.srcdir;
-		String destdir=chan.destdir;
 		String mode=chan.mode;
 		
 		if ("push".equals(mode))
-			src.copyFileTo(srcdir+"/"+ft.srcpath, dest, destdir+"/"+ft.destpath);
+			src.copyFileTo(ft.srcpath, dest, ft.destpath);
 		else if ("pull".equals(mode))
-			dest.copyFileFrom(src, srcdir+"/"+ft.srcpath, destdir+"/"+ft.destpath);
+			dest.copyFileFrom(src, ft.srcpath, ft.destpath);
 		return null;
 	}
 

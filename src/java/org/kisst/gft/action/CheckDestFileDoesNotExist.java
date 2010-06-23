@@ -14,8 +14,8 @@ public class CheckDestFileDoesNotExist implements Action {
 
 	public Object execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
-		if (ft.channel.dest.fileExists(ft.channel.destdir, ft.destpath))
-				throw new Problem(ft.channel.dest, ft.channel.destdir+"/"+ft.destpath);
+		if (ft.channel.dest.fileExists(ft.destpath))
+				throw new Problem(ft.channel.dest, ft.destpath);
 		return null;
 	}
 

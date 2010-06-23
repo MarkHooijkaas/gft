@@ -6,7 +6,6 @@ import java.util.Map;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.task.BasicTask;
-import org.kisst.util.FileUtil;
 import org.kisst.util.XmlNode;
 
 public class FileTransferTask extends BasicTask {
@@ -27,12 +26,9 @@ public class FileTransferTask extends BasicTask {
 		if (channel==null)
 			throw new RuntimeException("Could not find channel with name "+input.getChildText("kanaal"));
 		// Strip preceding slashes to normalize the path.
-		String tmp=input.getChildText("bestand");
-		while (tmp.startsWith("/"))
-			tmp=tmp.substring(1);
-		// TODO: check for unsafe constructs such as ..
-		this.srcpath=tmp;
-		this.destpath=FileUtil.filename(tmp);
+		String file=input.getChildText("bestand");
+		this.srcpath=channel.getSrcPath(file);
+		this.destpath=channel.getDestPath(file);
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
 	}

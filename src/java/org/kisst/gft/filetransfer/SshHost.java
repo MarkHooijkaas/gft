@@ -51,13 +51,11 @@ public class SshHost implements Representable {
 	public ExecResult exec(String command) { return Ssh.exec(this, cred, command); }
 	public String call(String command) { return Ssh.ssh(this, cred, command); }
 	public String convertPath(String path) { return path; }
-	public boolean fileExists(String dir, String file) {
-		String path=dir+"/"+file;
-		try {
-			String result=call("ls -l "+path);
-			return (result.trim().endsWith(FileUtil.filename(file)));
-		}
-		catch (Ssh.ExitCodeException e) { return false; } // TODO: exitcode could be due to something else 
+	public boolean fileExists(String path) {
+		path=convertPath(path);
+		String file=path.substring(path.lastIndexOf('/')+1);
+		ExecResult result=exec("ls -l "+path);
+		return (result.stdout.indexOf(FileUtil.filename(file))>0);
 	}
 	public void deleteFile(String path) { call("rm "+path); }
 	public void copyFileTo(String srcpath, SshHost dest, String destpath)  {

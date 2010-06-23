@@ -10,6 +10,7 @@ import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskDefinition;
+import org.kisst.util.FileUtil;
 import org.kisst.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +27,8 @@ public class Channel implements TaskDefinition {
 	public final Props props;
 	public final SshHost src;
 	public final SshHost dest;
-	public final String srcdir;
-	public final String destdir;
+	private final String srcdir;
+	private final String destdir;
 	public final String mode;
 	
 	public Channel(GftContainer gft, Props props) {
@@ -61,6 +62,23 @@ public class Channel implements TaskDefinition {
 			throw new RetryableException("Source system "+src+" is not available tot transfer file "+ft.srcpath+" for channel "+name);
 		if (! dest.isAvailable())
 			throw new RetryableException("Destination system "+dest+" is not available tot transfer file "+ft.destpath+" for channel "+name);
+	}
+	
+	public String getSrcPath(String file) {
+		while (file.startsWith("/"))
+			file=file.substring(1);
+		if (file.indexOf("..")>=0)
+			throw new RuntimeException("filename ["+file+"] is not allowed to contain .. pattern");
+		// TODO: check for more unsafe constructs
+		return srcdir+"/"+file;
+	}
+	public String getDestPath(String file) {
+		while (file.startsWith("/"))
+			file=file.substring(1);
+		if (file.indexOf("..")>=0)
+			throw new RuntimeException("filename ["+file+"] is not allowed to contain .. pattern");
+		// TODO: check for more unsafe constructs
+		return FileUtil.filename(destdir+"/"+file);
 	}
 	
 	public void run(Task task) {
