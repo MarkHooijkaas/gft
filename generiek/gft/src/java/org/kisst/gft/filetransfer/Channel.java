@@ -41,8 +41,19 @@ public class Channel implements TaskDefinition {
 		this.gft=gft;
 		this.src=gft.sshhosts.get(props.getString("src.host"));
 		this.dest=gft.sshhosts.get(props.getString("dest.host"));
-		this.srcdir =gft.processTemplate(props.getString("src.dir",  ""), context); // TODO: dynamic: directories will be processed twice
-		this.destdir=gft.processTemplate(props.getString("dest.dir", ""), context); // TODO: dynamic: directories will be processed twice
+
+		String dir=props.getString("src.dir",  "");
+		if (dir.startsWith("dynamic:"))
+			this.srcdir=dir;
+		else
+			this.srcdir =gft.processTemplate(dir, context); 
+
+		dir=props.getString("dest.dir",  "");
+		if (dir.startsWith("dynamic:"))
+			this.destdir=dir;
+		else
+			this.destdir =gft.processTemplate(dir, context);
+
 		this.mode=props.getString("mode", "push");
 		if (!("pull".equals(mode) || "push".equals(mode)))
 			throw new RuntimeException("mode should be push or pull, not "+mode);

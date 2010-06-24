@@ -36,7 +36,10 @@ public class NotifyReceiver  implements Action {
 	private final boolean safeToRetry;
 	
 	public NotifyReceiver(GftContainer gft, Props props) {
-		this.queue=TemplateUtil.processTemplate(props.getString("queue"), gft.getContext()); // TODO: use channel context
+		if (props.getString("queue").startsWith("dynamic:"))
+			this.queue=props.getString("queue"); 
+		else
+			this.queue=TemplateUtil.processTemplate(props.getString("queue"), gft.getContext()); // TODO: use channel context
 		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 
