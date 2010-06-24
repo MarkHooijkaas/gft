@@ -40,7 +40,7 @@ public class JmsSystem implements QueueSystem {
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
 	}
-	public QueueListener createListener(Props props) { return new JmsListener(this,props); }
+	public QueueListener createListener(Props props, Object context) { return new JmsListener(this,props, context); }
 
 	protected ConnectionFactory createConnectionFactory() {
         Hashtable<String, String> env= new Hashtable<String,String>();

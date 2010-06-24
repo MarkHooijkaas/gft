@@ -12,7 +12,7 @@ import org.kisst.util.XmlNode;
 public class FileTransferTask extends BasicTask {
 	public final GftContainer gft;
 	private final SimpleProps vars=new SimpleProps();;
-	private final HashMap<String, Object> context=new HashMap<String, Object>();
+	private final HashMap<String, Object> context;
 
 	public final Channel channel;
 	public final String srcpath;
@@ -31,17 +31,18 @@ public class FileTransferTask extends BasicTask {
 			throw new RuntimeException("Could not find channel with name "+input.getChildText("kanaal"));
 		// Strip preceding slashes to normalize the path.
 		String file=input.getChildText("bestand");
-		this.srcpath=channel.getSrcPath(file);
-		this.destpath=channel.getDestPath(file);
+		this.srcpath=channel.getSrcPath(file, this);
+		this.destpath=channel.getDestPath(file, this);
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
-		context.put("global", gft.props.get("gft.global", null));
+		context=new HashMap<String, Object>(channel.getContext());
 		context.put("var", vars);
 		context.put("task", this);
 	}
 
 	public void run() { channel.run(this); }
-	
+
+	public void setVar(String name, Object value) { vars.put(name, value); }
 	public Map<String, Object> getContext() { return context; }
 	public Map<String, Object> getActionContext(Action action) {
 		Map<String, Object> result=new HashMap<String, Object>(context);

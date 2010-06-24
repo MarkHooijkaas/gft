@@ -1,12 +1,10 @@
 package org.kisst.gft;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
@@ -23,13 +21,11 @@ import org.kisst.gft.mq.QueueSystem;
 import org.kisst.gft.mq.file.FileQueueSystem;
 import org.kisst.gft.mq.jms.ActiveMqSystem;
 import org.kisst.gft.mq.jms.JmsSystem;
+import org.kisst.util.ReflectionUtil;
+import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import freemarker.template.Configuration;
-import freemarker.template.DefaultObjectWrapper;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
 
 
 public class GftContainer {
@@ -38,29 +34,31 @@ public class GftContainer {
 	private final MessageHandler starter = new StartFileTransferTask(this); 
 	private final AdminServer admin=new AdminServer(this);
 	public Props props;
-	
+
 	public final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
 	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	public final HashMap<String, SshHost>    sshhosts= new LinkedHashMap<String, SshHost>();
 	public final HashMap<String, QueueListener>  listeners= new LinkedHashMap<String, QueueListener>();
+	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
+	private final HashMap<String, Object> context;
+
 
 	private final File configfile;
-	private final Configuration freemarkerConfig= new Configuration();
 
 	private QueueSystem queueSystem;
 
-	private void addAction(String name, String classname) {
+	public void addAction(String name, String classname) {
 		SimpleProps props=new SimpleProps();
 		props.put("class", classname);
 		actions.put(name, props);
 	}
 	public GftContainer(File configfile) {
+		TemplateUtil.init(configfile.getParentFile());
+		context=new HashMap<String, Object>();
+		context.put("gft", this);
+
 		this.configfile = configfile;
-		freemarkerConfig.setTemplateLoader(new GftTemplateLoader(configfile.getParentFile()));
-		DefaultObjectWrapper wrapper = new DefaultObjectWrapper();
-		wrapper.setExposeFields(true);
-		freemarkerConfig.setObjectWrapper(wrapper);
 		addAction("check_src","CheckSourceFile");
 		addAction("check_dest","CheckDestFileDoesNotExist");
 		addAction("copy","CopyFile");
@@ -68,14 +66,18 @@ public class GftContainer {
 		addAction("remove","DeleteSourceFile");
 		addAction("notify","NotifyReceiver");
 		addAction("reply","SendReplyAction");
-		addAction("log_start","LogStart");
-		addAction("log_completed","LogCompleted");
-		addAction("log_error","LogError");
 		addAction("fix_permissions","FixPermissions");
 	}
 	public QueueSystem getQueueSystem() { return queueSystem; }
+	public Map<String, Object> getContext() {return context; }
+	
 	public void init(Props props) {
 		this.props=props;
+		context.put("global", props.get("gft.global", null));
+		addDynamicModules(props);
+		for (Module mod: modules.values())
+			mod.init(props);
+
 		//actions.put("copy", new RemoteScpAction());
 		if (props.get("gft.http.host",null)!=null) {
 			Props hostProps=props.getProps("gft.http.host");
@@ -111,7 +113,7 @@ public class GftContainer {
 			throw new RuntimeException("Unknown type of queueing system "+type);
 
 		for (String lname: props.getProps("gft.listener").keys()) {
-			listeners.put(lname, queueSystem.createListener(props.getProps("gft.listener."+lname)));
+			listeners.put(lname, queueSystem.createListener(props.getProps("gft.listener."+lname), context));
 		}
 
 
@@ -143,24 +145,8 @@ public class GftContainer {
 	}
 	public Channel getChannel(String name) { return channels.get(name); }
 	public HttpHost getHost(String name) { return httphosts.get(name); }
+	public String processTemplate(Object template, Object context) { return TemplateUtil.processTemplate(template, context); }
 
-	public String processTemplate(Object template, Object context) {
-		try {
-			StringWriter out=new StringWriter();
-			Template templ;
-			if (template instanceof File)
-				templ=new Template(((File) template).getName(), new FileReader((File) template),freemarkerConfig);
-			else if (template instanceof String)
-				templ=new Template("InternalString", new StringReader((String) template),freemarkerConfig);
-			else
-				throw new RuntimeException("Unsupported template type "+template.getClass());
-			templ.process(context, out);
-			return out.toString();
-		}
-		catch (IOException e) { throw new RuntimeException(e);} 
-		catch (TemplateException e) {  throw new RuntimeException(e);}
-	}
-	
 	public void start() {
 		SimpleProps props=new SimpleProps();
 		props.load(configfile);
@@ -182,5 +168,25 @@ public class GftContainer {
 			q.stopListening();
 		queueSystem.stop();
 		admin.stopListening();
+	}
+
+	private void addDynamicModules(Props props) {
+		Object moduleProps = props.get("gft.modules",null);
+		if (! (moduleProps instanceof Props))
+			return;
+		Props modules = (Props) moduleProps;
+		for (String name:modules.keys()) {
+			try {
+				addModule(name, modules.getProps(name));
+			} catch (Exception e) {
+				throw new RuntimeException("Could not load module class "+name, e);
+			}
+		}
+	}
+	private void addModule(String name, Props props) {
+		String classname=props.getString("class");
+		Constructor cons=ReflectionUtil.getConstructor(classname, new Class<?>[] {GftContainer.class, String.class, Props.class});
+		Module mod= (Module) ReflectionUtil.createObject(cons, new Object[] {this, name, props});
+		modules.put(name, mod);
 	}
 }
