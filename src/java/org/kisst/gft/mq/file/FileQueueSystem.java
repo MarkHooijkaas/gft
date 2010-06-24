@@ -24,7 +24,7 @@ public class FileQueueSystem implements QueueSystem {
 	public FileQueue getQueue(String name) {
 		return new FileQueue(this,name);
 	}
-	public QueueListener createListener(Props props) {
+	public QueueListener createListener(Props props, Object context) {
 		return new FileListener(this, props);
 	}
 	public void stop() { }
