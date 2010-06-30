@@ -185,7 +185,7 @@ public class GftContainer {
 	}
 	private void addModule(String name, Props props) {
 		String classname=props.getString("class");
-		Constructor cons=ReflectionUtil.getConstructor(classname, new Class<?>[] {GftContainer.class, String.class, Props.class});
+		Constructor<?> cons=ReflectionUtil.getConstructor(classname, new Class<?>[] {GftContainer.class, String.class, Props.class});
 		Module mod= (Module) ReflectionUtil.createObject(cons, new Object[] {this, name, props});
 		modules.put(name, mod);
 	}
