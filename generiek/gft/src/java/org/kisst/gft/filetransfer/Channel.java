@@ -93,7 +93,7 @@ public class Channel implements TaskDefinition {
 
 	
 	public String getSrcPath(String file, FileTransferTask ft) { return calcPath(srcdir, file, ft); }
-	public String getDestPath(String file, FileTransferTask ft) {return FileUtil.filename(calcPath(destdir, file, ft));	}
+	public String getDestPath(String file, FileTransferTask ft) {return calcPath(destdir, file, ft);	}
 	
 	public void run(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
