@@ -26,7 +26,10 @@ public class JmsSystem implements QueueSystem {
 	
 	public JmsSystem(Props props) {
 		this.props=props;
-		this.sendParams = props.getString("sendParams", "");
+		if (props.getString("sendParams", null)==null)
+			this.sendParams = "";
+		else
+			this.sendParams = "?"+props.getString("sendParams", "");
 		try {
 			ConnectionFactory connectionFactory = createConnectionFactory();
 			String username=props.getString("username", null);
