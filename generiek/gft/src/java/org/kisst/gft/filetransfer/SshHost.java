@@ -3,7 +3,6 @@ package org.kisst.gft.filetransfer;
 import java.io.File;
 
 import org.kisst.cfg4j.Props;
-import org.kisst.gft.FunctionalException;
 import org.kisst.gft.admin.rest.Representable;
 import org.kisst.gft.filetransfer.Ssh.ExecResult;
 import org.kisst.util.FileUtil;
@@ -29,8 +28,6 @@ public class SshHost implements Representable {
 		this.user=props.getString("user");
 		this.port=props.getInt("port",22);
 		this.basePath=props.getString("basePath","").trim();
-		if (this.basePath.length()>0 && ! this.basePath.endsWith("/"))
-			throw new FunctionalException("basePath "+basePath+" should end with a / when it is defined");
 		String password=props.getString("password",null);
 		Object tmpkeyfile=props.get("keyfile",null);
 		if (tmpkeyfile instanceof File)

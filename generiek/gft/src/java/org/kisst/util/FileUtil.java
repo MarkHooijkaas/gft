@@ -100,4 +100,13 @@ public class FileUtil {
 			return path;
 	}
 
+	public static String joinPaths(String basePath, String path) {
+		while (basePath.endsWith("/")) 
+			basePath=basePath.substring(0,basePath.length()-1);
+		while (path.startsWith("/")) 
+			path=path.substring(1);
+		return basePath+"/"+path;
+		
+	}
+
 }
