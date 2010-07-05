@@ -23,7 +23,7 @@ public class FileTransferTask extends BasicTask {
 	public final String replyTo;
 	public final String correlationId;
 	
-	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]");
+	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
 
 	public FileTransferTask(GftContainer gft, String data, String replyTo, String correlationId) {
 		this.gft=gft;
