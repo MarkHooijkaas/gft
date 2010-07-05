@@ -14,6 +14,8 @@ public class EncryptServlet extends BaseServlet {
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
+		if (getUser(request, response)==null)
+			return;
 		response.setContentType("text/html;charset=utf-8");
 		PrintWriter out = response.getWriter();
 		out.println("<form action=\"encrypt\" method=\"get\"><input input type=\"text\" name=\"password\"><input type=\"submit\"></form><br>");
