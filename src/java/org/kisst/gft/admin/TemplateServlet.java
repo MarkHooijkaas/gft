@@ -29,6 +29,8 @@ public class TemplateServlet extends BaseServlet {
 
 	
 	public void handle(HttpServletRequest request, HttpServletResponse response) {
+		if (getUser(request, response)==null)
+			return;
 		try {
 			HashMap<String, Object> root=new HashMap<String, Object>();
 			root.put("gft", gft);
