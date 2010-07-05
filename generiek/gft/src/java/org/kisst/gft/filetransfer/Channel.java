@@ -12,7 +12,6 @@ import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskDefinition;
-import org.kisst.util.FileUtil;
 import org.kisst.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -92,8 +91,8 @@ public class Channel implements TaskDefinition {
 	}
 
 	
-	public String getSrcPath(String file, FileTransferTask ft) { return calcPath(srcdir, file, ft); }
-	public String getDestPath(String file, FileTransferTask ft) {return calcPath(destdir, file, ft);	}
+	public String getSrcPath(String file, FileTransferTask ft) { return calcPath(src.basePath+srcdir, file, ft); }
+	public String getDestPath(String file, FileTransferTask ft) {return calcPath(dest.basePath+destdir, file, ft);	}
 	
 	public void run(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
