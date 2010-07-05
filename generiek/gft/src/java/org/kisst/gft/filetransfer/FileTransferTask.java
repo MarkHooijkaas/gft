@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import org.kisst.cfg4j.SimpleProps;
+import org.kisst.gft.FunctionalException;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.task.BasicTask;
@@ -31,14 +32,16 @@ public class FileTransferTask extends BasicTask {
 		
 		this.channel=gft.getChannel(input.getChildText("kanaal"));
 		if (channel==null)
-			throw new RuntimeException("Could not find channel with name "+input.getChildText("kanaal"));
+			throw new FunctionalException("Could not find channel with name "+input.getChildText("kanaal"));
 		// Strip preceding slashes to normalize the path.
 		String file=input.getChildText("bestand");
 
+		if (file.length()>1024)
+			throw new FunctionalException("Filename length should not exceed 1024 characters");
 		if (! validCharacters.matcher(file).matches())
-			throw new RuntimeException("Filename should only contain alphanumeric characters, / . - or _");
+			throw new FunctionalException("Filename should only contain alphanumeric characters / . - or _");
 		if (file.indexOf("..")>=0)
-			throw new RuntimeException("Filename ["+file+"] is not allowed to contain .. pattern");
+			throw new FunctionalException("Filename ["+file+"] is not allowed to contain .. pattern");
 
 		this.srcpath=channel.getSrcPath(file, this);
 		this.destpath=channel.getDestPath(file, this);
