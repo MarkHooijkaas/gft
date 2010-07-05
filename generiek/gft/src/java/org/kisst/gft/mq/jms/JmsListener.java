@@ -43,8 +43,8 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 		this.system=system;
 		this.props=props;
 		this.queue=TemplateUtil.processTemplate(props.getString("queue"), context);
-		this.errorqueue=props.getString("errorqueue");
-		this.retryqueue=props.getString("retryqueue");
+		this.errorqueue=TemplateUtil.processTemplate(props.getString("errorqueue"), context);
+		this.retryqueue=TemplateUtil.processTemplate(props.getString("retryqueue"), context);
 		this.receiveErrorRetries = props.getInt("receiveErrorRetries", 1000);
 		this.receiveErrorRetryDelay = props.getInt("receiveErrorRetryDelay", 60000);
 		this.pool = Executors.newFixedThreadPool(props.getInt("threadPoolSize",10));
@@ -161,7 +161,7 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 					String code="TECHERR";
 					if (e instanceof FunctionalException)
 						code="FUNCERR";
-					logger.error(code+": Error when handling JMS message "+((TextMessage) message).getText(),e);
+					logger.error(code+": "+e.getMessage()+". When handling JMS message "+((TextMessage) message).getText(),e);
 					String queue=errorqueue;
 					if (e instanceof RetryableException)
 						queue=retryqueue;
