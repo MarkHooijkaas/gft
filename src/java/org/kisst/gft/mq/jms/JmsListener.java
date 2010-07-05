@@ -13,6 +13,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.kisst.cfg4j.Props;
+import org.kisst.gft.FunctionalException;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.admin.rest.Representable;
 import org.kisst.gft.mq.MessageHandler;
@@ -157,7 +158,10 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 			}
 			catch (Exception e) {
 				try {
-					logger.error("Error when handling JMS message "+((TextMessage) message).getText(),e);
+					String code="TECHERR";
+					if (e instanceof FunctionalException)
+						code="FUNCERR";
+					logger.error(code+": Error when handling JMS message "+((TextMessage) message).getText(),e);
 					String queue=errorqueue;
 					if (e instanceof RetryableException)
 						queue=retryqueue;
