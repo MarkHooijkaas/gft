@@ -84,8 +84,6 @@ public class Channel implements TaskDefinition {
 	private String calcPath(String dir, String file, FileTransferTask ft) {
 		while (file.startsWith("/"))
 			file=file.substring(1);
-		if (file.indexOf("..")>=0)
-			throw new RuntimeException("filename ["+file+"] is not allowed to contain .. pattern");
 		// TODO: check for more unsafe constructs
 		if (dir.startsWith("dynamic:"))
 			return gft.processTemplate(dir.substring(8)+"/"+file, ft.getContext());
