@@ -14,8 +14,16 @@ public class CryptoUtil {
 	private static final String ALGORITHM = "AES";
 	private static Key key= calcKey("jF0OQtZ4PYlEzEyZCchJdIq22GUuV6U9LoLZYqRt".getBytes());
 	
+	// The following method is public, so that any program using this library can set it's
+	// own key (preferably one that isn't publicly available worldwide through github :-) 
 	public static void setKey(String keystring) { key=calcKey(keystring.getBytes()); }
-	private static Key calcKey(byte[] keyValue) { return new SecretKeySpec(keyValue, ALGORITHM); }
+	private static Key calcKey(byte[] keyValue) {
+		// Make sure the key is 128-bits, if it is too long an Exception will be thrown
+		byte[] bytes= new byte[16];
+		for (int i=0; i<keyValue.length; i++)
+			bytes[i%16] += keyValue[i];
+		return new SecretKeySpec(bytes, ALGORITHM);
+	}
 	
 	public static String encrypt(String valueToEnc) {
 		try {

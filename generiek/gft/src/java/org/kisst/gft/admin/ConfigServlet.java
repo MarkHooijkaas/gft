@@ -14,6 +14,8 @@ public class ConfigServlet extends BaseServlet {
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
+		if (getUser(request, response)==null)
+			return;
 		response.setContentType("text/html;charset=utf-8");
 		PrintWriter out = response.getWriter();
 		out.println("<pre>");

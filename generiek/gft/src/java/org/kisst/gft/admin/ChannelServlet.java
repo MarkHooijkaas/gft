@@ -13,6 +13,8 @@ public class ChannelServlet extends BaseServlet {
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
+		if (getUser(request, response)==null)
+			return;
 		response.setContentType("text/html;charset=utf-8");
 		//response.setStatus(HttpServletResponse.SC_OK);
 		PrintWriter out = response.getWriter();
