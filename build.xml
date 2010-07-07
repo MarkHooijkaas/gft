@@ -44,6 +44,7 @@
 				<attribute name="Main-Class" value="org.kisst.gft.GftRunner"/>
 			</manifest>
 			<zipfileset dir="${srcdir}/java" includes="*.template"/>
+			<zipfileset dir="." includes="version.properties"/>
 	    </jar>
 	</target>
 
