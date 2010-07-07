@@ -51,14 +51,13 @@
 		<zip destfile="${builddir}/${projectname}-${project.version}.zip" >
 			<fileset dir="." includes="COPYING"/>
 			<zipfileset dir="build" includes="${projectname}.jar"/>
-			<zipfileset dir="bin" prefix="bin"/>
 		</zip>
 	</target>
 	
 	<target name="dist-config" description="creates a zip file with example configuration" depends="init">
-		<zip destfile="${builddir}/${projectname}-config-${project.version}.zip" >
+		<zip destfile="${builddir}/${projectname}-${project.version}-config.zip" >
 			<fileset dir="." includes="COPYING"/>
-			<zipfileset dir="config" prefix="config"/>
+			<zipfileset dir="config" prefix="config" excludes="ssh/id*" />
 		</zip>
 	</target>
 
