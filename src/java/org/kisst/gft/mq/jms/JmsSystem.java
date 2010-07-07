@@ -22,9 +22,14 @@ public class JmsSystem implements QueueSystem {
 	private final static Logger logger=LoggerFactory.getLogger(JmsSystem.class); 
 	protected final Props props;
 	private final Connection connection;
+	public final String sendParams;
 	
 	public JmsSystem(Props props) {
 		this.props=props;
+		if (props.getString("sendParams", null)==null)
+			this.sendParams = "";
+		else
+			this.sendParams = "?"+props.getString("sendParams", "");
 		try {
 			ConnectionFactory connectionFactory = createConnectionFactory();
 			String username=props.getString("username", null);

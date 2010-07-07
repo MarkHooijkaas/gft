@@ -30,8 +30,7 @@ public class CryptoUtil {
 			Cipher c = Cipher.getInstance(ALGORITHM);
 			c.init(Cipher.ENCRYPT_MODE, key);
 			byte[] encValue = c.doFinal(valueToEnc.getBytes());
-			String encryptedValue = toHex(encValue);
-			return encryptedValue;
+			return toHex(encValue);
 		}
 		catch (NoSuchAlgorithmException e) { throw new RuntimeException(e); }
 		catch (NoSuchPaddingException e) { throw new RuntimeException(e); } 
@@ -45,8 +44,8 @@ public class CryptoUtil {
 			Cipher c;
 			c = Cipher.getInstance(ALGORITHM);
 			c.init(Cipher.DECRYPT_MODE, key);
-			byte[] decordedValue = fromHex(encryptedValue);
-			byte[] decValue = c.doFinal(decordedValue);
+			byte[] decodedValue = fromHex(encryptedValue);
+			byte[] decValue = c.doFinal(decodedValue);
 			String decryptedValue = new String(decValue);
 			return decryptedValue;
 		}

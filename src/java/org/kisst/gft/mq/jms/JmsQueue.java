@@ -72,7 +72,7 @@ public class JmsQueue implements MqQueue {
 		try {
 			session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
 
-			Destination destination = session.createQueue(queue);
+			Destination destination = session.createQueue(queue+system.sendParams);
 			MessageProducer producer = session.createProducer(destination);
 			TextMessage message = session.createTextMessage();
 			message.setText(data);

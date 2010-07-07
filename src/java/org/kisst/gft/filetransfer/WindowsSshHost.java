@@ -15,7 +15,7 @@ public class WindowsSshHost extends SshHost {
 	@Override public String convertPath(String path) { return path.replace('/','\\'); }
 	@Override public boolean fileExists(String path) {
 		path=convertPath(path);
-		String file=path.substring(path.lastIndexOf('/')+1);
+		String file=path.substring(path.lastIndexOf('\\')+1);
 		String command="dir /b "+path;
 		ExecResult result=exec(command);
 		return (result.stdout.indexOf(FileUtil.filename(file))>=0);

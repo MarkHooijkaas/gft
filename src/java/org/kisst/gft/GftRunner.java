@@ -2,6 +2,8 @@ package org.kisst.gft;
 
 import java.io.File;
 
+import nl.duo.gft.GftDuoModule;
+
 import org.apache.log4j.PropertyConfigurator;
 import org.kisst.gft.ssh.GenerateKey;
 import org.kisst.util.CryptoUtil;
@@ -54,6 +56,7 @@ public class GftRunner {
 			showHelp();
 			return;
 		}
+		GftDuoModule.setKey();
 		File configfile=new File(config.get());
 		if (keygen.isSet()) {
 			GenerateKey.generateKey(configfile.getParentFile().getAbsolutePath()+"/ssh/id_dsa_gft"); // TODO: should be from config file
