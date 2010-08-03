@@ -1,13 +1,25 @@
 package org.kisst.util;
 
+import java.util.Calendar;
+
 
 public class TimeWindow {
 	private final int startHour;
 	private final int startMinute;
 	private final int endHour;
 	private final int endMinute;
+	private final int dayOfWeek;
 	
 	public TimeWindow(String window) {
+		int pos=window.indexOf(":");
+		if (pos<0)
+			dayOfWeek=-1;
+		else if (pos==2) {
+			dayOfWeek=getDayOfWeek(window.substring(0,2));
+			window=window.substring(3);
+		}
+		else
+			throw new RuntimeException("TimeWindow may only contain two letter day of week name before colon "+window);
 		String[] parts=window.split("-");
 		if (parts.length!=2)
 			throw new IllegalArgumentException("time window string ["+window+"] should contain exactly one - symbol");
@@ -22,9 +34,33 @@ public class TimeWindow {
 		
 	}
 
+	private int getDayOfWeek(String str) {
+		str=str.toLowerCase();
+		if ("su".equals(str)) return Calendar.SUNDAY;
+		if ("mo".equals(str)) return Calendar.MONDAY;
+		if ("tu".equals(str)) return Calendar.TUESDAY;
+		if ("we".equals(str)) return Calendar.WEDNESDAY;
+		if ("th".equals(str)) return Calendar.THURSDAY;
+		if ("fr".equals(str)) return Calendar.FRIDAY;
+		if ("sa".equals(str)) return Calendar.SATURDAY;
+
+		if ("zo".equals(str)) return Calendar.SUNDAY;
+		if ("ma".equals(str)) return Calendar.MONDAY;
+		if ("di".equals(str)) return Calendar.TUESDAY;
+		if ("wo".equals(str)) return Calendar.WEDNESDAY;
+		if ("do".equals(str)) return Calendar.THURSDAY;
+		if ("vr".equals(str)) return Calendar.FRIDAY;
+		if ("za".equals(str)) return Calendar.SATURDAY;
+		
+		throw new RuntimeException("Unknown day of week "+str);
+	}
+
 	public String toString() { return startHour+":"+startMinute+"-"+endHour+":"+endMinute; }
 	
-	public boolean isTimeInWindow(int hour, int minute) {
+	public boolean isTimeInWindow(int dow, int hour, int minute) {
+		if (dayOfWeek>0)
+			if (dow!=dayOfWeek)
+				return false;
 		if (hour<startHour || hour>endHour)
 			return false;
 		if (hour>startHour || minute>=startMinute)
