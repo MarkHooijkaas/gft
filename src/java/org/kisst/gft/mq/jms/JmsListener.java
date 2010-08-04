@@ -19,6 +19,7 @@ import org.kisst.gft.admin.rest.Representable;
 import org.kisst.gft.mq.MessageHandler;
 import org.kisst.gft.mq.QueueListener;
 import org.kisst.util.TemplateUtil;
+import org.kisst.util.TimeWindowList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,6 +34,8 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 	private final String retryqueue;
 	private final int receiveErrorRetries;
 	private final int receiveErrorRetryDelay;
+	private final TimeWindowList forbiddenTimes;
+
 	
 	private boolean running=false;
 	private MessageHandler handler=null;
@@ -48,6 +51,11 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 		this.receiveErrorRetries = props.getInt("receiveErrorRetries", 1000);
 		this.receiveErrorRetryDelay = props.getInt("receiveErrorRetryDelay", 60000);
 		this.pool = Executors.newFixedThreadPool(props.getInt("threadPoolSize",10));
+		String timewindow=props.getString("forbiddenTimes", null);
+		if (timewindow==null)
+			this.forbiddenTimes=null;
+		else
+			this.forbiddenTimes=new TimeWindowList(timewindow);
 	}
 	
 	public String toString() { return "JmsListener("+queue+")"; }
@@ -94,6 +102,12 @@ public class JmsListener implements Runnable, QueueListener, Representable {
 
 	private Message getMessage() throws JMSException {
 		long interval=props.getLong("interval",5000);
+		if (forbiddenTimes!=null && forbiddenTimes.isTimeInWindow()) {
+			try {
+				Thread.sleep(interval);
+			} catch (InterruptedException e) {/* ignore */}
+			return null;
+		}
 		if (session==null)
 			openSession();
 		int retryCount=0;
