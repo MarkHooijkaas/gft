@@ -23,13 +23,14 @@ public class TimeWindowList {
 	
 	public boolean isTimeInWindow() {
 		Calendar cal=Calendar.getInstance();
+		int dow =cal.get(Calendar.DAY_OF_WEEK);
 		int hour=cal.get(Calendar.HOUR_OF_DAY);
 		int minute=cal.get(Calendar.MINUTE);
-		return isTimeInWindow(hour,minute);
+		return isTimeInWindow(dow,hour,minute);
 	}
-	public boolean isTimeInWindow(int hour, int minute) {
+	public boolean isTimeInWindow(int dow, int hour, int minute) {
 		for (int i=0; i<list.length; i++)
-			if (list[i].isTimeInWindow(hour, minute))
+			if (list[i].isTimeInWindow(dow, hour, minute))
 				return true;
 		return false;
 	}
