@@ -20,12 +20,14 @@ public class SshHost implements Representable {
 	private final Ssh.Credentials cred;
 	private final String keyfile;
 	private final TimeWindowList forbiddenTimes;
+	public final String basePath;
 
 	
 	public SshHost(Props props) {
 		this.host=props.getString("host");
 		this.user=props.getString("user");
 		this.port=props.getInt("port",22);
+		this.basePath=props.getString("basePath","").trim();
 		String password=props.getString("password",null);
 		Object tmpkeyfile=props.get("keyfile",null);
 		if (tmpkeyfile instanceof File)
@@ -46,7 +48,7 @@ public class SshHost implements Representable {
 	}
 	public String toString() { return "ssh:"+user+"@"+host+(port==22? "" : ":"+port); }
 	
-	public boolean isAvailable() { return ! forbiddenTimes.isTimeInWindow(); }
+	public boolean isAvailable() { return forbiddenTimes==null || ! forbiddenTimes.isTimeInWindow(); }
 	
 	public ExecResult exec(String command) { return Ssh.exec(this, cred, command); }
 	public String call(String command) { return Ssh.ssh(this, cred, command); }
