@@ -1,10 +1,13 @@
 package org.kisst.gft;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Properties;
 
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
@@ -47,7 +50,16 @@ public class GftContainer {
 	private final File configfile;
 
 	private QueueSystem queueSystem;
-
+	public static String getVersion() {
+		InputStream in = GftContainer.class.getResourceAsStream("/version.properties");
+		if (in==null)
+			return "unknown-version";
+		Properties props=new Properties();
+		try {
+			props.load(in);
+		} catch (IOException e) { throw new RuntimeException(e);}
+		return props.getProperty("project.version");
+	}
 	public void addAction(String name, String classname) {
 		SimpleProps props=new SimpleProps();
 		props.put("class", classname);

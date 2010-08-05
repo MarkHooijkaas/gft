@@ -44,6 +44,7 @@
 				<attribute name="Main-Class" value="org.kisst.gft.GftRunner"/>
 			</manifest>
 			<zipfileset dir="${srcdir}/java" includes="*.template"/>
+			<zipfileset dir="." includes="version.properties"/>
 	    </jar>
 	</target>
 
@@ -57,7 +58,7 @@
 	<target name="dist-config" description="creates a zip file with example configuration" depends="init">
 		<zip destfile="${builddir}/${projectname}-${project.version}-config.zip" >
 			<fileset dir="." includes="COPYING"/>
-			<zipfileset dir="config" prefix="config" excludes="ssh" />
+			<zipfileset dir="config" prefix="config" excludes="ssh/id*" />
 		</zip>
 	</target>
 

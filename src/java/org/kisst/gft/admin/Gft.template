@@ -1,4 +1,4 @@
-<h1>GFT volgens template in classloader</h1> 
+<h1>GFT version ${gft.version}</h1> 
 <a href="config">Configuration</a><br> 
 
 <h2>Channels</h2> 
