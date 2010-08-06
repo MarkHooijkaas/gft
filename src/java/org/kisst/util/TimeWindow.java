@@ -11,7 +11,7 @@ public class TimeWindow {
 	private final int dayOfWeek;
 	
 	public TimeWindow(String window) {
-		int pos=window.indexOf(":");
+		int pos=window.indexOf("!");
 		if (pos<0)
 			dayOfWeek=-1;
 		else if (pos==2) {
@@ -19,7 +19,7 @@ public class TimeWindow {
 			window=window.substring(3);
 		}
 		else
-			throw new RuntimeException("TimeWindow may only contain two letter day of week name before colon "+window);
+			throw new RuntimeException("TimeWindow may only contain two letter day of week name before exclamation mark "+window);
 		String[] parts=window.split("-");
 		if (parts.length!=2)
 			throw new IllegalArgumentException("time window string ["+window+"] should contain exactly one - symbol");
