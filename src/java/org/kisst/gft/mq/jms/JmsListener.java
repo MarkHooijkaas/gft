@@ -110,10 +110,10 @@ public class JmsListener implements QueueListener, Representable {
 				} catch (InterruptedException e) {/* ignore */}
 				return null;
 			}
-			if (session==null)
-				openSession();
 			int retryCount=0;
 			try {
+				if (session==null)
+					openSession();
 				Message message = consumer.receive(interval);
 				if (message!=null)
 					return message;
