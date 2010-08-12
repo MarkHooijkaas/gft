@@ -49,8 +49,8 @@ public class GftContainer {
 
 	private final File configfile;
 
-	private QueueSystem queueSystem;
-	public static String getVersion() {
+	public QueueSystem queueSystem;
+	public String getVersion() {
 		InputStream in = GftContainer.class.getResourceAsStream("/version.properties");
 		if (in==null)
 			return "unknown-version";

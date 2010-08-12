@@ -29,9 +29,9 @@ public class JmsListener implements QueueListener, Representable {
 
 	private final JmsSystem system;
 	private final Props props;
-	private final String queue;
-	private final String errorqueue;
-	private final String retryqueue;
+	public final String queue;
+	public final String errorqueue;
+	public final String retryqueue;
 	private final int receiveErrorRetries;
 	private final int receiveErrorRetryDelay;
 	private final int nrofThreads;

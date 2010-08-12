@@ -18,14 +18,14 @@
 <h2>Listener</h2> 
 <table> 
 <#list listeners?keys as name>
-<tr><td><a href=rest/listener/${name}>${name}</a></td><td>${listeners[name]}</td></tr> 
+<tr><td><a href=rest/listener/${name}>${name}</a></td><td>${listeners[name]}</td><td><a href=listener/${name}>STATUS</a></td></tr> 
 </#list> 
 </table> 
 
 <h2>SSH Hosts</h2> 
 <table> 
 <#list sshhosts?keys as name>
-<tr><td><a href=rest/sshhost/${name}>${name}</a></td><td>${sshhosts[name]}</td></tr> 
+<tr><td><a href=rest/sshhost/${name}>${name}</a></td><td>${sshhosts[name]}</td><td><a href=dir/${name}>DIR</a></td></tr> 
 </#list> 
 </table> 
 
