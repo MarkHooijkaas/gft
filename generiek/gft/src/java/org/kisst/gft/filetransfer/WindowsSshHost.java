@@ -52,4 +52,9 @@ public class WindowsSshHost extends SshHost {
 	@Override public void copyFileFrom(SshHost src, String srcpath, String destpath)  {
 		call(scpCommand+" "+src.host+":"+src.convertPath(srcpath)+" "+convertPath(destpath));
 	}
+	@Override public String ls() {
+		ExecResult result=exec("dir "+convertPath(basePath));
+		return result.stdout;
+	}
+
 }
