@@ -93,5 +93,4 @@ public class JmsQueue implements MqQueue {
 			catch (JMSException e) {throw new RuntimeException(e); }
 		}
 	}
-
 }
