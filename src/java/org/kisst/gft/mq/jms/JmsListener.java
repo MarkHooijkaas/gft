@@ -8,6 +8,7 @@ import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
+import javax.jms.Queue;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
@@ -38,6 +39,7 @@ public class JmsListener implements QueueListener, Representable {
 
 
 	private boolean running=false;
+	private boolean stopMessage=false;
 	private MessageHandler handler=null;
 	private Thread[] threads=null;
 	//private final ExecutorService pool;
@@ -79,7 +81,7 @@ public class JmsListener implements QueueListener, Representable {
 
 	private final class MyMessageHandler implements Runnable {
 		private Session session = null;
-		private Destination destination = null;
+		private Queue destination = null;
 		private MessageConsumer consumer = null;
 
 		public void run() {
@@ -89,7 +91,12 @@ public class JmsListener implements QueueListener, Representable {
 					Message message=null;
 					message = getMessage();
 					if (message!=null) {
-						handleMessage(message);
+						if ( isStopMessage(message))
+							handleStopMessage(session, message);
+						else if ( isStartMessage(message))
+							handleStartMessage(session, message);
+						else
+							handleMessage(message);
 					}
 				}
 				logger.info("Stopped listening to queue {}", queue);
@@ -102,9 +109,12 @@ public class JmsListener implements QueueListener, Representable {
 			}
 		}
 
+		private boolean isStopMessage(Message message) { return false; }
+		private boolean isStartMessage(Message message) { return false; }
+
 		private Message getMessage() throws JMSException {
 			long interval=props.getLong("interval",5000);
-			if (forbiddenTimes!=null && forbiddenTimes.isTimeInWindow()) {
+			if (! isStopped()) {
 				try {
 					Thread.sleep(interval);
 				} catch (InterruptedException e) {/* ignore */}
@@ -238,6 +248,26 @@ public class JmsListener implements QueueListener, Representable {
 
 
 	public boolean listening() { return threads!=null; }
-	public void stopListening() { running=false; } 
+	public void stopListening() { running=false; }
+
+	private void handleStopMessage(Session session, Message message) {
+		stopMessage=true;
+		try {
+			session.rollback(); // put the stopMessage back on the queue
+		} catch (JMSException e) { throw new RuntimeException(e); } 
+	}
+
+	private void handleStartMessage(Session session, Message message) {
+		stopMessage=false;
+		try {
+			session.rollback(); // put the stopMessage back on the queue
+		} catch (JMSException e) { throw new RuntimeException(e); } 
+	}
+
+	public boolean isStopped() {
+		if (stopMessage)
+			return false;
+		return forbiddenTimes==null || ! forbiddenTimes.isTimeInWindow();
+	} 
 
 }
