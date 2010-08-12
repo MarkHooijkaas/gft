@@ -12,6 +12,7 @@ import com.jcraft.jsch.HostKey;
 
 
 public class SshHost implements Representable {
+	public final String name;
 	public final String user;
 	public final String host;
 	public final int port;
@@ -24,6 +25,7 @@ public class SshHost implements Representable {
 
 	
 	public SshHost(Props props) {
+		this.name=props.getLocalName();
 		this.host=props.getString("host");
 		this.user=props.getString("user");
 		this.port=props.getInt("port",22);
@@ -78,8 +80,8 @@ public class SshHost implements Representable {
 		result.append("}\n");
 		return result.toString();
 	}
-	public String ls() {
-		ExecResult result=exec("ls -l "+basePath);
+	public String ls(String dir) {
+		ExecResult result=exec("ls -l "+basePath+"/"+dir);
 		return result.stdout;
 	}
 

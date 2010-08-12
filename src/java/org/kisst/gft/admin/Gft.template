@@ -8,14 +8,7 @@
 </#list> 
 </table> 
 
-<h2>Actions</h2> 
-<table> 
-<#list actions?keys as name>
-<tr><td><a href=rest/action/${name}>${name}</a></td><td>${actions[name]}</td></tr> 
-</#list> 
-</table> 
-
-<h2>Listener</h2> 
+<h2>Listeners</h2> 
 <table> 
 <#list listeners?keys as name>
 <tr><td><a href=rest/listener/${name}>${name}</a></td><td>${listeners[name]}</td><td><a href=listener/${name}>STATUS</a></td></tr> 
@@ -33,5 +26,12 @@
 <table> 
 <#list httphosts?keys as name>
 <tr><td><a href=rest/httphost/${name}>${name}</a></td><td>${httphosts[name]}</td></tr> 
+</#list> 
+</table> 
+
+<h2>Actions</h2> 
+<table> 
+<#list actions?keys as name>
+<tr><td><a href=rest/action/${name}>${name}</a></td><td>${actions[name]}</td></tr> 
 </#list> 
 </table> 
