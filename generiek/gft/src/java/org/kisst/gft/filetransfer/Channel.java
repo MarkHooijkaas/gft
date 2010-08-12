@@ -29,8 +29,8 @@ public class Channel implements TaskDefinition {
 	public final Props props;
 	public final SshHost src;
 	public final SshHost dest;
-	private final String srcdir;
-	private final String destdir;
+	public final String srcdir;
+	public final String destdir;
 	public final String mode;
 	private final HashMap<String, Object> context;
 
