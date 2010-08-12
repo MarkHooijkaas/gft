@@ -246,7 +246,6 @@ public class JmsListener implements QueueListener, Representable {
 		}
 	}
 
-
 	public boolean listening() { return threads!=null; }
 	public void stopListening() { running=false; }
 
@@ -269,5 +268,4 @@ public class JmsListener implements QueueListener, Representable {
 			return false;
 		return forbiddenTimes==null || ! forbiddenTimes.isTimeInWindow();
 	} 
-
 }

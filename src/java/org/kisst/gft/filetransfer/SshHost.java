@@ -78,5 +78,9 @@ public class SshHost implements Representable {
 		result.append("}\n");
 		return result.toString();
 	}
+	public String ls() {
+		ExecResult result=exec("ls -l "+basePath);
+		return result.stdout;
+	}
 
 }
