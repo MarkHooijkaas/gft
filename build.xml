@@ -45,6 +45,7 @@
 			</manifest>
 			<zipfileset dir="${srcdir}/java" includes="*.template"/>
 			<zipfileset dir="." includes="version.properties"/>
+			<zipfileset dir="${srcdir}/java" includes="org/kisst/gft/admin/Gft.template"/>
 	    </jar>
 	</target>
 
