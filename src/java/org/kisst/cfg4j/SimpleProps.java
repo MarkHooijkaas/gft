@@ -40,7 +40,10 @@ public class SimpleProps extends PropsBase {
 	public SimpleProps() { this(null,null); }
 	public SimpleProps(SimpleProps parent, String name) {
 		this.parent=parent;
-		this.name=name;
+		if (name!=null && name.lastIndexOf(".")>0)
+			this.name=name.substring(name.lastIndexOf(".")+1);
+		else
+			this.name=name;
 	}
 	public String getLocalName() { return name; }
 	public String getFullName() {
