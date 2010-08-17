@@ -53,8 +53,8 @@ public class NotifyReceiver  implements Action {
 		String queue=this.queue;
 		if (queue.startsWith("dynamic:")) {
 			//queue=TemplateUtil.processTemplate(queue.substring(8), ft.getActionContext(this));
-			String omgevingNaar=msg.getChildText("Header/bestemming?/omgevingscode?");
-			queue=queue.substring(8).replaceAll("${omgevingNaar}", omgevingNaar);
+			String omgevingNaar=msg.getChildText("?Header/?bestemming/?omgevingscode");
+			queue=queue.substring(8).replaceAll("\\$\\{omgevingNaar\\}", omgevingNaar);
 		}
 		
 		logger.info("Sending message to queue {}",queue);
