@@ -190,7 +190,7 @@ public class JmsListener implements QueueListener, Representable {
 					String queue=errorqueue;
 					if (e instanceof RetryableException)
 						queue=retryqueue;
-					Destination errordestination = session.createQueue(queue);
+					Destination errordestination = session.createQueue(queue+system.sendParams);
 					MessageProducer producer = session.createProducer(errordestination);
 					Message errmsg=cloneMessage(message);
 					producer.send(errmsg);
