@@ -20,11 +20,13 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 package org.kisst.cfg4j;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
-import java.io.Reader;
+import java.io.InputStreamReader;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.kisst.util.FileUtil;
 import org.kisst.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,9 +114,18 @@ public class SimpleProps extends PropsBase {
 			return defaultValue;
 	}
 
-	public void load(String filename)  { new Parser(filename).fillMap(this);	}
-	public void load(File file)        { new Parser(file).fillMap(this); }
-	public void read(Reader inp)       { new Parser(inp).fillMap(this);}
+	public void load(String filename)  { load(new File(filename));	}
+	public void load(File file) {
+		InputStreamReader f = new InputStreamReader(FileUtil.open(file));
+		try {
+			new Parser(f, file).fillMap(this);
+		}
+		finally {
+			try {
+				f.close();
+			} catch (IOException e) { throw new RuntimeException(e); }
+		}
+	}
 	public void read(InputStream inp)  { new Parser(inp).fillMap(this);} 
 
 
