@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
+import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -45,6 +46,8 @@ public class GftContainer {
 	public final HashMap<String, QueueListener>  listeners= new LinkedHashMap<String, QueueListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
 	private final HashMap<String, Object> context;
+	private final String hostName;
+;
 
 
 	private final File configfile;
@@ -79,6 +82,10 @@ public class GftContainer {
 		addAction("notify","NotifyReceiver");
 		addAction("reply","SendReplyAction");
 		addAction("fix_permissions","FixPermissions");
+		try {
+			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
+		}
+		catch (UnknownHostException e) { throw new RuntimeException(e); }
 	}
 	public QueueSystem getQueueSystem() { return queueSystem; }
 	public Map<String, Object> getContext() {return context; }
@@ -163,7 +170,7 @@ public class GftContainer {
 		SimpleProps props=new SimpleProps();
 		props.load(configfile);
 		init(props);
-		logger.info("Starting GftContainer");
+		logger.info("Starting GftContainer on host "+hostName);
 		if (logger.isDebugEnabled()){
 			logger.debug("Starting GftContainer with props {}", props.toString());
 		}
