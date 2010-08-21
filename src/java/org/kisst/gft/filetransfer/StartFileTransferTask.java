@@ -12,7 +12,7 @@ public class StartFileTransferTask implements MessageHandler {
 	private final GftContainer gft;
 	
 	public StartFileTransferTask(GftContainer gft) { this.gft=gft; }
-	public void handle(MqMessage msg) {
+	public boolean handle(MqMessage msg) {
 		FileTransferTask task=new FileTransferTask(gft, msg.getData(), msg.getReplyTo(), msg.getCorrelationId());
 		if (logger.isInfoEnabled())
 			logger.info("file "+task.srcpath+" transfer task started");
@@ -20,6 +20,7 @@ public class StartFileTransferTask implements MessageHandler {
 		task.run();
 		//if (! t.isDone())
 		//	t.save();
+		return true;
 	}
 
 }
