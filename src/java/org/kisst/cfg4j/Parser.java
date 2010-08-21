@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import org.kisst.util.FileUtil;
-
 public class Parser {
 	private final File file;
 	private final BufferedReader inp;
@@ -19,17 +17,15 @@ public class Parser {
 	private int pos=0;
 
 
-	private Parser(Reader inp, File f) {
+	public Parser(Reader inp, File f) {
 		this.file=f; 
 		if (inp instanceof BufferedReader)
 			this.inp=(BufferedReader) inp;
 		else
 			this.inp=new BufferedReader(inp);
 	}
-	public Parser(Reader inp) { this(inp,null); }
-	public Parser(String filename)       { this(new File(filename));	}
-	public Parser(File f)                { this(new InputStreamReader(FileUtil.open(f)), f); }
-	public Parser(InputStream inpstream) { this(new InputStreamReader(inpstream)); }
+	public Parser(InputStream inpstream) { this(new InputStreamReader(inpstream), null); }
+	
 	public File getFile() { return file; }
 	public File getPath(String path) {
 		if (file==null)
