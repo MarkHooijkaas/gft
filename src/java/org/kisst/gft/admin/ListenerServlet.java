@@ -60,7 +60,7 @@ public class ListenerServlet extends BaseServlet {
 				out.println("<ul>");
 				Queue destination = session.createQueue(q);
 				QueueBrowser browser = session.createBrowser(destination);
-				Enumeration e = browser.getEnumeration();
+				Enumeration<?> e = browser.getEnumeration();
 				while (e.hasMoreElements()) {
 					Message msg = (Message) e.nextElement();
 					out.println("<li> "+format.format(new Date(msg.getJMSTimestamp())));

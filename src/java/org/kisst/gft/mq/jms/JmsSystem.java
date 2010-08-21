@@ -53,7 +53,7 @@ public class JmsSystem implements QueueSystem {
         Object jndifile = props.get("jndifile");
         if (jndifile instanceof File) {
 			try {
-				env.put( "java.naming.provider.url", ((File)jndifile).toURL().toString());
+				env.put( "java.naming.provider.url", ((File)jndifile).toURI().toURL().toString());
 			} catch (MalformedURLException e) { throw new RuntimeException(e); }
         }
 		else if (jndifile instanceof String )
