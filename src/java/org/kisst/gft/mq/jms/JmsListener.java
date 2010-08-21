@@ -38,11 +38,9 @@ public class JmsListener implements QueueListener, Representable {
 	private final long interval;
 	private final TimeWindowList forbiddenTimes;
 
-
-	private boolean running=false;
 	private boolean stopMessage=false;
 	private MessageHandler handler=null;
-	private Thread[] threads=null;
+	private ListenThread[] threads=null;
 
 
 	//private final ExecutorService pool;
@@ -67,28 +65,54 @@ public class JmsListener implements QueueListener, Representable {
 
 	public String toString() { return "JmsListener("+queue+")"; }
 	public String getRepresentation() { return props.toString(); }
+	public void stopListening() { stop(); }
 	public void stop() {
 		logger.info("Stopping listening to queue {}", queue);
-		running=false;
+		for (ListenThread t:threads)
+			t.stop();
 	}
 	public void listen(MessageHandler handler)  {
 		if (threads!=null)
 			throw new RuntimeException("Listener already running");
-		threads =new Thread[nrofThreads];
-		running=true;
+		threads =new ListenThread[nrofThreads];
 		this.handler=handler;
 		for (int i=0; i<nrofThreads; i++) {
-			threads[i]=new Thread(new MyMessageHandler());
-			threads[i].setName("JmsListener-"+i);
-			threads[i].start();
+			threads[i]=new ListenThread();
+			Thread t =new Thread(threads[i]);
+			t.setName("JmsListener-"+i);
+			t.start();
 		}
 	}
 
-	private final class MyMessageHandler implements Runnable {
+	public boolean listening() { return threads!=null; }
+	public void notifyThreadStop(ListenThread listenThread) {
+		if (threads==null)
+			throw new RuntimeException("Notification of thread stop while no thread should be running");
+		int count=0;
+		for (int i=0;i <threads.length; i++) {
+			if (threads[i]==listenThread)
+				threads[i]=null;
+			if (threads[i]!=null)
+				count++;
+		}
+		if (count==0)
+			threads=null;
+	}
+
+	public boolean isStopped() {
+		if (stopMessage)
+			return false;
+		return forbiddenTimes==null || ! forbiddenTimes.isTimeInWindow();
+	} 
+	
+	
+	private final class ListenThread implements Runnable {
 		private Session session = null;
 		private Queue destination = null;
 		private MessageConsumer consumer = null;
+		private boolean running=false;
 
+		private void stop() { running=false; }
 		public void run() {
 			try {
 				logger.info("Opening queue {}",queue);
@@ -104,13 +128,20 @@ public class JmsListener implements QueueListener, Representable {
 							handleMessage(message);
 					}
 				}
-				logger.info("Stopped listening to queue {}", queue);
-				closeSession();
 			}
 			catch (JMSException e) {
 				logger.error("Unrecoverable error during listening, stopped listening", e);
 				if (props.getBoolean("exitOnUnrecoverableListenerError", false))
 					System.exit(1);
+			}
+			finally {
+				try{
+					logger.info("Stopped listening to queue {}", queue);
+					closeSession();
+				}
+				finally {
+					notifyThreadStop(this);
+				}
 			}
 		}
 
@@ -250,9 +281,12 @@ public class JmsListener implements QueueListener, Representable {
 		}
 	}
 
-	public boolean listening() { return threads!=null; }
-	public void stopListening() { running=false; }
-
+	private void handleStartMessage(Session session, Message message) {
+		stopMessage=false;
+		try {
+			session.rollback(); // put the stopMessage back on the queue
+		} catch (JMSException e) { throw new RuntimeException(e); } 
+	}
 	private void handleStopMessage(Session session, Message message) {
 		stopMessage=true;
 		try {
@@ -260,16 +294,5 @@ public class JmsListener implements QueueListener, Representable {
 		} catch (JMSException e) { throw new RuntimeException(e); } 
 	}
 
-	private void handleStartMessage(Session session, Message message) {
-		stopMessage=false;
-		try {
-			session.rollback(); // put the stopMessage back on the queue
-		} catch (JMSException e) { throw new RuntimeException(e); } 
-	}
 
-	public boolean isStopped() {
-		if (stopMessage)
-			return false;
-		return forbiddenTimes==null || ! forbiddenTimes.isTimeInWindow();
-	} 
 }
