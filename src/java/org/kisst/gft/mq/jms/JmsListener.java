@@ -35,6 +35,7 @@ public class JmsListener implements QueueListener, Representable {
 	private final int receiveErrorRetries;
 	private final int receiveErrorRetryDelay;
 	private final int nrofThreads;
+	private final long interval;
 	private final TimeWindowList forbiddenTimes;
 
 
@@ -42,11 +43,15 @@ public class JmsListener implements QueueListener, Representable {
 	private boolean stopMessage=false;
 	private MessageHandler handler=null;
 	private Thread[] threads=null;
+
+
 	//private final ExecutorService pool;
 
 	public JmsListener(JmsSystem system, Props props, Object context) {
 		this.system=system;
 		this.props=props;
+		interval=props.getLong("interval",5000);
+
 		this.queue=TemplateUtil.processTemplate(props.getString("queue"), context);
 		this.errorqueue=TemplateUtil.processTemplate(props.getString("errorqueue"), context);
 		this.retryqueue=TemplateUtil.processTemplate(props.getString("retryqueue"), context);
@@ -113,7 +118,6 @@ public class JmsListener implements QueueListener, Representable {
 		private boolean isStartMessage(Message message) { return false; }
 
 		private Message getMessage() throws JMSException {
-			long interval=props.getLong("interval",5000);
 			if (! isStopped()) {
 				try {
 					Thread.sleep(interval);
@@ -186,7 +190,7 @@ public class JmsListener implements QueueListener, Representable {
 					String queue=errorqueue;
 					if (e instanceof RetryableException)
 						queue=retryqueue;
-					Destination errordestination = session.createQueue(queue);
+					Destination errordestination = session.createQueue(queue+system.sendParams);
 					MessageProducer producer = session.createProducer(errordestination);
 					Message errmsg=cloneMessage(message);
 					producer.send(errmsg);
