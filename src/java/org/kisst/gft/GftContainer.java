@@ -20,9 +20,9 @@ import org.kisst.gft.filetransfer.SshHost;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
 import org.kisst.gft.filetransfer.WindowsSshHost;
 import org.kisst.jms.ActiveMqSystem;
-import org.kisst.jms.JmsListener;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MessageHandler;
+import org.kisst.jms.MultiListener;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
@@ -41,7 +41,7 @@ public class GftContainer {
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
 	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	public final HashMap<String, SshHost>    sshhosts= new LinkedHashMap<String, SshHost>();
-	public final HashMap<String, JmsListener>  listeners= new LinkedHashMap<String, JmsListener>();
+	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
 	private final HashMap<String, Object> context;
 	private final String hostName;
@@ -170,7 +170,7 @@ public class GftContainer {
 		if (logger.isDebugEnabled()){
 			logger.debug("Starting GftContainer with props {}", props.toString());
 		}
-		for (JmsListener q : listeners.values() )
+		for (MultiListener q : listeners.values() )
 			q.listen(starter);
 		admin.startListening();
 	}
@@ -179,8 +179,8 @@ public class GftContainer {
 	}
 
 	public void stop() {
-		for (JmsListener q : listeners.values() )
-			q.stopListening();
+		for (MultiListener q : listeners.values() )
+			q.stop();
 		queueSystem.stop();
 		admin.stopListening();
 	}

@@ -16,8 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.jms.JmsListener;
 import org.kisst.jms.JmsSystem;
+import org.kisst.jms.MultiListener;
 import org.kisst.util.XmlNode;
 
 public class ListenerServlet extends BaseServlet {
@@ -41,18 +41,18 @@ public class ListenerServlet extends BaseServlet {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		out.println("<h1>Listener "+name);
 
-		JmsListener lstnr = (JmsListener) gft.listeners.get(name);
+		MultiListener lstnr = (MultiListener) gft.listeners.get(name);
 		Session session=null;
 		try {
 			session = ((JmsSystem)gft.queueSystem).getConnection().createSession(true, Session.AUTO_ACKNOWLEDGE);
 			for (String qname:queuenames.split("[,]")) {
 				String q;
 				if ("input".equals(qname))
-					q=lstnr.queue;
+					q=lstnr.getQueue();
 				else if ("error".equals(qname))
-					q=lstnr.errorqueue;
+					q=lstnr.getErrorQueue();
 				else if ("retry".equals(qname))
-					q=lstnr.retryqueue;
+					q=lstnr.getRetryQueue();
 				else
 					throw new RuntimeException("Invalid queuename "+qname);
 
