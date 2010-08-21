@@ -9,11 +9,9 @@ import nl.duo.gft.GftDuoModule;
 import org.apache.log4j.PropertyConfigurator;
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
-import org.kisst.gft.mq.QueueSystem;
-import org.kisst.gft.mq.file.FileQueueSystem;
-import org.kisst.gft.mq.jms.ActiveMqSystem;
-import org.kisst.gft.mq.jms.JmsSystem;
 import org.kisst.gft.ssh.GenerateKey;
+import org.kisst.jms.ActiveMqSystem;
+import org.kisst.jms.JmsSystem;
 import org.kisst.util.CryptoUtil;
 import org.kisst.util.FileUtil;
 import org.kisst.util.TemplateUtil;
@@ -73,13 +71,11 @@ public class GftRunner {
 			// TODO: refactor this code dupplication
 			SimpleProps props=new SimpleProps();
 			props.load(configfile);
-			QueueSystem queueSystem;
+			JmsSystem queueSystem;
 
 			Props qmprops=props.getProps("gft.queueSystem");
 			String type=qmprops.getString("type");
-			if ("File".equals(type))
-				queueSystem=new FileQueueSystem(qmprops);
-			else if ("ActiveMq".equals(type))
+			if ("ActiveMq".equals(type))
 				queueSystem=new ActiveMqSystem(qmprops);
 			else if ("Jms".equals(type))
 				queueSystem=new JmsSystem(qmprops);

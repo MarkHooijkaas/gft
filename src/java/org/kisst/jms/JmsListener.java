@@ -1,4 +1,4 @@
-package org.kisst.gft.mq.jms;
+package org.kisst.jms;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
@@ -13,14 +13,12 @@ import org.kisst.cfg4j.Props;
 import org.kisst.gft.FunctionalException;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.admin.rest.Representable;
-import org.kisst.gft.mq.MessageHandler;
-import org.kisst.gft.mq.QueueListener;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.TimeWindowList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JmsListener implements QueueListener, Representable {
+public class JmsListener implements Representable {
 
 	private final static Logger logger=LoggerFactory.getLogger(JmsListener.class); 
 
@@ -38,9 +36,6 @@ public class JmsListener implements QueueListener, Representable {
 	private boolean stopMessage=false;
 	private MessageHandler handler=null;
 	private ListenThread[] threads=null;
-
-
-	//private final ExecutorService pool;
 
 	public JmsListener(JmsSystem system, Props props, Object context) {
 		this.system=system;
@@ -198,7 +193,7 @@ public class JmsListener implements QueueListener, Representable {
 		public void handleMessage(Message message) {
 			try {
 				logger.debug("Handling {}",message.getJMSMessageID());
-				handler.handle(new JmsQueue.JmsMessage(message)); 
+				handler.handle(new JmsMessage(message)); 
 			}
 			catch (Exception e) {
 				try {

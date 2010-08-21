@@ -16,8 +16,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.mq.jms.JmsListener;
-import org.kisst.gft.mq.jms.JmsSystem;
+import org.kisst.jms.JmsListener;
+import org.kisst.jms.JmsSystem;
 import org.kisst.util.XmlNode;
 
 public class ListenerServlet extends BaseServlet {

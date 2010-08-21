@@ -1,4 +1,4 @@
-package org.kisst.gft.mq.jms;
+package org.kisst.jms;
 
 import java.util.Enumeration;
 

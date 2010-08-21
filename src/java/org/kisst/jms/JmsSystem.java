@@ -1,4 +1,4 @@
-package org.kisst.gft.mq.jms;
+package org.kisst.jms;
 
 import java.io.File;
 import java.net.MalformedURLException;
@@ -11,14 +11,11 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
 import org.kisst.cfg4j.Props;
-import org.kisst.gft.mq.MqQueue;
-import org.kisst.gft.mq.QueueListener;
-import org.kisst.gft.mq.QueueSystem;
 import org.kisst.util.CryptoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JmsSystem implements QueueSystem {
+public class JmsSystem {
 	private final static Logger logger=LoggerFactory.getLogger(JmsSystem.class); 
 	protected final Props props;
 	private final Connection connection;
@@ -45,7 +42,7 @@ public class JmsSystem implements QueueSystem {
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
 	}
-	public QueueListener createListener(Props props, Object context) { return new JmsListener(this,props, context); }
+	public JmsListener createListener(Props props, Object context) { return new JmsListener(this,props, context); }
 
 	protected ConnectionFactory createConnectionFactory() {
         Hashtable<String, String> env= new Hashtable<String,String>();
@@ -77,7 +74,7 @@ public class JmsSystem implements QueueSystem {
 	}
 
 
-	public MqQueue getQueue(String name) { return new JmsQueue(this, name); }
+	public JmsQueue getQueue(String name) { return new JmsQueue(this, name); }
 	public Connection getConnection() { return connection;	}
 	public void close() {
 		try {
