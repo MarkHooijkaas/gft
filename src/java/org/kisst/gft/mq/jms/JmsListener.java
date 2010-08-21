@@ -119,14 +119,8 @@ public class JmsListener implements QueueListener, Representable {
 				while (running) {
 					Message message=null;
 					message = getMessage();
-					if (message!=null) {
-						if ( isStopMessage(message))
-							handleStopMessage(session, message);
-						else if ( isStartMessage(message))
-							handleStartMessage(session, message);
-						else
-							handleMessage(message);
-					}
+					if (message!=null)
+						handleMessage(message);
 				}
 			}
 			catch (JMSException e) {
@@ -144,9 +138,6 @@ public class JmsListener implements QueueListener, Representable {
 				}
 			}
 		}
-
-		private boolean isStopMessage(Message message) { return false; }
-		private boolean isStartMessage(Message message) { return false; }
 
 		private Message getMessage() throws JMSException {
 			if (! isStopped()) {
@@ -280,19 +271,4 @@ public class JmsListener implements QueueListener, Representable {
 			catch (JMSException e) { throw new RuntimeException(e);}
 		}
 	}
-
-	private void handleStartMessage(Session session, Message message) {
-		stopMessage=false;
-		try {
-			session.rollback(); // put the stopMessage back on the queue
-		} catch (JMSException e) { throw new RuntimeException(e); } 
-	}
-	private void handleStopMessage(Session session, Message message) {
-		stopMessage=true;
-		try {
-			session.rollback(); // put the stopMessage back on the queue
-		} catch (JMSException e) { throw new RuntimeException(e); } 
-	}
-
-
 }
