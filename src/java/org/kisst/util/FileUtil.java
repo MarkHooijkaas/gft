@@ -22,9 +22,11 @@ package org.kisst.util;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.Reader;
 import java.util.Properties;
 
 public class FileUtil {
@@ -64,9 +66,15 @@ public class FileUtil {
 
 
 	public static String loadString(String filename) {
+		try {
+			return loadString(new FileReader(filename));
+		} catch (FileNotFoundException e) { throw new RuntimeException(e);}
+	}
+	
+	public static String loadString(Reader rdr) {
 		BufferedReader inp = null;
 		try {
-			inp =new BufferedReader(new FileReader(filename));
+			inp =new BufferedReader(rdr);
 			StringBuilder result=new StringBuilder();
 			String line;
 			while ((line=inp.readLine()) != null) {
