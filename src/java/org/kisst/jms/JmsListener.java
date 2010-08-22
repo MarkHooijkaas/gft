@@ -191,8 +191,6 @@ public class JmsListener implements Runnable {
 					logger.debug("browsing message with id {}, content {}",msg.getJMSMessageID(),((TextMessage) msg).getText());
 				if (isStopMessage(msg) || isStartMessage(msg)) {
 					if (lastMessage!=null) {
-						browser.close();
-						resetSession();
 						logger.info("Removing control message from queue {} because there is a newer control messages",queue);
 						if (!removeSpecificMessage(lastMessage)) {
 							logger.warn("Could not remove stop message, stopped looking for more control messages");
@@ -212,8 +210,6 @@ public class JmsListener implements Runnable {
 			}
 			if (isStartMessage(lastMessage)) { // startMessage may be removed
 				logger.info("Removing start message from queue {} because it is the newest start message",queue);
-				browser.close();
-				resetSession();
 				if (removeSpecificMessage(lastMessage))
 					exitBrowseMode();
 				else
@@ -239,17 +235,22 @@ public class JmsListener implements Runnable {
 				String body = ((TextMessage)m).getText();
 				logger.info("Removing message [{}] from queue {} with content\n"+body,selector, queue);
 			}
+			resetSession();
 			consumer.close();
-			Message msg = session.createConsumer(destination, selector).receive(2000);
-			if (msg!=null) {
-				session.commit();
-				resetSession();
-				return true;
+			try {
+				Message msg = session.createConsumer(destination, selector).receive(2000);
+				if (msg!=null) {
+					session.commit();
+					return true;
+				}
+				else {
+					logger.warn("Could not find for removal a message with id {} ",msgid);
+					return false;
+				}
 			}
-			else {
-				logger.warn("Could not find for removal a message with id {} ",msgid);
-				resetSession();
-				return false;
+			finally {
+				session.close();
+				openSession();
 			}
 		}
 		catch (JMSException e) { throw new RuntimeException(e);}
