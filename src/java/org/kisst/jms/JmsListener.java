@@ -12,13 +12,12 @@ import javax.jms.TextMessage;
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.FunctionalException;
 import org.kisst.gft.RetryableException;
-import org.kisst.gft.admin.rest.Representable;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.TimeWindowList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class JmsListener implements Representable, Runnable {
+public class JmsListener implements Runnable {
 	private final static Logger logger=LoggerFactory.getLogger(JmsListener.class); 
 
 	private final JmsSystem system;
@@ -36,7 +35,6 @@ public class JmsListener implements Representable, Runnable {
 	private MessageConsumer consumer = null;
 	private boolean running=false;
 
-	private boolean stopMessage=false;
 	private MessageHandler handler=null;
 
 	public JmsListener(JmsSystem system, Props props, Object context) {
@@ -57,13 +55,9 @@ public class JmsListener implements Representable, Runnable {
 	}
 
 	public String toString() { return "JmsListener("+queue+")"; }
-	public String getRepresentation() { return props.toString(); }
 
-
-	public boolean isStopped() {
-		if (stopMessage)
-			return false;
-		return forbiddenTimes==null || ! forbiddenTimes.isTimeInWindow();
+	public boolean isForbiddenTime() {
+		return forbiddenTimes!=null && forbiddenTimes.isTimeInWindow();
 	} 
 	public void stop() { running=false; }
 
@@ -94,7 +88,7 @@ public class JmsListener implements Representable, Runnable {
 	}
 
 	private Message getMessage() throws JMSException {
-		if (! isStopped()) {
+		if (isForbiddenTime()) {
 			try {
 				Thread.sleep(interval);
 			} catch (InterruptedException e) {/* ignore */}
