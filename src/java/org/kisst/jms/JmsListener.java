@@ -1,5 +1,6 @@
 package org.kisst.jms;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 
 import javax.jms.Destination;
@@ -127,10 +128,9 @@ public class JmsListener implements Runnable {
 		}
 		int retryCount=0;
 		try {
-			if (session==null)
-				openSession();
 			if (checkBrowseMode())
 				return null;
+			openConsumer();
 			Message message = consumer.receive(interval);
 			if (message!=null) {
 				if (isStopMessage(message)) {
@@ -163,11 +163,6 @@ public class JmsListener implements Runnable {
 		logger.info("Entering browse mode on queue {}",queue);
 		browseMode=true;
 	}
-	private void exitBrowseMode() {
-		logger.info("Exiting browse mode on queue {}",queue);
-		browseMode=false;
-	}
-
 	/**
 	 * Will browse the top of the queue for starting or stopping messages 
 	 * If multiple starting/stopping message are available all but the last will be removed
@@ -177,9 +172,9 @@ public class JmsListener implements Runnable {
 		if (! browseMode)
 			return false;
 		QueueBrowser browser=null;
+		ArrayList<String> removeList=new ArrayList<String>();
 		try {
-			if (session==null)
-				openSession();
+			openSession();
 			browser = session.createBrowser(destination);
 
 			logger.debug("browsing for a message");
@@ -192,10 +187,7 @@ public class JmsListener implements Runnable {
 				if (isStopMessage(msg) || isStartMessage(msg)) {
 					if (lastMessage!=null) {
 						logger.info("Removing control message from queue {} because there is a newer control messages",queue);
-						if (!removeSpecificMessage(lastMessage)) {
-							logger.warn("Could not remove stop message, stopped looking for more control messages");
-							return true;
-						}
+						removeList.add(lastMessage.getJMSMessageID());
 					}
 					lastMessage=msg;
 				}
@@ -203,20 +195,23 @@ public class JmsListener implements Runnable {
 					break;
 			}
 			if (lastMessage==null) // there were no control message on queue, no reason to stay in browsemode
-				exitBrowseMode(); 
-			if (isStopMessage(lastMessage)) {
+				browseMode=false;
+			else if (isStopMessage(lastMessage)) {
 				sleepSomeTime(this.interval);
-				return true;
 			}
-			if (isStartMessage(lastMessage)) { // startMessage may be removed
-				logger.info("Removing start message from queue {} because it is the newest start message",queue);
-				if (removeSpecificMessage(lastMessage))
-					exitBrowseMode();
-				else
-					logger.warn("Could not remove start message, staying in browse mode",queue);
-
-			}		
-			return false;
+			else if (isStartMessage(lastMessage)) { // startMessage may be removed
+				logger.info("Removing start message from queue {} because it is the last control message",queue);
+				removeList.add(lastMessage.getJMSMessageID());
+				browseMode=false;
+			}
+			closeSession();
+			if (!removeMessages(removeList)) {
+				logger.warn("Could not remove some messages, so staying in browse mode",queue);
+				browseMode=true;
+			}
+			if (! browseMode)
+				logger.info("Exiting browse mode on queue {}",queue);
+			return browseMode;
 		}
 		catch (JMSException e) { throw new RuntimeException(e);}
 		finally {
@@ -227,33 +222,37 @@ public class JmsListener implements Runnable {
 		}
 	}
 
-	private boolean removeSpecificMessage(Message m) {
+	private boolean removeMessages(ArrayList<String> removeList) {
 		try {
-			String msgid=m.getJMSMessageID();
-			String selector = "JMSMessageID='" +msgid+  "'";
-			if (logger.isInfoEnabled()) {
-				String body = ((TextMessage)m).getText();
-				logger.info("Removing message [{}] from queue {} with content\n"+body,selector, queue);
-			}
-			resetSession();
-			consumer.close();
-			try {
-				Message msg = session.createConsumer(destination, selector).receive(2000);
-				if (msg!=null) {
+			closeSession();
+			openSession();
+			//consumer.close();
+			for (String msgid:removeList) {
+				String selector = "JMSMessageID='" +msgid+  "'";
+				logger.debug("Removing message [{}] from queue {} ",selector, queue);
+				MessageConsumer cons2=null;
+				try {
+					cons2 = session.createConsumer(destination, selector);
+					Message msg = cons2.receive(2000);
+					if (msg==null) {
+						logger.warn("Could not find for removal a message with id {} ",msgid);
+						return false;
+					}
+					if (logger.isInfoEnabled()) {
+						String body = ((TextMessage)msg).getText();
+						logger.info("Removing message [{}] from queue {} with content: "+body,selector, queue);
+					}
 					session.commit();
-					return true;
 				}
-				else {
-					logger.warn("Could not find for removal a message with id {} ",msgid);
-					return false;
+				finally {
+					if (cons2!=null)
+						cons2.close();
 				}
 			}
-			finally {
-				session.close();
-				openSession();
-			}
+			closeSession();
 		}
 		catch (JMSException e) { throw new RuntimeException(e);}
+		return true;
 	}
 	private boolean isStopMessage(Message msg) {
 		try {
@@ -285,7 +284,9 @@ public class JmsListener implements Runnable {
 		if (session==null)
 			return;
 		try {
-			consumer.close();
+			if (consumer!=null)
+				consumer.close();
+			consumer=null;
 		}
 		catch (Exception e) {
 			logger.warn("Ignoring error when trying to close already suspicious consumer",e);
@@ -298,18 +299,22 @@ public class JmsListener implements Runnable {
 		}
 		session=null;
 	}
-
-	private void resetSession() throws JMSException {
-		consumer.close();
-		session.close();
-		//session = system.getConnection().createQueueSession(true, Session.SESSION_TRANSACTED);
-		//destination = session.createQueue(queue);
-		//consumer=null;
-		openSession();
-	}
 	private void openSession() throws JMSException {
+		if (session!=null)
+			return;
 		session = system.getConnection().createQueueSession(true, Session.SESSION_TRANSACTED);
 		destination = session.createQueue(queue);
+	}
+	private void closeConsumer() throws JMSException {
+		if (consumer==null)
+			return;
+		consumer.close();
+		consumer=null;
+	}
+	private void openConsumer() throws JMSException {
+		if (consumer!=null)
+			return;
+		openSession();
 		consumer = session.createConsumer(destination);
 	}
 
