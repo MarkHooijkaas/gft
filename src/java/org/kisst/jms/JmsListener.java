@@ -141,7 +141,8 @@ public class JmsListener implements Runnable {
 					return null;
 				}
 				else if (isStartMessage(message)) {
-					message.acknowledge(); // remove the start message
+					logger.info("Ignoring a received a start message on queue {}, because is already started",queue);
+					session.commit(); // remove the start message
 					return null;
 				}
 				return message;
