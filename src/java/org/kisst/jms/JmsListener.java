@@ -73,14 +73,17 @@ public class JmsListener implements Runnable {
 		// Always start in browse mode, to check for stop messages
 		// If one would receive the stop message, other threads/machines might temporarily 
 		// not see it, and pick-up the next message
+		logger.info("Started Listener on queue {}",queue);
 		enterBrowseMode(); 
 		try {
-			logger.info("Opening queue {}",queue);
 			while (running) {
 				Message message=null;
 				message = getMessage();
-				if (message!=null)
+				if (message!=null) {
+					if (logger.isDebugEnabled())
+						logger.debug("handling message {}",message.getJMSMessageID());
 					handleMessage(message);
+				}
 			}
 		}
 		catch (JMSException e) {
@@ -97,6 +100,7 @@ public class JmsListener implements Runnable {
 
 	private Message getMessage() throws JMSException {
 		if (isForbiddenTime()) {
+			logger.debug("Sleeping for {} millisecs because of forbiddenTime", interval);
 			sleepSomeTime(interval);
 			return null;
 		}
@@ -109,6 +113,7 @@ public class JmsListener implements Runnable {
 			Message message = consumer.receive(interval);
 			if (message!=null) {
 				if (isStopMessage(message)) {
+					logger.info("Received a stop message on queue {}, rolling back the stop message",queue);
 					session.rollback(); // put the message back on the queue
 					session.recover(); // recover the session so it will see the stop message
 					enterBrowseMode();
@@ -130,12 +135,14 @@ public class JmsListener implements Runnable {
 	}
 
 	private void enterBrowseMode() {
+		logger.info("Entering browse mode on queue {}",queue);
 		try {
 			if (browser==null)
 				browser = session.createBrowser(destination);
 		} catch (JMSException e) { throw new RuntimeException(e); }
 	}
 	private void exitBrowseMode() {
+		logger.info("Exiting browse mode on queue {}",queue);
 		try {
 			if (browser!=null)
 				browser.close();
@@ -156,8 +163,10 @@ public class JmsListener implements Runnable {
 			while (e.hasMoreElements()) {
 				Message msg = (Message) e.nextElement();
 				if (isStopMessage(msg) || isStartMessage(msg)) {
-					if (lastMessage!=null)
+					if (lastMessage!=null) {
+						logger.info("Removing control message from queue {} because there are newer control messages",queue);
 						removeSpecificMessage(lastMessage);
+					}
 					lastMessage=msg;
 				}
 				else 
@@ -166,6 +175,7 @@ public class JmsListener implements Runnable {
 			if (isStopMessage(lastMessage))
 				return true;
 			if (isStartMessage(lastMessage)) { // startMessage may be removed
+				logger.info("Removing start message from queue {} because it is the newest start message",queue);
 				removeSpecificMessage(lastMessage);
 				exitBrowseMode();
 			}
@@ -177,6 +187,10 @@ public class JmsListener implements Runnable {
 	private void removeSpecificMessage(Message m) {
 		try {
 			String msgid=m.getJMSMessageID();
+			if (logger.isInfoEnabled()) {
+				String body = ((TextMessage)m).getText();
+				logger.info("Removing message {} from queue {} with content\n"+body,msgid, queue);
+			}
 			String selector = "JMSMessageID = '" +msgid+  "'";
 			Message msg = session.createReceiver(destination, selector).receiveNoWait();
 			if (msg!=null)
