@@ -1,11 +1,15 @@
 package org.kisst.jms;
 
+import java.util.Enumeration;
+
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
+import javax.jms.QueueBrowser;
+import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
@@ -30,12 +34,15 @@ public class JmsListener implements Runnable {
 	private final long interval;
 	private final TimeWindowList forbiddenTimes;
 
-	private Session session = null;
+	private QueueSession session = null;
 	private Queue destination = null;
 	private MessageConsumer consumer = null;
+	private QueueBrowser browser = null; 
 	private boolean running=false;
 
+
 	private MessageHandler handler=null;
+	Thread thread;
 
 	public JmsListener(JmsSystem system, Props props, Object context) {
 		this.system=system;
@@ -62,6 +69,11 @@ public class JmsListener implements Runnable {
 	public void stop() { running=false; }
 
 	public void run() {
+		thread=Thread.currentThread();
+		// Always start in browse mode, to check for stop messages
+		// If one would receive the stop message, other threads/machines might temporarily 
+		// not see it, and pick-up the next message
+		enterBrowseMode(); 
 		try {
 			logger.info("Opening queue {}",queue);
 			while (running) {
@@ -77,30 +89,33 @@ public class JmsListener implements Runnable {
 				System.exit(1);
 		}
 		finally {
-			try{
-				logger.info("Stopped listening to queue {}", queue);
-				closeSession();
-			}
-			finally {
-				//TODO: notifyThreadStop(this);
-			}
+			thread=null;
+			logger.info("Stopped listening to queue {}", queue);
+			closeSession();
 		}
 	}
 
 	private Message getMessage() throws JMSException {
 		if (isForbiddenTime()) {
-			try {
-				Thread.sleep(interval);
-			} catch (InterruptedException e) {/* ignore */}
+			sleepSomeTime(interval);
 			return null;
 		}
 		int retryCount=0;
 		try {
 			if (session==null)
 				openSession();
+			if (checkBrowseMode())
+				return null;
 			Message message = consumer.receive(interval);
-			if (message!=null)
+			if (message!=null) {
+				if (isStopMessage(message)) {
+					session.rollback(); // put the message back on the queue
+					session.recover(); // recover the session so it will see the stop message
+					enterBrowseMode();
+					return null;
+				}
 				return message;
+			}
 			retryCount=0;
 		}
 		catch (Exception e) {
@@ -108,15 +123,87 @@ public class JmsListener implements Runnable {
 			if (retryCount++ > receiveErrorRetries)
 				throw new RuntimeException("too many receive retries for queue "+queue);
 			closeSession();
-			sleepSomeTime();
+			logger.info("sleeping for "+receiveErrorRetryDelay+" milliseconds for retrying listening to "+queue);
+			sleepSomeTime(receiveErrorRetryDelay);
 		}
 		return null;
 	}
 
-	private void sleepSomeTime() {
-		logger.info("sleeping for "+receiveErrorRetryDelay/1000+" secs for retrying listening to "+queue);
+	private void enterBrowseMode() {
 		try {
-			Thread.sleep(receiveErrorRetryDelay);
+			if (browser==null)
+				browser = session.createBrowser(destination);
+		} catch (JMSException e) { throw new RuntimeException(e); }
+	}
+	private void exitBrowseMode() {
+		try {
+			if (browser!=null)
+				browser.close();
+		} catch (JMSException e) { throw new RuntimeException(e); }
+	}
+
+	/**
+	 * Will browse the top of the queue for starting or stopping messages 
+	 * If multiple starting/stopping message are available all but the last will be removed
+	 * If the last message is a start message it will be removed as well
+	 */
+	private boolean checkBrowseMode() {
+		if (browser==null)
+			return false;
+		try {
+			Enumeration<?> e = browser.getEnumeration();
+			Message lastMessage=null;
+			while (e.hasMoreElements()) {
+				Message msg = (Message) e.nextElement();
+				if (isStopMessage(msg) || isStartMessage(msg)) {
+					if (lastMessage!=null)
+						removeSpecificMessage(lastMessage);
+					lastMessage=msg;
+				}
+				else 
+					break;
+			}
+			if (isStopMessage(lastMessage))
+				return true;
+			if (isStartMessage(lastMessage)) { // startMessage may be removed
+				removeSpecificMessage(lastMessage);
+				exitBrowseMode();
+			}
+			return false;
+		}
+		catch (JMSException e) { throw new RuntimeException(e);}
+	}
+
+	private void removeSpecificMessage(Message m) {
+		try {
+			String msgid=m.getJMSMessageID();
+			String selector = "JMSMessageID = '" +msgid+  "'";
+			Message msg = session.createReceiver(destination, selector).receiveNoWait();
+			if (msg!=null)
+				msg.acknowledge();
+			else
+				logger.warn("Could not find for removal a message with id {} ",msgid);
+		}
+		catch (JMSException e) { throw new RuntimeException(e);}
+	}
+	private boolean isStopMessage(Message msg) {
+		try {
+			String body = ((TextMessage)msg).getText();
+			return body.startsWith("6") && body.indexOf("Stop")>0;
+		}
+		catch (JMSException e) { throw new RuntimeException(e);}
+	}
+	private boolean isStartMessage(Message msg) {
+		try{
+			String body = ((TextMessage)msg).getText();
+			return body.startsWith("6") && body.indexOf("Start")>0;
+		}
+		catch (JMSException e) { throw new RuntimeException(e);}
+	}
+
+	private void sleepSomeTime(long delay) {
+		try {
+			Thread.sleep(delay);
 		}
 		catch (InterruptedException e1) { throw new RuntimeException(e1); }
 	}
@@ -140,7 +227,7 @@ public class JmsListener implements Runnable {
 	}
 
 	private void openSession() throws JMSException {
-		session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
+		session = system.getConnection().createQueueSession(true, Session.SESSION_TRANSACTED);
 		destination = session.createQueue(queue);
 		consumer = session.createConsumer(destination);
 	}
