@@ -128,7 +128,7 @@ public class GftContainer {
 			throw new RuntimeException("Unknown type of queueing system "+type);
 
 		for (String lname: props.getProps("gft.listener").keys()) {
-			listeners.put(lname, queueSystem.createListener(props.getProps("gft.listener."+lname), context));
+			listeners.put(lname, new MultiListener(queueSystem, starter, props.getProps("gft.listener."+lname), context));
 		}
 
 
@@ -171,7 +171,7 @@ public class GftContainer {
 			logger.debug("Starting GftContainer with props {}", props.toString());
 		}
 		for (MultiListener q : listeners.values() )
-			q.listen(starter);
+			q.start();
 		admin.startListening();
 	}
 	public void join() {

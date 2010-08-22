@@ -12,13 +12,13 @@ public class MultiListener implements Representable {
 	private final Props props;
 	private final JmsListener[] threads;
 
-	public MultiListener(JmsSystem system, Props props, Object context) {
+	public MultiListener(JmsSystem system, MessageHandler handler, Props props, Object context) {
 		this.name=props.getLocalName();
 		this.props=props;
 		int nrofThreads = props.getInt("nrofThreads",2);
 		this.threads =new JmsListener[nrofThreads];
 		for (int i=0; i<nrofThreads; i++)
-			threads[i]=new JmsListener(system, props, context);
+			threads[i]=new JmsListener(system, handler, props, context);
 	}
 	
 	public boolean listening() { return threads!=null; }
@@ -32,28 +32,9 @@ public class MultiListener implements Representable {
 		for (JmsListener t:threads)
 			t.stop();
 	}
-	public void listen(MessageHandler handler)  {
-		if (threads!=null)
-			throw new RuntimeException("Listener already running");
-		for (int i=0; i<threads.length; i++) {
-			Thread t =new Thread(threads[i]);
-			t.setName("JmsListener-"+i);
+	public void start()  {
+		logger.info("Starting MultiListener {}", name);
+		for (JmsListener t:threads)
 			t.start();
-		}
 	}
-
-	void notifyThreadStop(JmsListener listenThread) {
-		if (threads==null)
-			throw new RuntimeException("Notification of thread stop while no thread should be running");
-		int count=0;
-		for (int i=0;i <threads.length; i++) {
-			if (threads[i]==listenThread) {
-				threads[i]=null;
-				logger.info("Thread {} stopped listening", i);
-			}
-			if (threads[i]!=null)
-				count++;
-		}
-	}
-
 }

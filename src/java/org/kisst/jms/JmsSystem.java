@@ -42,7 +42,6 @@ public class JmsSystem {
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
 	}
-	public MultiListener createListener(Props props, Object context) { return new MultiListener(this,props, context); }
 
 	protected QueueConnectionFactory createConnectionFactory() {
         Hashtable<String, String> env= new Hashtable<String,String>();
