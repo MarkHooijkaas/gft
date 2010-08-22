@@ -2,7 +2,7 @@ package org.kisst.jms;
 
 import java.util.Hashtable;
 
-import javax.jms.ConnectionFactory;
+import javax.jms.QueueConnectionFactory;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -15,7 +15,7 @@ public class MqSeriesJmsSystem extends JmsSystem {
 
 	public MqSeriesJmsSystem(Props props) { super(props); }
 
-	@Override protected ConnectionFactory createConnectionFactory() {
+	@Override protected QueueConnectionFactory createConnectionFactory() {
 		return jantje(props.getString("jndiQueuemanager"));
 	}
 	/*
@@ -35,7 +35,7 @@ public class MqSeriesJmsSystem extends JmsSystem {
 	}
 	*/
 	
-	public ConnectionFactory jantje(String name) {
+	public QueueConnectionFactory jantje(String name) {
         Hashtable<String, String> env= new Hashtable<String,String>();
         env.put( "java.naming.factory.initial", "com.sun.jndi.fscontext.RefFSContextFactory" );
         env.put( "java.naming.provider.url", "file:///c:/tmp/preont");
@@ -49,7 +49,7 @@ public class MqSeriesJmsSystem extends JmsSystem {
 		try {
 			jndiContext = new InitialContext( env);
 			logger.debug("Looking up {}",name);
-			return (ConnectionFactory) jndiContext.lookup( name );
+			return (QueueConnectionFactory) jndiContext.lookup( name );
 		} catch (NamingException e) { throw new RuntimeException(e); }
 
 	}
