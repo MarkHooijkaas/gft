@@ -84,6 +84,7 @@ public class GftRunner {
 			queueSystem.getQueue(queuename).send(data);
 			System.out.println("send the following message to the queue "+queuename);
 			System.out.println(data);
+			queueSystem.close();
 			return;
 		}
 		if (rmmsg.isSet()) {		// TODO: refactor this code dupplication
@@ -96,11 +97,14 @@ public class GftRunner {
 			try {
 				QueueSession session = queueSystem.getConnection().createQueueSession(true, Session.SESSION_TRANSACTED);
 				MessageConsumer consumer = session.createConsumer(session.createQueue(queuename), selector);
-				Message msg = consumer.receiveNoWait();
+				Message msg = consumer.receive(5000);
 				if (msg==null)
 					System.out.println("Could not find message "+selector);
-				else
-					msg.acknowledge();
+				else {
+					session.commit();
+					System.out.println("Removed message "+selector);
+				}
+				queueSystem.close();
 			}
 			catch (JMSException e) { throw new RuntimeException(e); }
 			return;
