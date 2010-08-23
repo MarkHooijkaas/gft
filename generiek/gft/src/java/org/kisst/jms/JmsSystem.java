@@ -4,9 +4,9 @@ import java.io.File;
 import java.net.MalformedURLException;
 import java.util.Hashtable;
 
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
-import javax.jms.QueueConnection;
-import javax.jms.QueueConnectionFactory;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class JmsSystem {
 	private final static Logger logger=LoggerFactory.getLogger(JmsSystem.class); 
 	protected final Props props;
-	private final QueueConnection connection;
+	private final Connection connection;
 	public final String sendParams;
 	
 	public JmsSystem(Props props) {
@@ -28,22 +28,22 @@ public class JmsSystem {
 		else
 			this.sendParams = "?"+props.getString("sendParams", "");
 		try {
-			QueueConnectionFactory connectionFactory = createConnectionFactory();
+			ConnectionFactory connectionFactory = createConnectionFactory();
 			String username=props.getString("username", null);
 			if (username==null)
-				connection = connectionFactory.createQueueConnection();
+				connection = connectionFactory.createConnection();
 			else {
 				String password=props.getString("password", null);
 				if (password==null)
 					password=CryptoUtil.decrypt(props.getString("encryptedPassword"));
-				connection = connectionFactory.createQueueConnection(username, password);
+				connection = connectionFactory.createConnection(username, password);
 			}
 			connection.start();
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
 	}
 
-	protected QueueConnectionFactory createConnectionFactory() {
+	protected ConnectionFactory createConnectionFactory() {
         Hashtable<String, String> env= new Hashtable<String,String>();
         env.put( "java.naming.factory.initial", "com.sun.jndi.fscontext.RefFSContextFactory" );
         Object jndifile = props.get("jndifile");
@@ -67,14 +67,14 @@ public class JmsSystem {
 			String name=props.getString("jndiName");
 			jndiContext = new InitialContext( env);
 			logger.debug("Looking up {}",name);
-			return (QueueConnectionFactory) jndiContext.lookup( name );
+			return (ConnectionFactory) jndiContext.lookup( name );
 		} catch (NamingException e) { throw new RuntimeException(e); }
 
 	}
 
 
 	public JmsQueue getQueue(String name) { return new JmsQueue(this, name); }
-	public QueueConnection getConnection() { return connection;	}
+	public Connection getConnection() { return connection;	}
 	public void close() {
 		try {
 			connection.close();

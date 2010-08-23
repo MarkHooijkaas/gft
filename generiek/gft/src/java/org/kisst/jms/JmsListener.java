@@ -10,7 +10,6 @@ import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.QueueBrowser;
-import javax.jms.QueueSession;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
@@ -36,7 +35,7 @@ public class JmsListener implements Runnable {
 	private final long interval;
 	private final TimeWindowList forbiddenTimes;
 
-	private QueueSession session = null;
+	private Session session = null;
 	private Queue destination = null;
 	private MessageConsumer consumer = null;
 	private boolean browseMode=true; 
@@ -303,14 +302,8 @@ public class JmsListener implements Runnable {
 	private void openSession() throws JMSException {
 		if (session!=null)
 			return;
-		session = system.getConnection().createQueueSession(true, Session.SESSION_TRANSACTED);
+		session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
 		destination = session.createQueue(queue);
-	}
-	private void closeConsumer() throws JMSException {
-		if (consumer==null)
-			return;
-		consumer.close();
-		consumer=null;
 	}
 	private void openConsumer() throws JMSException {
 		if (consumer!=null)
