@@ -58,17 +58,17 @@ public class SshHost implements Representable {
 	public boolean fileExists(String path) {
 		path=convertPath(path);
 		String file=path.substring(path.lastIndexOf('/')+1);
-		ExecResult result=exec("ls -l "+path);
+		ExecResult result=exec("ls -l \""+path+"\"");
 		return (result.stdout.indexOf(FileUtil.filename(file))>0);
 	}
-	public void deleteFile(String path) { call("rm "+path); }
+	public void deleteFile(String path) { call("rm \""+path+"\""); }
 	public void copyFileTo(String srcpath, SshHost dest, String destpath)  {
-		String command="scp "+srcpath+" "+dest.user+"@"+dest.host+":"+dest.convertPath(destpath);
+		String command="scp \""+srcpath+"\" \""+dest.user+"@"+dest.host+":"+dest.convertPath(destpath)+"\"";
 		command=command.replace("\\","\\\\");
 		call(command);
 	}
 	public void copyFileFrom(SshHost src, String srcpath, String destpath)  {
-		call("scp "+src.host+":"+src.convertPath(srcpath)+" "+destpath);
+		call("scp \""+src.host+":"+src.convertPath(srcpath)+"\" \""+destpath+"\"");
 	}
 	public String getRepresentation() {
 		StringBuilder result=new StringBuilder();
@@ -81,7 +81,7 @@ public class SshHost implements Representable {
 		return result.toString();
 	}
 	public String ls(String dir) {
-		ExecResult result=exec("ls -l "+basePath+"/"+dir);
+		ExecResult result=exec("ls -l \""+basePath+"/"+dir+"\"");
 		return result.stdout;
 	}
 

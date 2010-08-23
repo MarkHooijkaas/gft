@@ -16,13 +16,13 @@ public class WindowsSshHost extends SshHost {
 	@Override public boolean fileExists(String path) {
 		path=convertPath(path);
 		String file=path.substring(path.lastIndexOf('\\')+1);
-		String command="dir /b "+path;
+		String command="dir /b \""+path+"\"";
 		ExecResult result=exec(command);
 		return (result.stdout.indexOf(FileUtil.filename(file))>=0);
 	}
 
 	@Override public void deleteFile(String path) { 
-		String command="del "+convertPath(path);
+		String command="del \""+convertPath(path)+"\"";
 		ExecResult result = exec(command);
 		// This is a hack, because the exitcode does not seem to be reliable. 
 		if (result.exitcode==0)
@@ -35,7 +35,7 @@ public class WindowsSshHost extends SshHost {
 	}
 	
 	@Override public void copyFileTo(String srcpath, SshHost dest, String destdir)  {
-		String command=scpCommand+" "+convertPath(srcpath)+" "+dest.host+":"+dest.convertPath(destdir);
+		String command=scpCommand+" \""+convertPath(srcpath)+"\" \""+dest.host+":"+dest.convertPath(destdir)+"\"";
 		if (dest==this) // special case,: a local copy
 			command="copy "+convertPath(srcpath)+" "+dest.convertPath(destdir);
 		//command=command.replace("\\","\\\\");
@@ -50,10 +50,10 @@ public class WindowsSshHost extends SshHost {
 		throw new RuntimeException("Ssh call of command ["+command+"] returned exit code "+result.exitcode+" and stderr ["+result.stderr+"] and stoput "+result.stdout);
 	}
 	@Override public void copyFileFrom(SshHost src, String srcpath, String destpath)  {
-		call(scpCommand+" "+src.host+":"+src.convertPath(srcpath)+" "+convertPath(destpath));
+		call(scpCommand+" \""+src.host+":"+src.convertPath(srcpath)+"\" \""+convertPath(destpath)+"\"");
 	}
 	@Override public String ls(String dir) {
-		ExecResult result=exec("dir "+convertPath(basePath+"/"+dir));
+		ExecResult result=exec("dir \""+convertPath(basePath+"/"+dir)+"\"");
 		return result.stdout;
 	}
 

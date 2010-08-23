@@ -21,7 +21,7 @@ package org.kisst.cfg4j;
 
 import java.io.File;
 
-import org.kisst.gft.mq.file.FileUtil;
+import org.kisst.util.FileUtil;
 
 public abstract class PropsBase implements Props {
 	private static final long serialVersionUID = 1L;

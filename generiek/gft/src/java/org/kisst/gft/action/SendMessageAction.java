@@ -22,8 +22,8 @@ package org.kisst.gft.action;
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferTask;
-import org.kisst.gft.mq.QueueSystem;
 import org.kisst.gft.task.Task;
+import org.kisst.jms.JmsSystem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class SendMessageAction  implements Action {
 
 	private final GftContainer gft;
 	public final Props props;
-	private final QueueSystem qmgr;
+	private final JmsSystem qmgr;
 	private final String queue;
 	private final String templateName;
 	private final boolean safeToRetry;

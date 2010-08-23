@@ -65,6 +65,11 @@ public class FileUtil {
 
 
 
+	public static String loadString(File f) {
+		try {
+			return loadString(new FileReader(f));
+		} catch (FileNotFoundException e) { throw new RuntimeException(e);}
+	}
 	public static String loadString(String filename) {
 		try {
 			return loadString(new FileReader(filename));

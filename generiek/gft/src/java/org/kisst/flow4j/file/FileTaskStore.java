@@ -7,7 +7,7 @@ import org.kisst.cfg4j.SimpleProps;
 import org.kisst.flow4j.FlowRegistry;
 import org.kisst.flow4j.Task;
 import org.kisst.flow4j.TaskStore;
-import org.kisst.gft.mq.file.FileUtil;
+import org.kisst.util.FileUtil;
 
 public class FileTaskStore implements TaskStore {
 	private final FlowRegistry flowregistry;

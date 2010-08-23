@@ -1,52 +1,14 @@
-package org.kisst.gft.mq.jms;
+package org.kisst.jms;
 
 import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.Message;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.kisst.cfg4j.Props;
-import org.kisst.gft.mq.MqMessage;
-import org.kisst.gft.mq.MqQueue;
 
-public class JmsQueue implements MqQueue {
-	public static class JmsMessage implements MqMessage {
-		private final Message msg;
-		public JmsMessage(Message msg) { this.msg=msg; } 
-		public void lock() {}
-		public void done() { 
-			try {
-				msg.acknowledge();
-			} catch (JMSException e) { throw new RuntimeException(e);}
-		}
-		public String getData() {
-			try {
-				return ((TextMessage) msg).getText();
-			} catch (JMSException e) { throw new RuntimeException(e); }
-		}
-		public String getReplyTo() { 
-			try {
-				Destination dest = msg.getJMSReplyTo();
-				if (dest==null)
-					return null;
-				else
-					return msg.getJMSReplyTo().toString();
-			} catch (JMSException e) { throw new RuntimeException(e); } 
-		}
-		public String getMessageId() { 
-			try {
-				return msg.getJMSMessageID();
-			} catch (JMSException e) { throw new RuntimeException(e); } 
-		}
-		public String getCorrelationId() { 
-			try {
-				return msg.getJMSCorrelationID();
-			} catch (JMSException e) { throw new RuntimeException(e); } 
-		}
-	}
-	
+public class JmsQueue {
 	private final JmsSystem system;
 	//private final Props props;
 	private final String queue;

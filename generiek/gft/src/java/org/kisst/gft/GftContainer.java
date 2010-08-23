@@ -19,12 +19,10 @@ import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.SshHost;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
 import org.kisst.gft.filetransfer.WindowsSshHost;
-import org.kisst.gft.mq.MessageHandler;
-import org.kisst.gft.mq.QueueListener;
-import org.kisst.gft.mq.QueueSystem;
-import org.kisst.gft.mq.file.FileQueueSystem;
-import org.kisst.gft.mq.jms.ActiveMqSystem;
-import org.kisst.gft.mq.jms.JmsSystem;
+import org.kisst.jms.ActiveMqSystem;
+import org.kisst.jms.JmsSystem;
+import org.kisst.jms.MessageHandler;
+import org.kisst.jms.MultiListener;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
@@ -43,7 +41,7 @@ public class GftContainer {
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
 	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	public final HashMap<String, SshHost>    sshhosts= new LinkedHashMap<String, SshHost>();
-	public final HashMap<String, QueueListener>  listeners= new LinkedHashMap<String, QueueListener>();
+	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
 	private final HashMap<String, Object> context;
 	private final String hostName;
@@ -52,7 +50,7 @@ public class GftContainer {
 
 	private final File configfile;
 
-	public QueueSystem queueSystem;
+	public JmsSystem queueSystem;
 	public String getVersion() {
 		InputStream in = GftContainer.class.getResourceAsStream("/version.properties");
 		if (in==null)
@@ -87,7 +85,7 @@ public class GftContainer {
 		}
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
 	}
-	public QueueSystem getQueueSystem() { return queueSystem; }
+	public JmsSystem getQueueSystem() { return queueSystem; }
 	public Map<String, Object> getContext() {return context; }
 	
 	public void init(Props props) {
@@ -122,9 +120,7 @@ public class GftContainer {
 
 		Props qmprops=props.getProps("gft.queueSystem");
 		String type=qmprops.getString("type");
-		if ("File".equals(type))
-			queueSystem=new FileQueueSystem(qmprops);
-		else if ("ActiveMq".equals(type))
+		if ("ActiveMq".equals(type))
 			queueSystem=new ActiveMqSystem(qmprops);
 		else if ("Jms".equals(type))
 			queueSystem=new JmsSystem(qmprops);
@@ -132,7 +128,7 @@ public class GftContainer {
 			throw new RuntimeException("Unknown type of queueing system "+type);
 
 		for (String lname: props.getProps("gft.listener").keys()) {
-			listeners.put(lname, queueSystem.createListener(props.getProps("gft.listener."+lname), context));
+			listeners.put(lname, new MultiListener(queueSystem, starter, props.getProps("gft.listener."+lname), context));
 		}
 
 
@@ -174,8 +170,8 @@ public class GftContainer {
 		if (logger.isDebugEnabled()){
 			logger.debug("Starting GftContainer with props {}", props.toString());
 		}
-		for (QueueListener q : listeners.values() )
-			q.listen(starter);
+		for (MultiListener q : listeners.values() )
+			q.start();
 		admin.startListening();
 	}
 	public void join() {
@@ -183,8 +179,8 @@ public class GftContainer {
 	}
 
 	public void stop() {
-		for (QueueListener q : listeners.values() )
-			q.stopListening();
+		for (MultiListener q : listeners.values() )
+			q.stop();
 		queueSystem.stop();
 		admin.stopListening();
 	}
