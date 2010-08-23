@@ -5,6 +5,8 @@ import java.util.HashMap;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import nl.duo.gft.LogServlet;
+
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
@@ -39,6 +41,7 @@ public class AdminServer extends AbstractHandler {
         handlerMap.put("/restart", new RestartServlet(gft));
         handlerMap.put("/shutdown", new ShutdownServlet(gft));
         handlerMap.put("/encrypt", new EncryptServlet(gft));
+        handlerMap.put("/logging", new LogServlet(gft));
         
         RestServlet rest=new RestServlet(gft, "/rest/");
         rest.map("gft",new ObjectResource(gft));
