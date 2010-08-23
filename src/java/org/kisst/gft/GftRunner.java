@@ -7,7 +7,6 @@ import java.util.HashMap;
 import javax.jms.JMSException;
 import javax.jms.Message;
 import javax.jms.MessageConsumer;
-import javax.jms.QueueSession;
 import javax.jms.Session;
 
 import nl.duo.gft.GftDuoModule;
@@ -95,7 +94,7 @@ public class GftRunner {
 			String selector=rmmsg.get();
 			System.out.println("removing the following message "+selector);
 			try {
-				QueueSession session = queueSystem.getConnection().createQueueSession(true, Session.SESSION_TRANSACTED);
+				Session session = queueSystem.getConnection().createSession(true, Session.SESSION_TRANSACTED);
 				MessageConsumer consumer = session.createConsumer(session.createQueue(queuename), selector);
 				Message msg = consumer.receive(5000);
 				if (msg==null)
