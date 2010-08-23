@@ -240,7 +240,7 @@ public class JmsListener implements Runnable {
 					}
 					if (logger.isInfoEnabled()) {
 						String body = ((TextMessage)msg).getText();
-						logger.info("Removing message [{}] from queue {} with content: "+body,selector, queue);
+						logger.debug("Removing message [{}] from queue {} with content: "+body,selector, queue);
 					}
 					session.commit();
 				}
