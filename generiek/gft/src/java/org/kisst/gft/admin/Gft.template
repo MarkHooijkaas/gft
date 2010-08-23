@@ -29,6 +29,9 @@
 </#list> 
 </table> 
 
+<h2>Logging</h2> 
+<a href=logging/days=1>LOGB</a>
+
 <h2>Actions</h2> 
 <table> 
 <#list actions?keys as name>
