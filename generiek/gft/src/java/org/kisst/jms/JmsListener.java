@@ -107,7 +107,7 @@ public class JmsListener implements Runnable {
 				}
 			}
 		}
-		catch (JMSException e) {
+		catch (Exception e) {
 			logger.error("Unrecoverable error during listening, stopped listening", e);
 			if (props.getBoolean("exitOnUnrecoverableListenerError", false))
 				System.exit(1);
