@@ -39,7 +39,7 @@ public class ListenerServlet extends BaseServlet {
 			name=name.substring(0,pos);
 		}
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		out.println("<h1>Listener "+name);
+		out.println("<h1>Listener "+name+"</h1>");
 
 		MultiListener lstnr = (MultiListener) gft.listeners.get(name);
 		Session session=null;
