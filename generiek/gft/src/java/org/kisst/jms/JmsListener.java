@@ -286,11 +286,11 @@ public class JmsListener implements Runnable {
 		try {
 			if (consumer!=null)
 				consumer.close();
-			consumer=null;
 		}
 		catch (Exception e) {
 			logger.warn("Ignoring error when trying to close already suspicious consumer",e);
 		}
+		consumer=null;
 		try {
 			session.close();
 		}
@@ -304,6 +304,7 @@ public class JmsListener implements Runnable {
 			return;
 		session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
 		destination = session.createQueue(queue);
+		consumer=null;
 	}
 	private void openConsumer() throws JMSException {
 		if (consumer!=null)
