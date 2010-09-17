@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class JmsListener implements Runnable {
-	private final static Logger logger=LoggerFactory.getLogger(JmsListener.class); 
+	private final static Logger logger=LoggerFactory.getLogger(JmsListener.class);
 
 	private final JmsSystem system;
 	private final MessageHandler handler;
@@ -38,10 +38,10 @@ public class JmsListener implements Runnable {
 	private Session session = null;
 	private Queue destination = null;
 	private MessageConsumer consumer = null;
-	private boolean browseMode=true; 
+	private boolean browseMode=true;
 	private boolean running=false;
 
-
+	
 	Thread thread;
 
 	public JmsListener(JmsSystem system, MessageHandler handler, Props props, Object context) {
@@ -66,7 +66,7 @@ public class JmsListener implements Runnable {
 
 	public boolean isForbiddenTime() {
 		return forbiddenTimes!=null && forbiddenTimes.isTimeInWindow();
-	} 
+	}
 
 	public synchronized void start() {
 		logger.info("Starting Listener {}",this);
@@ -78,7 +78,7 @@ public class JmsListener implements Runnable {
 			thread.start();
 		}
 	}
-	public void stop() { 
+	public void stop() {
 		logger.info("Stopping Listener {}",this);
 		running=false;
 		Thread t=thread;
@@ -92,10 +92,10 @@ public class JmsListener implements Runnable {
 
 	public void run() {
 		// Always start in browse mode, to check for stop messages
-		// If one would receive the stop message, other threads/machines might temporarily 
+		// If one would receive the stop message, other threads/machines might temporarily
 		// not see it, and pick-up the next message
 		logger.info("Started Listener on queue {}",queue);
-		enterBrowseMode(); 
+		enterBrowseMode();
 		try {
 			while (running) {
 				Message message=null;
@@ -164,7 +164,7 @@ public class JmsListener implements Runnable {
 		browseMode=true;
 	}
 	/**
-	 * Will browse the top of the queue for starting or stopping messages 
+	 * Will browse the top of the queue for starting or stopping messages
 	 * If multiple starting/stopping message are available all but the last will be removed
 	 * If the last message is a start message it will be removed as well
 	 */
@@ -191,7 +191,7 @@ public class JmsListener implements Runnable {
 					}
 					lastMessage=msg;
 				}
-				else 
+				else
 					break;
 			}
 			if (lastMessage==null) // there were no control message on queue, no reason to stay in browsemode
@@ -286,11 +286,11 @@ public class JmsListener implements Runnable {
 		try {
 			if (consumer!=null)
 				consumer.close();
-			consumer=null;
 		}
 		catch (Exception e) {
 			logger.warn("Ignoring error when trying to close already suspicious consumer",e);
 		}
+		consumer=null;
 		try {
 			session.close();
 		}
@@ -304,6 +304,7 @@ public class JmsListener implements Runnable {
 			return;
 		session = system.getConnection().createSession(true, Session.SESSION_TRANSACTED);
 		destination = session.createQueue(queue);
+		consumer=null;
 	}
 	private void openConsumer() throws JMSException {
 		if (consumer!=null)
@@ -312,11 +313,11 @@ public class JmsListener implements Runnable {
 		consumer = session.createConsumer(destination);
 	}
 
-
+	
 	private void handleMessage(Message message) {
 		try {
 			logger.debug("Handling {}",message.getJMSMessageID());
-			handler.handle(new JmsMessage(message)); 
+			handler.handle(new JmsMessage(message));
 		}
 		catch (Exception e) {
 			try {
