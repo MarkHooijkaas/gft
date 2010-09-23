@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.jms.JmsListener;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MultiListener;
 import org.kisst.util.XmlNode;
@@ -65,8 +66,14 @@ public class ListenerServlet extends BaseServlet {
 					Message msg = (Message) e.nextElement();
 					out.println("<li> "+format.format(new Date(msg.getJMSTimestamp())));
 					try {
-						XmlNode xml=new XmlNode(((TextMessage)msg).getText()).getChild("Body/transferFile");
-						out.println("kanaal: "+xml.getChildText("kanaal")+" bestand: "+xml.getChildText("bestand"));
+						if (JmsListener.isStartMessage(msg))
+							out.println("Start bericht");
+						else if (JmsListener.isStopMessage(msg))
+							out.println("Stop bericht");
+						else {
+							XmlNode xml=new XmlNode(((TextMessage)msg).getText()).getChild("Body/transferFile");
+							out.println("kanaal: "+xml.getChildText("kanaal")+" bestand: "+xml.getChildText("bestand"));
+						}
 					}
 					catch (RuntimeException ex) {
 						out.println("Unknown format, id="+msg.getJMSMessageID());

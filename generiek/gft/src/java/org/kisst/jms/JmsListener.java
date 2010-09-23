@@ -254,7 +254,7 @@ public class JmsListener implements Runnable {
 		catch (JMSException e) { throw new RuntimeException(e);}
 		return true;
 	}
-	private boolean isStopMessage(Message msg) {
+	static public boolean isStopMessage(Message msg) {
 		try {
 			if (msg==null)
 				return false;
@@ -263,7 +263,7 @@ public class JmsListener implements Runnable {
 		}
 		catch (JMSException e) { throw new RuntimeException(e);}
 	}
-	private boolean isStartMessage(Message msg) {
+	static public boolean isStartMessage(Message msg) {
 		try{
 			if (msg==null)
 				return false;
