@@ -256,7 +256,7 @@ public class JmsListener implements Runnable {
 	}
 	static public boolean isStopMessage(Message msg) {
 		try {
-			if (msg==null)
+			if (msg==null || ! (msg instanceof TextMessage))
 				return false;
 			String body = ((TextMessage)msg).getText();
 			return body.startsWith("6") && body.indexOf("Stop")>0;
@@ -265,7 +265,7 @@ public class JmsListener implements Runnable {
 	}
 	static public boolean isStartMessage(Message msg) {
 		try{
-			if (msg==null)
+			if (msg==null || ! (msg instanceof TextMessage))
 				return false;
 			String body = ((TextMessage)msg).getText();
 			return body.startsWith("6") && body.indexOf("Start")>0;
