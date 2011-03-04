@@ -7,6 +7,7 @@ import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.task.Task;
+import org.kisst.util.ThreadUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,8 +16,12 @@ public class ActionList  implements Action {
 	
 	private final LinkedHashMap<String,Action> actions=new LinkedHashMap<String,Action>();
 
-	public ActionList(Channel chan, Props props) {
+	private final int maxNrofTries;
+	private final long retryDelay;
 
+	public ActionList(Channel chan, Props props) {
+		maxNrofTries = props.getInt("maxNrofTries", 3);
+		retryDelay = props.getLong("retryDelay", 30000);
 		String actions=props.getString("actions");
 		String[] parts=actions.split(",");
 		//this.actions=new Action[parts.length];
@@ -43,18 +48,30 @@ public class ActionList  implements Action {
 
 	public Object execute(Task task) {
 		for (String name: actions.keySet()) {
-			try {
-				Action a=actions.get(name);
-				task.setLastAction(name);
-				if (logger.isDebugEnabled())
-					logger.debug("action "+name+" started");
-				a.execute(task);
+			Action a=actions.get(name);
+			task.setLastAction(name);
+			if (logger.isDebugEnabled())
+				logger.debug("action "+name+" started");
+			boolean done=false;
+			int nrofTries=0;
+			while (! done){
+				try {
+					a.execute(task);
+					done=true;
+				}
+				catch (RuntimeException e) {
+					if (a.safeToRetry() && nrofTries <= maxNrofTries) {
+						logger.warn("Error during action "+name+", try number "+nrofTries+", will retry after "+retryDelay/1000+" seconds, error was ", e);
+						nrofTries++;
+						ThreadUtil.sleep(retryDelay);
+					}
+					else {
+						logger.error("action "+name+" had error: "+e.getMessage());
+						throw e;
+					}
+				}	
 				if (logger.isInfoEnabled())
 					logger.info("action "+name+" succesful");
-			}
-			catch (RuntimeException e) {
-				logger.error("action "+name+" had error: "+e.getMessage());
-				throw e;
 			}
 		}
 		return null;
