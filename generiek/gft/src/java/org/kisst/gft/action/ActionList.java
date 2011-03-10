@@ -49,7 +49,6 @@ public class ActionList  implements Action {
 	public Object execute(Task task) {
 		for (String name: actions.keySet()) {
 			Action a=actions.get(name);
-			task.setLastAction(name);
 			if (logger.isDebugEnabled())
 				logger.debug("action "+name+" started");
 			boolean done=false;
@@ -69,7 +68,12 @@ public class ActionList  implements Action {
 						logger.error("action "+name+" had error: "+e.getMessage());
 						throw e;
 					}
-				}	
+				}
+				finally {
+					// This needs to be done here, otherwise the log_error will always log the log_error action as last action.
+					// TODO: a more elegant solution is desired
+					task.setLastAction(name);
+				}
 				if (logger.isInfoEnabled())
 					logger.info("action "+name+" succesful");
 			}
