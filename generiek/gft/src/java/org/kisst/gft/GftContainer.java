@@ -10,6 +10,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import nl.duo.gft.poller.Poller;
+
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.action.HttpHost;
@@ -44,6 +46,7 @@ public class GftContainer {
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
 	private final HashMap<String, Object> context;
+	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
 	private final String hostName;
 ;
 
@@ -144,6 +147,15 @@ public class GftContainer {
 		for (String name: channelProps.keys())
 			channels.put(name, new Channel(this, channelProps.getProps(name)));
 
+		if (props.hasKey("gft.poller")) {
+			Props pollerProps=props.getProps("gft.poller");
+			for (String name: pollerProps.keys())
+				//pollers.put(name, new Poller(this, pollerProps.getProps(name)));
+				pollers.put(name, new Poller(name, pollerProps.getProps(name)));
+		}
+
+		
+		
 		if (logger.isDebugEnabled()) {
 			logger.debug("Using props "+props);
 			for (String name: channels.keySet())

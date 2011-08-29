@@ -120,7 +120,7 @@ public class Ssh {
 	}
 
 	
-	public static Session openSession(SshHost host, Ssh.Credentials cred, String type) {
+	public static Session openSession(SshHost host, Ssh.Credentials cred) {
 		logger.info("creating sftp connection to {} ", host);
 		try{
 			JSch jsch=new JSch();

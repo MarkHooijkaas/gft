@@ -6,7 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
-public class LocalFileServer implements FileServer {
+public class LocalFileServer implements FileServer, FileServerConnection {
 	private static final Logger logger = LoggerFactory.getLogger(LocalFileServer.class);
 
 	
@@ -17,11 +17,17 @@ public class LocalFileServer implements FileServer {
 	public long fileSize(String path) { return file(path).length(); }
 	public long lastModified(String path) { return file(path).lastModified(); }
 	public boolean isDirectory(String path) { return file(path).isDirectory(); }
-	public String[] ls(String path) { return file(path).list();	}
+	public String[] getDirectoryEntries(String path) { return file(path).list();	}
 	public boolean move(String path, String newpath) {
 		File dest = new File(newpath);
 		logger.info("moving {} to {}",path, dest);
 		return file(path).renameTo(dest); 
 	}
+
+	@Override
+	public FileServerConnection openConnection() { return this;}
+
+	@Override
+	public void close() {}
 
 }
