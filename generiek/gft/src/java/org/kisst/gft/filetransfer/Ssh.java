@@ -119,6 +119,40 @@ public class Ssh {
 		}
 	}
 
+	
+	public static Session openSession(SshHost host, Ssh.Credentials cred, String type) {
+		logger.info("creating sftp connection to {} ", host);
+		try{
+			JSch jsch=new JSch();
+			if (host.known_hosts!=null)
+				jsch.setKnownHosts(host.known_hosts);
+
+			if (cred.keyfile!=null) {
+				logger.debug("Using keyfile {}",cred.keyfile);
+				jsch.addIdentity(cred.keyfile);
+			}
+			Session session=jsch.getSession(cred.user, host.host, 22);
+
+			// username and password will be given via UserInfo interface.
+			session.setUserInfo(cred);
+			session.connect();
+			return session;
+		}
+		catch(JSchException e) { throw new RuntimeException(e); }
+	}
+	
+	public static void closeChannel(Channel channel) {
+		int count=0;
+		while (! channel.isClosed()) {
+			if (count>=50)
+				throw new RuntimeException("SSH Channel was not closed after "+count+" waiting attempts");
+			logger.info("Sleeping some time because channel is not yet closed, attempt "+count++);
+			try{Thread.sleep(200);}catch(Exception ee){}
+		}
+		//channel.disconnect();
+	}
+
+	
 	public static class MyLogger implements com.jcraft.jsch.Logger {
 		public boolean isEnabled(int level){
 			if (level==DEBUG) return logger.isTraceEnabled();
