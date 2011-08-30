@@ -120,13 +120,14 @@ public class Ssh {
 	}
 
 	
-	public static Session openSession(SshHost host, Ssh.Credentials cred) {
+	public static Session openSession(SshHost host) {
 		logger.info("creating sftp connection to {} ", host);
 		try{
 			JSch jsch=new JSch();
 			if (host.known_hosts!=null)
 				jsch.setKnownHosts(host.known_hosts);
 
+			Credentials cred = host.cred;
 			if (cred.keyfile!=null) {
 				logger.debug("Using keyfile {}",cred.keyfile);
 				jsch.addIdentity(cred.keyfile);

@@ -18,7 +18,7 @@ public class SshHost implements Representable {
 	public final int port;
 	public final HostKey hostKey=null;
 	public final String known_hosts;
-	private final Ssh.Credentials cred;
+	public final Ssh.Credentials cred;
 	private final String keyfile;
 	private final TimeWindowList forbiddenTimes;
 	public final String basePath;

@@ -151,7 +151,7 @@ public class GftContainer {
 			Props pollerProps=props.getProps("gft.poller");
 			for (String name: pollerProps.keys())
 				//pollers.put(name, new Poller(this, pollerProps.getProps(name)));
-				pollers.put(name, new Poller(name, pollerProps.getProps(name)));
+				pollers.put(name, new Poller(this, name, pollerProps.getProps(name)));
 		}
 
 		

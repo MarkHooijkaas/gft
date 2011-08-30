@@ -1,13 +1,10 @@
 package org.kisst.gft.filetransfer;
 
-import java.io.File;
 import java.util.Vector;
 
-import org.kisst.gft.filetransfer.Ssh.Credentials;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jcraft.jsch.Channel;
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
@@ -21,8 +18,9 @@ public class RemoteFileServerConnection implements FileServerConnection {
 	private final Session session;
 	private final ChannelSftp sftp;
 
-	public RemoteFileServerConnection(SshHost host, Credentials cred) {
-		session = Ssh.openSession(host, cred);
+	public RemoteFileServerConnection(SshHost host) {
+		session = Ssh.openSession(host);
+		logger.info("Opening session on host: {}",host);
 		try {
 			sftp = (ChannelSftp) session.openChannel("sftp");
 		} catch (JSchException e) { throw new RuntimeException(e);}
