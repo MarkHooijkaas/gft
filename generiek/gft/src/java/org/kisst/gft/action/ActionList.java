@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import org.kisst.cfg4j.LayeredProps;
 import org.kisst.cfg4j.Props;
 import org.kisst.cfg4j.SimpleProps;
-import org.kisst.gft.filetransfer.Channel;
+import org.kisst.gft.filetransfer.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.util.ThreadUtil;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ public class ActionList  implements Action {
 	private final int maxNrofTries;
 	private final long retryDelay;
 
-	public ActionList(Channel chan, Props props) {
+	public ActionList(BasicTaskDefinition taskdef, Props props) {
 		maxNrofTries = props.getInt("maxNrofTries", 3);
 		retryDelay = props.getLong("retryDelay", 30000);
 		String actions=props.getString("actions");
@@ -29,16 +29,16 @@ public class ActionList  implements Action {
 			name=name.trim();
 			LayeredProps lprops=new LayeredProps();
 			SimpleProps top=new SimpleProps();
-			top.put("action",chan.gft.actions.get(name));
+			top.put("action",taskdef.gft.actions.get(name));
 			top.put("channel",props);
 			lprops.addLayer(top);
 			if (props.get(name,null) instanceof Props)
 				lprops.addLayer(props.getProps(name));
-			lprops.addLayer(chan.gft.actions.get(name));
+			lprops.addLayer(taskdef.gft.actions.get(name));
 			lprops.addLayer(props);
-			lprops.addLayer(chan.gft.props.getProps("gft.global"));
+			lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
 				
-			Action a=chan.createAction(lprops);
+			Action a=taskdef.createAction(lprops);
 			if (a==null)
 				throw new RuntimeException("Unknown action "+name);
 			this.actions.put(name,a);

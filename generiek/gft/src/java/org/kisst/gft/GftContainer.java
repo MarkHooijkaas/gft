@@ -184,6 +184,8 @@ public class GftContainer {
 		}
 		for (MultiListener q : listeners.values() )
 			q.start();
+		for (Poller p : pollers.values())
+			p.start();
 		admin.startListening();
 	}
 	public void join() {
@@ -193,6 +195,8 @@ public class GftContainer {
 	public void stop() {
 		for (MultiListener q : listeners.values() )
 			q.stop();
+		for (Poller p : pollers.values())
+			p.stop();
 		queueSystem.stop();
 		admin.stopListening();
 	}
