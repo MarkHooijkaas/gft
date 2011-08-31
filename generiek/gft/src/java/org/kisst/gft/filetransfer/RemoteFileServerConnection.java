@@ -17,17 +17,21 @@ public class RemoteFileServerConnection implements FileServerConnection {
 	private static final Logger logger = LoggerFactory.getLogger(RemoteFileServerConnection.class);
 	private final Session session;
 	private final ChannelSftp sftp;
+	private final SshHost host;
 
 	public RemoteFileServerConnection(SshHost host) {
+		this.host=host;
 		session = Ssh.openSession(host);
 		logger.info("Opening session on host: {}",host);
 		try {
 			sftp = (ChannelSftp) session.openChannel("sftp");
+			sftp.connect();
 		} catch (JSchException e) { throw new RuntimeException(e);}
 	}
 
 	@Override
 	public void close() {
+		logger.info("Closing session on host: {}",host);
 		sftp.disconnect();
 		session.disconnect();
 	}
@@ -54,13 +58,17 @@ public class RemoteFileServerConnection implements FileServerConnection {
 		} catch (SftpException e) { throw new RuntimeException(e); }
 	}
 	
+	@Override
 	@SuppressWarnings("unchecked")
 	public String[] getDirectoryEntries(String path) {
 		try {
+			logger.info("getting remote diretory: {}",path);
 			Vector<LsEntry> vv = sftp.ls(path);
+			logger.info("found {} entries",vv.size());
 			String[] result = new String[vv.size()];
 			int i=0;
 			for (LsEntry entry: vv) {
+				logger.debug("found entry {} - {}",entry.getFilename(), entry.getLongname());
                 result[i++] = entry.getFilename();
 			}
 			return result;
@@ -71,9 +79,13 @@ public class RemoteFileServerConnection implements FileServerConnection {
 	public boolean move(String path, String newpath) {
 		try {
 			sftp.rename(path, newpath);
-			return true; // TODO: ????
+			return true; 
 		}
-		catch (SftpException e) { throw new RuntimeException(e); }
+		catch (SftpException e) {
+			logger.error("verplaatsen is niet gelukt: {}", e);
+			return false;
+
+			}
 	}
 
 
