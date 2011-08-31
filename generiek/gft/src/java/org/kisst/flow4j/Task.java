@@ -1,7 +1,7 @@
 package org.kisst.flow4j;
 
-import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
+import org.kisst.props4j.Props;
+import org.kisst.props4j.SimpleProps;
 
 public class Task {
 	public enum Status { OPEN, RUNNING, WAITING, ABORTED, DONE }

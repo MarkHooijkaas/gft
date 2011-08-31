@@ -1,10 +1,10 @@
 package org.kisst.gft.action;
 
-import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.filetransfer.SshHost;
 import org.kisst.gft.task.Task;
+import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

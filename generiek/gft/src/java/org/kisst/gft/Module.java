@@ -19,7 +19,7 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft;
 
-import org.kisst.cfg4j.Props;
+import org.kisst.props4j.Props;
 
 public interface Module {
 	public String getName();

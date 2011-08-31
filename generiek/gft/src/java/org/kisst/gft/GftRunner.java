@@ -12,11 +12,11 @@ import javax.jms.Session;
 import nl.duo.gft.GftDuoModule;
 
 import org.apache.log4j.PropertyConfigurator;
-import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.ssh.GenerateKey;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
+import org.kisst.props4j.Props;
+import org.kisst.props4j.SimpleProps;
 import org.kisst.util.CryptoUtil;
 import org.kisst.util.FileUtil;
 import org.kisst.util.TemplateUtil;

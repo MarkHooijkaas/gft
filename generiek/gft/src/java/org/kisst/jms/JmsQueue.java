@@ -6,7 +6,7 @@ import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.kisst.cfg4j.Props;
+import org.kisst.props4j.Props;
 
 public class JmsQueue {
 	private final JmsSystem system;

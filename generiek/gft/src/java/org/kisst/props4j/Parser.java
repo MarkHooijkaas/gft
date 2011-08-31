@@ -1,4 +1,4 @@
-package org.kisst.cfg4j;
+package org.kisst.props4j;
 
 import java.io.BufferedReader;
 import java.io.File;

@@ -3,9 +3,9 @@ package org.kisst.gft.task;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
+import org.kisst.props4j.SimpleProps;
 
 
 public class BasicTask implements Task {

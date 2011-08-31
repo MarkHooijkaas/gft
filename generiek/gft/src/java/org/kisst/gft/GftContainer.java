@@ -12,8 +12,6 @@ import java.util.Properties;
 
 import nl.duo.gft.poller.Poller;
 
-import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.filetransfer.As400SshHost;
@@ -25,6 +23,8 @@ import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MessageHandler;
 import org.kisst.jms.MultiListener;
+import org.kisst.props4j.Props;
+import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;

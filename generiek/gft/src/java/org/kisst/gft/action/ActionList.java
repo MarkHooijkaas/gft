@@ -2,11 +2,11 @@ package org.kisst.gft.action;
 
 import java.util.LinkedHashMap;
 
-import org.kisst.cfg4j.LayeredProps;
-import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.filetransfer.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
+import org.kisst.props4j.LayeredProps;
+import org.kisst.props4j.Props;
+import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ThreadUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

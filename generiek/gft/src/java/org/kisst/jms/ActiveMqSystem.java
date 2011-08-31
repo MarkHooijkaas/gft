@@ -3,7 +3,7 @@ package org.kisst.jms;
 import javax.jms.QueueConnectionFactory;
 
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.kisst.cfg4j.Props;
+import org.kisst.props4j.Props;
 
 public class ActiveMqSystem extends JmsSystem {
 	public ActiveMqSystem(Props props) { super(props); }

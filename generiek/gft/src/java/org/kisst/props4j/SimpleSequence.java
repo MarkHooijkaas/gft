@@ -1,4 +1,4 @@
-package org.kisst.cfg4j;
+package org.kisst.props4j;
 
 import java.util.ArrayList;
 import java.util.Iterator;

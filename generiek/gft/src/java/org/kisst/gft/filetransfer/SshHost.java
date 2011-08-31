@@ -2,9 +2,9 @@ package org.kisst.gft.filetransfer;
 
 import java.io.File;
 
-import org.kisst.cfg4j.Props;
 import org.kisst.gft.admin.rest.Representable;
 import org.kisst.gft.filetransfer.Ssh.ExecResult;
+import org.kisst.props4j.Props;
 import org.kisst.util.FileUtil;
 import org.kisst.util.TimeWindowList;
 

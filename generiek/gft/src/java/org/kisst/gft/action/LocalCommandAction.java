@@ -1,7 +1,7 @@
 package org.kisst.gft.action;
 
-import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
+import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

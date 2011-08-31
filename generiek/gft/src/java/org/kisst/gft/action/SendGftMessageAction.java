@@ -21,13 +21,13 @@ package org.kisst.gft.action;
 
 import java.util.Map;
 
-import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MultiListener;
+import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,7 +1,7 @@
 package org.kisst.gft.filetransfer;
 
-import org.kisst.cfg4j.Props;
 import org.kisst.gft.filetransfer.Ssh.ExecResult;
+import org.kisst.props4j.Props;
 import org.kisst.util.FileUtil;
 
 public class WindowsSshHost extends SshHost {

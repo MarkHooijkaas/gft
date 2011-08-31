@@ -3,10 +3,10 @@ package org.kisst.flow4j.file;
 import java.io.File;
 import java.util.Map;
 
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.flow4j.FlowRegistry;
 import org.kisst.flow4j.Task;
 import org.kisst.flow4j.TaskStore;
+import org.kisst.props4j.SimpleProps;
 import org.kisst.util.FileUtil;
 
 public class FileTaskStore implements TaskStore {

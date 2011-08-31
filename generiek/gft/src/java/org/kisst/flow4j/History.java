@@ -2,8 +2,8 @@ package org.kisst.flow4j;
 
 import java.util.ArrayList;
 
-import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.Sequence;
+import org.kisst.props4j.Props;
+import org.kisst.props4j.Sequence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

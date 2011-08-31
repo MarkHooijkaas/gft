@@ -1,6 +1,6 @@
 package org.kisst.gft.filetransfer;
 
-import org.kisst.cfg4j.Props;
+import org.kisst.props4j.Props;
 
 public class As400SshHost extends SshHost {
 	private final String scpCommand;

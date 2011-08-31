@@ -1,12 +1,12 @@
 package org.kisst.gft.filetransfer;
 
-import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskDefinition;
+import org.kisst.props4j.Props;
+import org.kisst.props4j.SimpleProps;
 import org.kisst.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -13,9 +13,9 @@ import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.kisst.cfg4j.Props;
 import org.kisst.gft.FunctionalException;
 import org.kisst.gft.RetryableException;
+import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.TimeWindowList;
 import org.slf4j.Logger;

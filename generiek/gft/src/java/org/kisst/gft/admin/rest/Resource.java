@@ -2,7 +2,7 @@ package org.kisst.gft.admin.rest;
 
 import java.util.Map;
 
-import org.kisst.cfg4j.SimpleProps;
+import org.kisst.props4j.SimpleProps;
 
 
 public class Resource {
