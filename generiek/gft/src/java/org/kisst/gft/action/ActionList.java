@@ -20,9 +20,12 @@ public class ActionList  implements Action {
 	private final long retryDelay;
 
 	public ActionList(BasicTaskDefinition taskdef, Props props) {
+		this(taskdef, props, null);
+	}
+	public ActionList(BasicTaskDefinition taskdef, Props props, String defaultActions) {
 		maxNrofTries = props.getInt("maxNrofTries", 3);
 		retryDelay = props.getLong("retryDelay", 30000);
-		String actions=props.getString("actions");
+		String actions=props.getString("actions",defaultActions);
 		String[] parts=actions.split(",");
 		//this.actions=new Action[parts.length];
 		for (String name: parts) {

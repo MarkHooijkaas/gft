@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
@@ -21,30 +20,20 @@ public class BasicTaskDefinition implements TaskDefinition {
 	public final GftContainer gft;
 	public final String name;
 	private final Action action;
-	private final Action startAction;
-	private final Action endAction;
-	private final Action errorAction;
+	protected Action startAction=null;
+	protected Action endAction=null;
+	protected Action errorAction=null;
 	public final Props props;
 	private final HashMap<String, Object> context;
 
 
-	public BasicTaskDefinition(GftContainer gft, Props props) {
+	public BasicTaskDefinition(GftContainer gft, Props props, String defaultActions) {
 		this.gft=gft;
 		context=new HashMap<String, Object>(gft.getContext());
 
 		this.props=props;
 		this.name=props.getLocalName();
-		this.action=new ActionList(this, props);
-		SimpleProps actprops=new SimpleProps();
-
-		actprops.put("actions", "log_error");
-		this.errorAction=new ActionList(this, actprops);
-
-		actprops.put("actions", "log_start");
-		this.startAction=new ActionList(this, actprops);
-		
-		actprops.put("actions", "log_completed");
-		this.endAction=new ActionList(this, actprops);
+		this.action=new ActionList(this, props, defaultActions);
 		// TODO Auto-generated constructor stub
 	}
 
@@ -52,9 +41,11 @@ public class BasicTaskDefinition implements TaskDefinition {
 
 	public void run(Task task) {
 		try {
-			startAction.execute(task);
+			if (startAction!=null)
+				startAction.execute(task);
 			action.execute(task);
-			endAction.execute(task);
+			if (endAction!=null)
+				endAction.execute(task);
 			task.setStatus(Task.DONE);
 		}
 		catch (RuntimeException e) {

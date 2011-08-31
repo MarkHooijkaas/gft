@@ -18,7 +18,7 @@ public class FileTransferTask extends BasicTask {
 	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
 
 	public FileTransferTask(GftContainer gft, String data, String replyTo, String correlationId) {
-		super(gft);
+		super(gft, null); // TODO
 		message=new XmlNode(data);
 		XmlNode input=message.getChild("Body/transferFile");
 		

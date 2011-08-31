@@ -19,6 +19,8 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
+import java.util.Map;
+
 import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferTask;
@@ -43,14 +45,14 @@ public class SendGftMessageAction  implements Action {
 		"<Envelope xmlns=\"http://schemas.xmlsoap.org/soap/envelope/\">\n"+
 		"	<Header>\n"+
 		"		<herkomst xmlns=\"NL:OCW:ALG:SOAP\">\n"+
-		"			<systeemcode xmlns=\"NL:OCW:GWB:BASIS\">JV</systeemcode>\n"+
-		"			<omgevingscode xmlns=\"NL:OCW:GWB:BASIS\">ONT</omgevingscode>\n"+
+		"			<systeemcode xmlns=\"NL:OCW:GWB:BASIS\">${action.props.herkomst.systeemcode}</systeemcode>\n"+
+		"			<omgevingscode xmlns=\"NL:OCW:GWB:BASIS\">${action.props.herkomst.omgevingscode!\"ONT\"}</omgevingscode>\n"+
 		"		</herkomst>\n"+
 		"	</Header>\n"+
 		"	<Body>\n"+
 		"		<transferFile xmlns=\"gft:filetransfer-1.0\">\n"+
-		"			<kanaal>${kanaalnaam}</kanaal>\n"+
-		"			<bestand>${bestand}</bestand>\n"+
+		"			<kanaal>${action.props.kanaal}</kanaal>\n"+
+		"			<bestand>${task.filename}</bestand>\n"+
 		"		</transferFile>\n"+
 		"	</Body>\n"+
 		"</Envelope>\n";
@@ -75,7 +77,9 @@ public class SendGftMessageAction  implements Action {
 	public Object execute(Task task) {
 		BasicTask basicTask= (BasicTask) task;
 		logger.info("Sending message to queue {}",queue);
-		String body=gft.processTemplate(template, basicTask.getActionContext(this));
+		Map<String, Object> context = basicTask.getActionContext(this);
+		//context.put("bestand", "TODO");
+		String body=gft.processTemplate(template, context);
 		qmgr.getQueue(queue).send(body);
 		return null;
 	}

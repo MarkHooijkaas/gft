@@ -10,6 +10,7 @@ import org.kisst.gft.action.Action;
 
 public class BasicTask implements Task {
 	public final GftContainer gft;
+	public final TaskDefinition taskdef;
 	private final SimpleProps vars=new SimpleProps();;
 	private final HashMap<String, Object> context;
 
@@ -17,8 +18,9 @@ public class BasicTask implements Task {
 	private Exception lastError=null;
 	private String lastAction=null;
 	
-	public BasicTask(GftContainer gft) {
+	public BasicTask(GftContainer gft, TaskDefinition taskdef) {
 		this.gft = gft;
+		this.taskdef = taskdef;
 		this.context=new HashMap<String, Object>();
 		this.context.put("var", vars);
 		this.context.put("task", this);

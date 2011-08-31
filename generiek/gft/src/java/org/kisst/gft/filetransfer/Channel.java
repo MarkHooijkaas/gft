@@ -1,8 +1,10 @@
 package org.kisst.gft.filetransfer;
 
 import org.kisst.cfg4j.Props;
+import org.kisst.cfg4j.SimpleProps;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
+import org.kisst.gft.action.ActionList;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskDefinition;
 import org.kisst.util.FileUtil;
@@ -19,7 +21,7 @@ public class Channel extends BasicTaskDefinition implements TaskDefinition {
 	public final String mode;
 
 	public Channel(GftContainer gft, Props props) {
-		super(gft, props);
+		super(gft, props, null);
 		getContext().put("channel", this);
 		
 		this.src=gft.sshhosts.get(props.getString("src.host"));
@@ -40,6 +42,18 @@ public class Channel extends BasicTaskDefinition implements TaskDefinition {
 		this.mode=props.getString("mode", "push");
 		if (!("pull".equals(mode) || "push".equals(mode)))
 			throw new RuntimeException("mode should be push or pull, not "+mode);
+		
+		SimpleProps actprops=new SimpleProps();
+
+		actprops.put("actions", "log_error");
+		this.errorAction=new ActionList(this, actprops);
+
+		actprops.put("actions", "log_start");
+		this.startAction=new ActionList(this, actprops);
+		
+		actprops.put("actions", "log_completed");
+		this.endAction=new ActionList(this, actprops);
+
 	}
 	
 	public String toString() { return "Channel("+name+" from "+src+":"+srcdir+" to "+dest+":"+destdir+")";}
