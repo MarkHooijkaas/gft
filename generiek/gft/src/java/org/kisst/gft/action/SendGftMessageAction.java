@@ -19,7 +19,6 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-
 import java.util.Map;
 
 import org.kisst.gft.GftContainer;
@@ -45,7 +44,7 @@ public class SendGftMessageAction  implements Action {
 		"	<Header>\n"+
 		"		<herkomst xmlns=\"NL:OCW:ALG:SOAP\">\n"+
 		"			<systeemcode xmlns=\"NL:OCW:GWB:BASIS\">${action.props.herkomst.systeemcode}</systeemcode>\n"+
-		"			<omgevingscode xmlns=\"NL:OCW:GWB:BASIS\">${action.props.herkomst.omgevingscode!\"ONT\"}</omgevingscode>\n"+
+		"			<omgevingscode xmlns=\"NL:OCW:GWB:BASIS\">${action.props.herkomst.omgevingscode}</omgevingscode>\n"+
 		"		</herkomst>\n"+
 		"	</Header>\n"+
 		"	<Body>\n"+
@@ -77,9 +76,9 @@ public class SendGftMessageAction  implements Action {
 		BasicTask basicTask= (BasicTask) task;
 		logger.info("Sending message to queue {}",queue);
 		Map<String, Object> context = basicTask.getActionContext(this);
-		//context.put("bestand", "TODO");
 		String body=gft.processTemplate(template, context);
 		qmgr.getQueue(queue).send(body);
+		logger.info("verzonden bericht \n {}", body);
 		return null;
 	}
 }
