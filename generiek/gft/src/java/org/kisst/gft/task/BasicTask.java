@@ -1,8 +1,5 @@
 package org.kisst.gft.task;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.props4j.SimpleProps;
@@ -12,7 +9,7 @@ public class BasicTask implements Task {
 	public final GftContainer gft;
 	public final TaskDefinition taskdef;
 	private final SimpleProps vars=new SimpleProps();;
-	private final HashMap<String, Object> context;
+	private final SimpleProps context;
 
 	private Task.Status status=null;
 	private Exception lastError=null;
@@ -21,7 +18,7 @@ public class BasicTask implements Task {
 	public BasicTask(GftContainer gft, TaskDefinition taskdef) {
 		this.gft = gft;
 		this.taskdef = taskdef;
-		this.context=new HashMap<String, Object>(gft.getContext());
+		this.context=gft.getContext().shallowClone();
 		this.context.put("var", vars);
 		this.context.put("task", this);
 	}
@@ -37,10 +34,10 @@ public class BasicTask implements Task {
 	public void setLastAction(String act) {	this.lastAction=act; }
 
 	public void setVar(String name, Object value) { vars.put(name, value); }
-	public Map<String, Object> getContext() { return context; }
+	public SimpleProps getContext() { return context; }
 	
-	public Map<String, Object> getActionContext(Action action) {
-		Map<String, Object> result=new HashMap<String, Object>(getContext());
+	public SimpleProps getActionContext(Action action) {
+		SimpleProps result=getContext().shallowClone();
 		result.put("action", action);
 		return result;
 	}

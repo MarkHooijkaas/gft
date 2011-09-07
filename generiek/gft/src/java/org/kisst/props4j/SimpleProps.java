@@ -60,6 +60,13 @@ public class SimpleProps extends PropsBase {
 		}
 	}
 
+	public SimpleProps shallowClone() {
+		SimpleProps result=new SimpleProps(parent,name);
+		for (String key: keys())
+			result.put(key, this.get(key));
+		return result;
+	}
+	
 	public Iterable<String> keys() { return values.keySet(); }
 
 	public void put(String key, Object value) {

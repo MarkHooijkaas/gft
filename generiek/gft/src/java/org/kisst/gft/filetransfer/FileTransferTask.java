@@ -39,7 +39,7 @@ public class FileTransferTask extends BasicTask {
 		this.destpath=channel.getDestPath(file, this);
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
-		for (String key : channel.getContext().keySet())
+		for (String key : channel.getContext().keys())
 			getContext().put(key,channel.getContext().get(key));
 	}
 

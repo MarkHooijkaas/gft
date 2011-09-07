@@ -7,7 +7,6 @@ import java.lang.reflect.Constructor;
 import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import nl.duo.gft.poller.Poller;
@@ -45,7 +44,7 @@ public class GftContainer {
 	public final HashMap<String, SshHost>    sshhosts= new LinkedHashMap<String, SshHost>();
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
-	private final HashMap<String, Object> context;
+	private final SimpleProps context = new SimpleProps();
 	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
 	private final String hostName;
 ;
@@ -71,7 +70,6 @@ public class GftContainer {
 	}
 	public GftContainer(File configfile) {
 		TemplateUtil.init(configfile.getParentFile());
-		context=new HashMap<String, Object>();
 		context.put("gft", this);
 
 		this.configfile = configfile;
@@ -91,7 +89,7 @@ public class GftContainer {
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
 	}
 	public JmsSystem getQueueSystem() { return queueSystem; }
-	public Map<String, Object> getContext() {return context; }
+	public SimpleProps getContext() {return context; }
 	
 	public void init(Props props) {
 		this.props=props;

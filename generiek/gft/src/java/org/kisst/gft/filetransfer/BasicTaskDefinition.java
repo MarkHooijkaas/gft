@@ -1,8 +1,6 @@
 package org.kisst.gft.filetransfer;
 
 import java.lang.reflect.Constructor;
-import java.util.HashMap;
-import java.util.Map;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
@@ -10,6 +8,7 @@ import org.kisst.gft.action.ActionList;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskDefinition;
 import org.kisst.props4j.Props;
+import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,12 +23,12 @@ public class BasicTaskDefinition implements TaskDefinition {
 	protected Action endAction=null;
 	protected Action errorAction=null;
 	public final Props props;
-	private final HashMap<String, Object> context;
+	private final SimpleProps context;
 
 
 	public BasicTaskDefinition(GftContainer gft, Props props, String defaultActions) {
 		this.gft=gft;
-		context=new HashMap<String, Object>(gft.getContext());
+		context=gft.getContext().shallowClone();
 
 		this.props=props;
 		this.name=props.getLocalName();
@@ -37,7 +36,7 @@ public class BasicTaskDefinition implements TaskDefinition {
 		// TODO Auto-generated constructor stub
 	}
 
-	public Map<String,Object> getContext() { return context;}
+	public SimpleProps getContext() { return context;}
 
 	public void run(Task task) {
 		try {

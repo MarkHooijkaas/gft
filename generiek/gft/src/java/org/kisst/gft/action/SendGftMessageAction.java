@@ -19,8 +19,6 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-import java.util.Map;
-
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
@@ -77,7 +75,7 @@ public class SendGftMessageAction  implements Action {
 	public Object execute(Task task) {
 		BasicTask basicTask= (BasicTask) task;
 		logger.info("Sending message to queue {}",queue);
-		Map<String, Object> context = basicTask.getActionContext(this);
+		SimpleProps context = basicTask.getActionContext(this);
 		SimpleProps global = (SimpleProps) context.get("global");
 		String omgevingscode = props.getString("herkomst.omgevingscode", global.getString("omgeving"));
 		context.put("omgevingscode", omgevingscode);
