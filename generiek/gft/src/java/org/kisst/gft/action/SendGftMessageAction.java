@@ -27,6 +27,7 @@ import org.kisst.gft.task.Task;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MultiListener;
 import org.kisst.props4j.Props;
+import org.kisst.props4j.SimpleProps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,7 +45,7 @@ public class SendGftMessageAction  implements Action {
 		"	<Header>\n"+
 		"		<herkomst xmlns=\"NL:OCW:ALG:SOAP\">\n"+
 		"			<systeemcode xmlns=\"NL:OCW:GWB:BASIS\">${action.props.herkomst.systeemcode}</systeemcode>\n"+
-		"			<omgevingscode xmlns=\"NL:OCW:GWB:BASIS\">${action.props.herkomst.omgevingscode}</omgevingscode>\n"+
+		"			<omgevingscode xmlns=\"NL:OCW:GWB:BASIS\">${omgevingscode}</omgevingscode>\n"+
 		"		</herkomst>\n"+
 		"	</Header>\n"+
 		"	<Body>\n"+
@@ -59,6 +60,7 @@ public class SendGftMessageAction  implements Action {
 		this.gft=gft;
 		this.props=props;
 		this.qmgr=gft.getQueueSystem();
+
 		String firstListenerQueue=null;
 		for (MultiListener l : gft.listeners.values()) {
 			firstListenerQueue=l.getQueue();
@@ -76,6 +78,11 @@ public class SendGftMessageAction  implements Action {
 		BasicTask basicTask= (BasicTask) task;
 		logger.info("Sending message to queue {}",queue);
 		Map<String, Object> context = basicTask.getActionContext(this);
+		SimpleProps global = (SimpleProps) context.get("global");
+		String omgevingscode = props.getString("herkomst.omgevingscode", global.getString("omgeving"));
+		context.put("omgevingscode", omgevingscode);
+		logger.info("context is {}",context);
+
 		String body=gft.processTemplate(template, context);
 		qmgr.getQueue(queue).send(body);
 		logger.info("verzonden bericht \n {}", body);
