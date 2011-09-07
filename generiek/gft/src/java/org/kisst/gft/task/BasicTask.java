@@ -21,7 +21,7 @@ public class BasicTask implements Task {
 	public BasicTask(GftContainer gft, TaskDefinition taskdef) {
 		this.gft = gft;
 		this.taskdef = taskdef;
-		this.context=new HashMap<String, Object>();
+		this.context=new HashMap<String, Object>(gft.getContext());
 		this.context.put("var", vars);
 		this.context.put("task", this);
 	}
