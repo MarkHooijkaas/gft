@@ -109,7 +109,7 @@ public class SimpleProps extends PropsBase {
 		if (o==null)
 			return defaultValue;
 		else if (o instanceof SimpleProps)
-			return ((SimpleProps)o).get(keyremainder,null);
+			return ((SimpleProps)o).get(keyremainder,defaultValue);
 		else
 			return defaultValue;
 	}
