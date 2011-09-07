@@ -76,10 +76,9 @@ public class SendGftMessageAction  implements Action {
 		BasicTask basicTask= (BasicTask) task;
 		logger.info("Sending message to queue {}",queue);
 		SimpleProps context = basicTask.getActionContext(this);
-		SimpleProps global = (SimpleProps) context.get("global");
-		String omgevingscode = props.getString("herkomst.omgevingscode", global.getString("omgeving"));
+		String omgevingscode = props.getString("herkomst.omgevingscode", context.getString("global.omgeving"));
 		context.put("omgevingscode", omgevingscode);
-		logger.info("context is {}",context);
+		logger.debug("context is {}",context);
 
 		String body=gft.processTemplate(template, context);
 		qmgr.getQueue(queue).send(body);
