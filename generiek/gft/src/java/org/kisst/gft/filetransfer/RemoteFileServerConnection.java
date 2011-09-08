@@ -76,16 +76,18 @@ public class RemoteFileServerConnection implements FileServerConnection {
 		catch (SftpException e) { throw new RuntimeException(e); }
 	}
 
-	public boolean move(String path, String newpath) {
+	public void move(String path, String newpath) {
 		try {
 			sftp.rename(path, newpath);
-			return true; 
 		}
-		catch (SftpException e) {
-			logger.error("verplaatsen is niet gelukt: {}", e);
-			return false;
+		catch (SftpException e) { throw new FileCouldNotBeMovedException(path, e); }
+	}
 
-			}
+	public void getToLocalFile(String remotepath, String localpath) {
+			try {
+				sftp.get(remotepath, localpath);
+			} 
+			catch (SftpException e) { throw new RuntimeException(e); }
 	}
 
 

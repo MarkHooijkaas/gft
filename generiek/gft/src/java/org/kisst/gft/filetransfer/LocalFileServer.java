@@ -18,10 +18,12 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 	public long lastModified(String path) { return file(path).lastModified(); }
 	public boolean isDirectory(String path) { return file(path).isDirectory(); }
 	public String[] getDirectoryEntries(String path) { return file(path).list();	}
-	public boolean move(String path, String newpath) {
+	public void move(String path, String newpath) {
 		File dest = new File(newpath);
 		logger.info("moving {} to {}",path, dest);
-		return file(path).renameTo(dest); 
+		boolean result = file(path).renameTo(dest);
+		if (! result)
+			throw new FileCouldNotBeMovedException(path);
 	}
 
 	@Override
@@ -29,5 +31,8 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 
 	@Override
 	public void close() {}
+
+	@Override
+	public void getToLocalFile(String remotepath, String localpath) { throw new RuntimeException("not implemented yet"); } // TODO: implement
 
 }

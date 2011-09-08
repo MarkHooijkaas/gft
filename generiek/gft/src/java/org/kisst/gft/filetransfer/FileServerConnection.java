@@ -11,5 +11,6 @@ public interface FileServerConnection {
 	public long fileSize(String path);
 	public long lastModified(String path);
 	public boolean isDirectory(String path);
-	public boolean move(String path, String newpath);
+	public void move(String path, String newpath);
+	public void getToLocalFile(String remotepath, String localpath); 
 }
