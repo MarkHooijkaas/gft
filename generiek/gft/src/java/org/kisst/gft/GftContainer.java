@@ -83,6 +83,7 @@ public class GftContainer {
 		addAction("fix_permissions","FixPermissions");
 		addAction("sendGftMessage", "SendGftMessageAction");
 		addAction("localCommand", "LocalCommandAction");
+		addAction("archive", "ArchiveAction");
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
