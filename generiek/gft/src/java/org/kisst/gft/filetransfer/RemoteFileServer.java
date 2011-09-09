@@ -10,7 +10,6 @@ public class RemoteFileServer implements FileServer {
 	}
 	@Override
 	public FileServerConnection openConnection() {
-		// TODO Auto-generated method stub
 		return new RemoteFileServerConnection(host);
 	}
 	

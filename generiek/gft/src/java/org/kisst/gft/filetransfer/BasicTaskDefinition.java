@@ -33,7 +33,7 @@ public class BasicTaskDefinition implements TaskDefinition {
 		this.props=props;
 		this.name=props.getLocalName();
 		this.action=new ActionList(this, props, defaultActions);
-		// TODO Auto-generated constructor stub
+		
 	}
 
 	public SimpleProps getContext() { return context;}
