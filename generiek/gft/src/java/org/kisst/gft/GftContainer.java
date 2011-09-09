@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
+import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
 import org.kisst.gft.action.HttpHost;
@@ -42,12 +43,13 @@ public class GftContainer {
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
 	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	public final HashMap<String, SshHost>    sshhosts= new LinkedHashMap<String, SshHost>();
+	public final HashMap<String, OnDemandHost>    ondemandhosts= new LinkedHashMap<String, OnDemandHost>();
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
 	private final SimpleProps context = new SimpleProps();
 	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
 	private final String hostName;
-;
+
 
 
 	private final File configfile;
@@ -122,6 +124,14 @@ public class GftContainer {
 			}
 		}
 
+		if (props.get("gft.ondemand.host",null)!=null) {
+			Props hostProps=props.getProps("gft.ondemand.host");
+			for (String name: hostProps.keys()) {
+				Props p=hostProps.getProps(name);
+				ondemandhosts.put(name, new OnDemandHost(p));
+			}
+		}
+		
 		Props qmprops=props.getProps("gft.queueSystem");
 		String type=qmprops.getString("type");
 		if ("ActiveMq".equals(type))
