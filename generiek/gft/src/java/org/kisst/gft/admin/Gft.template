@@ -8,12 +8,21 @@
 </#list> 
 </table> 
 
+<h2>Pollers</h2> 
+<table> 
+<#list pollers?keys as name>
+<tr><td><a href=poller/${name}>${name}</a></td><td>${pollers[name]}</td></tr> 
+</#list> 
+</table> 
+
+
 <h2>Listeners</h2> 
 <table> 
 <#list listeners?keys as name>
 <tr><td><a href=rest/listener/${name}>${name}</a></td><td>${listeners[name]}</td><td><a href=listener/${name}>STATUS</a></td></tr> 
 </#list> 
 </table> 
+
 
 <h2>SSH Hosts</h2> 
 <table> 

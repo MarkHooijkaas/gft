@@ -42,6 +42,13 @@ public class HomeServlet extends BaseServlet {
 		}
 		out.println("</table>");
 
+		out.println("<h2>Pollers</h2>");
+		out.println("<table>");
+		for (String name : gft.pollers.keySet()) {
+			out.println("<tr><td>"+name+"</td><td>"+gft.pollers.get(name)+"</td></tr>");
+		}
+		out.println("</table>");
+		
 		out.println("<h2>SSH Hosts</h2>");
 		out.println("<table>");
 		for (String name : gft.sshhosts.keySet()) {
