@@ -85,10 +85,13 @@ public class RemoteFileServerConnection implements FileServerConnection {
 
 	public void getToLocalFile(String remotepath, String localpath) {
 			try {
+				logger.info("copy file from remote {} to local {}",remotepath,localpath);
 				sftp.get(remotepath, localpath);
+
 			} 
 			catch (SftpException e) { throw new RuntimeException(e); }
 	}
+	
 
 
 }
