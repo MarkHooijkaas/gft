@@ -38,11 +38,14 @@ public class ArchiveAction  implements Action {
 	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task task) {
-		logger.info("archiveAction is aangeroepen!");
-		logger.info("archiveAction Stap haal op!");
-		logger.info("archiveAction Stap Archiveer!");
-		logger.info("archiveAction is ruim localfile op!");
-
+		if (logger.isInfoEnabled()){
+			String melding1 = "de melding1";
+			String melding = "de melding";
+			logger.info("{} archiveAction is aangeroepen! {}", melding1 , melding);
+			logger.info("archiveAction Stap haal op!");
+			logger.info("archiveAction Stap Archiveer!");
+			logger.info("archiveAction is ruim localfile op!");
+		}
 		return null;
 
 	}
