@@ -15,22 +15,25 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with the RelayConnector framework.  If not, see <http://www.gnu.org/licenses/>.
- */
+*/
 
 package org.kisst.gft.action;
 
+import java.io.File;
 import java.util.Enumeration;
 
 import nl.duo.gft.odwek.OnDemandHost;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.filetransfer.FileServer;
+import org.kisst.gft.filetransfer.FileServerConnection;
+import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.filetransfer.RemoteFileServer;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ibm.edms.od.ODConfig;
-import com.ibm.edms.od.ODConstant;
 import com.ibm.edms.od.ODCriteria;
 import com.ibm.edms.od.ODException;
 import com.ibm.edms.od.ODFolder;
@@ -38,30 +41,35 @@ import com.ibm.edms.od.ODHit;
 import com.ibm.edms.od.ODServer;
 
 public class ArchiveAction implements Action {
-	private final static Logger logger = LoggerFactory
-			.getLogger(ArchiveAction.class);
-
+	private final static Logger logger=LoggerFactory.getLogger(ArchiveAction.class);
 	private final boolean safeToRetry;
-
-	private final OnDemandHost host;
-
+	private final GftContainer gft;
+    private final OnDemandHost host;
+	
 	public ArchiveAction(GftContainer gft, Props props) {
 		safeToRetry = props.getBoolean("safeToRetry", false);
 		this.host=gft.ondemandhosts.get("main");
+		this.gft = gft; 
 	}
 
-	public boolean safeToRetry() {
-		return safeToRetry;
-	}
-
+	public boolean safeToRetry() { return safeToRetry; }
+        
 	public Object execute(Task task) {
+		FileTransferTask ft= (FileTransferTask) task;
 		logger.info("archiveAction is aangeroepen!");
+
 		logger.info("archiveAction Stap haal op!");
-
+		
+		FileServer fileserver= new RemoteFileServer(gft.sshhosts.get(ft.channel.src.name));
+		FileServerConnection fsconn=fileserver.openConnection();
+		File nieuwTempDir = gft.createUniqueDir(ft.channel.name);
+		String filename = ft.message.getChildText("Body/transferFile/bestand");
+		String remotefile = ft.channel.srcdir + "/" + ft.message.getChildText("Body/transferFile/bestand");
+		fsconn.getToLocalFile(remotefile, nieuwTempDir.getPath());
+		//TODO stappen aan elkaar koppelen:
+		
 		logger.info("archiveAction Stap Archiveer!");
-
 		ODServer odServer = null;
-
 		try {
 			// ONT= 1455, FAT=1460
 			odServer = host.openConnection();
@@ -150,9 +158,15 @@ public class ArchiveAction implements Action {
 		}
 
 		logger.info("archiveAction is ruim localfile op!");
+		
+//TODO nette opruiming
+		File f = new File(nieuwTempDir+"/"+filename);
+		logger.info("delete localfile {}", f.getPath());
+		f.delete();
+		logger.info("delete localfile {}", nieuwTempDir.getPath());
+		nieuwTempDir.delete();
 		return null;
 	}
-
 	private static ODHit storeDocument(ODServer odServer, String folder,
 			String docID) throws Exception {
 		ODFolder odFolder = odServer.openFolder(folder);

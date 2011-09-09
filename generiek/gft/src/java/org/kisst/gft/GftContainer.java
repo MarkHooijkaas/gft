@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
@@ -49,8 +51,8 @@ public class GftContainer {
 	private final SimpleProps context = new SimpleProps();
 	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
 	private final String hostName;
-
-
+	private String tempdir;
+	private int dirVolgnr;
 
 	private final File configfile;
 
@@ -73,7 +75,7 @@ public class GftContainer {
 	public GftContainer(File configfile) {
 		TemplateUtil.init(configfile.getParentFile());
 		context.put("gft", this);
-
+	
 		this.configfile = configfile;
 		addAction("check_src","CheckSourceFile");
 		addAction("check_dest","CheckDestFileDoesNotExist");
@@ -97,6 +99,8 @@ public class GftContainer {
 	public void init(Props props) {
 		this.props=props;
 		context.put("global", props.get("gft.global", null));
+		tempdir = context.getString("global.tempdir");
+		dirVolgnr = 0;
 		addDynamicModules(props);
 		for (Module mod: modules.values())
 			mod.init(props);
@@ -230,5 +234,23 @@ public class GftContainer {
 		Constructor<?> cons=ReflectionUtil.getConstructor(classname, new Class<?>[] {GftContainer.class, String.class, Props.class});
 		Module mod= (Module) ReflectionUtil.createObject(cons, new Object[] {this, name, props});
 		modules.put(name, mod);
+	}
+	
+	private synchronized int getUniqueVolgnummer() {
+		dirVolgnr++;
+		if (dirVolgnr>1000000)
+			dirVolgnr=0;
+		return dirVolgnr;
+	}
+
+
+	public File createUniqueDir(String subdir){
+		SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss");
+		String date = formatter.format(new Date());
+		int volgnummer=getUniqueVolgnummer();
+		File file = new File(tempdir +"/"+ subdir +"/"+ date + "-" + volgnummer);
+		file.mkdirs();
+		return file;
+		
 	}
 }
