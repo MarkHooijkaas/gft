@@ -20,11 +20,14 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 package org.kisst.gft.action;
 
 import java.io.File;
+import java.nio.channels.Channels;
 import java.util.Enumeration;
 
+import nl.duo.gft.odwek.ArchiveerChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileTransferTask;
@@ -47,6 +50,10 @@ public class ArchiveAction implements Action {
     private final OnDemandHost host;
 	
 	public ArchiveAction(GftContainer gft, Props props) {
+		// TODO: we willen channel weten
+		//Channel chan=null;
+		//if (chan instanceof ArchiveerChannel)
+		//	throw new RuntimeException("ArchiveAction moet in een ArchiveerChannel zitten, en dat is "+chan.name+" niet");
 		safeToRetry = props.getBoolean("safeToRetry", false);
 		this.host=gft.ondemandhosts.get("main");
 		this.gft = gft; 
@@ -69,8 +76,9 @@ public class ArchiveAction implements Action {
 		String remotefile = ft.channel.srcdir + "/" + filename;
 		fsconn.getToLocalFile(remotefile, nieuwTempDir.getPath());
 		//TODO stappen aan elkaar koppelen:
-		
 
+
+		
 		//ophalen lijstje uit ondemand 
 		//String kenmerkNaam = "docSoort";
 		//filename = ft.message.getChildText("Body/transferFile/"+kenmerkNaam);
@@ -82,8 +90,9 @@ public class ArchiveAction implements Action {
 		try {
 			// ONT= 1455, FAT=1460
 			odServer = host.openConnection();
-			String folder = "DUO Documenten"; // TODO uit channel
-			storeDocument(odServer, folder);
+			// String folder = "DUO Documenten"; // TODO uit channel
+			
+			storeDocument(odServer, ft);
 			odServer.logoff();
 		}catch (ODException e) {
 			System.out.println("ODException: " + e);
@@ -110,13 +119,17 @@ public class ArchiveAction implements Action {
 		return null;
 	}
 	
-	private static void storeDocument(ODServer odServer, String folder) throws Exception {
+	private void storeDocument(ODServer odServer, FileTransferTask ft) throws Exception {
+		ArchiveerChannel channel = (ArchiveerChannel) ft.channel;
+		ODFolder odFolder = odServer.openFolder(channel.odfolder);
 		
-		ODFolder odFolder = odServer.openFolder(folder);
+		String applGroup = channel.odapplgroup;		
+		String application = channel.odapplication;
 		
-		String ApplGroup = "DUOARC_LOS"; // TODO uit channel
-		String Application = "DUOTIF_LOS"; // TODO uit channel
-		Object[][] dubbelArray = odFolder.getStoreDocFields(ApplGroup, Application);
+//		String ApplGroup = "DUOARC_LOS"; // TODO uit channel;		
+		//String Application = "DUOPDF_LOS"; // TODO uit channel
+		
+		Object[][] dubbelArray = odFolder.getStoreDocFields(applGroup, application);
 		for (int i = 0; i < dubbelArray.length; i++) {
 			Object[] enkelArray = dubbelArray[i];
 			for (int j = 0; j < enkelArray.length; j++) {
@@ -163,7 +176,7 @@ public class ArchiveAction implements Action {
 
 		System.out.println("start store-call" + System.currentTimeMillis());
 
-		odFolder.storeDocument("C:/temp/43432.pdf",	ApplGroup, Application, newValues);
+		odFolder.storeDocument("C:/temp/43432.pdf",	applGroup, application, newValues);
 
 		System.out.println("end store-call" + System.currentTimeMillis());
 

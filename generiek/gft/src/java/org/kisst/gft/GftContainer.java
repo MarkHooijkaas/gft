@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
+import nl.duo.gft.odwek.ArchiveerChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
@@ -159,8 +160,16 @@ public class GftContainer {
 		}
 
 		Props channelProps=props.getProps("gft.channel");
-		for (String name: channelProps.keys())
-			channels.put(name, new Channel(this, channelProps.getProps(name)));
+		for (String name: channelProps.keys()) {
+			Props p=channelProps.getProps(name);
+			String type2=p.getString("type",null);
+			if (type2==null) 
+				channels.put(name, new Channel(this, p));
+			else if ("ArchiveerChannel".equals(type2))
+				channels.put(name, new ArchiveerChannel(this, p));
+			else 
+				throw new RuntimeException("Channel type in channel "+name+" veld type moet leeg zijn of ArchiveerChannel, niet "+type2);
+		}
 
 		if (props.hasKey("gft.poller")) {
 			Props pollerProps=props.getProps("gft.poller");
