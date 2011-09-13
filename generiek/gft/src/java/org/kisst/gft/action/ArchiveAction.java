@@ -20,14 +20,11 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 package org.kisst.gft.action;
 
 import java.io.File;
-import java.nio.channels.Channels;
-import java.util.Enumeration;
 
 import nl.duo.gft.odwek.ArchiveerChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileTransferTask;
@@ -37,10 +34,8 @@ import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ibm.edms.od.ODCriteria;
 import com.ibm.edms.od.ODException;
 import com.ibm.edms.od.ODFolder;
-import com.ibm.edms.od.ODHit;
 import com.ibm.edms.od.ODServer;
 
 public class ArchiveAction implements Action {
@@ -94,15 +89,10 @@ public class ArchiveAction implements Action {
 			
 			storeDocument(odServer, ft);
 			odServer.logoff();
-		}catch (ODException e) {
-			System.out.println("ODException: " + e);
-			System.out.println("   id = " + e.getErrorId());
-			System.out.println("  msg = " + e.getErrorMsg());
-			e.printStackTrace();
-		}catch (Exception e2) {
-			System.out.println("exception: " + e2);
-			e2.printStackTrace();
-		}finally {
+		}
+		catch (ODException e) { throw new RuntimeException(e.getMessage()+", id="+e.getErrorId()+", msg="+e.getErrorMsg(), e); } 
+		catch (Exception e) { throw new RuntimeException(e);}
+		finally {
 			if (odServer != null) {
 				odServer.terminate();
 			}
@@ -137,14 +127,16 @@ public class ArchiveAction implements Action {
 				System.out.println("[" + i + " " + j + "]:" + obj);
 			}
 		}
-
+		
+		String[] docFields = new String[dubbelArray.length];
 		for (int i = 0; i < dubbelArray.length; i++) {
-			String inputveld = (String) dubbelArray[i][0];
-			logger.info("obj is {}", inputveld);
-			
-
+			String waarde = "";
+			String docField = (String) dubbelArray[i][0];
+			logger.info("string is {}", docField);
+			waarde = ft.message.getChildText("Body/transferFile/extra/kenmerken/"+docField);
+			docFields[i]=waarde;
 		}
-
+		logger.info("docFields is: {}", docFields);
 		
 		String[] newValues = new String[17];
 		for (int i = 0; i < newValues.length; i++) {
