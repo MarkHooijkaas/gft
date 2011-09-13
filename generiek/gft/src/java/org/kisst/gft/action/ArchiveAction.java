@@ -137,6 +137,15 @@ public class ArchiveAction implements Action {
 				System.out.println("[" + i + " " + j + "]:" + obj);
 			}
 		}
+
+		for (int i = 0; i < dubbelArray.length; i++) {
+			String inputveld = (String) dubbelArray[i][0];
+			logger.info("obj is {}", inputveld);
+			
+
+		}
+
+		
 		String[] newValues = new String[17];
 		for (int i = 0; i < newValues.length; i++) {
 			newValues[i] = "";
