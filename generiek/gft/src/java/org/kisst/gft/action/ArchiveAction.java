@@ -55,6 +55,8 @@ public class ArchiveAction implements Action {
 	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task task) {
+		String filename = null;		
+		
 		FileTransferTask ft= (FileTransferTask) task;
 		logger.info("archiveAction is aangeroepen!");
 
@@ -63,95 +65,35 @@ public class ArchiveAction implements Action {
 		FileServer fileserver= new RemoteFileServer(gft.sshhosts.get(ft.channel.src.name));
 		FileServerConnection fsconn=fileserver.openConnection();
 		File nieuwTempDir = gft.createUniqueDir(ft.channel.name);
-		String filename = ft.message.getChildText("Body/transferFile/bestand");
-		String remotefile = ft.channel.srcdir + "/" + ft.message.getChildText("Body/transferFile/bestand");
+		filename = ft.message.getChildText("Body/transferFile/bestand");
+		String remotefile = ft.channel.srcdir + "/" + filename;
 		fsconn.getToLocalFile(remotefile, nieuwTempDir.getPath());
 		//TODO stappen aan elkaar koppelen:
 		
+
+		//ophalen lijstje uit ondemand 
+		//String kenmerkNaam = "docSoort";
+		//filename = ft.message.getChildText("Body/transferFile/"+kenmerkNaam);
+
+		
 		logger.info("archiveAction Stap Archiveer!");
+		
 		ODServer odServer = null;
 		try {
 			// ONT= 1455, FAT=1460
 			odServer = host.openConnection();
-
-			System.out.println("FOLDERS: ");
-
-			Enumeration e = odServer.getFolders();
-			while (e.hasMoreElements()) {
-				ODFolder f = (ODFolder) e.nextElement();
-				System.out.println(f.getName() + "--" + f.getDescription());
-
-				// f.close();
-			}
-
-			// System.out.println("\n\nCRITERIA for DUO Documenten DocID");
-			System.out.println("\n\nCRITERIA for DUO Documenten");
-			ODFolder f = odServer.openFolder("DUO Documenten");
-			// ODFolder f = odServer.openFolder("DUO Documenten DocID");
-			// System.out.println("\n\nCRITERIA for DUO Documenten KS en OS");
-			// ODFolder f = odServer.openFolder("DUO Documenten KS en OS");
-			Enumeration crits = f.getCriteria();
-			while (crits.hasMoreElements()) {
-				ODCriteria c = (ODCriteria) crits.nextElement();
-				System.out.println(c.getName() + ": " + c);
-			}
-			f.close();
-
-			System.out.println("\n\nCRITERIA for SCI Documenten DocID");
-			ODFolder f2 = odServer.openFolder("SCI Documenten DocID");
-			// System.out.println("\n\nCRITERIA for DUO Documenten KS en OS");
-			// ODFolder f = odServer.openFolder("DUO Documenten KS en OS");
-			Enumeration crits2 = f2.getCriteria();
-			while (crits2.hasMoreElements()) {
-				ODCriteria c = (ODCriteria) crits2.nextElement();
-				System.out.println(c.getName() + ": " + c);
-			}
-			f2.close();
-
-			// System.out.println("\n\nCRITERIA for SCI Documenten");
-			// ODFolder f = odServer.openFolder("SCI Documenten");
-			// Enumeration crits = f.getCriteria();
-			// while (crits.hasMoreElements()) {
-			// ODCriteria c = (ODCriteria) crits.nextElement();
-			// System.out.println(c.getName() + ": " + c);
-			// }
-			// f.close();
-
-			// System.out.println("\n\nCalling ODHit.getDocument");
-
-			// getDocumentByDocId(odServer, "DUO Documenten DocID",
-			// "B10027AA.AAD");
-			// getDocumentAndAnnotationsByDocId(odServer,
-			// "DUO Documenten DocID", "B10027AA.AAD");
-			// getDocumentAndAnnotationsByDocId(odServer,
-			// "SCI Documenten DocID", "1test");
-			// getDocumentAndAnnotationsByDocId(odServer,
-			// "DUO Documenten DocID", "1test");
-			// storeDocument(odServer, "DUO Documenten DocID", "1test");
-			storeDocument(odServer, "DUO Documenten", "C11200CC.CCC");
-			// getDocument(odServer, "DUO Documenten DocId", "000002364934");
-
-			// getDocument(odServer, "DUO Documenten KS en OS", "000002364934");
-			// byte[] doc = odHit.getDocument();
-			// System.out.println("Size document" + doc.length);
-
-			// ----------
-			// Cleanup
-			// ----------
+			String folder = "DUO Documenten"; // TODO uit channel
+			storeDocument(odServer, folder);
 			odServer.logoff();
-		}
-
-		catch (ODException e) {
+		}catch (ODException e) {
 			System.out.println("ODException: " + e);
 			System.out.println("   id = " + e.getErrorId());
 			System.out.println("  msg = " + e.getErrorMsg());
 			e.printStackTrace();
-		}
-
-		catch (Exception e2) {
+		}catch (Exception e2) {
 			System.out.println("exception: " + e2);
 			e2.printStackTrace();
-		} finally {
+		}finally {
 			if (odServer != null) {
 				odServer.terminate();
 			}
@@ -167,42 +109,14 @@ public class ArchiveAction implements Action {
 		nieuwTempDir.delete();
 		return null;
 	}
-	private static ODHit storeDocument(ODServer odServer, String folder,
-			String docID) throws Exception {
+	
+	private static void storeDocument(ODServer odServer, String folder) throws Exception {
+		
 		ODFolder odFolder = odServer.openFolder(folder);
-		// Object [][] Fields =
-		// folder.getStoreDocFields("DUOARC_LOS","DUOTIF_LOS");
-		// ODCriteria odCrit = odFolder.getCriteria("DocIdVi");
-		// odCrit.setSearchValue(docID);
-		// String a =odCrit.getDefaultFmt();
-		// String b =odCrit.getDisplayFmt();
-		// String c = odCrit.getName();
-		// boolean d = odCrit.isQueryable();
-		// odCrit.setOperator(ODConstant.OPEqual);
-		//		
-		//		
-		// ODCriteria odCrit2 = odFolder.getCriteria("Datum afh.");
-		// ODCriteria odCrit2 = odFolder.getCriteria("OntvangenVerzonden");
-		// hmm veranderd qua formaat
-		// odCrit2.setSearchValues("01-12-31", "11-01-01");
-		// mm/dd/jj
-		// odCrit2.setSearchValues("12/31/01","01/01/11");
-		// odCrit2.setOperator(ODConstant.OPBetween);
-
-		String[] appnames = odFolder.getApplGroupNames();
-		for (int k = 0; k < appnames.length; k++) {
-			System.out.println("Appname: " + appnames[k]);
-
-			Object[] obj = odFolder.getApplNames(appnames[k]);
-			for (int i = 0; i < obj.length; i++) {
-				System.out.println(obj[i].toString());
-			}
-		}
-
-		// odFolder.setMaxHits(10);
-		// Vector hits = odFolder.search();
-		Object[][] dubbelArray = odFolder.getStoreDocFields("DUOARC_LOS",
-				"DUOTIF_LOS");
+		
+		String ApplGroup = "DUOARC_LOS"; // TODO uit channel
+		String Application = "DUOTIF_LOS"; // TODO uit channel
+		Object[][] dubbelArray = odFolder.getStoreDocFields(ApplGroup, Application);
 		for (int i = 0; i < dubbelArray.length; i++) {
 			Object[] enkelArray = dubbelArray[i];
 			for (int j = 0; j < enkelArray.length; j++) {
@@ -210,7 +124,6 @@ public class ArchiveAction implements Action {
 				System.out.println("[" + i + " " + j + "]:" + obj);
 			}
 		}
-		// odFolder.getStoreDocFields("DUO", "DUO Documenten");
 		String[] newValues = new String[17];
 		for (int i = 0; i < newValues.length; i++) {
 			newValues[i] = "";
@@ -248,37 +161,13 @@ public class ArchiveAction implements Action {
 		// DOCVIID is nummer 9, max 12 lang
 		newValues[9] = "1";
 
-		// TODO werkt nog niet.
-		System.out.println(System.currentTimeMillis());
-		odFolder.storeDocument("C:/temp/43432.pdf",
-				"DUOARC_LOS", "DUOPDF_LOS", newValues);
-		System.out.println(System.currentTimeMillis());
+		System.out.println("start store-call" + System.currentTimeMillis());
 
-		System.out.println("gelukt?");
-		// if (hits.size()==0){
-		// System.out.println("Niet gevonden....");
-		// }
-		//		
-		// for (int i = 0; i < hits.size(); i++) {
-		// ODHit odhit=(ODHit) hits.elementAt(i);
-		//			
-		// byte[] doc = odhit.getDocument();
-		// String html=new String(doc, "UTF-16");
-		// System.out.println(i+ "-size document ID"+odhit.getDocId() +
-		// " lengte:  "+doc.length);
-		//			
-		// }
-		//	
-		//		
-		//		
-		// if (hits.size() > 0){
-		// ODHit odh= (ODHit) hits.elementAt(0);
+		odFolder.storeDocument("C:/temp/43432.pdf",	ApplGroup, Application, newValues);
+
+		System.out.println("end store-call" + System.currentTimeMillis());
+
 		odFolder.close();
-		// return (ODHit) hits.elementAt(0);
-		// }
-		odFolder.close();
-		return null;
-		//	
 
 	}
 }
