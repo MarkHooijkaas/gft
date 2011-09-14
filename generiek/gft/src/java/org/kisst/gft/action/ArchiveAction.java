@@ -57,7 +57,7 @@ public class ArchiveAction implements Action {
 	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task task) {
-		String filename = null;		
+//		String filename = null;		
 		
 		FileTransferTask ft= (FileTransferTask) task;
 		logger.info("archiveAction is aangeroepen!");
@@ -67,10 +67,10 @@ public class ArchiveAction implements Action {
 		FileServer fileserver= new RemoteFileServer(gft.sshhosts.get(ft.channel.src.name));
 		FileServerConnection fsconn=fileserver.openConnection();
 		File nieuwTempDir = gft.createUniqueDir(ft.channel.name);
-		filename = ft.message.getChildText("Body/transferFile/bestand");
-		String remotefile = ft.channel.srcdir + "/" + filename;
+//		filename = ft.message.getChildText("Body/transferFile/bestand");
+		String remotefile = ft.channel.srcdir + "/" + ft.filename;
 		fsconn.getToLocalFile(remotefile, nieuwTempDir.getPath());
-		File file = new File(nieuwTempDir+"/"+filename);
+//		File file = new File(nieuwTempDir+"/"+filename);
 		
 		logger.info("archiveAction Stap Archiveer!");
 		
@@ -83,7 +83,7 @@ public class ArchiveAction implements Action {
 
 			// String folder = "DUO Documenten"; // TODO uit channel
 			
-			storeDocument(odServer, ft, file);
+			storeDocument(odServer, ft);
 			odServer.logoff();
 		}
 		catch (ODException e) { throw new RuntimeException(e.getMessage()+", id="+e.getErrorId()+", msg="+e.getErrorMsg(), e); } 
@@ -108,7 +108,7 @@ public class ArchiveAction implements Action {
 		// Returns true if all deletions were successful.
 		// If a deletion fails, the method stops attempting to delete and returns false.
 
-		boolean gelukt = deleteDir(nieuwTempDir);
+		boolean gelukt = deleteDir(ft.getTempFile().getParentFile());
 		if (gelukt){
 			logger.info("verwijderen van directorie {}, inclusief bestanden, is gelukt", nieuwTempDir.getPath());
 			}
@@ -134,7 +134,7 @@ public class ArchiveAction implements Action {
 	    return dir.delete();
 	}
 
-	private void storeDocument(ODServer odServer, FileTransferTask ft, File file) throws Exception {
+	private void storeDocument(ODServer odServer, FileTransferTask ft) throws Exception {
 		ArchiveerChannel channel = (ArchiveerChannel) ft.channel;
 		ODFolder odFolder = odServer.openFolder(channel.odfolder);
 		
@@ -162,7 +162,7 @@ public class ArchiveAction implements Action {
 			docFields[i]=waarde;
 		}
 		logger.info("docFields is: {}", docFields);
-		odFolder.storeDocument(file.getPath(), applGroup, application, docFields);
+		odFolder.storeDocument(ft.getTempFile().getPath(), applGroup, application, docFields);
 		odFolder.close();
 
 	}
