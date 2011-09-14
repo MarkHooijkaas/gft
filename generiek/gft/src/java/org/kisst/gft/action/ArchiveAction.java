@@ -98,13 +98,42 @@ public class ArchiveAction implements Action {
 		
 //TODO nette opruiming
 		//File f = new File(nieuwTempDir+"/"+filename);
-		logger.info("delete localfile {}", file.getPath());
-		file.delete();
-		logger.info("delete localfile {}", nieuwTempDir.getPath());
-		nieuwTempDir.delete();
+	//	logger.info("delete localfile {}", file.getPath());
+	//	file.delete();
+	//	logger.info("delete localfile {}", nieuwTempDir.getPath());
+	//	nieuwTempDir.delete();
+	//	return null;
+		
+		// Deletes all files and subdirectories under dir.
+		// Returns true if all deletions were successful.
+		// If a deletion fails, the method stops attempting to delete and returns false.
+
+		boolean gelukt = deleteDir(nieuwTempDir);
+		if (gelukt){
+			logger.info("verwijderen van directorie {}, inclusief bestanden, is gelukt", nieuwTempDir.getPath());
+			}
+		else {
+			logger.error("verwijderen van directorie {} is niet gelukt", nieuwTempDir.getPath());	
+			}
+	
 		return null;
 	}
 	
+	public static boolean deleteDir(File dir) {
+	    if (dir.isDirectory()) {
+	        String[] children = dir.list();
+	        for (int i=0; i<children.length; i++) {
+	            boolean success = deleteDir(new File(dir, children[i]));
+	            if (!success) {
+	                return false;
+	            }
+	        }
+	    }
+
+	    // The directory is now empty so delete it
+	    return dir.delete();
+	}
+
 	private void storeDocument(ODServer odServer, FileTransferTask ft, File file) throws Exception {
 		ArchiveerChannel channel = (ArchiveerChannel) ft.channel;
 		ODFolder odFolder = odServer.openFolder(channel.odfolder);
@@ -118,11 +147,28 @@ public class ArchiveAction implements Action {
 		for (int i = 0; i < dubbelArray.length; i++) {
 			String waarde = null;
 			String docField = (String) dubbelArray[i][0];
+			ArchiveerChannel.Field fielddef=channel.fields.get(docField);
+			waarde = ft.message.getChildText("Body/transferFile/extra/kenmerken/?"+docField );
+			if (fielddef!=null) {
+				if (waarde==null && fielddef.optional==false)
+					throw new RuntimeException("veld "+docField+" is niet optioneel en niet megegeven");
+				if (waarde==null && fielddef.defaultValue!=null)
+					waarde=fielddef.defaultValue;
+				if (fielddef.fixedValue != null)
+					waarde=fielddef.fixedValue;
+			}
+			
 			//TODO uit kanaal halen welke velden welke default waarde moet hebben!
 			if (docField.startsWith("RptD") || docField.startsWith("RptT")){
-				waarde = "t";
-			}else {
-				waarde = ft.message.getChildText("Body/transferFile/extra/kenmerken/?"+docField );
+				waarde = "t";}
+			else {	
+				if (docField.equals("InUit")){
+					waarde = "V";
+				}
+				else {
+					waarde = ft.message.getChildText("Body/transferFile/extra/kenmerken/?"+docField );
+				}
+
 			}
 			logger.info("waarde is {}", waarde);
 			docFields[i]=waarde;
