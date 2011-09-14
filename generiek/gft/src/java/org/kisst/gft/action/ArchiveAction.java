@@ -70,24 +70,20 @@ public class ArchiveAction implements Action {
 		filename = ft.message.getChildText("Body/transferFile/bestand");
 		String remotefile = ft.channel.srcdir + "/" + filename;
 		fsconn.getToLocalFile(remotefile, nieuwTempDir.getPath());
-		//TODO stappen aan elkaar koppelen:
-
-
-		
-		//ophalen lijstje uit ondemand 
-		//String kenmerkNaam = "docSoort";
-		//filename = ft.message.getChildText("Body/transferFile/"+kenmerkNaam);
-
+		File file = new File(nieuwTempDir+"/"+filename);
 		
 		logger.info("archiveAction Stap Archiveer!");
 		
 		ODServer odServer = null;
 		try {
 			// ONT= 1455, FAT=1460
+			logger.info("open connection met {}",host);
 			odServer = host.openConnection();
+			logger.info("connection {}",host);
+
 			// String folder = "DUO Documenten"; // TODO uit channel
 			
-			storeDocument(odServer, ft);
+			storeDocument(odServer, ft, file);
 			odServer.logoff();
 		}
 		catch (ODException e) { throw new RuntimeException(e.getMessage()+", id="+e.getErrorId()+", msg="+e.getErrorMsg(), e); } 
@@ -101,86 +97,38 @@ public class ArchiveAction implements Action {
 		logger.info("archiveAction is ruim localfile op!");
 		
 //TODO nette opruiming
-		File f = new File(nieuwTempDir+"/"+filename);
-		logger.info("delete localfile {}", f.getPath());
-		f.delete();
+		//File f = new File(nieuwTempDir+"/"+filename);
+		logger.info("delete localfile {}", file.getPath());
+		file.delete();
 		logger.info("delete localfile {}", nieuwTempDir.getPath());
 		nieuwTempDir.delete();
 		return null;
 	}
 	
-	private void storeDocument(ODServer odServer, FileTransferTask ft) throws Exception {
+	private void storeDocument(ODServer odServer, FileTransferTask ft, File file) throws Exception {
 		ArchiveerChannel channel = (ArchiveerChannel) ft.channel;
 		ODFolder odFolder = odServer.openFolder(channel.odfolder);
 		
 		String applGroup = channel.odapplgroup;		
 		String application = channel.odapplication;
-		
 //		String ApplGroup = "DUOARC_LOS"; // TODO uit channel;		
 		//String Application = "DUOPDF_LOS"; // TODO uit channel
-		
 		Object[][] dubbelArray = odFolder.getStoreDocFields(applGroup, application);
-		for (int i = 0; i < dubbelArray.length; i++) {
-			Object[] enkelArray = dubbelArray[i];
-			for (int j = 0; j < enkelArray.length; j++) {
-				Object obj = enkelArray[j];
-				System.out.println("[" + i + " " + j + "]:" + obj);
-			}
-		}
-		
 		String[] docFields = new String[dubbelArray.length];
 		for (int i = 0; i < dubbelArray.length; i++) {
-			String waarde = "";
+			String waarde = null;
 			String docField = (String) dubbelArray[i][0];
-			logger.info("string is {}", docField);
-			waarde = ft.message.getChildText("Body/transferFile/extra/kenmerken/"+docField);
+			//TODO uit kanaal halen welke velden welke default waarde moet hebben!
+			if (docField.startsWith("RptD") || docField.startsWith("RptT")){
+				waarde = "t";
+			}else {
+				waarde = ft.message.getChildText("Body/transferFile/extra/kenmerken/?"+docField );
+			}
+			logger.info("waarde is {}", waarde);
 			docFields[i]=waarde;
 		}
 		logger.info("docFields is: {}", docFields);
-		
-		String[] newValues = new String[17];
-		for (int i = 0; i < newValues.length; i++) {
-			newValues[i] = "";
-		}
-
-		// DOCTYPE
-		newValues[0] = "DR_TEST";
-
-		// DATUM afhandeling mm/dd/yy (AMERIKAANS)
-		newValues[1] = "09/09/11";
-
-		// BSN
-		newValues[2] = "123456789";
-
-		// ARCHIEFKENMERK
-		newValues[3] = "DR test GAS";
-
-		// RPTID
-		newValues[4] = "DUOPDF_LOS";
-
-		// ONTVANGEN VERZONDEN
-		newValues[5] = "O";
-
-		// DATUM rapport mm/dd/yy (AMERIKAANS)
-		// newValues[6]="05/23/11";
-		newValues[6] = "t";
-
-		// tijd hh:mm:ss (AMERIKAANS)
-		// newValues[7]="12:34:09";
-		newValues[7] = "t";
-
-		// CORRNR is nummer 9, max 12 lang
-		newValues[8] = "131313131313";
-
-		// DOCVIID is nummer 9, max 12 lang
-		newValues[9] = "1";
-
-		System.out.println("start store-call" + System.currentTimeMillis());
-
-		odFolder.storeDocument("C:/temp/43432.pdf",	applGroup, application, newValues);
-
-		System.out.println("end store-call" + System.currentTimeMillis());
-
+		odFolder.storeDocument(file.getPath(), applGroup, application, docFields);
 		odFolder.close();
 
 	}
