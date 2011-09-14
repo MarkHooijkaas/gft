@@ -1,5 +1,6 @@
 package org.kisst.gft.filetransfer;
 
+import java.io.File;
 import java.util.regex.Pattern;
 
 import org.kisst.gft.FunctionalException;
@@ -14,6 +15,7 @@ public class FileTransferTask extends BasicTask {
 	public final XmlNode message;
 	public final String replyTo;
 	public final String correlationId;
+	public final String filename;
 	
 	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
 
@@ -26,17 +28,17 @@ public class FileTransferTask extends BasicTask {
 		if (channel==null)
 			throw new FunctionalException("Could not find channel with name "+input.getChildText("kanaal"));
 		// Strip preceding slashes to normalize the path.
-		String file=input.getChildText("bestand");
+		filename=input.getChildText("?bestand");
 
-		if (file.length()>1024)
+		if (filename.length()>1024)
 			throw new FunctionalException("Filename length should not exceed 1024 characters");
-		if (! validCharacters.matcher(file).matches())
+		if (! validCharacters.matcher(filename).matches())
 			throw new FunctionalException("Filename should only contain alphanumeric characters / . - or _");
-		if (file.indexOf("..")>=0)
-			throw new FunctionalException("Filename ["+file+"] is not allowed to contain .. pattern");
+		if (filename.indexOf("..")>=0)
+			throw new FunctionalException("Filename ["+filename+"] is not allowed to contain .. pattern");
 
-		this.srcpath=channel.getSrcPath(file, this);
-		this.destpath=channel.getDestPath(file, this);
+		this.srcpath=channel.getSrcPath(filename, this);
+		this.destpath=channel.getDestPath(filename, this);
 		this.replyTo=replyTo;
 		this.correlationId=correlationId;
 		for (String key : channel.getContext().keys())
@@ -44,4 +46,16 @@ public class FileTransferTask extends BasicTask {
 	}
 
 	public void run() { channel.run(this); }
+	
+	private File  tempFile=null;
+	public File getTempFile() {
+		if (tempFile!=null)
+			return tempFile;
+		File nieuwTempDir = gft.createUniqueDir(channel.name);
+		if (filename==null)
+			tempFile = new File(nieuwTempDir,"file.dat");
+		else
+			tempFile = new File(nieuwTempDir,filename);
+		return tempFile;
+	}
 }
