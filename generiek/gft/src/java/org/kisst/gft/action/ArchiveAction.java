@@ -158,18 +158,6 @@ public class ArchiveAction implements Action {
 					waarde=fielddef.fixedValue;
 			}
 			
-			//TODO uit kanaal halen welke velden welke default waarde moet hebben!
-			if (docField.startsWith("RptD") || docField.startsWith("RptT")){
-				waarde = "t";}
-			else {	
-				if (docField.equals("InUit")){
-					waarde = "V";
-				}
-				else {
-					waarde = ft.message.getChildText("Body/transferFile/extra/kenmerken/?"+docField );
-				}
-
-			}
 			logger.info("waarde is {}", waarde);
 			docFields[i]=waarde;
 		}
