@@ -1,6 +1,5 @@
 package org.kisst.gft.ssh;
 
-import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.RemoteFileServer;
 import org.kisst.props4j.Props;
 
