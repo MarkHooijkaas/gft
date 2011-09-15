@@ -94,6 +94,14 @@ public class RemoteFileServerConnection implements FileServerConnection {
 			catch (SftpException e) { throw new RuntimeException(e); }
 	}
 	
+	@Override
+	public void putFromLocalFile(String localpath, String remotepath) {
+		try {
+			logger.info("copy file from local {} to remote {}",localpath,remotepath);
+			sftp.put(localpath, remotepath);
 
+		} 
+		catch (SftpException e) { throw new RuntimeException(e); }
+	}
 
 }

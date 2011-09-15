@@ -19,8 +19,6 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-import java.io.File;
-
 import nl.duo.gft.odwek.ArchiveerChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 
@@ -80,20 +78,6 @@ public class ArchiveAction implements Action {
 		return null;
 	}
 	
-	public static boolean deleteDir(File dir) {
-	    if (dir.isDirectory()) {
-	        String[] children = dir.list();
-	        for (int i=0; i<children.length; i++) {
-	            boolean success = deleteDir(new File(dir, children[i]));
-	            if (!success) {
-	                return false;
-	            }
-	        }
-	    }
-	    // The directory is now empty so delete it
-	    return dir.delete();
-	}
-
 	private void storeDocument(ODServer odServer, FileTransferTask ft) throws Exception {
 		ArchiveerChannel channel = (ArchiveerChannel) ft.channel;
 		ODFolder odFolder = odServer.openFolder(channel.odfolder);

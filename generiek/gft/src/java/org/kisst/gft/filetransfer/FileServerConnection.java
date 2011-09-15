@@ -13,4 +13,5 @@ public interface FileServerConnection {
 	public boolean isDirectory(String path);
 	public void move(String path, String newpath);
 	public void getToLocalFile(String remotepath, String localpath); 
+	public void putFromLocalFile(String localpath, String remotepath); 
 }
