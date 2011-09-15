@@ -48,6 +48,9 @@ public class SshHost implements Representable {
 		else
 			this.forbiddenTimes=new TimeWindowList(timewindow);
 	}
+	
+	public String getBasePath() { return basePath; }
+
 	public String toString() { return "ssh:"+user+"@"+host+(port==22? "" : ":"+port); }
 	
 	public boolean isAvailable() { return forbiddenTimes==null || ! forbiddenTimes.isTimeInWindow(); }

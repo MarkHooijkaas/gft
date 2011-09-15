@@ -1,8 +1,10 @@
 package org.kisst.gft.ssh;
 
+import org.kisst.gft.filetransfer.FileServer;
+import org.kisst.gft.filetransfer.RemoteFileServer;
 import org.kisst.props4j.Props;
 
-public class As400SshHost extends SshHost {
+public class As400SshHost extends RemoteFileServer {
 	private final String scpCommand;
 
 	public As400SshHost(Props props) {

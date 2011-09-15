@@ -18,7 +18,7 @@ public class SshAction implements Action {
 	public SshAction(GftContainer gft, Props props) {
 		this.gft=gft;
 		commandTemplate =props.getString("command");
-		host=gft.sshhosts.get(props.getString("host"));
+		host=(SshHost) gft.sshhosts.get(props.getString("host"));
 		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 

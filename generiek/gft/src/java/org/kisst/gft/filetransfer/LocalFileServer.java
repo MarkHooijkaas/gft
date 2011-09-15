@@ -35,4 +35,13 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 	@Override
 	public void getToLocalFile(String remotepath, String localpath) { throw new RuntimeException("not implemented yet"); } // TODO: implement
 
+	@Override
+	public String getBasePath() {
+		throw new RuntimeException("not implemented yet");  // TODO: implement
+	}
+
+	@Override
+	public boolean isAvailable() {
+		throw new RuntimeException("not implemented yet");  // TODO: implement
+	}
 }

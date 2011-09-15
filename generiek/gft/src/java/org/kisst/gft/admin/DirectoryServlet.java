@@ -41,7 +41,7 @@ public class DirectoryServlet extends BaseServlet {
 
 		out.println("<h1>Directory "+name+"</h1>");
 		out.println("<pre>");
-		String txt = gft.sshhosts.get(name).ls(dir);
+		String txt = gft.sshhosts.get(name).ls(dir); // TODO
 		txt=txt.replaceAll("&", "&amp;");
 		txt=txt.replaceAll("<", "&lt;");
 		txt=txt.replaceAll(">", "&gt;");

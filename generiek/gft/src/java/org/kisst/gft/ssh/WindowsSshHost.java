@@ -1,10 +1,11 @@
 package org.kisst.gft.ssh;
 
+import org.kisst.gft.filetransfer.RemoteFileServer;
 import org.kisst.gft.ssh.Ssh.ExecResult;
 import org.kisst.props4j.Props;
 import org.kisst.util.FileUtil;
 
-public class WindowsSshHost extends SshHost {
+public class WindowsSshHost extends RemoteFileServer {
 	private final String scpCommand;
 
 	public WindowsSshHost(Props props) {

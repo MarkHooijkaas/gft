@@ -23,7 +23,6 @@ import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileTransferTask;
-import org.kisst.gft.filetransfer.RemoteFileServer;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
@@ -46,7 +45,7 @@ public class SftpGetAction implements Action {
 
 		logger.info("sftpGetAction Stap haal op!");
 		
-		FileServer fileserver= new RemoteFileServer(gft.sshhosts.get(ft.channel.src.name));
+		FileServer fileserver= ft.channel.src;
 		FileServerConnection fsconn=fileserver.openConnection();
 		String remotefile = ft.channel.srcdir + "/" + ft.filename;
 		fsconn.getToLocalFile(remotefile, ft.getTempFile().getPath());

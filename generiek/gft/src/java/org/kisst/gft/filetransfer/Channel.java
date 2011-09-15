@@ -3,7 +3,6 @@ package org.kisst.gft.filetransfer;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.action.ActionList;
-import org.kisst.gft.ssh.SshHost;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskDefinition;
 import org.kisst.props4j.Props;
@@ -15,8 +14,8 @@ import org.slf4j.LoggerFactory;
 public class Channel extends BasicTaskDefinition implements TaskDefinition {
 	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
 
-	public final SshHost src;
-	public final SshHost dest;
+	public final RemoteFileServer src;
+	public final RemoteFileServer dest;
 	public final String srcdir;
 	public final String destdir;
 	public final String mode;
@@ -76,8 +75,8 @@ public class Channel extends BasicTaskDefinition implements TaskDefinition {
 	}
 
 	
-	public String getSrcPath(String file, FileTransferTask ft) { return FileUtil.joinPaths(src.basePath, calcPath(srcdir, file, ft)); }
-	public String getDestPath(String file, FileTransferTask ft) {return FileUtil.joinPaths(dest.basePath,calcPath(destdir, file, ft));	}
+	public String getSrcPath(String file, FileTransferTask ft) { return FileUtil.joinPaths(src.getBasePath(), calcPath(srcdir, file, ft)); }
+	public String getDestPath(String file, FileTransferTask ft) {return FileUtil.joinPaths(dest.getBasePath(),calcPath(destdir, file, ft));	}
 
 	@Override
 	public void run(Task task) {

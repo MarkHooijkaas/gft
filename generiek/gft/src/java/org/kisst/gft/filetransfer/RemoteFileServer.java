@@ -1,19 +1,17 @@
 package org.kisst.gft.filetransfer;
 
 import org.kisst.gft.ssh.SshHost;
+import org.kisst.props4j.Props;
 
 
 
-public class RemoteFileServer implements FileServer {
-	private SshHost host;
+public class RemoteFileServer extends SshHost implements FileServer {
 
-	public RemoteFileServer(SshHost host) {
-		this.host=host;
+	public RemoteFileServer(Props props) {
+		super(props);
 	}
 	@Override
 	public FileServerConnection openConnection() {
-		return new RemoteFileServerConnection(host);
+		return new RemoteFileServerConnection(this);
 	}
-	
-	
 }
