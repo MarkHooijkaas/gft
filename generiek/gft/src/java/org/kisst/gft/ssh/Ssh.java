@@ -1,4 +1,4 @@
-package org.kisst.gft.filetransfer;
+package org.kisst.gft.ssh;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;

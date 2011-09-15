@@ -2,7 +2,7 @@ package org.kisst.gft.action;
 
 import org.kisst.gft.FunctionalException;
 import org.kisst.gft.filetransfer.FileTransferTask;
-import org.kisst.gft.filetransfer.SshHost;
+import org.kisst.gft.ssh.SshHost;
 import org.kisst.gft.task.Task;
 
 public class CheckDestFileDoesNotExist implements Action {

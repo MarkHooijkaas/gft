@@ -1,5 +1,7 @@
 package org.kisst.gft.filetransfer;
 
+import org.kisst.gft.ssh.SshHost;
+
 
 
 public class RemoteFileServer implements FileServer {

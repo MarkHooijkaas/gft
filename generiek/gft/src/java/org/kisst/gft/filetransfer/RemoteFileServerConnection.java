@@ -2,6 +2,8 @@ package org.kisst.gft.filetransfer;
 
 import java.util.Vector;
 
+import org.kisst.gft.ssh.Ssh;
+import org.kisst.gft.ssh.SshHost;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

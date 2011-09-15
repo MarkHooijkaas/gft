@@ -3,6 +3,7 @@ package org.kisst.gft.filetransfer;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.action.ActionList;
+import org.kisst.gft.ssh.SshHost;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskDefinition;
 import org.kisst.props4j.Props;

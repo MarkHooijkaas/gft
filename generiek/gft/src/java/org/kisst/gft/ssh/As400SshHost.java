@@ -1,4 +1,4 @@
-package org.kisst.gft.filetransfer;
+package org.kisst.gft.ssh;
 
 import org.kisst.props4j.Props;
 

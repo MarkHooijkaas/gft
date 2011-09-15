@@ -17,11 +17,11 @@ import nl.duo.gft.poller.Poller;
 
 import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.admin.AdminServer;
-import org.kisst.gft.filetransfer.As400SshHost;
 import org.kisst.gft.filetransfer.Channel;
-import org.kisst.gft.filetransfer.SshHost;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
-import org.kisst.gft.filetransfer.WindowsSshHost;
+import org.kisst.gft.ssh.As400SshHost;
+import org.kisst.gft.ssh.SshHost;
+import org.kisst.gft.ssh.WindowsSshHost;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MessageHandler;
