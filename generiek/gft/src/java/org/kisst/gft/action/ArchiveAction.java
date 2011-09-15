@@ -25,10 +25,7 @@ import nl.duo.gft.odwek.ArchiveerChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileServer;
-import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileTransferTask;
-import org.kisst.gft.filetransfer.RemoteFileServer;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
@@ -41,7 +38,6 @@ import com.ibm.edms.od.ODServer;
 public class ArchiveAction implements Action {
 	private final static Logger logger=LoggerFactory.getLogger(ArchiveAction.class);
 	private final boolean safeToRetry;
-	private final GftContainer gft;
     private final OnDemandHost host;
 	
 	public ArchiveAction(GftContainer gft, Props props) {
@@ -51,27 +47,15 @@ public class ArchiveAction implements Action {
 		//	throw new RuntimeException("ArchiveAction moet in een ArchiveerChannel zitten, en dat is "+chan.name+" niet");
 		safeToRetry = props.getBoolean("safeToRetry", false);
 		this.host=gft.ondemandhosts.get("main");
-		this.gft = gft; 
 	}
 
 	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task task) {
-//		String filename = null;		
 		
 		FileTransferTask ft= (FileTransferTask) task;
-		logger.info("archiveAction is aangeroepen!");
-
-		logger.info("archiveAction Stap haal op!");
-		
-		FileServer fileserver= new RemoteFileServer(gft.sshhosts.get(ft.channel.src.name));
-		FileServerConnection fsconn=fileserver.openConnection();
-		File nieuwTempDir = gft.createUniqueDir(ft.channel.name);
-//		filename = ft.message.getChildText("Body/transferFile/bestand");
-		String remotefile = ft.channel.srcdir + "/" + ft.filename;
-		fsconn.getToLocalFile(remotefile, nieuwTempDir.getPath());
-//		File file = new File(nieuwTempDir+"/"+filename);
-		
+	
+		logger.info("archiveAction is aangeroepen!");		
 		logger.info("archiveAction Stap Archiveer!");
 		
 		ODServer odServer = null;
@@ -80,9 +64,7 @@ public class ArchiveAction implements Action {
 			logger.info("open connection met {}",host);
 			odServer = host.openConnection();
 			logger.info("connection {}",host);
-
-			// String folder = "DUO Documenten"; // TODO uit channel
-			
+	
 			storeDocument(odServer, ft);
 			odServer.logoff();
 		}
@@ -96,24 +78,16 @@ public class ArchiveAction implements Action {
 
 		logger.info("archiveAction is ruim localfile op!");
 		
-//TODO nette opruiming
-		//File f = new File(nieuwTempDir+"/"+filename);
-	//	logger.info("delete localfile {}", file.getPath());
-	//	file.delete();
-	//	logger.info("delete localfile {}", nieuwTempDir.getPath());
-	//	nieuwTempDir.delete();
-	//	return null;
-		
 		// Deletes all files and subdirectories under dir.
 		// Returns true if all deletions were successful.
 		// If a deletion fails, the method stops attempting to delete and returns false.
 
 		boolean gelukt = deleteDir(ft.getTempFile().getParentFile());
 		if (gelukt){
-			logger.info("verwijderen van directorie {}, inclusief bestanden, is gelukt", nieuwTempDir.getPath());
+			logger.info("verwijderen van directorie {}, inclusief bestanden, is gelukt", ft.getTempFile().getPath());
 			}
 		else {
-			logger.error("verwijderen van directorie {} is niet gelukt", nieuwTempDir.getPath());	
+			logger.error("verwijderen van directorie {} is niet gelukt", ft.getTempFile().getPath());	
 			}
 	
 		return null;
@@ -129,7 +103,6 @@ public class ArchiveAction implements Action {
 	            }
 	        }
 	    }
-
 	    // The directory is now empty so delete it
 	    return dir.delete();
 	}
@@ -140,8 +113,7 @@ public class ArchiveAction implements Action {
 		
 		String applGroup = channel.odapplgroup;		
 		String application = channel.odapplication;
-//		String ApplGroup = "DUOARC_LOS"; // TODO uit channel;		
-		//String Application = "DUOPDF_LOS"; // TODO uit channel
+
 		Object[][] dubbelArray = odFolder.getStoreDocFields(applGroup, application);
 		String[] docFields = new String[dubbelArray.length];
 		for (int i = 0; i < dubbelArray.length; i++) {
@@ -162,6 +134,11 @@ public class ArchiveAction implements Action {
 			docFields[i]=waarde;
 		}
 		logger.info("docFields is: {}", docFields);
+		
+		// This check is important because otherwise JVM will crash
+		if (! ft.getTempFile().exists())
+			throw new RuntimeException("Te archiveren bestand "+ft.getTempFile()+" bestaat niet");
+		
 		odFolder.storeDocument(ft.getTempFile().getPath(), applGroup, application, docFields);
 		odFolder.close();
 

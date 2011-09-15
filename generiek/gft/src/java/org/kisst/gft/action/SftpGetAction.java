@@ -19,11 +19,6 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-import java.io.File;
-
-import nl.duo.gft.odwek.ArchiveerChannel;
-import nl.duo.gft.odwek.OnDemandHost;
-
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
@@ -33,10 +28,6 @@ import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.ibm.edms.od.ODException;
-import com.ibm.edms.od.ODFolder;
-import com.ibm.edms.od.ODServer;
 
 public class SftpGetAction implements Action {
 	private final static Logger logger=LoggerFactory.getLogger(SftpGetAction.class);
@@ -53,7 +44,7 @@ public class SftpGetAction implements Action {
 	public Object execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 
-		logger.info("archiveAction Stap haal op!");
+		logger.info("sftpGetAction Stap haal op!");
 		
 		FileServer fileserver= new RemoteFileServer(gft.sshhosts.get(ft.channel.src.name));
 		FileServerConnection fsconn=fileserver.openConnection();

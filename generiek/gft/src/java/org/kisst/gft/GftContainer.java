@@ -68,6 +68,7 @@ public class GftContainer {
 		} catch (IOException e) { throw new RuntimeException(e);}
 		return props.getProperty("project.version");
 	}
+	
 	public void addAction(String name, String classname) {
 		SimpleProps props=new SimpleProps();
 		props.put("class", classname);
@@ -89,6 +90,8 @@ public class GftContainer {
 		addAction("sendGftMessage", "SendGftMessageAction");
 		addAction("localCommand", "LocalCommandAction");
 		addAction("archive", "ArchiveAction");
+		addAction("decode", "DecodeBase64ToFileAction");
+		addAction("sftpGet", "SftpGetAction");
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
