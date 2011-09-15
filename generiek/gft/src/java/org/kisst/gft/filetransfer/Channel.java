@@ -3,6 +3,7 @@ package org.kisst.gft.filetransfer;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.action.ActionList;
+import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskDefinition;
 import org.kisst.props4j.Props;
@@ -14,8 +15,8 @@ import org.slf4j.LoggerFactory;
 public class Channel extends BasicTaskDefinition implements TaskDefinition {
 	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
 
-	public final RemoteFileServer src;
-	public final RemoteFileServer dest;
+	public final SshFileServer src;
+	public final SshFileServer dest;
 	public final String srcdir;
 	public final String destdir;
 	public final String mode;

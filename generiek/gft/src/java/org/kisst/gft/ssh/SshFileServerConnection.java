@@ -1,9 +1,9 @@
-package org.kisst.gft.filetransfer;
+package org.kisst.gft.ssh;
 
 import java.util.Vector;
 
-import org.kisst.gft.ssh.Ssh;
-import org.kisst.gft.ssh.SshHost;
+import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
+import org.kisst.gft.filetransfer.FileServerConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,13 +15,13 @@ import com.jcraft.jsch.SftpException;
 import com.jcraft.jsch.ChannelSftp.LsEntry;
 
 
-public class RemoteFileServerConnection implements FileServerConnection {
-	private static final Logger logger = LoggerFactory.getLogger(RemoteFileServerConnection.class);
+public class SshFileServerConnection implements FileServerConnection {
+	private static final Logger logger = LoggerFactory.getLogger(SshFileServerConnection.class);
 	private final Session session;
 	private final ChannelSftp sftp;
 	private final SshHost host;
 
-	public RemoteFileServerConnection(SshHost host) {
+	public SshFileServerConnection(SshHost host) {
 		this.host=host;
 		session = Ssh.openSession(host);
 		logger.info("Opening session on host: {}",host);
