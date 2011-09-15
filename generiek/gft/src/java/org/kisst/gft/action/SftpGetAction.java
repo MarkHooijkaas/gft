@@ -31,11 +31,9 @@ import org.slf4j.LoggerFactory;
 public class SftpGetAction implements Action {
 	private final static Logger logger=LoggerFactory.getLogger(SftpGetAction.class);
 	private final boolean safeToRetry;
-	private final GftContainer gft;
 	
 	public SftpGetAction(GftContainer gft, Props props) {
 		safeToRetry = props.getBoolean("safeToRetry", false);
-		this.gft = gft; 
 	}
 
 	public boolean safeToRetry() { return safeToRetry; }
