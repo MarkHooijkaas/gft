@@ -92,6 +92,7 @@ public class GftContainer {
 		addAction("archive", "ArchiveAction");
 		addAction("decode", "DecodeBase64ToFileAction");
 		addAction("sftpGet", "SftpGetAction");
+		addAction("delete_local_file", "DeleteLocalFileAction");
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}

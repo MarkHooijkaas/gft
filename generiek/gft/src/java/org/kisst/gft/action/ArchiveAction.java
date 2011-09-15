@@ -76,20 +76,7 @@ public class ArchiveAction implements Action {
 			}
 		}
 
-		logger.info("archiveAction is ruim localfile op!");
-		
-		// Deletes all files and subdirectories under dir.
-		// Returns true if all deletions were successful.
-		// If a deletion fails, the method stops attempting to delete and returns false.
 
-		boolean gelukt = deleteDir(ft.getTempFile().getParentFile());
-		if (gelukt){
-			logger.info("verwijderen van directorie {}, inclusief bestanden, is gelukt", ft.getTempFile().getPath());
-			}
-		else {
-			logger.error("verwijderen van directorie {} is niet gelukt", ft.getTempFile().getPath());	
-			}
-	
 		return null;
 	}
 	
