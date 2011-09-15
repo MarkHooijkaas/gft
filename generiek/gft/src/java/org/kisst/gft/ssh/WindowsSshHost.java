@@ -34,7 +34,7 @@ public class WindowsSshHost extends SshFileServer {
 		throw new RuntimeException("Ssh call of command ["+command+"] returned exit code "+result.exitcode+" and stderr ["+result.stderr+"] and stdout "+result.stdout);
 	}
 	
-	@Override public void copyFileTo(String srcpath, SshHost dest, String destdir)  {
+	@Override public void copyFileTo(String srcpath, SshFileServer dest, String destdir)  {
 		String command=scpCommand+" \""+convertPath(srcpath)+"\" \""+dest.host+":"+dest.convertPath(destdir)+"\"";
 		if (dest==this) // special case,: a local copy
 			command="copy "+convertPath(srcpath)+" "+dest.convertPath(destdir);
@@ -49,7 +49,7 @@ public class WindowsSshHost extends SshFileServer {
 			return;
 		throw new RuntimeException("Ssh call of command ["+command+"] returned exit code "+result.exitcode+" and stderr ["+result.stderr+"] and stoput "+result.stdout);
 	}
-	@Override public void copyFileFrom(SshHost src, String srcpath, String destpath)  {
+	@Override public void copyFileFrom(SshFileServer src, String srcpath, String destpath)  {
 		call(scpCommand+" \""+src.host+":"+src.convertPath(srcpath)+"\" \""+convertPath(destpath)+"\"");
 	}
 	@Override public String ls(String dir) {

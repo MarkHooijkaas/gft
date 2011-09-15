@@ -21,7 +21,9 @@ public class SshFileServer extends SshHost implements FileServer {
 	}
 
 	public String getBasePath() { return basePath; }
-
+	
+	public String convertPath(String path) { return path; }
+	
 	public boolean fileExists(String path) {
 		path=convertPath(path);
 		String file=path.substring(path.lastIndexOf('/')+1);
@@ -29,17 +31,16 @@ public class SshFileServer extends SshHost implements FileServer {
 		return (result.stdout.indexOf(FileUtil.filename(file))>0);
 	}
 	public void deleteFile(String path) { call("rm \""+path+"\""); }
-	public void copyFileTo(String srcpath, SshHost dest, String destpath)  {
+	public void copyFileTo(String srcpath, SshFileServer dest, String destpath)  {
 		String command="scp \""+srcpath+"\" \""+dest.user+"@"+dest.host+":"+dest.convertPath(destpath)+"\"";
 		command=command.replace("\\","\\\\");
 		call(command);
 	}
-	public void copyFileFrom(SshHost src, String srcpath, String destpath)  {
+	public void copyFileFrom(SshFileServer src, String srcpath, String destpath)  {
 		call("scp \""+src.host+":"+src.convertPath(srcpath)+"\" \""+destpath+"\"");
 	}
 	public String ls(String dir) {
 		ExecResult result=exec("ls -l \""+basePath+"/"+dir+"\"");
 		return result.stdout;
 	}
-
 }
