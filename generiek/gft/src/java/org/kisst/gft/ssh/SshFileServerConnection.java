@@ -1,5 +1,6 @@
 package org.kisst.gft.ssh;
 
+import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
@@ -50,28 +51,30 @@ public class SshFileServerConnection implements FileServerConnection {
 			sftp.rm(path);
 		} catch (SftpException e) { throw new RuntimeException(e); }
 	}
-	public long fileSize(String path) { return getFileAttributes(path).getSize(); }
-	public long lastModified(String path) { return getFileAttributes(path).getMTime(); }
-	public boolean isDirectory(String path) { return getFileAttributes(path).isDir(); }
+	public long fileSize(String path) { return getFileAttributes(path).size; }
+	public long lastModified(String path) { return getFileAttributes(path).modifyTime; }
+	public boolean isDirectory(String path) { return getFileAttributes(path).isDirectory; }
 	
-	public SftpATTRS getFileAttributes(String path) { 
+	public FileAttributes getFileAttributes(String path) { 
 		try {
-			return sftp.lstat(path);
+			SftpATTRS attr = sftp.lstat(path);
+			return new FileAttributes(attr.getATime(), attr.getMTime(), attr.isDir(), attr.getSize());
 		} catch (SftpException e) { throw new RuntimeException(e); }
 	}
 	
 	@Override
 	@SuppressWarnings("unchecked")
-	public String[] getDirectoryEntries(String path) {
+	public LinkedHashMap<String, FileAttributes> getDirectoryEntries(String path) {
 		try {
 			logger.info("getting remote diretory: {}",path);
 			Vector<LsEntry> vv = sftp.ls(path);
 			logger.info("found {} entries",vv.size());
-			String[] result = new String[vv.size()];
-			int i=0;
+			LinkedHashMap<String,FileAttributes> result = new LinkedHashMap<String,FileAttributes>();
 			for (LsEntry entry: vv) {
 				logger.debug("found entry {} - {}",entry.getFilename(), entry.getLongname());
-                result[i++] = entry.getFilename();
+				SftpATTRS attr = entry.getAttrs();
+                result.put(entry.getFilename(),
+                	new FileAttributes(attr.getATime(), attr.getMTime(), attr.isDir(), attr.getSize()));
 			}
 			return result;
 		} 

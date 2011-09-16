@@ -2,7 +2,6 @@ package org.kisst.gft.ssh;
 
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
-import org.kisst.gft.ssh.Ssh.ExecResult;
 import org.kisst.props4j.Props;
 
 
@@ -78,9 +77,4 @@ public class SshFileServer implements FileServer {
 					destpath
 			);
 	}
-	public String ls(String dir) {
-		ExecResult result=host.exec("ls -l",basePath+"/"+dir);
-		return result.stdout;
-	}
-	
 }

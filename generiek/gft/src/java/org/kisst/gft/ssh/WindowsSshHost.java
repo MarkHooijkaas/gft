@@ -33,11 +33,4 @@ public class WindowsSshHost extends SshFileServer {
 			return;
 		throw new RuntimeException("Ssh call of command ["+command+"] returned exit code "+result.exitcode+" and stderr ["+result.stderr+"] and stdout "+result.stdout);
 	}
-	
-
-	@Override public String ls(String dir) {
-		ExecResult result=host.exec("dir \""+nativePath(basePath+"/"+dir)+"\"");
-		return result.stdout;
-	}
-
 }
