@@ -12,7 +12,7 @@ public class FixPermissions implements Action {
 		FileTransferTask ft= (FileTransferTask) task;
 		String destdir=ft.destpath.substring(0,ft.destpath.lastIndexOf('/'));
 
-		SshHost dest = (SshHost) ft.channel.dest;
+		SshHost dest =  ft.channel.dest.getSshHost();
 		String s=dest.call("system dspaut \"obj('"+destdir+"/')\"");
 		int pos=s.indexOf("Lijst van machtigingen");
 		if (pos<=0)

@@ -4,43 +4,83 @@ import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.ssh.Ssh.ExecResult;
 import org.kisst.props4j.Props;
-import org.kisst.util.FileUtil;
 
 
 
-public class SshFileServer extends SshHost implements FileServer {
-	public final String basePath;
-
+public class SshFileServer implements FileServer {
+	protected final SshHost host;
+	protected final String basePath;
+	protected final String scpCommand;
+	
 	public SshFileServer(Props props) {
-		super(props);
+		this.host=new SshHost(props);
 		this.basePath=props.getString("basePath","").trim();
+		this.scpCommand=props.getString("scpCommand","scp").trim();
 	}
 	@Override
 	public FileServerConnection openConnection() {
-		return new SshFileServerConnection(this);
+		return new SshFileServerConnection(host);
 	}
+	public boolean isAvailable() { return host.isAvailable();}
+	public SshHost getSshHost() { return host; }
 
 	public String getBasePath() { return basePath; }
 	
-	public String convertPath(String path) { return path; }
+	public String nativePath(String path) { return path; }
+	public String unixPath(String path) { return path; }
+	public String escape(String str) { return str.replace("\\","\\\\"); }
+
 	
 	public boolean fileExists(String path) {
-		path=convertPath(path);
-		String file=path.substring(path.lastIndexOf('/')+1);
-		ExecResult result=exec("ls -l \""+path+"\"");
-		return (result.stdout.indexOf(FileUtil.filename(file))>0);
+		FileServerConnection conn=openConnection();
+		try {
+			return conn.fileExists(unixPath(path));
+		}
+		finally {
+			conn.close();
+		}
 	}
-	public void deleteFile(String path) { call("rm \""+path+"\""); }
+	public void deleteFile(String path) { 
+		FileServerConnection conn=openConnection();
+		try {
+			conn.deleteFile(unixPath(path));
+		}
+		finally {
+			conn.close();
+		}
+	}
+
+	public void copyFile(String srcpath, String destpath) { 
+		host.call(
+			"cp", 
+			nativePath(srcpath), 
+			nativePath(destpath) 
+		);
+	}
+
 	public void copyFileTo(String srcpath, SshFileServer dest, String destpath)  {
-		String command="scp \""+srcpath+"\" \""+dest.user+"@"+dest.host+":"+dest.convertPath(destpath)+"\"";
-		command=command.replace("\\","\\\\");
-		call(command);
+		if (dest==this)
+			copyFile(srcpath,destpath);
+		else
+			host.call(
+					scpCommand, 
+					nativePath(srcpath), 
+					dest.getSshHost().user+"@"+dest.host+":"+escape(dest.nativePath(destpath))
+			);
 	}
 	public void copyFileFrom(SshFileServer src, String srcpath, String destpath)  {
-		call("scp \""+src.host+":"+src.convertPath(srcpath)+"\" \""+destpath+"\"");
+		if (src==this)
+			copyFile(srcpath,destpath);
+		else 
+			host.call(
+					scpCommand, 
+					src.host+":"+escape(src.nativePath(srcpath)), 
+					destpath
+			);
 	}
 	public String ls(String dir) {
-		ExecResult result=exec("ls -l \""+basePath+"/"+dir+"\"");
+		ExecResult result=host.exec("ls -l",basePath+"/"+dir);
 		return result.stdout;
 	}
+	
 }

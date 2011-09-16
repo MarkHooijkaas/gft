@@ -45,14 +45,23 @@ public class SshHost implements Representable {
 		else
 			this.forbiddenTimes=new TimeWindowList(timewindow);
 	}
-	
+	public String getUser() { return user; }
 
 	public String toString() { return "ssh:"+user+"@"+host+(port==22? "" : ":"+port); }
 	
 	public boolean isAvailable() { return forbiddenTimes==null || ! forbiddenTimes.isTimeInWindow(); }
-	
-	public ExecResult exec(String command) { return Ssh.exec(this, cred, command); }
-	public String call(String command) { return Ssh.ssh(this, cred, command); }
+	public String createCommand(String cmd, String... args) {
+		String result=cmd;
+		for (String arg: args) {
+			if (arg.contains(" "))
+				result+=" \""+arg+"\"";
+			else
+				result+=" "+arg;
+		}
+		return result;
+	}	
+	public ExecResult exec(String command, String... args) { return Ssh.exec(this, cred, createCommand(command,args)); }
+	public String call(String command, String... args) { return Ssh.ssh(this, cred, createCommand(command,args)); }
 	public String getRepresentation() {
 		StringBuilder result=new StringBuilder();
 		result.append("SshHost {\n");
