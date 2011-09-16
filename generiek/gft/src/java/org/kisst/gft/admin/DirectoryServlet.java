@@ -45,26 +45,32 @@ public class DirectoryServlet extends BaseServlet {
 
 		out.println("<h1>Directory "+name+"</h1>");
 		out.println("<table>");
+		out.println("<tr><td><b>filename</b></td><td width=100 ALIGN=RIGHT><b>filesize</b></td><td><b>modification date</b></td></tr>");
 		FileServerConnection conn = gft.sshhosts.get(name).openConnection();
+		int count = 0;
 		try {
 			LinkedHashMap<String, FileAttributes> entries = conn.getDirectoryEntries(dir);
 			for (String filename: entries.keySet()) {
+				if (filename.equals(".") || filename.equals(".."))
+					continue;
 				FileAttributes attr = entries.get(filename);
 				filename=filename.replaceAll("&", "&amp;");
 				filename=filename.replaceAll("<", "&lt;");
 				filename=filename.replaceAll(">", "&gt;");
 				String txt = null;
 				if (attr.isDirectory)
-					txt = "<tr><td><a href="+filename+">" + filename + "</td><td>DIR</td>";
+					txt = "<tr><td><a href="+filename+">" + filename + "</td><td ALIGN=RIGHT>DIR</td>";
 				else
-					txt = "<tr><td>" + filename + "</td>";
+					txt = "<tr><td>" + filename + "</td><td ALIGN=RIGHT>"+attr.size+"</td>";
 				txt=txt+"<td>"+new Date(attr.modifyTime)+ "</td></tr>";
-					
 				out.println(txt);
+				count++;
 			}
 		}
 		finally { conn.close(); }
 		out.println("</table>");
+		out.println(count+" entries found");
+		
 	}
 
 }
