@@ -20,10 +20,12 @@ public class SshFileServerConnection implements FileServerConnection {
 	private static final Logger logger = LoggerFactory.getLogger(SshFileServerConnection.class);
 	private final Session session;
 	private final ChannelSftp sftp;
+	private final SshFileServer fileserver;
 	private final SshHost host;
 
-	public SshFileServerConnection(SshHost host) {
-		this.host=host;
+	public SshFileServerConnection(SshFileServer fileserver) {
+		this.fileserver = fileserver;
+		this.host=fileserver.getSshHost();
 		session = Ssh.openSession(host);
 		logger.info("Opening session on host: {}",host);
 		try {
@@ -40,6 +42,7 @@ public class SshFileServerConnection implements FileServerConnection {
 	}
 
 	public boolean fileExists(String path) { 
+		path=fileserver.unixPath(path);
 		try {
 			SftpATTRS result = sftp.lstat(path);
 			return result != null;
@@ -47,6 +50,7 @@ public class SshFileServerConnection implements FileServerConnection {
 	}
 
 	public void deleteFile(String path) { 
+		path=fileserver.unixPath(path);
 		try {
 			sftp.rm(path);
 		} catch (SftpException e) { throw new RuntimeException(e); }
@@ -55,7 +59,8 @@ public class SshFileServerConnection implements FileServerConnection {
 	public long lastModified(String path) { return getFileAttributes(path).modifyTime; }
 	public boolean isDirectory(String path) { return getFileAttributes(path).isDirectory; }
 	
-	public FileAttributes getFileAttributes(String path) { 
+	public FileAttributes getFileAttributes(String path) {
+		path=fileserver.unixPath(path);
 		try {
 			SftpATTRS attr = sftp.lstat(path);
 			return new FileAttributes(attr.getATime(), attr.getMTime(), attr.isDir(), attr.getSize());
@@ -66,6 +71,7 @@ public class SshFileServerConnection implements FileServerConnection {
 	@SuppressWarnings("unchecked")
 	public LinkedHashMap<String, FileAttributes> getDirectoryEntries(String path) {
 		try {
+			path=fileserver.unixPath(path);
 			logger.info("getting remote diretory: {}",path);
 			Vector<LsEntry> vv = sftp.ls(path);
 			logger.info("found {} entries",vv.size());
@@ -82,6 +88,8 @@ public class SshFileServerConnection implements FileServerConnection {
 	}
 
 	public void move(String path, String newpath) {
+		path=fileserver.unixPath(path);
+		newpath=fileserver.unixPath(newpath);
 		try {
 			sftp.rename(path, newpath);
 		}
@@ -89,20 +97,20 @@ public class SshFileServerConnection implements FileServerConnection {
 	}
 
 	public void getToLocalFile(String remotepath, String localpath) {
-			try {
-				logger.info("copy file from remote {} to local {}",remotepath,localpath);
-				sftp.get(remotepath, localpath);
-
-			} 
-			catch (SftpException e) { throw new RuntimeException(e); }
+		remotepath=fileserver.unixPath(remotepath);
+		try {
+			logger.info("copy file from remote {} to local {}",remotepath,localpath);
+			sftp.get(remotepath, localpath);
+		} 
+		catch (SftpException e) { throw new RuntimeException(e); }
 	}
-	
+
 	@Override
 	public void putFromLocalFile(String localpath, String remotepath) {
+		remotepath=fileserver.unixPath(remotepath);
 		try {
 			logger.info("copy file from local {} to remote {}",localpath,remotepath);
 			sftp.put(localpath, remotepath);
-
 		} 
 		catch (SftpException e) { throw new RuntimeException(e); }
 	}

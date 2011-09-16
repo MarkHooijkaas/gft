@@ -9,10 +9,10 @@ public class WindowsSshHost extends SshFileServer {
 	}
 	@Override public String nativePath(String path) { return path.replace('/','\\'); }
 	@Override public String unixPath(String path) {
-		if (path.charAt(1)==':')
-			return '/'+path.charAt(0)+'/'+path.substring(2);
-		else
+		if (path.charAt(1)!=':') 
 			return path;
+		else
+			return "/"+path.charAt(0)+path.substring(2);
 	}
 	@Override public String escape(String str) { return str; }
 

@@ -18,7 +18,7 @@ public class SshFileServer implements FileServer {
 	}
 	@Override
 	public FileServerConnection openConnection() {
-		return new SshFileServerConnection(host);
+		return new SshFileServerConnection(this);
 	}
 	public boolean isAvailable() { return host.isAvailable();}
 	public SshHost getSshHost() { return host; }
