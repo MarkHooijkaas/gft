@@ -24,6 +24,10 @@ public class JmsUtil {
 				dest = session.createTextMessage();
 				( (TextMessage) dest).setText( ( (TextMessage) src).getText() );
 			}
+			else if( src.getClass().getName().equals("com.ibm.jms.JMSNullMessage") ) {
+				dest = session.createTextMessage();
+				( (TextMessage) dest).setText( "");
+			}
 			else  
 				throw new RuntimeException( "Unsupported message format: "+ src.getClass().getName() );
 

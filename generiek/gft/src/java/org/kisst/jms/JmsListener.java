@@ -324,7 +324,10 @@ public class JmsListener implements Runnable {
 				String code="TECHERR";
 				if (e instanceof FunctionalException)
 					code="FUNCERR";
-				logger.error(code+": "+e.getMessage()+". When handling JMS message "+((TextMessage) message).getText(),e);
+				if (message instanceof TextMessage)
+					logger.error(code+": "+e.getMessage()+". When handling JMS message "+((TextMessage) message).getText(),e);
+				else 
+					logger.error(code+": "+e.getMessage()+". When handling JMS message of type "+ message.getClass(),e);
 				String queue=errorqueue;
 				if (e instanceof RetryableException)
 					queue=retryqueue;
