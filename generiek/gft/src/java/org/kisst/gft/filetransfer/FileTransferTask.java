@@ -28,15 +28,14 @@ public class FileTransferTask extends BasicTask {
 		if (channel==null)
 			throw new FunctionalException("Could not find channel with name "+input.getChildText("kanaal"));
 		// Strip preceding slashes to normalize the path.
-		filename=input.getChildText("?bestand");
+		filename =input.getChildText("bestand");
 
-		if (filename.length()>1024)
+		if ( filename.length()>1024)
 			throw new FunctionalException("Filename length should not exceed 1024 characters");
 		if (! validCharacters.matcher(filename).matches())
 			throw new FunctionalException("Filename should only contain alphanumeric characters / . - or _");
 		if (filename.indexOf("..")>=0)
 			throw new FunctionalException("Filename ["+filename+"] is not allowed to contain .. pattern");
-
 		this.srcpath=channel.getSrcPath(filename, this);
 		this.destpath=channel.getDestPath(filename, this);
 		this.replyTo=replyTo;
@@ -52,10 +51,7 @@ public class FileTransferTask extends BasicTask {
 		if (tempFile!=null)
 			return tempFile;
 		File nieuwTempDir = gft.createUniqueDir(channel.name);
-		if (filename==null)
-			tempFile = new File(nieuwTempDir,"file.dat");
-		else
-			tempFile = new File(nieuwTempDir,filename);
+		tempFile = new File(nieuwTempDir,filename);
 		return tempFile;
 	}
 }
