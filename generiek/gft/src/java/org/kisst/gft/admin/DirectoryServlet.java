@@ -2,6 +2,8 @@ package org.kisst.gft.admin;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.regex.Pattern;
 
 import javax.servlet.http.HttpServletRequest;
@@ -9,6 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.FunctionalException;
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.filetransfer.FileServerConnection;
+import org.kisst.gft.filetransfer.FileServerConnection.FileAttributes;
 
 public class DirectoryServlet extends BaseServlet {
 	public DirectoryServlet(GftContainer gft) { super(gft);	}
@@ -40,13 +44,27 @@ public class DirectoryServlet extends BaseServlet {
 			throw new FunctionalException("Dirname ["+dir+"] is not allowed to contain .. pattern");
 
 		out.println("<h1>Directory "+name+"</h1>");
-		out.println("<pre>");
-		String txt = gft.sshhosts.get(name).ls(dir); // TODO
-		txt=txt.replaceAll("&", "&amp;");
-		txt=txt.replaceAll("<", "&lt;");
-		txt=txt.replaceAll(">", "&gt;");
-		out.println(txt);
-		out.println("</pre>");
+		out.println("<table>");
+		FileServerConnection conn = gft.sshhosts.get(name).openConnection();
+		try {
+			LinkedHashMap<String, FileAttributes> entries = conn.getDirectoryEntries(dir);
+			for (String filename: entries.keySet()) {
+				FileAttributes attr = entries.get(filename);
+				filename=filename.replaceAll("&", "&amp;");
+				filename=filename.replaceAll("<", "&lt;");
+				filename=filename.replaceAll(">", "&gt;");
+				String txt = null;
+				if (attr.isDirectory)
+					txt = "<tr><td><a href="+filename+">" + filename + "</td><td>DIR</td>";
+				else
+					txt = "<tr><td>" + filename + "</td>";
+				txt=txt+"<td>"+new Date(attr.modifyTime)+ "</td></tr>";
+					
+				out.println(txt);
+			}
+		}
+		finally { conn.close(); }
+		out.println("</table>");
 	}
 
 }
