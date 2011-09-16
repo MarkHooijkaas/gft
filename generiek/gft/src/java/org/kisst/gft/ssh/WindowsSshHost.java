@@ -7,11 +7,13 @@ public class WindowsSshHost extends SshFileServer {
 	public WindowsSshHost(Props props) {
 		super(props);
 	}
-	@Override public String nativePath(String path) { return path.replace('/','\\'); }
+	@Override public String nativePath(String path) { return basePath+path.replace('/','\\'); }
 	@Override public String unixPath(String path) {
-		if (path.charAt(1)!=':') 
+		path=basePath+path;
+		if (path.charAt(1)!=':') // check for drive letter, e.g. E:
 			return path;
 		else
+			// this should replace E:/temp by /E/temp
 			return "/"+path.charAt(0)+path.substring(2);
 	}
 	@Override public String escape(String str) { return str; }

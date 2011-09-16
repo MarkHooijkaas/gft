@@ -21,12 +21,13 @@ public class SshFileServer implements FileServer {
 		return new SshFileServerConnection(this);
 	}
 	public boolean isAvailable() { return host.isAvailable();}
+	public String getBasePath() { return basePath; }
 	public SshHost getSshHost() { return host; }
 
-	public String getBasePath() { return basePath; }
+	//public String getBasePath() { return basePath; }
 	
-	public String nativePath(String path) { return path; }
-	public String unixPath(String path) { return path; }
+	public String nativePath(String path) { return basePath+path; }
+	public String unixPath(String path) { return basePath+path; }
 	public String escape(String str) { return str.replace("\\","\\\\"); }
 
 	
