@@ -40,13 +40,13 @@ public class SftpGetAction implements Action {
         
 	public Object execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
-
-		logger.info("sftpGetAction Stap haal op!");
 		
 		FileServer fileserver= ft.channel.src;
 		FileServerConnection fsconn=fileserver.openConnection();
 		String remotefile = ft.channel.srcdir + "/" + ft.filename;
-		fsconn.getToLocalFile(remotefile, ft.getTempFile().getPath());
+		String localfile=ft.getTempFile().getPath();
+		logger.info("sftp get {} to localfile {}",remotefile, localfile);
+		fsconn.getToLocalFile(remotefile, localfile);
 		
 		return null;
 	}
