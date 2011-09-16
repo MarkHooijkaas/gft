@@ -16,19 +16,20 @@ public class FileTransferTask extends BasicTask {
 	public final String replyTo;
 	public final String correlationId;
 	public final String filename;
+	public final XmlNode content; 		
 	
 	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
 
 	public FileTransferTask(GftContainer gft, String data, String replyTo, String correlationId) {
 		super(gft, null); // TODO
 		message=new XmlNode(data);
-		XmlNode input=message.getChild("Body/transferFile");
+		content=message.getChild("Body").getChildren().get(0);
 		
-		this.channel=gft.getChannel(input.getChildText("kanaal"));
+		this.channel=gft.getChannel(content.getChildText("kanaal"));
 		if (channel==null)
-			throw new FunctionalException("Could not find channel with name "+input.getChildText("kanaal"));
+			throw new FunctionalException("Could not find channel with name "+content.getChildText("kanaal"));
 		// Strip preceding slashes to normalize the path.
-		filename =input.getChildText("bestand");
+		filename =content.getChildText("bestand");
 
 		if ( filename.length()>1024)
 			throw new FunctionalException("Filename length should not exceed 1024 characters");

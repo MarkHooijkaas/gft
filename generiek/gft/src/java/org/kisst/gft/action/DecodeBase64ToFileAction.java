@@ -22,7 +22,7 @@ public class DecodeBase64ToFileAction implements Action{
 			FileOutputStream fos = null;
 			try {
 				FileTransferTask ft = (FileTransferTask) task;
-				String encoded = ft.message.getChildText("Body/transferFile/bestandsInhoud"); 
+				String encoded = ft.content.getChildText("bestandsinhoud"); 
 				byte[] bytes = Base64.decode(encoded);
 				fos = new FileOutputStream(ft.getTempFile());
 				fos.write(bytes);

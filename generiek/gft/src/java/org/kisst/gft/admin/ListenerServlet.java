@@ -71,7 +71,7 @@ public class ListenerServlet extends BaseServlet {
 						else if (JmsListener.isStopMessage(msg))
 							out.println("Stop bericht");
 						else {
-							XmlNode xml=new XmlNode(((TextMessage)msg).getText()).getChild("Body/transferFile");
+							XmlNode xml=new XmlNode(((TextMessage)msg).getText()).getChild("Body").getChildren().get(0);
 							out.println("kanaal: "+xml.getChildText("kanaal")+" bestand: "+xml.getChildText("bestand"));
 						}
 					}

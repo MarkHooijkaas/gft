@@ -91,7 +91,7 @@ public class ArchiveAction implements Action {
 			String waarde = null;
 			String docField = (String) dubbelArray[i][0];
 			ArchiveerChannel.Field fielddef=channel.fields.get(docField);
-			waarde = ft.message.getChildText("Body/transferFile/extra/kenmerken/?"+docField );
+			waarde = ft.content.getChildText("kenmerken/?"+docField );
 			if (fielddef!=null) {
 				if (waarde==null && fielddef.optional==false)
 					throw new RuntimeException("veld "+docField+" is niet optioneel en niet megegeven");

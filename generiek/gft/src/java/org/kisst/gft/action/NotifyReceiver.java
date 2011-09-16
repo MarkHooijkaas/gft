@@ -19,7 +19,10 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
+import nl.duo.gft.odwek.ArchiveerChannel;
+
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.filetransfer.FileTransferChannel;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
@@ -34,6 +37,7 @@ public class NotifyReceiver  implements Action {
 
 	private final String queue;
 	private final boolean safeToRetry;
+
 	
 	public NotifyReceiver(GftContainer gft, Props props) {
 		if (props.getString("queue").startsWith("dynamic:"))
@@ -48,7 +52,15 @@ public class NotifyReceiver  implements Action {
 	public Object execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		XmlNode msg=ft.message.clone();
+		
 		msg.getChild("Body/transferFile").element.setName("transferFileNotification");
+	
+		if (ft.channel instanceof FileTransferChannel)
+			msg.getChild("Body/transferFile").element.setName("transferFileNotification");
+		else if (ft.channel instanceof ArchiveerChannel)
+			msg.getChild("Body/archiveerBestand").element.setName("archiveerBestandNotification");
+		else 
+			throw new RuntimeException("channel "+ft.channel.name+" is of unknown type "+ft.channel.getClass());
 		
 		String queue=this.queue;
 		if (queue.startsWith("dynamic:")) {

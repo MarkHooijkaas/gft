@@ -18,6 +18,7 @@ import nl.duo.gft.poller.Poller;
 import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.filetransfer.Channel;
+import org.kisst.gft.filetransfer.FileTransferChannel;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
 import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
@@ -168,7 +169,7 @@ public class GftContainer {
 			Props p=channelProps.getProps(name);
 			String type2=p.getString("type",null);
 			if (type2==null) 
-				channels.put(name, new Channel(this, p));
+				channels.put(name, new FileTransferChannel(this, p));
 			else if ("ArchiveerChannel".equals(type2))
 				channels.put(name, new ArchiveerChannel(this, p));
 			else 

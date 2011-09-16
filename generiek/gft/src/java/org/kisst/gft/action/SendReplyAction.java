@@ -19,7 +19,11 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
+import nl.duo.gft.odwek.ArchiveerChannel;
+
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.filetransfer.Channel;
+import org.kisst.gft.filetransfer.FileTransferChannel;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
@@ -52,7 +56,12 @@ public class SendReplyAction  implements Action {
 			logger.info("Sending reply with correlationId {} to queue {}",ft.correlationId, queue);
 		
 		XmlNode msg=ft.message.clone();
-		msg.getChild("Body/transferFile").element.setName("transferFileResponse");
+		if (ft.channel instanceof FileTransferChannel)
+			msg.getChild("Body/transferFile").element.setName("transferFileResponse");
+		else if (ft.channel instanceof ArchiveerChannel)
+			msg.getChild("Body/archiveerBestand").element.setName("archiveerBestandResponse");
+		else 
+			throw new RuntimeException("channel "+ft.channel.name+" is of unknown type "+ft.channel.getClass());
 		
 		String body=msg.toString();
 		gft.getQueueSystem().getQueue(queue).send(body, null, ft.correlationId);
