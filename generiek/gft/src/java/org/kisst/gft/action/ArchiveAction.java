@@ -56,22 +56,22 @@ public class ArchiveAction implements Action {
 		logger.info("archiveAction is aangeroepen!");		
 		logger.info("archiveAction Stap Archiveer!");
 		
-		ODServer odServer = null;
+		logger.info("open connection met {}",host);
+		
+		ODServer odServer = host.openConnection();
 		try {
 			// ONT= 1455, FAT=1460
-			logger.info("open connection met {}",host);
-			odServer = host.openConnection();
 			logger.info("connection {}",host);
-	
 			storeDocument(odServer, ft);
-			odServer.logoff();
+			
 		}
 		catch (ODException e) { throw new RuntimeException(e.getMessage()+", id="+e.getErrorId()+", msg="+e.getErrorMsg(), e); } 
 		catch (Exception e) { throw new RuntimeException(e);}
 		finally {
-			if (odServer != null) {
-				odServer.terminate();
-			}
+			try {
+					odServer.logoff();
+				} 
+			catch (Exception e) { throw new RuntimeException(e);}
 		}
 
 
