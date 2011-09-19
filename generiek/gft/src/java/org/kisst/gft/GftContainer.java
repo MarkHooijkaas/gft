@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
+import nl.duo.gft.LogUtil;
 import nl.duo.gft.odwek.ArchiveerChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
@@ -105,6 +106,8 @@ public class GftContainer {
 	public void init(Props props) {
 		this.props=props;
 		context.put("global", props.get("gft.global", null));
+		LogUtil.init(this, props.getProps("gft.db.logb"));
+		
 		tempdir = context.getString("global.tempdir");
 		dirVolgnr = 0;
 		addDynamicModules(props);
