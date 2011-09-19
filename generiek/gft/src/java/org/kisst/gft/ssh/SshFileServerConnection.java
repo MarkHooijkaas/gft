@@ -44,12 +44,11 @@ public class SshFileServerConnection implements FileServerConnection {
 	public boolean fileExists(String path) { 
 		path=fileserver.unixPath(path);
 		try {
-			System.out.println(path);
 			SftpATTRS result = sftp.lstat(path);
 			return result != null;
 		}
 		catch (SftpException e) {
-			if (e.id==4 && e.getMessage().equals("SfsStatusCode.NoSuchPath")) {
+			if (e.id==2 && e.getMessage().equals("SfsStatusCode.NoSuchFile")) {
 				return false;
 			}
 			throw new RuntimeException(e); }
