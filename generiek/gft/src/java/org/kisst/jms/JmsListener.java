@@ -13,6 +13,8 @@ import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import nl.duo.gft.LogUtil;
+
 import org.kisst.gft.FunctionalException;
 import org.kisst.gft.RetryableException;
 import org.kisst.props4j.Props;
@@ -338,6 +340,7 @@ public class JmsListener implements Runnable {
 
 				producer.close();
 				logger.info("message send to queue {}",queue);
+				LogUtil.log("error", "jms", "handle", "exception", e.getMessage());
 			}
 			catch (JMSException e2) {throw new RuntimeException(e2); }
 		}
