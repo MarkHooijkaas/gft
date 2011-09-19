@@ -3,6 +3,7 @@ package org.kisst.gft.ssh;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.props4j.Props;
+import org.kisst.util.FileUtil;
 
 
 
@@ -26,15 +27,15 @@ public class SshFileServer implements FileServer {
 
 	//public String getBasePath() { return basePath; }
 	
-	public String nativePath(String path) { return basePath+path; }
-	public String unixPath(String path) { return basePath+path; }
+	public String nativePath(String path) { return FileUtil.joinPaths(basePath, path); }
+	public String unixPath(String path) { return FileUtil.joinPaths(basePath, path); }
 	public String escape(String str) { return str.replace("\\","\\\\"); }
 
 	
 	public boolean fileExists(String path) {
 		FileServerConnection conn=openConnection();
 		try {
-			return conn.fileExists(unixPath(path));
+			return conn.fileExists(path);
 		}
 		finally {
 			conn.close();
@@ -43,7 +44,7 @@ public class SshFileServer implements FileServer {
 	public void deleteFile(String path) { 
 		FileServerConnection conn=openConnection();
 		try {
-			conn.deleteFile(unixPath(path));
+			conn.deleteFile(path);
 		}
 		finally {
 			conn.close();
@@ -65,7 +66,7 @@ public class SshFileServer implements FileServer {
 			host.call(
 					scpCommand, 
 					nativePath(srcpath), 
-					dest.getSshHost().user+"@"+dest.host+":"+escape(dest.nativePath(destpath))
+					dest.host.user+"@"+dest.host.host+":"+escape(dest.nativePath(destpath))
 			);
 	}
 	public void copyFileFrom(SshFileServer src, String srcpath, String destpath)  {
@@ -74,7 +75,7 @@ public class SshFileServer implements FileServer {
 		else 
 			host.call(
 					scpCommand, 
-					src.host+":"+escape(src.nativePath(srcpath)), 
+					src.host.user+"@"+src.host.host+":"+escape(src.nativePath(srcpath)), 
 					destpath
 			);
 	}

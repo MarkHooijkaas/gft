@@ -2,12 +2,13 @@ package org.kisst.gft.ssh;
 
 import org.kisst.gft.ssh.Ssh.ExecResult;
 import org.kisst.props4j.Props;
+import org.kisst.util.FileUtil;
 
 public class WindowsSshHost extends SshFileServer {
 	public WindowsSshHost(Props props) {
 		super(props);
 	}
-	@Override public String nativePath(String path) { return basePath+path.replace('/','\\'); }
+	@Override public String nativePath(String path) { return FileUtil.joinPaths(basePath, path).replace('/','\\'); }
 	@Override public String unixPath(String path) {
 		path=basePath+path;
 		if (path.charAt(1)!=':') // check for drive letter, e.g. E:
