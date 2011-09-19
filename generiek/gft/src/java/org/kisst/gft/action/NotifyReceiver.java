@@ -53,12 +53,10 @@ public class NotifyReceiver  implements Action {
 		FileTransferTask ft= (FileTransferTask) task;
 		XmlNode msg=ft.message.clone();
 		
-		msg.getChild("Body/transferFile").element.setName("transferFileNotification");
-	
 		if (ft.channel instanceof FileTransferChannel)
 			msg.getChild("Body/transferFile").element.setName("transferFileNotification");
 		else if (ft.channel instanceof ArchiveerChannel)
-			msg.getChild("Body/archiveerBestand").element.setName("archiveerBestandNotification");
+			msg.getChild("Body/archiveerBestand").element.setName("archiveerBestandNotificatie");
 		else 
 			throw new RuntimeException("channel "+ft.channel.name+" is of unknown type "+ft.channel.getClass());
 		
