@@ -2,6 +2,7 @@ package org.kisst.gft.action;
 
 import java.util.LinkedHashMap;
 
+import org.kisst.gft.RetryableException;
 import org.kisst.gft.filetransfer.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.LayeredProps;
@@ -61,7 +62,7 @@ public class ActionList  implements Action {
 					a.execute(task);
 					done=true;
 				}
-				catch (RuntimeException e) {
+				catch (RetryableException e) {
 					if (a.safeToRetry() && nrofTries <= maxNrofTries) {
 						logger.warn("Error during action "+name+", try number "+nrofTries+", will retry after "+retryDelay/1000+" seconds, error was ", e);
 						nrofTries++;

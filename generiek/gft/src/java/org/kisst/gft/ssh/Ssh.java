@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.kisst.gft.RetryableException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,8 +110,13 @@ public class Ssh {
 			}
 			return new ExecResult(exitvalue, result.toString(), err.toString());
 		}
-		catch(JSchException e) { throw new RuntimeException(e); }
-		catch(IOException e)   { throw new RuntimeException(e); }
+		catch(IOException e)   { throw new RetryableException(e); }
+		catch(JSchException e) {
+			if (e.getCause() instanceof IOException)
+				throw new RetryableException(e);
+			else
+				throw new RuntimeException(e);
+		}
 		finally {
 			try {
 				if(fos!=null) fos.close();
