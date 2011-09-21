@@ -48,9 +48,8 @@ public class SshFileServerConnection implements FileServerConnection {
 			return result != null;
 		}
 		catch (SftpException e) {
-			if (e.id==2 && e.getMessage().equals("SfsStatusCode.NoSuchFile")) {
+			if (e.id==2) // && e.getMessage().equals("SfsStatusCode.NoSuchFile")) {
 				return false;
-			}
 			throw new RuntimeException(e); }
 	}
 
