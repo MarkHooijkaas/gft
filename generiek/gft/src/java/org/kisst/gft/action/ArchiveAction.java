@@ -94,17 +94,22 @@ public class ArchiveAction implements Action {
 			waarde = ft.content.getChildText("kenmerken/?"+docField );
 			if (fielddef!=null) {
 				if (waarde==null && fielddef.optional==false)
-					throw new RuntimeException("veld "+docField+" is niet optioneel en niet megegeven");
+					throw new RuntimeException("veld "+docField+" is niet optioneel en niet meegegeven");
 				if (waarde==null && fielddef.defaultValue!=null)
 					waarde=fielddef.defaultValue;
 				if (fielddef.fixedValue != null)
 					waarde=fielddef.fixedValue;
 			}
 			
-			logger.info("waarde is {}", waarde);
+			logger.info("{} is {}", docField, waarde);
 			docFields[i]=waarde;
 		}
-		logger.info("docFields is: {}", docFields);
+		if (logger.isInfoEnabled()) {
+			String str="";
+			for (int i=0; i<docFields.length; i++)
+				str+=", "+docFields[i];
+			logger.info("docFields is [{}]", str);
+		}
 		
 		// This check is important because otherwise JVM will crash
 		if (! ft.getTempFile().exists())
