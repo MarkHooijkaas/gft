@@ -39,7 +39,7 @@ public abstract class PropsBase implements Props {
 		if (result!=null)
 			return result;
 		else
-			throw new RuntimeException("Could not find property "+key+" in context "+getFullName());
+			throw new RuntimeException("Could not find property "+key+" in context "+getFullName()+"\n"+this);
 	}
 
 	public String getString(String key) { 
@@ -58,6 +58,8 @@ public abstract class PropsBase implements Props {
 			return (String) result;
 		if (result instanceof File)
 			return FileUtil.loadString((File) result);
+		if (result instanceof SimpleProps)
+			return ((SimpleProps) result).stringValue;
 		throw new RuntimeException("type of key "+key+" is not a String but a "+result.getClass().getSimpleName());
 	}
 

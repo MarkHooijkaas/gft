@@ -23,12 +23,15 @@ package org.kisst.props4j;
 
 public interface Props extends MinimalProps {
 	public String getLocalName();
+	//public String getFullName();
 	
+	//public Object get(String key, Object defaultValue);
 	public String getString(String key, String defaultValue);
 	public int    getInt(String string, int defaultValue);
 	public long   getLong(String string, long defaultValue);
 	public boolean getBoolean(String name, boolean defaultValue);
 	public Props getProps(String name);
+	//public Iterable<String> keys();
 	
 	public Object get(String key);
 	public String getString(String key);
