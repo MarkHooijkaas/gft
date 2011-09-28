@@ -62,6 +62,15 @@ public class JmsListener implements Runnable {
 			this.forbiddenTimes=new TimeWindowList(timewindow);
 	}
 
+	public String getStatus() {
+		if (! running)
+			return "STOPPED";
+		if (browseMode)
+			return "PAUZED";
+		return "RUNNING";
+	}
+	public boolean isActive() { return running && ! browseMode; }
+	
 	public String toString() { return "JmsListener("+queue+")"; }
 
 	public boolean isForbiddenTime() {
