@@ -31,7 +31,7 @@ public class ActionList  implements Action {
 		//this.actions=new Action[parts.length];
 		for (String name: parts) {
 			name=name.trim();
-			LayeredProps lprops=new LayeredProps();
+			LayeredProps lprops=new LayeredProps(taskdef.gft.props.getProps("gft.global"));
 			SimpleProps top=new SimpleProps();
 			top.put("action",taskdef.gft.actions.get(name));
 			top.put("channel",props);
@@ -40,7 +40,7 @@ public class ActionList  implements Action {
 				lprops.addLayer(props.getProps(name));
 			lprops.addLayer(taskdef.gft.actions.get(name));
 			lprops.addLayer(props);
-			lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
+			//lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
 				
 			Action a=taskdef.createAction(lprops);
 			if (a==null)
