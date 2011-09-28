@@ -22,7 +22,6 @@ package org.kisst.gft.action;
 import nl.duo.gft.odwek.ArchiveerChannel;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.FileTransferChannel;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
