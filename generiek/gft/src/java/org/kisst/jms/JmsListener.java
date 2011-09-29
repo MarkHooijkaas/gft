@@ -40,9 +40,11 @@ public class JmsListener implements Runnable {
 	private MessageConsumer consumer = null;
 	private boolean browseMode=true; 
 	private boolean running=false;
+	private String messageId=null;
 
 
 	Thread thread;
+
 
 	public JmsListener(JmsSystem system, MessageHandler handler, Props props, Object context) {
 		this.system=system;
@@ -63,6 +65,8 @@ public class JmsListener implements Runnable {
 	}
 
 	public String getStatus() {
+		if (messageId!=null)
+			return "WORKING "+messageId;
 		if (! running)
 			return "STOPPED";
 		if (browseMode)
@@ -110,9 +114,15 @@ public class JmsListener implements Runnable {
 				Message message=null;
 				message = getMessage();
 				if (message!=null) {
-					if (logger.isDebugEnabled())
-						logger.debug("handling message {}",message.getJMSMessageID());
-					handleMessage(message);
+					try { 
+						this.messageId=message.getJMSMessageID();
+						if (logger.isDebugEnabled())
+							logger.debug("handling message {}",message.getJMSMessageID());
+						handleMessage(message);
+					}
+					finally {
+						this.messageId=null;
+					}
 				}
 			}
 		}
