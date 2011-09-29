@@ -185,10 +185,10 @@ public class GftContainer {
 			String type2=p.getString("type",null);
 			if (type2==null) 
 				channels.put(name, new FileTransferChannel(this, p));
-			else if ("ArchiveerChannel".equals(type2))
+			else if ("OnDemandChannel".equals(type2))
 				channels.put(name, new OnDemandChannel(this, p));
 			else 
-				throw new RuntimeException("Channel type in channel "+name+" veld type moet leeg zijn of ArchiveerChannel, niet "+type2);
+				throw new RuntimeException("Channel type in channel "+name+" veld type moet leeg zijn of OnDemandChannel, niet "+type2);
 		}
 
 		if (props.hasKey("gft.poller")) {
