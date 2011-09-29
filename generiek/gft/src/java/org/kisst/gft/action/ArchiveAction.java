@@ -19,7 +19,7 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-import nl.duo.gft.odwek.ArchiveerChannel;
+import nl.duo.gft.odwek.OnDemandChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 
 import org.kisst.gft.GftContainer;
@@ -70,7 +70,7 @@ public class ArchiveAction implements Action {
 	}
 	
 	private void storeDocument(ODServer odServer, FileTransferTask ft) throws Exception {
-		ArchiveerChannel channel = (ArchiveerChannel) ft.channel;
+		OnDemandChannel channel = (OnDemandChannel) ft.channel;
 		ODFolder odFolder = odServer.openFolder(channel.odfolder);
 		
 		String applGroup = channel.odapplgroup;		
@@ -81,7 +81,7 @@ public class ArchiveAction implements Action {
 		for (int i = 0; i < dubbelArray.length; i++) {
 			String waarde = null;
 			String docField = (String) dubbelArray[i][0];
-			ArchiveerChannel.Field fielddef=channel.fields.get(docField);
+			OnDemandChannel.Field fielddef=channel.fields.get(docField);
 			waarde = ft.content.getChildText("kenmerken/?"+docField );
 			if (fielddef!=null) {
 				if (waarde==null && fielddef.optional==false)

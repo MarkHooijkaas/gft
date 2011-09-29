@@ -19,7 +19,7 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-import nl.duo.gft.odwek.ArchiveerChannel;
+import nl.duo.gft.odwek.OnDemandChannel;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferChannel;
@@ -57,7 +57,7 @@ public class SendReplyAction  implements Action {
 		XmlNode msg=ft.message.clone();
 		if (ft.channel instanceof FileTransferChannel)
 			msg.getChild("Body/transferFile").element.setName("transferFileResponse");
-		else if (ft.channel instanceof ArchiveerChannel)
+		else if (ft.channel instanceof OnDemandChannel)
 			msg.getChild("Body/archiveerBestand").element.setName("archiveerBestandResponse");
 		else 
 			throw new RuntimeException("channel "+ft.channel.name+" is of unknown type "+ft.channel.getClass());

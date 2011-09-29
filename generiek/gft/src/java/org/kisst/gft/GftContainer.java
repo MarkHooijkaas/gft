@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
-import nl.duo.gft.odwek.ArchiveerChannel;
+import nl.duo.gft.odwek.OnDemandChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
@@ -186,7 +186,7 @@ public class GftContainer {
 			if (type2==null) 
 				channels.put(name, new FileTransferChannel(this, p));
 			else if ("ArchiveerChannel".equals(type2))
-				channels.put(name, new ArchiveerChannel(this, p));
+				channels.put(name, new OnDemandChannel(this, p));
 			else 
 				throw new RuntimeException("Channel type in channel "+name+" veld type moet leeg zijn of ArchiveerChannel, niet "+type2);
 		}
