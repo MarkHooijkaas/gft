@@ -6,6 +6,8 @@
   <tr>
     <td><b>name</b></td>
     <td><b>type</b></td>
+    <td><b>number of tasks</b></td>
+    <td><b>nuber of errors</b></td>
     <td><b>from</b></td>
     <td><b>to</b></td>
   </tr>
@@ -13,6 +15,8 @@
   <tr>
     <td><a href="channel/${name}"><b>${name}</b></a></td>
     <td>${channels[name].class.simpleName}</td>
+    <td>${channels[name].totalCount}</td>
+    <td>${channels[name].errorCount}</td>
     <td>${channels[name].srcDescription}</td>
     <td>${channels[name].destDescription}</td>
   </tr>

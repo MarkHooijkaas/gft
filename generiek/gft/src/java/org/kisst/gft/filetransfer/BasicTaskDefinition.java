@@ -25,6 +25,8 @@ public class BasicTaskDefinition implements TaskDefinition {
 	public final Props props;
 	private final SimpleProps context;
 
+	private long totalCount=0;
+	private long errorCount=0;
 
 	public BasicTaskDefinition(GftContainer gft, Props props, String defaultActions) {
 		this.gft=gft;
@@ -37,9 +39,12 @@ public class BasicTaskDefinition implements TaskDefinition {
 	}
 
 	public SimpleProps getContext() { return context;}
-
+	public long getTotalCount() { return totalCount; }
+	public long getErrorCount() { return errorCount; }
+	
 	public void run(Task task) {
 		try {
+			totalCount++;
 			if (startAction!=null)
 				startAction.execute(task);
 			action.execute(task);
@@ -48,6 +53,7 @@ public class BasicTaskDefinition implements TaskDefinition {
 			task.setStatus(Task.DONE);
 		}
 		catch (RuntimeException e) {
+			errorCount++;
 			task.setLastError(e);
 			try {
 				if (errorAction!=null)
