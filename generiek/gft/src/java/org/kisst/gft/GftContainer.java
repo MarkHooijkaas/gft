@@ -102,11 +102,11 @@ public class GftContainer {
 		addAction("notify",NotifyReceiver.class);
 		addAction("reply",SendReplyAction.class);
 		addAction("fix_permissions",FixPermissions.class);
-		addAction("sendGftMessage", SendGftMessageAction.class);
-		addAction("localCommand", LocalCommandAction.class);
+		addAction("send_gft_message", SendGftMessageAction.class);
+		addAction("local_command", LocalCommandAction.class);
 		addAction("archive", ArchiveAction.class);
 		addAction("decode", DecodeBase64ToFileAction.class);
-		addAction("sftpGet", SftpGetAction.class);
+		addAction("sftp_get", SftpGetAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
