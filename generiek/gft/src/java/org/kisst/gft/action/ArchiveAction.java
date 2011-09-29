@@ -84,13 +84,23 @@ public class ArchiveAction implements Action {
 			OnDemandChannel.Field fielddef=channel.fields.get(docField);
 			waarde = ft.content.getChildText("kenmerken/?"+docField );
 			if (fielddef!=null) {
-				if (waarde==null && fielddef.optional==false)
-					throw new RuntimeException("veld "+docField+" is niet optioneel en niet meegegeven");
-				if (waarde==null && fielddef.defaultValue!=null)
-					waarde=fielddef.defaultValue;
-				if (fielddef.fixedValue != null)
+				if (fielddef.fixedValue != null) {
+					if (waarde!=null)
+						throw new RuntimeException("kenmerk "+docField+" heeft fixedValue, maar ook een waarde in XML bericht: "+waarde);
 					waarde=fielddef.fixedValue;
+				}
+				else {
+					if (waarde==null && fielddef.defaultValue!=null)
+						waarde=fielddef.defaultValue;
+					if (waarde==null && fielddef.optional==false)
+						throw new RuntimeException("veld "+docField+" is niet optioneel en niet meegegeven");
+				}
 			}
+			else {
+				if (waarde==null)
+					throw new RuntimeException("veld "+docField+" is niet optioneel en niet meegegeven");
+			}
+				
 			
 			logger.info("{} is {}", docField, waarde);
 			docFields[i]=waarde;
