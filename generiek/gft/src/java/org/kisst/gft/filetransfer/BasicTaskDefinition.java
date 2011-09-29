@@ -18,7 +18,7 @@ public class BasicTaskDefinition implements TaskDefinition {
 
 	public final GftContainer gft;
 	public final String name;
-	private final Action action;
+	protected final Action action;
 	protected Action startAction=null;
 	protected Action endAction=null;
 	protected Action errorAction=null;

@@ -84,4 +84,12 @@ public class ActionList  implements Action {
 		}
 		return null;
 	}
+	
+	public boolean contains(Class<?> cls) {
+		for (Action a: actions.values()) {
+			if (cls.isAssignableFrom(a.getClass()))
+				return true;
+		}
+		return false;
+	}
 }

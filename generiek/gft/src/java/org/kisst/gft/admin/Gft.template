@@ -3,10 +3,25 @@
 
 <h2>Channels</h2> 
 <table> 
+  <tr>
+    <td><b>name</b></td>
+    <td><b>type</b></td>
+    <td><b>from</b></td>
+    <td><b>to</b></td>
+  </tr>
 <#list channels?keys as name>
-  <tr><td><a href="channel/${name}"><b>${name}</b></a></td><td>${channels[name]}</td></tr>
+  <tr>
+    <td><a href="channel/${name}"><b>${name}</b></a></td>
+    <td>${channels[name].class.simpleName}</td>
+    <td>${channels[name].srcDescription}</td>
+    <td>${channels[name].destDescription}</td>
+  </tr>
 </#list> 
 </table> 
+
+<h2>Logging</h2> 
+<a href=logging/days=1>View Logging in LOGB</a>
+
 
 <h2>Pollers</h2> 
 <table> 
@@ -42,8 +57,12 @@
 </#list> 
 </table> 
 
-<h2>Logging</h2> 
-<a href=logging/days=1>LOGB</a>
+<h2>OnDemand Hosts</h2> 
+<table> 
+<#list ondemandhosts?keys as name>
+<tr><td><a href=rest/ondemandhost/${name}>${name}</a></td><td>${ondemandhosts[name]}</td></tr> 
+</#list> 
+</table> 
 
 <h2>Actions</h2> 
 <table> 

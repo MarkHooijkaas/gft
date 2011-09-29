@@ -3,6 +3,7 @@ package org.kisst.gft.filetransfer;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.action.ActionList;
+import org.kisst.gft.action.DecodeBase64ToFileAction;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.task.Task;
 import org.kisst.gft.task.TaskDefinition;
@@ -19,6 +20,7 @@ public class Channel extends BasicTaskDefinition implements TaskDefinition {
 	public final String srcdir;
 	public final String destdir;
 	public final String mode;
+	private final boolean useDecode;
 
 	public Channel(GftContainer gft, Props props) {
 		super(gft, props, null);
@@ -53,10 +55,19 @@ public class Channel extends BasicTaskDefinition implements TaskDefinition {
 		
 		actprops.put("actions", "log_completed");
 		this.endAction=new ActionList(this, actprops);
-
+		useDecode = ((ActionList) action).contains(DecodeBase64ToFileAction.class);
 	}
 	
-	public String toString() { return "Channel("+name+" from "+src+":"+srcdir+" to "+dest+":"+destdir+")";}
+
+	public String getSrcDescription() {
+		if (useDecode)
+			return "encoded-in-message";
+		else
+			return src+":"+srcdir;
+	}
+	public String getDestDescription() { return dest+":"+destdir; }
+
+	public String toString() { return this.getClass().getSimpleName()+"("+name+" from "+getSrcDescription()+" to "+getDestDescription()+")";}
 	public void checkSystemsAvailable(FileTransferTask ft) {
 		if (! src.isAvailable())
 			throw new RetryableException("Source system "+src+" is not available tot transfer file "+ft.srcpath+" for channel "+name);

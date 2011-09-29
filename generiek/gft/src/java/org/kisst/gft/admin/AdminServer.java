@@ -50,6 +50,8 @@ public class AdminServer extends AbstractHandler {
         rest.map("listener",new MappedResource(gft.listeners));
         rest.map("httphost",new MappedResource(gft.httphosts));
         rest.map("sshhost",new MappedResource(gft.sshhosts));
+        rest.map("poller",new MappedResource(gft.pollers));
+        rest.map("ondemandhost",new MappedResource(gft.ondemandhosts));
         
         handlerMap.put(rest.getPrefix(), rest);
 		try {
