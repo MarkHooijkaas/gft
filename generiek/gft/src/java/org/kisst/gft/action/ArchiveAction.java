@@ -53,29 +53,20 @@ public class ArchiveAction implements Action {
 		
 		FileTransferTask ft= (FileTransferTask) task;
 	
-		logger.info("archiveAction is aangeroepen!");		
-		logger.info("archiveAction Stap Archiveer!");
-		
 		logger.info("open connection met {}",host);
 		
-		ODServer odServer = host.openConnection();
+		ODServer odServer = host.borrowConnection();
 		try {
 			// ONT= 1455, FAT=1460
 			logger.info("connection {}",host);
 			storeDocument(odServer, ft);
-			
+			return null;
 		}
 		catch (ODException e) { throw new RuntimeException(e.getMessage()+", id="+e.getErrorId()+", msg="+e.getErrorMsg(), e); } 
 		catch (Exception e) { throw new RuntimeException(e);}
 		finally {
-			try {
-					odServer.logoff();
-				} 
-			catch (Exception e) { throw new RuntimeException(e);}
+			host.releaseConnection(odServer);
 		}
-
-
-		return null;
 	}
 	
 	private void storeDocument(ODServer odServer, FileTransferTask ft) throws Exception {
