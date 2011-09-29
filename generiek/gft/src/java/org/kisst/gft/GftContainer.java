@@ -30,6 +30,7 @@ import org.kisst.gft.action.NotifyReceiver;
 import org.kisst.gft.action.SendGftMessageAction;
 import org.kisst.gft.action.SendReplyAction;
 import org.kisst.gft.action.SftpGetAction;
+import org.kisst.gft.action.SftpPutAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.FileTransferChannel;
@@ -107,6 +108,7 @@ public class GftContainer {
 		addAction("archive", ArchiveAction.class);
 		addAction("decode", DecodeBase64ToFileAction.class);
 		addAction("sftp_get", SftpGetAction.class);
+		addAction("sftp_put", SftpPutAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
