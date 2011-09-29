@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.filetransfer.BasicTaskDefinition;
+import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.Props;
@@ -11,6 +12,9 @@ import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ThreadUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 
 public class ActionList  implements Action {
 	final static Logger logger=LoggerFactory.getLogger(ActionList.class); 
@@ -58,6 +62,12 @@ public class ActionList  implements Action {
 			boolean done=false;
 			int nrofTries=0;
 			while (! done){
+				Monitor mon1=MonitorFactory.start("action:"+name);
+				Monitor mon2=null;
+				if (task instanceof FileTransferTask) {
+					String channelName= ((FileTransferTask) task).channel.name;
+					mon2=MonitorFactory.start("channel:"+channelName+":action:"+name);
+				}
 				try {
 					a.execute(task);
 					done=true;
@@ -74,6 +84,8 @@ public class ActionList  implements Action {
 					}
 				}
 				finally {
+					mon1.stop();
+					if (mon2!=null) mon2.stop();
 					// This needs to be done here, otherwise the log_error will always log the log_error action as last action.
 					// TODO: a more elegant solution is desired
 					task.setLastAction(name);

@@ -8,6 +8,9 @@ import org.kisst.jms.MessageHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
+
 public class StartFileTransferTask implements MessageHandler {
 	final static Logger logger=LoggerFactory.getLogger(StartFileTransferTask.class); 
 
@@ -26,7 +29,13 @@ public class StartFileTransferTask implements MessageHandler {
 		if (logger.isInfoEnabled())
 			logger.info("file "+task.srcpath+" transfer task started");
 		
-		task.run();
+		Monitor mon1 = MonitorFactory.start("channel:"+task.channel.name);
+		try {
+			task.run();
+		}
+		finally {
+			mon1.stop();
+		}
 		//if (! t.isDone())
 		//	t.save();
 		return true;

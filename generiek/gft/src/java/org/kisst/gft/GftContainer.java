@@ -15,6 +15,7 @@ import nl.duo.gft.odwek.OnDemandChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
+import org.kisst.util.JamonUtil;
 import org.kisst.gft.action.ArchiveAction;
 import org.kisst.gft.action.CheckCopiedFile;
 import org.kisst.gft.action.CheckDestFileDoesNotExist;
@@ -46,8 +47,10 @@ import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.TemplateUtil;
+import org.kisst.util.JamonUtil.JamonThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 
 
@@ -70,7 +73,8 @@ public class GftContainer {
 	private final String hostName;
 	private String tempdir;
 	private int dirVolgnr;
-
+	private JamonThread jamonThread;
+	
 	private final File configfile;
 
 	public JmsSystem queueSystem;
@@ -119,6 +123,7 @@ public class GftContainer {
 	public SimpleProps getContext() {return context; }
 	
 	public void init(Props props) {
+		this.jamonThread = new JamonThread(props);
 		this.props=props;
 		context.put("global", props.get("gft.global", null));
 		
@@ -237,8 +242,14 @@ public class GftContainer {
 	public void join() {
 		admin.join();
 	}
-
+	public void reset() {
+		JamonUtil.jamonLog(props, "RESET called, dumping all statistics");
+		jamonThread.reset();
+	}
+	
 	public void stop() {
+		JamonUtil.jamonLog(props, "STOP called, dumping all statistics");
+		jamonThread.stop();
 		for (MultiListener q : listeners.values() )
 			q.stop();
 		for (Poller p : pollers.values())

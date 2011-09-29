@@ -1,6 +1,8 @@
 <h1>GFT version ${gft.version}</h1> 
 <a href="config">Configuration</a><br> 
 
+<a href="reset">Reset JAMON logging</a><br>
+
 <h2>Channels</h2> 
 <table> 
   <tr>
