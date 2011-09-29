@@ -71,7 +71,7 @@ public class JmsListener implements Runnable {
 			return "STOPPED";
 		if (browseMode)
 			return "PAUZED";
-		return "RUNNING";
+		return "LISTENING";
 	}
 	public boolean isActive() { return running && ! browseMode; }
 	

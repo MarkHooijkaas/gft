@@ -45,7 +45,7 @@ public class ListenerServlet extends BaseServlet {
 
 		
 		MultiListener lstnr = (MultiListener) gft.listeners.get(name);
-		out.println("<h2>Status</h2>");
+		out.println("<h2>Status of Listener threads</h2>");
 		out.println("<ul>");
 		for (JmsListener l :lstnr.listeners)
 			out.println("<li>"+l.getStatus()+"</l>");

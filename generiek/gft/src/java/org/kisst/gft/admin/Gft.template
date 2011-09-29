@@ -39,7 +39,7 @@
 <table> 
 <tr><td>name</td><td>queue</td><td>STATUS</td><td>threads</td><td>active</td></tr>
 <#list listeners?keys as name>
-<tr><td><a href=rest/listener/${name}>${name}</a></td><td>${listeners[name].queue}</td><td><a href=listener/${name}>STATUS</a></td>
+<tr><td><a href=rest/listener/${name}>${name}</a></td><td>${listeners[name].queue}</td><td><a href=listener/${name}>VIEW STATUS and QUEUES</a></td>
 <td>${listeners[name].nrofListeners}</td>
 <td>${listeners[name].nrofActiveListeners}</td>
 </tr> 
