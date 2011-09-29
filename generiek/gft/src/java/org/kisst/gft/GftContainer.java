@@ -15,7 +15,21 @@ import nl.duo.gft.odwek.ArchiveerChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
+import org.kisst.gft.action.ArchiveAction;
+import org.kisst.gft.action.CheckCopiedFile;
+import org.kisst.gft.action.CheckDestFileDoesNotExist;
+import org.kisst.gft.action.CheckSourceFile;
+import org.kisst.gft.action.CopyFile;
+import org.kisst.gft.action.DecodeBase64ToFileAction;
+import org.kisst.gft.action.DeleteLocalFileAction;
+import org.kisst.gft.action.DeleteSourceFile;
+import org.kisst.gft.action.FixPermissions;
 import org.kisst.gft.action.HttpHost;
+import org.kisst.gft.action.LocalCommandAction;
+import org.kisst.gft.action.NotifyReceiver;
+import org.kisst.gft.action.SendGftMessageAction;
+import org.kisst.gft.action.SendReplyAction;
+import org.kisst.gft.action.SftpGetAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.FileTransferChannel;
@@ -70,9 +84,9 @@ public class GftContainer {
 		return props.getProperty("project.version");
 	}
 	
-	public void addAction(String name, String classname) {
+	public void addAction(String name, Class<?> cls) {
 		SimpleProps props=new SimpleProps();
-		props.put("class", classname);
+		props.put("class", cls.getName());
 		actions.put(name, props);
 	}
 	public GftContainer(File configfile) {
@@ -80,20 +94,20 @@ public class GftContainer {
 		context.put("gft", this);
 	
 		this.configfile = configfile;
-		addAction("check_src","CheckSourceFile");
-		addAction("check_dest","CheckDestFileDoesNotExist");
-		addAction("copy","CopyFile");
-		addAction("check_copy","CheckCopiedFile");
-		addAction("remove","DeleteSourceFile");
-		addAction("notify","NotifyReceiver");
-		addAction("reply","SendReplyAction");
-		addAction("fix_permissions","FixPermissions");
-		addAction("sendGftMessage", "SendGftMessageAction");
-		addAction("localCommand", "LocalCommandAction");
-		addAction("archive", "ArchiveAction");
-		addAction("decode", "DecodeBase64ToFileAction");
-		addAction("sftpGet", "SftpGetAction");
-		addAction("delete_local_file", "DeleteLocalFileAction");
+		addAction("check_src",CheckSourceFile.class);
+		addAction("check_dest",CheckDestFileDoesNotExist.class);
+		addAction("copy",CopyFile.class);
+		addAction("check_copy",CheckCopiedFile.class);
+		addAction("remove",DeleteSourceFile.class);
+		addAction("notify",NotifyReceiver.class);
+		addAction("reply",SendReplyAction.class);
+		addAction("fix_permissions",FixPermissions.class);
+		addAction("sendGftMessage", SendGftMessageAction.class);
+		addAction("localCommand", LocalCommandAction.class);
+		addAction("archive", ArchiveAction.class);
+		addAction("decode", DecodeBase64ToFileAction.class);
+		addAction("sftpGet", SftpGetAction.class);
+		addAction("delete_local_file", DeleteLocalFileAction.class);
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
