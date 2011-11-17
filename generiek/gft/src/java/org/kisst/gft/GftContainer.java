@@ -12,7 +12,6 @@ import java.util.LinkedHashMap;
 import java.util.Properties;
 
 import nl.duo.gft.odwek.ArchiveAction;
-import nl.duo.gft.odwek.OnDemandChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
@@ -173,15 +172,17 @@ public class GftContainer {
 			Props p=channelProps.getProps(name);
 			String type2=p.getString("type","FileTransferChannel");
 			Module mod=channelTypes.get(type2);
-			if (mod==null)
-				throw new RuntimeException("Unknown Channel type in channel "+name+": "+type2);
+			if (mod==null) {
+				String typenames="";
+				String komma="";
+				for (String name2: channelTypes.keySet()) {
+					typenames+=komma+name2;
+					komma=",";
+				}
+				throw new RuntimeException("Unknown Channel type in channel "+name+": "+type2+" only the following types are allowed "+typenames);
+			}
 			TaskDefinition channel = mod.createDefinition(type2, p);
-			if (type2==null) 
-				channels.put(name, channel);
-			else if ("OnDemandChannel".equals(type2))
-				channels.put(name, new OnDemandChannel(this, p));
-			else 
-				throw new RuntimeException("Channel type in channel "+name+" veld type moet leeg zijn of OnDemandChannel, niet "+type2);
+			channels.put(name, channel);
 		}
 
 		if (props.hasKey("gft.poller")) {
