@@ -16,7 +16,6 @@ import nl.duo.gft.odwek.OnDemandChannel;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
-import org.kisst.util.JamonUtil;
 import org.kisst.gft.action.DecodeBase64ToFileAction;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.HttpHost;
@@ -26,16 +25,8 @@ import org.kisst.gft.action.SendReplyAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.FileTransferChannel;
+import org.kisst.gft.filetransfer.FileTransferModule;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
-import org.kisst.gft.filetransfer.action.CheckCopiedFile;
-import org.kisst.gft.filetransfer.action.CheckDestFileDoesNotExist;
-import org.kisst.gft.filetransfer.action.CheckSourceFile;
-import org.kisst.gft.filetransfer.action.CopyFile;
-import org.kisst.gft.filetransfer.action.DeleteSourceFile;
-import org.kisst.gft.filetransfer.action.FixPermissions;
-import org.kisst.gft.filetransfer.action.NotifyReceiver;
-import org.kisst.gft.filetransfer.action.SftpGetAction;
-import org.kisst.gft.filetransfer.action.SftpPutAction;
 import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.WindowsSshHost;
@@ -45,6 +36,7 @@ import org.kisst.jms.MessageHandler;
 import org.kisst.jms.MultiListener;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
+import org.kisst.util.JamonUtil;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.JamonUtil.JamonThread;
@@ -99,20 +91,11 @@ public class GftContainer {
 		context.put("gft", this);
 	
 		this.configfile = configfile;
-		addAction("check_src",CheckSourceFile.class);
-		addAction("check_dest",CheckDestFileDoesNotExist.class);
-		addAction("copy",CopyFile.class);
-		addAction("check_copy",CheckCopiedFile.class);
-		addAction("remove",DeleteSourceFile.class);
-		addAction("notify",NotifyReceiver.class);
 		addAction("reply",SendReplyAction.class);
-		addAction("fix_permissions",FixPermissions.class);
 		addAction("send_gft_message", SendGftMessageAction.class);
 		addAction("local_command", LocalCommandAction.class);
 		addAction("archive", ArchiveAction.class);
 		addAction("decode", DecodeBase64ToFileAction.class);
-		addAction("sftp_get", SftpGetAction.class);
-		addAction("sftp_put", SftpPutAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
@@ -259,6 +242,7 @@ public class GftContainer {
 	}
 
 	private void addDynamicModules(Props props) {
+		modules.put("filetransfer", new FileTransferModule(this, props));
 		Object moduleProps = props.get("gft.modules",null);
 		if (! (moduleProps instanceof Props))
 			return;
