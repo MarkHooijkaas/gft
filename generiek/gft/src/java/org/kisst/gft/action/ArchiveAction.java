@@ -82,7 +82,7 @@ public class ArchiveAction implements Action {
 			String waarde = null;
 			String docField = (String) dubbelArray[i][0];
 			OnDemandChannel.Field fielddef=channel.fields.get(docField);
-			waarde = ft.content.getChildText("kenmerken/?"+docField );
+			waarde = ft.getContent().getChildText("kenmerken/?"+docField );
 			if (fielddef!=null) {
 				if (fielddef.fixedValue != null) {
 					if (waarde!=null)

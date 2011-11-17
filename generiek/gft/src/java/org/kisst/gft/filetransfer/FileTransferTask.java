@@ -20,9 +20,9 @@ public class FileTransferTask extends JmsXmlTask {
 		
 		this.channel= channel; 
 		if (channel==null)
-			throw new FunctionalException("Could not find channel with name "+content.getChildText("kanaal"));
+			throw new FunctionalException("Could not find channel with name "+getContent().getChildText("kanaal"));
 		// Strip preceding slashes to normalize the path.
-		filename =content.getChildText("bestand");
+		filename =getContent().getChildText("bestand");
 
 		if ( filename.length()>1024)
 			throw new FunctionalException("Filename length should not exceed 1024 characters");

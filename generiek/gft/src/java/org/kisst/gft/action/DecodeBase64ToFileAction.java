@@ -4,12 +4,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.task.BasicTask;
+import org.kisst.gft.task.JmsXmlTask;
+import org.kisst.gft.task.SoapTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.kisst.util.Base64;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
 
 public class DecodeBase64ToFileAction implements Action{
 	//private static final Logger logger = LoggerFactory.getLogger(DecodeBase64ToFileAction.class);
@@ -18,13 +18,14 @@ public class DecodeBase64ToFileAction implements Action{
 
 	@Override
 	public Object execute(Task task) {
+		SoapTask soaptask =  (SoapTask) task;
+		BasicTask basictask = (BasicTask) task;
 		try {
 			FileOutputStream fos = null;
 			try {
-				FileTransferTask ft = (FileTransferTask) task;
-				String encoded = ft.content.getChildText("bestandsinhoud"); 
+				String encoded = soaptask.getContent().getChildText("bestandsinhoud"); 
 				byte[] bytes = Base64.decode(encoded);
-				fos = new FileOutputStream(ft.getTempFile());
+				fos = new FileOutputStream(basictask.getTempFile());
 				fos.write(bytes);
 				return null;
 			}

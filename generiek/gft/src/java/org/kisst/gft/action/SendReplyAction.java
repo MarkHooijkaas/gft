@@ -23,7 +23,8 @@ import nl.duo.gft.odwek.OnDemandChannel;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferChannel;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.task.JmsXmlTask;
+import org.kisst.gft.task.SoapTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.kisst.util.XmlNode;
@@ -47,23 +48,25 @@ public class SendReplyAction  implements Action {
 	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task task) {
-		FileTransferTask ft= (FileTransferTask) task;
-		String queue=ft.msg.getReplyTo();
+		SoapTask ft= (SoapTask) task;
+		JmsXmlTask jmstask= (JmsXmlTask) task;
+		
+		String queue=jmstask.getJmsMessage().getReplyTo();
 		if (queue==null)
 			throw new RuntimeException("No replyTo address given for task "+ft);
 		if (logger.isInfoEnabled())
-			logger.info("Sending reply with correlationId {} to queue {}",ft.msg.getCorrelationId(), queue);
+			logger.info("Sending reply with correlationId {} to queue {}",jmstask.getJmsMessage().getCorrelationId(), queue);
 		
-		XmlNode msg=ft.message.clone();
-		if (ft.channel instanceof FileTransferChannel)
+		XmlNode msg=ft.getMessage().clone();
+		if (task.getTaskDefinition() instanceof FileTransferChannel)
 			msg.getChild("Body/transferFile").element.setName("transferFileResponse");
-		else if (ft.channel instanceof OnDemandChannel)
+		else if (task.getTaskDefinition() instanceof OnDemandChannel)
 			msg.getChild("Body/archiveerBestand").element.setName("archiveerBestandResponse");
 		else 
-			throw new RuntimeException("channel "+ft.channel.name+" is of unknown type "+ft.channel.getClass());
+			throw new RuntimeException("channel "+task.getTaskDefinition().getName()+" is of unknown type "+task.getTaskDefinition().getClass());
 		
 		String body=msg.toString();
-		gft.getQueueSystem().getQueue(queue).send(body, null, ft.msg.getCorrelationId());
+		gft.getQueueSystem().getQueue(queue).send(body, null, jmstask.getJmsMessage().getCorrelationId());
 		return null;
 	}
 }

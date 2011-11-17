@@ -47,8 +47,9 @@ public class BasicTask implements Task {
 		return result;
 	}
 	
+	public File getTempFile() { return getTempFile("file.tmp"); }
 	private File  tempFile=null;
-	public File getTempFile(String filename) {
+	protected File getTempFile(String filename) {
 		if (tempFile!=null)
 			return tempFile;
 		File nieuwTempDir = gft.createUniqueDir(taskdef.getName());

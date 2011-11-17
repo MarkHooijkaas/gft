@@ -23,7 +23,7 @@ import nl.duo.gft.odwek.OnDemandChannel;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferChannel;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.task.SoapTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
@@ -38,8 +38,11 @@ public class NotifyReceiver  implements Action {
 	private final String queue;
 	private final boolean safeToRetry;
 
+	private final GftContainer gft;
+
 	
 	public NotifyReceiver(GftContainer gft, Props props) {
+		this.gft=gft;
 		if (props.getString("queue").startsWith("dynamic:"))
 			this.queue=props.getString("queue"); 
 		else
@@ -50,15 +53,16 @@ public class NotifyReceiver  implements Action {
 	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task task) {
-		FileTransferTask ft= (FileTransferTask) task;
-		XmlNode msg=ft.message.clone();
+		SoapTask ft= (SoapTask) task;
+
+		XmlNode msg=ft.getMessage().clone();
 		
-		if (ft.channel instanceof FileTransferChannel)
+		if (task.getTaskDefinition() instanceof FileTransferChannel)
 			msg.getChild("Body/transferFile").element.setName("transferFileNotification");
-		else if (ft.channel instanceof OnDemandChannel)
+		else if (task.getTaskDefinition() instanceof OnDemandChannel)
 			msg.getChild("Body/archiveerBestand").element.setName("archiveerBestandNotificatie");
 		else 
-			throw new RuntimeException("channel "+ft.channel.name+" is of unknown type "+ft.channel.getClass());
+			throw new RuntimeException("channel "+task.getTaskDefinition().getName()+" is of unknown type "+task.getTaskDefinition().getClass());
 		
 		String queue=this.queue;
 		if (queue.startsWith("dynamic:")) {
@@ -70,7 +74,7 @@ public class NotifyReceiver  implements Action {
 		logger.info("Sending message to queue {}",queue);
 		
 		String body=msg.toString();
-		ft.channel.gft.getQueueSystem().getQueue(queue).send(body);
+		gft.getQueueSystem().getQueue(queue).send(body);
 		return null;
 	}
 }
