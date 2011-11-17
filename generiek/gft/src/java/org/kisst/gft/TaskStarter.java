@@ -24,7 +24,7 @@ public class TaskStarter implements MessageHandler {
 		try {
 			XmlNode message=new XmlNode(msg.getData());
 			XmlNode content=message.getChild("Body").getChildren().get(0);
-			JmsTaskDefinition definition=gft.getChannel(content.getChildText("kanaal"));
+			JmsTaskDefinition definition=(JmsTaskDefinition) gft.getTaskDefinition(content.getChildText("kanaal"));
 
 			task=definition.createNewTask(msg);
 		}

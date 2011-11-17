@@ -19,6 +19,7 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft;
 
+import org.kisst.gft.task.TaskDefinition;
 import org.kisst.props4j.Props;
 
 public interface Module {
@@ -26,4 +27,5 @@ public interface Module {
 	public void init(Props props);
 	public void reset(Props props);
 	public void destroy();
+	public TaskDefinition createDefinition(String type, Props props);
 }

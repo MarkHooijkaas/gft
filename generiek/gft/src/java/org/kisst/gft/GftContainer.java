@@ -23,13 +23,11 @@ import org.kisst.gft.action.LocalCommandAction;
 import org.kisst.gft.action.SendGftMessageAction;
 import org.kisst.gft.action.SendReplyAction;
 import org.kisst.gft.admin.AdminServer;
-import org.kisst.gft.filetransfer.Channel;
-import org.kisst.gft.filetransfer.FileTransferChannel;
 import org.kisst.gft.filetransfer.FileTransferModule;
-import org.kisst.gft.filetransfer.StartFileTransferTask;
 import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.WindowsSshHost;
+import org.kisst.gft.task.TaskDefinition;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MessageHandler;
@@ -49,17 +47,18 @@ import org.slf4j.LoggerFactory;
 public class GftContainer {
 	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
 
-	private final MessageHandler starter = new StartFileTransferTask(this); 
+	private final MessageHandler starter = new TaskStarter(this); 
 	private final AdminServer admin=new AdminServer(this);
 	public Props props;
 
-	public final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
+	public final HashMap<String, TaskDefinition> channels= new LinkedHashMap<String, TaskDefinition>();
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
 	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>();
 	public final HashMap<String, OnDemandHost>    ondemandhosts= new LinkedHashMap<String, OnDemandHost>();
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
+	private final HashMap<String, Module > channelTypes=new LinkedHashMap<String, Module>();
 	private final SimpleProps context = new SimpleProps();
 	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
 	private final String hostName;
@@ -172,9 +171,13 @@ public class GftContainer {
 		Props channelProps=props.getProps("gft.channel");
 		for (String name: channelProps.keys()) {
 			Props p=channelProps.getProps(name);
-			String type2=p.getString("type",null);
+			String type2=p.getString("type","FileTransferChannel");
+			Module mod=channelTypes.get(type2);
+			if (mod==null)
+				throw new RuntimeException("Unknown Channel type in channel "+name+": "+type2);
+			TaskDefinition channel = mod.createDefinition(type2, p);
 			if (type2==null) 
-				channels.put(name, new FileTransferChannel(this, p));
+				channels.put(name, channel);
 			else if ("OnDemandChannel".equals(type2))
 				channels.put(name, new OnDemandChannel(this, p));
 			else 
@@ -204,7 +207,7 @@ public class GftContainer {
 				logger.info("Listener {}\t{}",name,listeners.get(name));
 		}
 	}
-	public Channel getChannel(String name) { return channels.get(name); }
+	public TaskDefinition getTaskDefinition(String name) { return channels.get(name); }
 	public HttpHost getHost(String name) { return httphosts.get(name); }
 	public String processTemplate(Object template, Object context) { return TemplateUtil.processTemplate(template, context); }
 
@@ -278,5 +281,11 @@ public class GftContainer {
 		file.mkdirs();
 		return file;
 		
+	}
+
+	public void registerDefinitionType(String name, Module module) {
+		if (channelTypes.get(name)!=null)
+			throw new RuntimeException("TaskDefinitionType "+name+" is already registerd to module "+channelTypes.get(name)+" when trying to register it for module "+module);
+		channelTypes.put(name, module);
 	}
 }

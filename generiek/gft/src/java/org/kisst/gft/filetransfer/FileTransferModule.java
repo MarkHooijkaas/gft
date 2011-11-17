@@ -11,6 +11,7 @@ import org.kisst.gft.filetransfer.action.FixPermissions;
 import org.kisst.gft.filetransfer.action.NotifyReceiver;
 import org.kisst.gft.filetransfer.action.SftpGetAction;
 import org.kisst.gft.filetransfer.action.SftpPutAction;
+import org.kisst.gft.task.TaskDefinition;
 import org.kisst.props4j.Props;
 
 public class FileTransferModule implements Module {
@@ -34,8 +35,14 @@ public class FileTransferModule implements Module {
 		gft.addAction("fix_permissions",FixPermissions.class);
 		gft.addAction("sftp_get", SftpGetAction.class);
 		gft.addAction("sftp_put", SftpPutAction.class);
+		gft.registerDefinitionType("FileTransferChannel", this);
 	}
 
 	@Override public void reset(Props props) {}
+
+	@Override
+	public TaskDefinition createDefinition(String type, Props props) {
+		return new Channel(gft, props);
+	}
 
 }

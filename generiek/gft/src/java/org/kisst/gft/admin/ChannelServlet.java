@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.Channel;
+import org.kisst.gft.task.TaskDefinition;
 
 public class ChannelServlet extends BaseServlet {
 	public ChannelServlet(GftContainer gft) { super(gft);	}
@@ -21,8 +22,13 @@ public class ChannelServlet extends BaseServlet {
 		PrintWriter out = response.getWriter();
 		String url=request.getRequestURI();
 		String name=url.substring("/channel/".length());
-		Channel ch=gft.channels.get(name);
-		out.println("<h1>Channel "+name+"</h1>");
+		TaskDefinition def=gft.getTaskDefinition(name);
+		writeChannelInfo(out, (Channel) def);
+	}
+	
+	
+	private void writeChannelInfo(PrintWriter out, Channel ch) {
+		out.println("<h1>Channel "+ch.getName()+"</h1>");
 		out.println("<ul>");
 		out.println("<li>FROM: <a href=\"/dir/"+ch.src.getSshHost().name+"/"+ ch.srcdir +"\">"+ch.src.getSshHost().name+"/"+ ch.srcdir +"</a>");
 		out.println("<li>TO:   <a href=\"/dir/"+ch.dest.getSshHost().name+"/"+ch.destdir+"\">"+ch.dest.getSshHost().name+"/"+ch.destdir+"</a>");
