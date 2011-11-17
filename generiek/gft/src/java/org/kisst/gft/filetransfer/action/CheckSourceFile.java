@@ -1,6 +1,7 @@
-package org.kisst.gft.action;
+package org.kisst.gft.filetransfer.action;
 
 import org.kisst.gft.FunctionalException;
+import org.kisst.gft.action.Action;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
 

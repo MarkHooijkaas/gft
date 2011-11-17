@@ -17,9 +17,10 @@ You should have received a copy of the GNU General Public License
 along with the RelayConnector framework.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.kisst.gft.action;
+package org.kisst.gft.filetransfer.action;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.action.Action;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileTransferTask;

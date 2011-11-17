@@ -5,7 +5,6 @@ import java.io.IOException;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.task.BasicTask;
-import org.kisst.gft.task.JmsXmlTask;
 import org.kisst.gft.task.SoapTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
