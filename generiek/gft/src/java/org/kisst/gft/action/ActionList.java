@@ -3,8 +3,8 @@ package org.kisst.gft.action;
 import java.util.LinkedHashMap;
 
 import org.kisst.gft.RetryableException;
-import org.kisst.gft.filetransfer.BasicTaskDefinition;
 import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.Props;

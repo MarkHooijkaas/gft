@@ -1,12 +1,11 @@
-package org.kisst.gft.filetransfer;
+package org.kisst.gft.task;
 
 import java.lang.reflect.Constructor;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
-import org.kisst.gft.task.Task;
-import org.kisst.gft.task.TaskDefinition;
+import org.kisst.gft.filetransfer.Channel;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ReflectionUtil;
