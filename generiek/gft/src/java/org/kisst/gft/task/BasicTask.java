@@ -26,6 +26,7 @@ public class BasicTask implements Task {
 		this.taskdef = taskdef;
 	}
 	public TaskDefinition getTaskDefinition() { return taskdef; }
+	public void run() { taskdef.run(this); }
 	
 	public void save() {  throw new RuntimeException("save not implemented yet"); }
 	public Status getStatus() { return status; }

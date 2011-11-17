@@ -34,7 +34,6 @@ public class BasicTaskDefinition implements TaskDefinition {
 		this.props=props;
 		this.name=props.getLocalName();
 		this.action=new ActionList(this, props, defaultActions);
-		
 	}
 
 	public String getName() { return name; }
@@ -86,7 +85,4 @@ public class BasicTaskDefinition implements TaskDefinition {
 			return (Action) ReflectionUtil.createObject(c, new Object[] {gft, props} );
 		
 	}
-
-
-
 }

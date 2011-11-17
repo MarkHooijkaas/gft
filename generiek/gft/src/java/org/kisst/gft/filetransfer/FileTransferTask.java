@@ -36,6 +36,7 @@ public class FileTransferTask extends JmsXmlTask {
 			getContext().put(key,channel.getContext().get(key));
 	}
 
+	public String toString() { return "FileTransferTask("+srcpath+")"; } 
 	public void run() { channel.run(this); }
 	public File getTempFile() { return getTempFile(filename); }
 
