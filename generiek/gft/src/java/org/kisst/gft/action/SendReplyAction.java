@@ -48,11 +48,11 @@ public class SendReplyAction  implements Action {
         
 	public Object execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
-		String queue=ft.replyTo;
+		String queue=ft.msg.getReplyTo();
 		if (queue==null)
 			throw new RuntimeException("No replyTo address given for task "+ft);
 		if (logger.isInfoEnabled())
-			logger.info("Sending reply with correlationId {} to queue {}",ft.correlationId, queue);
+			logger.info("Sending reply with correlationId {} to queue {}",ft.msg.getCorrelationId(), queue);
 		
 		XmlNode msg=ft.message.clone();
 		if (ft.channel instanceof FileTransferChannel)
@@ -63,7 +63,7 @@ public class SendReplyAction  implements Action {
 			throw new RuntimeException("channel "+ft.channel.name+" is of unknown type "+ft.channel.getClass());
 		
 		String body=msg.toString();
-		gft.getQueueSystem().getQueue(queue).send(body, null, ft.correlationId);
+		gft.getQueueSystem().getQueue(queue).send(body, null, ft.msg.getCorrelationId());
 		return null;
 	}
 }

@@ -5,6 +5,7 @@ import nl.duo.gft.LogUtil;
 import org.kisst.gft.GftContainer;
 import org.kisst.jms.JmsMessage;
 import org.kisst.jms.MessageHandler;
+import org.kisst.util.XmlNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -20,7 +21,11 @@ public class StartFileTransferTask implements MessageHandler {
 	public boolean handle(JmsMessage msg) {
 		FileTransferTask task;
 		try {
-			task=new FileTransferTask(gft, msg.getData(), msg.getReplyTo(), msg.getCorrelationId());
+			XmlNode message=new XmlNode(msg.getData());
+			XmlNode content=message.getChild("Body").getChildren().get(0);
+			Channel channel=gft.getChannel(content.getChildText("kanaal"));
+
+			task=new FileTransferTask(channel, msg);
 		}
 		catch (RuntimeException e) {
 			LogUtil.log("error", "jms", "handle", "exception", e.getMessage());

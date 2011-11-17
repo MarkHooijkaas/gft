@@ -38,6 +38,7 @@ public class BasicTaskDefinition implements TaskDefinition {
 		
 	}
 
+	public String getName() { return name; }
 	public SimpleProps getContext() { return context;}
 	public long getTotalCount() { return totalCount; }
 	public long getErrorCount() { return errorCount; }
