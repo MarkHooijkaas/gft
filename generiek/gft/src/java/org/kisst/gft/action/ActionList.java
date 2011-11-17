@@ -3,7 +3,6 @@ package org.kisst.gft.action;
 import java.util.LinkedHashMap;
 
 import org.kisst.gft.RetryableException;
-import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.LayeredProps;
@@ -64,10 +63,8 @@ public class ActionList  implements Action {
 			while (! done){
 				Monitor mon1=MonitorFactory.start("action:"+name);
 				Monitor mon2=null;
-				if (task instanceof FileTransferTask) {
-					String channelName= ((FileTransferTask) task).channel.name;
-					mon2=MonitorFactory.start("channel:"+channelName+":action:"+name);
-				}
+				String channelName= task.getTaskDefinition().getName();
+				mon2=MonitorFactory.start("channel:"+channelName+":action:"+name);
 				try {
 					a.execute(task);
 					done=true;

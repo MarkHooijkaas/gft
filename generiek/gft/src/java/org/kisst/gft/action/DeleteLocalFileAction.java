@@ -22,7 +22,7 @@ package org.kisst.gft.action;
 import java.io.File;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
@@ -45,7 +45,7 @@ public class DeleteLocalFileAction implements Action {
         
 	public Object execute(Task task) {
 		
-		FileTransferTask ft= (FileTransferTask) task;
+		BasicTask ft= (BasicTask) task;
 	
 		logger.info("deleteLocalFileAction is ruim localfile op!");
 		

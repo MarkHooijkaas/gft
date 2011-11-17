@@ -30,7 +30,7 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 
@@ -65,12 +65,12 @@ public class HttpAction  implements Action {
 	public boolean safeToRetry() { return safeToRetry; }
 
 	protected String getBody(Task task) {
-		FileTransferTask ft= (FileTransferTask) task;
-		return gft.processTemplate(templateName, ft.getActionContext(this));
+		BasicTask basictask= (BasicTask) task;
+		return gft.processTemplate(templateName, basictask.getActionContext(this));
 	}
 
-	public Object execute(Task t) {
-		String body=getBody(t);
+	public Object execute(Task task) {
+		String body=getBody(task);
 
 		for (int i=0; i<hosts.length; i++) {
 			HttpHost host=hosts[i];

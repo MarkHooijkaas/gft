@@ -20,7 +20,7 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 package org.kisst.gft.action;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
 import org.kisst.jms.JmsSystem;
 import org.kisst.props4j.Props;
@@ -50,10 +50,10 @@ public class SendMessageAction  implements Action {
 	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task task) {
-		FileTransferTask ft= (FileTransferTask) task;
+		BasicTask basictask= (BasicTask) task;
 		logger.info("Sending message to queue {}",queue);
 		
-		String body=gft.processTemplate(templateName, ft.getActionContext(this));
+		String body=gft.processTemplate(templateName, basictask.getActionContext(this));
 		qmgr.getQueue(queue).send(body);
 		return null;
 	}
