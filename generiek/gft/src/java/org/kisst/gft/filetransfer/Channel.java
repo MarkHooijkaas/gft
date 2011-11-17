@@ -24,7 +24,7 @@ public class Channel extends JmsTaskDefinition {
 	private final boolean useDecode;
 
 	public Channel(GftContainer gft, Props props) {
-		super(gft, props, null);
+		super(gft, props);
 		getContext().put("channel", this);
 		
 		this.src=gft.sshhosts.get(props.getString("src.host"));
