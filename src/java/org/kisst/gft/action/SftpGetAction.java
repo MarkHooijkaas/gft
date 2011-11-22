@@ -19,29 +19,20 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-import nl.duo.gft.odwek.ArchiveerChannel;
-
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.Channel;
-import org.kisst.gft.filetransfer.FileTransferChannel;
+import org.kisst.gft.filetransfer.FileServer;
+import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
-import org.kisst.util.XmlNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
-public class SendReplyAction  implements Action {
-	private final static Logger logger=LoggerFactory.getLogger(SendReplyAction.class);
-
-	private final GftContainer gft;
-	public final Props props;
+public class SftpGetAction implements Action {
+	private final static Logger logger=LoggerFactory.getLogger(SftpGetAction.class);
 	private final boolean safeToRetry;
 	
-	public SendReplyAction(GftContainer gft, Props props) {
-		this.gft=gft;
-		this.props=props;
+	public SftpGetAction(GftContainer gft, Props props) {
 		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 
@@ -49,22 +40,15 @@ public class SendReplyAction  implements Action {
         
 	public Object execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
-		String queue=ft.replyTo;
-		if (queue==null)
-			throw new RuntimeException("No replyTo address given for task "+ft);
-		if (logger.isInfoEnabled())
-			logger.info("Sending reply with correlationId {} to queue {}",ft.correlationId, queue);
 		
-		XmlNode msg=ft.message.clone();
-		if (ft.channel instanceof FileTransferChannel)
-			msg.getChild("Body/transferFile").element.setName("transferFileResponse");
-		else if (ft.channel instanceof ArchiveerChannel)
-			msg.getChild("Body/archiveerBestand").element.setName("archiveerBestandResponse");
-		else 
-			throw new RuntimeException("channel "+ft.channel.name+" is of unknown type "+ft.channel.getClass());
+		FileServer fileserver= ft.channel.src;
+		FileServerConnection fsconn=fileserver.openConnection();
+		String remotefile = ft.channel.srcdir + "/" + ft.filename;
+		String localfile=ft.getTempFile().getPath();
+		logger.info("sftp get {} to localfile {}",remotefile, localfile);
+		fsconn.getToLocalFile(remotefile, localfile);
 		
-		String body=msg.toString();
-		gft.getQueueSystem().getQueue(queue).send(body, null, ft.correlationId);
 		return null;
 	}
+
 }

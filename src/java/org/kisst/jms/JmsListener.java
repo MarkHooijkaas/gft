@@ -13,9 +13,9 @@ import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.kisst.cfg4j.Props;
 import org.kisst.gft.FunctionalException;
 import org.kisst.gft.RetryableException;
+import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.TimeWindowList;
 import org.slf4j.Logger;
@@ -256,7 +256,7 @@ public class JmsListener implements Runnable {
 	}
 	static public boolean isStopMessage(Message msg) {
 		try {
-			if (msg==null)
+			if (msg==null || ! (msg instanceof TextMessage))
 				return false;
 			String body = ((TextMessage)msg).getText();
 			return body.startsWith("6") && body.indexOf("Stop")>0;
@@ -265,7 +265,7 @@ public class JmsListener implements Runnable {
 	}
 	static public boolean isStartMessage(Message msg) {
 		try{
-			if (msg==null)
+			if (msg==null || ! (msg instanceof TextMessage))
 				return false;
 			String body = ((TextMessage)msg).getText();
 			return body.startsWith("6") && body.indexOf("Start")>0;
@@ -324,7 +324,10 @@ public class JmsListener implements Runnable {
 				String code="TECHERR";
 				if (e instanceof FunctionalException)
 					code="FUNCERR";
-				logger.error(code+": "+e.getMessage()+". When handling JMS message "+((TextMessage) message).getText(),e);
+				if (message instanceof TextMessage)
+					logger.error(code+": "+e.getMessage()+". When handling JMS message "+((TextMessage) message).getText(),e);
+				else 
+					logger.error(code+": "+e.getMessage()+". When handling JMS message of type "+ message.getClass(),e);
 				String queue=errorqueue;
 				if (e instanceof RetryableException)
 					queue=retryqueue;

@@ -1,7 +1,7 @@
 package org.kisst.jms;
 
-import org.kisst.cfg4j.Props;
 import org.kisst.gft.admin.rest.Representable;
+import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

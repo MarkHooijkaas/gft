@@ -22,7 +22,7 @@ package org.kisst.gft.action;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.kisst.cfg4j.Props;
+import org.kisst.props4j.Props;
 import org.kisst.util.CryptoUtil;
 
 public class HttpHost {

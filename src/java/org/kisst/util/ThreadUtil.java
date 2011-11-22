@@ -16,6 +16,12 @@ public class ThreadUtil {
 				result.append("\t"+elm);
 		}
 		return result.toString();
-
+	}
+	
+	public static void sleep(long millisecs) {
+		try {
+			Thread.sleep(millisecs);
+		} 
+		catch (InterruptedException e) { throw new RuntimeException(e);}
 	}
 }

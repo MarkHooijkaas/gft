@@ -17,21 +17,18 @@ You should have received a copy of the GNU General Public License
 along with the RelayConnector framework.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-package org.kisst.cfg4j;
+package org.kisst.props4j;
 
 
 
 public interface Props extends MinimalProps {
 	public String getLocalName();
-	//public String getFullName();
 	
-	//public Object get(String key, Object defaultValue);
 	public String getString(String key, String defaultValue);
 	public int    getInt(String string, int defaultValue);
 	public long   getLong(String string, long defaultValue);
 	public boolean getBoolean(String name, boolean defaultValue);
 	public Props getProps(String name);
-	//public Iterable<String> keys();
 	
 	public Object get(String key);
 	public String getString(String key);

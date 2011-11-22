@@ -1,6 +1,6 @@
 package org.kisst.gft.admin.rest;
 
-import org.kisst.cfg4j.SimpleProps;
+import org.kisst.props4j.SimpleProps;
 
 public class PropsResource extends Resource {
 	private final SimpleProps props;

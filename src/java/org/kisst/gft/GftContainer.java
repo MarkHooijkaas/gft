@@ -5,24 +5,30 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Properties;
 
-import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
+import nl.duo.gft.odwek.ArchiveerChannel;
+import nl.duo.gft.odwek.OnDemandHost;
+import nl.duo.gft.poller.Poller;
+
 import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.admin.AdminServer;
-import org.kisst.gft.filetransfer.As400SshHost;
 import org.kisst.gft.filetransfer.Channel;
-import org.kisst.gft.filetransfer.SshHost;
+import org.kisst.gft.filetransfer.FileTransferChannel;
 import org.kisst.gft.filetransfer.StartFileTransferTask;
-import org.kisst.gft.filetransfer.WindowsSshHost;
+import org.kisst.gft.ssh.As400SshHost;
+import org.kisst.gft.ssh.SshFileServer;
+import org.kisst.gft.ssh.WindowsSshHost;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MessageHandler;
 import org.kisst.jms.MultiListener;
+import org.kisst.props4j.Props;
+import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
@@ -40,13 +46,15 @@ public class GftContainer {
 	public final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
 	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
-	public final HashMap<String, SshHost>    sshhosts= new LinkedHashMap<String, SshHost>();
+	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>();
+	public final HashMap<String, OnDemandHost>    ondemandhosts= new LinkedHashMap<String, OnDemandHost>();
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
-	private final HashMap<String, Object> context;
+	private final SimpleProps context = new SimpleProps();
+	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
 	private final String hostName;
-;
-
+	private String tempdir;
+	private int dirVolgnr;
 
 	private final File configfile;
 
@@ -61,6 +69,7 @@ public class GftContainer {
 		} catch (IOException e) { throw new RuntimeException(e);}
 		return props.getProperty("project.version");
 	}
+	
 	public void addAction(String name, String classname) {
 		SimpleProps props=new SimpleProps();
 		props.put("class", classname);
@@ -68,9 +77,8 @@ public class GftContainer {
 	}
 	public GftContainer(File configfile) {
 		TemplateUtil.init(configfile.getParentFile());
-		context=new HashMap<String, Object>();
 		context.put("gft", this);
-
+	
 		this.configfile = configfile;
 		addAction("check_src","CheckSourceFile");
 		addAction("check_dest","CheckDestFileDoesNotExist");
@@ -80,17 +88,26 @@ public class GftContainer {
 		addAction("notify","NotifyReceiver");
 		addAction("reply","SendReplyAction");
 		addAction("fix_permissions","FixPermissions");
+		addAction("sendGftMessage", "SendGftMessageAction");
+		addAction("localCommand", "LocalCommandAction");
+		addAction("archive", "ArchiveAction");
+		addAction("decode", "DecodeBase64ToFileAction");
+		addAction("sftpGet", "SftpGetAction");
+		addAction("delete_local_file", "DeleteLocalFileAction");
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
 	}
 	public JmsSystem getQueueSystem() { return queueSystem; }
-	public Map<String, Object> getContext() {return context; }
+	public SimpleProps getContext() {return context; }
 	
 	public void init(Props props) {
 		this.props=props;
 		context.put("global", props.get("gft.global", null));
+		
+		tempdir = context.getString("global.tempdir");
+		dirVolgnr = 0;
 		addDynamicModules(props);
 		for (Module mod: modules.values())
 			mod.init(props);
@@ -109,8 +126,8 @@ public class GftContainer {
 				String type=p.getString("type",null);
 				if ("WINDOWS".equals(type))
 					sshhosts.put(name, new WindowsSshHost(p));
-				else if ("UNIX".equals(type))
-					sshhosts.put(name, new SshHost(p));
+				//else if ("UNIX".equals(type))
+				//	sshhosts.put(name, new RemoteFileServer(p));
 				else if ("AS400".equals(type))
 					sshhosts.put(name, new As400SshHost(p));
 				else 
@@ -118,6 +135,14 @@ public class GftContainer {
 			}
 		}
 
+		if (props.get("gft.ondemand.host",null)!=null) {
+			Props hostProps=props.getProps("gft.ondemand.host");
+			for (String name: hostProps.keys()) {
+				Props p=hostProps.getProps(name);
+				ondemandhosts.put(name, new OnDemandHost(p));
+			}
+		}
+		
 		Props qmprops=props.getProps("gft.queueSystem");
 		String type=qmprops.getString("type");
 		if ("ActiveMq".equals(type))
@@ -141,9 +166,26 @@ public class GftContainer {
 		}
 
 		Props channelProps=props.getProps("gft.channel");
-		for (String name: channelProps.keys())
-			channels.put(name, new Channel(this, channelProps.getProps(name)));
+		for (String name: channelProps.keys()) {
+			Props p=channelProps.getProps(name);
+			String type2=p.getString("type",null);
+			if (type2==null) 
+				channels.put(name, new FileTransferChannel(this, p));
+			else if ("ArchiveerChannel".equals(type2))
+				channels.put(name, new ArchiveerChannel(this, p));
+			else 
+				throw new RuntimeException("Channel type in channel "+name+" veld type moet leeg zijn of ArchiveerChannel, niet "+type2);
+		}
 
+		if (props.hasKey("gft.poller")) {
+			Props pollerProps=props.getProps("gft.poller");
+			for (String name: pollerProps.keys())
+				//pollers.put(name, new Poller(this, pollerProps.getProps(name)));
+				pollers.put(name, new Poller(this, name, pollerProps.getProps(name)));
+		}
+
+		
+		
 		if (logger.isDebugEnabled()) {
 			logger.debug("Using props "+props);
 			for (String name: channels.keySet())
@@ -172,6 +214,8 @@ public class GftContainer {
 		}
 		for (MultiListener q : listeners.values() )
 			q.start();
+		for (Poller p : pollers.values())
+			p.start();
 		admin.startListening();
 	}
 	public void join() {
@@ -181,6 +225,8 @@ public class GftContainer {
 	public void stop() {
 		for (MultiListener q : listeners.values() )
 			q.stop();
+		for (Poller p : pollers.values())
+			p.stop();
 		queueSystem.stop();
 		admin.stopListening();
 	}
@@ -203,5 +249,23 @@ public class GftContainer {
 		Constructor<?> cons=ReflectionUtil.getConstructor(classname, new Class<?>[] {GftContainer.class, String.class, Props.class});
 		Module mod= (Module) ReflectionUtil.createObject(cons, new Object[] {this, name, props});
 		modules.put(name, mod);
+	}
+	
+	private synchronized int getUniqueVolgnummer() {
+		dirVolgnr++;
+		if (dirVolgnr>1000000)
+			dirVolgnr=0;
+		return dirVolgnr;
+	}
+
+
+	public File createUniqueDir(String subdir){
+		SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss");
+		String date = formatter.format(new Date());
+		int volgnummer=getUniqueVolgnummer();
+		File file = new File(tempdir +"/"+ subdir +"/"+ date + "-" + volgnummer);
+		file.mkdirs();
+		return file;
+		
 	}
 }

@@ -39,6 +39,7 @@ public class TemplateServlet extends BaseServlet {
 			root.put("httphosts", gft.httphosts);
 			root.put("actions", gft.actions);
 			root.put("listeners", gft.listeners);
+			root.put("pollers", gft.pollers);
 			Template temp = cfg.getTemplate("org/kisst/gft/admin/Gft.template");
 			Writer out = response.getWriter();
 			temp.process(root, out);

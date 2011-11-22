@@ -1,10 +1,10 @@
 package org.kisst.gft.action;
 
-import org.kisst.cfg4j.Props;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferTask;
-import org.kisst.gft.filetransfer.SshHost;
+import org.kisst.gft.ssh.SshHost;
 import org.kisst.gft.task.Task;
+import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ public class SshAction implements Action {
 	public SshAction(GftContainer gft, Props props) {
 		this.gft=gft;
 		commandTemplate =props.getString("command");
-		host=gft.sshhosts.get(props.getString("host"));
+		host=gft.sshhosts.get(props.getString("host")).getSshHost();
 		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 

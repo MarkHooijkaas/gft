@@ -1,6 +1,6 @@
 package org.kisst.util;
 
-import org.kisst.cfg4j.Props;
+import org.kisst.props4j.Props;
 
 public class StringUtil {
 

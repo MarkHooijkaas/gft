@@ -24,8 +24,8 @@ public class ChannelServlet extends BaseServlet {
 		Channel ch=gft.channels.get(name);
 		out.println("<h1>Channel "+name+"</h1>");
 		out.println("<ul>");
-		out.println("<li>FROM: <a href=\"/dir/"+ch.src.name+"/"+ ch.srcdir +"\">"+ch.src.name+"/"+ ch.srcdir +"</a>");
-		out.println("<li>TO:   <a href=\"/dir/"+ch.dest.name+"/"+ch.destdir+"\">"+ch.dest.name+"/"+ch.destdir+"</a>");
+		out.println("<li>FROM: <a href=\"/dir/"+ch.src.getSshHost().name+"/"+ ch.srcdir +"\">"+ch.src.getSshHost().name+"/"+ ch.srcdir +"</a>");
+		out.println("<li>TO:   <a href=\"/dir/"+ch.dest.getSshHost().name+"/"+ch.destdir+"\">"+ch.dest.getSshHost().name+"/"+ch.destdir+"</a>");
 		out.println("</ul>");
 		
 		out.println("<h2>Config</h2>");

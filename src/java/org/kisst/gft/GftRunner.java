@@ -12,16 +12,21 @@ import javax.jms.Session;
 import nl.duo.gft.GftDuoModule;
 
 import org.apache.log4j.PropertyConfigurator;
-import org.kisst.cfg4j.Props;
-import org.kisst.cfg4j.SimpleProps;
+import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.ssh.GenerateKey;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
+import org.kisst.props4j.Props;
+import org.kisst.props4j.SimpleProps;
 import org.kisst.util.CryptoUtil;
 import org.kisst.util.FileUtil;
 import org.kisst.util.TemplateUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GftRunner {
+	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
+
 	private final File configfile;
 	private boolean running=false;
 	private GftContainer gft;
@@ -74,15 +79,20 @@ public class GftRunner {
 		GftDuoModule.setKey();
 		File configfile=new File(config.get());
 		if (putmsg.isSet()) {		// TODO: refactor this code dupplication
+			logger.info("gft put");
+			logger.info("loading props");
 			SimpleProps props=new SimpleProps();
 			props.load(configfile);
+			logger.info("opening queuesystem");
 			JmsSystem queueSystem=getQueueSystem(props);
 			String queuename = getQueue(props);
+			logger.info("loading data from standard input");
 
 			String data=FileUtil.loadString(new InputStreamReader(System.in));
+			logger.info("sending message");
 			queueSystem.getQueue(queuename).send(data);
-			System.out.println("send the following message to the queue "+queuename);
-			System.out.println(data);
+			logger.info("send the following message to the queue {}",queuename);
+			logger.debug("data send was {}",data);
 			queueSystem.close();
 			return;
 		}
@@ -92,16 +102,16 @@ public class GftRunner {
 			JmsSystem queueSystem=getQueueSystem(props);
 			String queuename = getQueue(props);
 			String selector=rmmsg.get();
-			System.out.println("removing the following message "+selector);
+			logger.info("removing the following message "+selector);
 			try {
 				Session session = queueSystem.getConnection().createSession(true, Session.SESSION_TRANSACTED);
 				MessageConsumer consumer = session.createConsumer(session.createQueue(queuename), selector);
 				Message msg = consumer.receive(5000);
 				if (msg==null)
-					System.out.println("Could not find message "+selector);
+					logger.info("Could not find message "+selector);
 				else {
 					session.commit();
-					System.out.println("Removed message "+selector);
+					logger.info("Removed message "+selector);
 				}
 				queueSystem.close();
 			}

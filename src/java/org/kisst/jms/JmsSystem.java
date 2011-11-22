@@ -10,7 +10,7 @@ import javax.jms.JMSException;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 
-import org.kisst.cfg4j.Props;
+import org.kisst.props4j.Props;
 import org.kisst.util.CryptoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
