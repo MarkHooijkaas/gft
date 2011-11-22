@@ -25,6 +25,7 @@ public class SshFileServer implements FileServer {
 	public String getBasePath() { return basePath; }
 	public SshHost getSshHost() { return host; }
 
+	public String toString() { return host.toString(); }
 	//public String getBasePath() { return basePath; }
 	
 	public String nativePath(String path) { return FileUtil.joinPaths(basePath, path); }

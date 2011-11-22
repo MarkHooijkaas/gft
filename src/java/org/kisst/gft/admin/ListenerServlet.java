@@ -42,7 +42,15 @@ public class ListenerServlet extends BaseServlet {
 		SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		out.println("<h1>Listener "+name+"</h1>");
 
+
+		
 		MultiListener lstnr = (MultiListener) gft.listeners.get(name);
+		out.println("<h2>Status of Listener threads</h2>");
+		out.println("<ul>");
+		for (JmsListener l :lstnr.listeners)
+			out.println("<li>"+l.getStatus()+"</l>");
+		out.println("</ul>");
+		
 		Session session=null;
 		try {
 			session = ((JmsSystem)gft.queueSystem).getConnection().createSession(true, Session.AUTO_ACKNOWLEDGE);

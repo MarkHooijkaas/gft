@@ -10,6 +10,10 @@ public interface Task {
 	}
 	public static Status DONE=new Status("DONE");
 	
+	public TaskDefinition getTaskDefinition();
+	
+	public void run();
+
 	public void save();
 	public void setStatus(Status status);
 	public Status getStatus();

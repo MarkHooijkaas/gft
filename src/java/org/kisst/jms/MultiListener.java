@@ -10,31 +10,40 @@ public class MultiListener implements Representable {
 
 	private final String name;
 	private final Props props;
-	private final JmsListener[] threads;
+	public final JmsListener[] listeners;
 
 	public MultiListener(JmsSystem system, MessageHandler handler, Props props, Object context) {
 		this.name=props.getLocalName();
 		this.props=props;
 		int nrofThreads = props.getInt("nrofThreads",2);
-		this.threads =new JmsListener[nrofThreads];
+		this.listeners =new JmsListener[nrofThreads];
 		for (int i=0; i<nrofThreads; i++)
-			threads[i]=new JmsListener(system, handler, props, context);
+			listeners[i]=new JmsListener(system, handler, props, context);
 	}
 	
-	public boolean listening() { return threads!=null; }
-	public String getQueue() { return threads[0].queue; }
-	public String getErrorQueue() { return threads[0].errorqueue; }
-	public String getRetryQueue() { return threads[0].retryqueue; }
+	public int getNrofListeners() { return listeners.length; }
+	public int getNrofActiveListeners() {
+		int count = 0;
+		for (JmsListener l: listeners) {
+			if (l.isActive())
+				count++;
+		}
+		return count;
+	}
+	public boolean listening() { return listeners!=null; }
+	public String getQueue() { return listeners[0].queue; }
+	public String getErrorQueue() { return listeners[0].errorqueue; }
+	public String getRetryQueue() { return listeners[0].retryqueue; }
 	public String getRepresentation() { return props.toString(); }
 
 	public void stop() {
 		logger.info("Stopping MultiListener {}", name);
-		for (JmsListener t:threads)
+		for (JmsListener t:listeners)
 			t.stop();
 	}
 	public void start()  {
 		logger.info("Starting MultiListener {}", name);
-		for (JmsListener t:threads)
+		for (JmsListener t:listeners)
 			t.start();
 	}
 }

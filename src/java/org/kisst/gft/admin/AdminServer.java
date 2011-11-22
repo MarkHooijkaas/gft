@@ -35,10 +35,12 @@ public class AdminServer extends AbstractHandler {
         server.setHandler(this);
         handlerMap.put("default", new TemplateServlet(gft));  //new HomeServlet(gft));
         handlerMap.put("/channel", new ChannelServlet(gft));
+        handlerMap.put("/poller", new PollerServlet(gft));
         handlerMap.put("/dir", new DirectoryServlet(gft));
         handlerMap.put("/listener", new ListenerServlet(gft));
         handlerMap.put("/config", new ConfigServlet(gft));
         handlerMap.put("/restart", new RestartServlet(gft));
+        handlerMap.put("/reset", new ResetServlet(gft));
         handlerMap.put("/shutdown", new ShutdownServlet(gft));
         handlerMap.put("/encrypt", new EncryptServlet(gft));
         handlerMap.put("/logging", new LogServlet(gft));
@@ -50,6 +52,8 @@ public class AdminServer extends AbstractHandler {
         rest.map("listener",new MappedResource(gft.listeners));
         rest.map("httphost",new MappedResource(gft.httphosts));
         rest.map("sshhost",new MappedResource(gft.sshhosts));
+        rest.map("poller",new MappedResource(gft.pollers));
+        rest.map("ondemandhost",new MappedResource(gft.ondemandhosts));
         
         handlerMap.put(rest.getPrefix(), rest);
 		try {

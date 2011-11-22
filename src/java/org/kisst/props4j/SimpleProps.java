@@ -38,6 +38,7 @@ public class SimpleProps extends PropsBase {
 	private final SimpleProps parent;
 	private final String name; 
 	private final Map<String, Object> values=new LinkedHashMap<String, Object>();
+	public String stringValue=null;
 	
 	public SimpleProps() { this(null,null); }
 	public SimpleProps(SimpleProps parent, String name) {
@@ -47,8 +48,8 @@ public class SimpleProps extends PropsBase {
 		else
 			this.name=name;
 	}
-	public String getLocalName() { return name; }
-	public String getFullName() {
+	@Override public String getLocalName() { return name; }
+	@Override public String getFullName() {
 		if (parent==null)
 			return name;
 		else { 
@@ -66,7 +67,7 @@ public class SimpleProps extends PropsBase {
 			result.put(key, this.get(key));
 		return result;
 	}
-	
+
 	public Iterable<String> keys() { return values.keySet(); }
 
 	public void put(String key, Object value) {
@@ -80,17 +81,23 @@ public class SimpleProps extends PropsBase {
 			else {
 				if (logger.isInfoEnabled())
 					logger.info("put {} = {}",getFullName()+"."+key,value);
-				values.put(key, value);
+				Object old=values.get(key);
+				if (old instanceof SimpleProps && value instanceof String)
+					((SimpleProps) old).stringValue=(String) value;
+				else
+					values.put(key, value);
 			}
 			return;
 		}
 		String keystart=key.substring(0,pos);
 		String keyremainder=key.substring(pos+1);
 		Object o=values.get(keystart);
-		if (o==null) {
+		if (o==null || o instanceof String) {
 			SimpleProps props=new SimpleProps(this,keystart);
 			values.put(keystart, props);
 			props.put(keyremainder, value);
+			if (o instanceof String)
+				props.stringValue= (String) o;
 		}
 		else if (o instanceof SimpleProps)
 			((SimpleProps)o).put(keyremainder, value);

@@ -1,7 +1,7 @@
 package org.kisst.gft.action;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 
@@ -20,8 +20,8 @@ public class EchoAction implements Action {
 	public boolean safeToRetry() { return true; }
 
 	public Object execute(Task task) {
-		FileTransferTask ft= (FileTransferTask) task;
-		String result=gft.processTemplate(template, ft.getActionContext(this));
+		BasicTask basictask= (BasicTask) task;
+		String result=gft.processTemplate(template, basictask.getActionContext(this));
 
 		System.out.println(result);
 		return null;

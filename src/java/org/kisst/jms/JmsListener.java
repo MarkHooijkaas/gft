@@ -40,9 +40,11 @@ public class JmsListener implements Runnable {
 	private MessageConsumer consumer = null;
 	private boolean browseMode=true; 
 	private boolean running=false;
+	private String messageId=null;
 
 
 	Thread thread;
+
 
 	public JmsListener(JmsSystem system, MessageHandler handler, Props props, Object context) {
 		this.system=system;
@@ -62,6 +64,17 @@ public class JmsListener implements Runnable {
 			this.forbiddenTimes=new TimeWindowList(timewindow);
 	}
 
+	public String getStatus() {
+		if (messageId!=null)
+			return "WORKING "+messageId;
+		if (! running)
+			return "STOPPED";
+		if (browseMode)
+			return "PAUZED";
+		return "LISTENING";
+	}
+	public boolean isActive() { return running && ! browseMode; }
+	
 	public String toString() { return "JmsListener("+queue+")"; }
 
 	public boolean isForbiddenTime() {
@@ -101,13 +114,19 @@ public class JmsListener implements Runnable {
 				Message message=null;
 				message = getMessage();
 				if (message!=null) {
-					if (logger.isDebugEnabled())
-						logger.debug("handling message {}",message.getJMSMessageID());
-					handleMessage(message);
+					try { 
+						this.messageId=message.getJMSMessageID();
+						if (logger.isDebugEnabled())
+							logger.debug("handling message {}",message.getJMSMessageID());
+						handleMessage(message);
+					}
+					finally {
+						this.messageId=null;
+					}
 				}
 			}
 		}
-		catch (Exception e) {
+		catch (Throwable e) { // DLL link errors
 			logger.error("Unrecoverable error during listening, stopped listening", e);
 			if (props.getBoolean("exitOnUnrecoverableListenerError", false))
 				System.exit(1);

@@ -4,32 +4,25 @@ import java.io.File;
 import java.util.regex.Pattern;
 
 import org.kisst.gft.FunctionalException;
-import org.kisst.gft.GftContainer;
-import org.kisst.gft.task.BasicTask;
-import org.kisst.util.XmlNode;
+import org.kisst.gft.task.JmsXmlTask;
+import org.kisst.jms.JmsMessage;
 
-public class FileTransferTask extends BasicTask {
+public class FileTransferTask extends JmsXmlTask {
 	public final Channel channel;
 	public final String srcpath;
 	public final String destpath;
-	public final XmlNode message;
-	public final String replyTo;
-	public final String correlationId;
 	public final String filename;
-	public final XmlNode content; 		
 	
 	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
 
-	public FileTransferTask(GftContainer gft, String data, String replyTo, String correlationId) {
-		super(gft, null); // TODO
-		message=new XmlNode(data);
-		content=message.getChild("Body").getChildren().get(0);
+	public FileTransferTask(Channel channel, JmsMessage msg) {
+		super(channel.gft, channel, msg); 
 		
-		this.channel=gft.getChannel(content.getChildText("kanaal"));
+		this.channel= channel; 
 		if (channel==null)
-			throw new FunctionalException("Could not find channel with name "+content.getChildText("kanaal"));
+			throw new FunctionalException("Could not find channel with name "+getContent().getChildText("kanaal"));
 		// Strip preceding slashes to normalize the path.
-		filename =content.getChildText("bestand");
+		filename =getContent().getChildText("bestand");
 
 		if ( filename.length()>1024)
 			throw new FunctionalException("Filename length should not exceed 1024 characters");
@@ -39,20 +32,12 @@ public class FileTransferTask extends BasicTask {
 			throw new FunctionalException("Filename ["+filename+"] is not allowed to contain .. pattern");
 		this.srcpath=channel.getSrcPath(filename, this);
 		this.destpath=channel.getDestPath(filename, this);
-		this.replyTo=replyTo;
-		this.correlationId=correlationId;
 		for (String key : channel.getContext().keys())
 			getContext().put(key,channel.getContext().get(key));
 	}
 
+	public String toString() { return "FileTransferTask("+srcpath+")"; } 
 	public void run() { channel.run(this); }
-	
-	private File  tempFile=null;
-	public File getTempFile() {
-		if (tempFile!=null)
-			return tempFile;
-		File nieuwTempDir = gft.createUniqueDir(channel.name);
-		tempFile = new File(nieuwTempDir,filename);
-		return tempFile;
-	}
+	public File getTempFile() { return getTempFile(filename); }
+
 }

@@ -1,8 +1,8 @@
 package org.kisst.gft.action;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.ssh.SshHost;
+import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
@@ -25,8 +25,8 @@ public class SshAction implements Action {
 	public boolean safeToRetry() { return safeToRetry; }
 
 	public Object execute(Task task) {
-		FileTransferTask ft= (FileTransferTask) task;
-		String command=gft.processTemplate(commandTemplate, ft.getActionContext(this));
+		BasicTask basictask= (BasicTask) task;
+		String command=gft.processTemplate(commandTemplate, basictask.getActionContext(this));
 		logger.info("ssh call to {} with command {}", host, command);
 		String result=host.call(command);
 		logger.info("ssh result {}",result);

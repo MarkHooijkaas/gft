@@ -3,7 +3,7 @@ package org.kisst.gft.action;
 import java.util.LinkedHashMap;
 
 import org.kisst.gft.RetryableException;
-import org.kisst.gft.filetransfer.BasicTaskDefinition;
+import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.Props;
@@ -11,6 +11,9 @@ import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ThreadUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.jamonapi.Monitor;
+import com.jamonapi.MonitorFactory;
 
 public class ActionList  implements Action {
 	final static Logger logger=LoggerFactory.getLogger(ActionList.class); 
@@ -31,7 +34,7 @@ public class ActionList  implements Action {
 		//this.actions=new Action[parts.length];
 		for (String name: parts) {
 			name=name.trim();
-			LayeredProps lprops=new LayeredProps();
+			LayeredProps lprops=new LayeredProps(taskdef.gft.props.getProps("gft.global"));
 			SimpleProps top=new SimpleProps();
 			top.put("action",taskdef.gft.actions.get(name));
 			top.put("channel",props);
@@ -40,7 +43,7 @@ public class ActionList  implements Action {
 				lprops.addLayer(props.getProps(name));
 			lprops.addLayer(taskdef.gft.actions.get(name));
 			lprops.addLayer(props);
-			lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
+			//lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
 				
 			Action a=taskdef.createAction(lprops);
 			if (a==null)
@@ -58,6 +61,10 @@ public class ActionList  implements Action {
 			boolean done=false;
 			int nrofTries=0;
 			while (! done){
+				Monitor mon1=MonitorFactory.start("action:"+name);
+				Monitor mon2=null;
+				String channelName= task.getTaskDefinition().getName();
+				mon2=MonitorFactory.start("channel:"+channelName+":action:"+name);
 				try {
 					a.execute(task);
 					done=true;
@@ -74,6 +81,8 @@ public class ActionList  implements Action {
 					}
 				}
 				finally {
+					mon1.stop();
+					if (mon2!=null) mon2.stop();
 					// This needs to be done here, otherwise the log_error will always log the log_error action as last action.
 					// TODO: a more elegant solution is desired
 					task.setLastAction(name);
@@ -83,5 +92,13 @@ public class ActionList  implements Action {
 			}
 		}
 		return null;
+	}
+	
+	public boolean contains(Class<?> cls) {
+		for (Action a: actions.values()) {
+			if (cls.isAssignableFrom(a.getClass()))
+				return true;
+		}
+		return false;
 	}
 }

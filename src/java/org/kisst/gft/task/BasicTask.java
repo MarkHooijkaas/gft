@@ -1,5 +1,7 @@
 package org.kisst.gft.task;
 
+import java.io.File;
+
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.props4j.SimpleProps;
@@ -7,7 +9,8 @@ import org.kisst.props4j.SimpleProps;
 
 public class BasicTask implements Task {
 	public final GftContainer gft;
-	public final TaskDefinition taskdef;
+	private final TaskDefinition taskdef;
+	
 	private final SimpleProps vars=new SimpleProps();;
 	private final SimpleProps context;
 
@@ -17,11 +20,14 @@ public class BasicTask implements Task {
 	
 	public BasicTask(GftContainer gft, TaskDefinition taskdef) {
 		this.gft = gft;
-		this.taskdef = taskdef;
 		this.context=gft.getContext().shallowClone();
 		this.context.put("var", vars);
 		this.context.put("task", this);
+		this.taskdef = taskdef;
 	}
+	public TaskDefinition getTaskDefinition() { return taskdef; }
+	public void run() { taskdef.run(this); }
+	
 	public void save() {  throw new RuntimeException("save not implemented yet"); }
 	public Status getStatus() { return status; }
 	public boolean isDone() { return status==DONE; }
@@ -40,5 +46,15 @@ public class BasicTask implements Task {
 		SimpleProps result=getContext().shallowClone();
 		result.put("action", action);
 		return result;
+	}
+	
+	public File getTempFile() { return getTempFile("file.tmp"); }
+	private File  tempFile=null;
+	protected File getTempFile(String filename) {
+		if (tempFile!=null)
+			return tempFile;
+		File nieuwTempDir = gft.createUniqueDir(taskdef.getName());
+		tempFile = new File(nieuwTempDir,filename);
+		return tempFile;
 	}
 }

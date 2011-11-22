@@ -11,51 +11,60 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
-import nl.duo.gft.odwek.ArchiveerChannel;
+import nl.duo.gft.odwek.ArchiveAction;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
+import org.kisst.gft.action.DecodeBase64ToFileAction;
+import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.HttpHost;
+import org.kisst.gft.action.LocalCommandAction;
+import org.kisst.gft.action.SendGftMessageAction;
+import org.kisst.gft.action.SendReplyAction;
 import org.kisst.gft.admin.AdminServer;
-import org.kisst.gft.filetransfer.Channel;
-import org.kisst.gft.filetransfer.FileTransferChannel;
-import org.kisst.gft.filetransfer.StartFileTransferTask;
+import org.kisst.gft.filetransfer.FileTransferModule;
 import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.WindowsSshHost;
+import org.kisst.gft.task.TaskDefinition;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MessageHandler;
 import org.kisst.jms.MultiListener;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
+import org.kisst.util.JamonUtil;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.TemplateUtil;
+import org.kisst.util.JamonUtil.JamonThread;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 
 
 public class GftContainer {
 	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
 
-	private final MessageHandler starter = new StartFileTransferTask(this); 
+	private final MessageHandler starter = new TaskStarter(this); 
 	private final AdminServer admin=new AdminServer(this);
 	public Props props;
 
-	public final HashMap<String, Channel> channels= new LinkedHashMap<String, Channel>();
+	public final HashMap<String, TaskDefinition> channels= new LinkedHashMap<String, TaskDefinition>();
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
 	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>();
 	public final HashMap<String, OnDemandHost>    ondemandhosts= new LinkedHashMap<String, OnDemandHost>();
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
+	private final HashMap<String, Module > channelTypes=new LinkedHashMap<String, Module>();
 	private final SimpleProps context = new SimpleProps();
 	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
 	private final String hostName;
 	private String tempdir;
 	private int dirVolgnr;
-
+	private JamonThread jamonThread;
+	
 	private final File configfile;
 
 	public JmsSystem queueSystem;
@@ -70,9 +79,9 @@ public class GftContainer {
 		return props.getProperty("project.version");
 	}
 	
-	public void addAction(String name, String classname) {
+	public void addAction(String name, Class<?> cls) {
 		SimpleProps props=new SimpleProps();
-		props.put("class", classname);
+		props.put("class", cls.getName());
 		actions.put(name, props);
 	}
 	public GftContainer(File configfile) {
@@ -80,20 +89,12 @@ public class GftContainer {
 		context.put("gft", this);
 	
 		this.configfile = configfile;
-		addAction("check_src","CheckSourceFile");
-		addAction("check_dest","CheckDestFileDoesNotExist");
-		addAction("copy","CopyFile");
-		addAction("check_copy","CheckCopiedFile");
-		addAction("remove","DeleteSourceFile");
-		addAction("notify","NotifyReceiver");
-		addAction("reply","SendReplyAction");
-		addAction("fix_permissions","FixPermissions");
-		addAction("sendGftMessage", "SendGftMessageAction");
-		addAction("localCommand", "LocalCommandAction");
-		addAction("archive", "ArchiveAction");
-		addAction("decode", "DecodeBase64ToFileAction");
-		addAction("sftpGet", "SftpGetAction");
-		addAction("delete_local_file", "DeleteLocalFileAction");
+		addAction("reply",SendReplyAction.class);
+		addAction("send_gft_message", SendGftMessageAction.class);
+		addAction("local_command", LocalCommandAction.class);
+		addAction("archive", ArchiveAction.class);
+		addAction("decode", DecodeBase64ToFileAction.class);
+		addAction("delete_local_file", DeleteLocalFileAction.class);
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
@@ -103,6 +104,7 @@ public class GftContainer {
 	public SimpleProps getContext() {return context; }
 	
 	public void init(Props props) {
+		this.jamonThread = new JamonThread(props);
 		this.props=props;
 		context.put("global", props.get("gft.global", null));
 		
@@ -168,13 +170,19 @@ public class GftContainer {
 		Props channelProps=props.getProps("gft.channel");
 		for (String name: channelProps.keys()) {
 			Props p=channelProps.getProps(name);
-			String type2=p.getString("type",null);
-			if (type2==null) 
-				channels.put(name, new FileTransferChannel(this, p));
-			else if ("ArchiveerChannel".equals(type2))
-				channels.put(name, new ArchiveerChannel(this, p));
-			else 
-				throw new RuntimeException("Channel type in channel "+name+" veld type moet leeg zijn of ArchiveerChannel, niet "+type2);
+			String type2=p.getString("type","FileTransferChannel");
+			Module mod=channelTypes.get(type2);
+			if (mod==null) {
+				String typenames="";
+				String komma="";
+				for (String name2: channelTypes.keySet()) {
+					typenames+=komma+name2;
+					komma=",";
+				}
+				throw new RuntimeException("Unknown Channel type in channel "+name+": "+type2+" only the following types are allowed "+typenames);
+			}
+			TaskDefinition channel = mod.createDefinition(type2, p);
+			channels.put(name, channel);
 		}
 
 		if (props.hasKey("gft.poller")) {
@@ -200,7 +208,7 @@ public class GftContainer {
 				logger.info("Listener {}\t{}",name,listeners.get(name));
 		}
 	}
-	public Channel getChannel(String name) { return channels.get(name); }
+	public TaskDefinition getTaskDefinition(String name) { return channels.get(name); }
 	public HttpHost getHost(String name) { return httphosts.get(name); }
 	public String processTemplate(Object template, Object context) { return TemplateUtil.processTemplate(template, context); }
 
@@ -221,8 +229,14 @@ public class GftContainer {
 	public void join() {
 		admin.join();
 	}
-
+	public void reset() {
+		JamonUtil.jamonLog(props, "RESET called, dumping all statistics");
+		jamonThread.reset();
+	}
+	
 	public void stop() {
+		JamonUtil.jamonLog(props, "STOP called, dumping all statistics");
+		jamonThread.stop();
 		for (MultiListener q : listeners.values() )
 			q.stop();
 		for (Poller p : pollers.values())
@@ -232,6 +246,7 @@ public class GftContainer {
 	}
 
 	private void addDynamicModules(Props props) {
+		modules.put("filetransfer", new FileTransferModule(this, props));
 		Object moduleProps = props.get("gft.modules",null);
 		if (! (moduleProps instanceof Props))
 			return;
@@ -267,5 +282,11 @@ public class GftContainer {
 		file.mkdirs();
 		return file;
 		
+	}
+
+	public void registerDefinitionType(String name, Module module) {
+		if (channelTypes.get(name)!=null)
+			throw new RuntimeException("TaskDefinitionType "+name+" is already registerd to module "+channelTypes.get(name)+" when trying to register it for module "+module);
+		channelTypes.put(name, module);
 	}
 }
