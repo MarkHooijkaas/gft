@@ -49,7 +49,6 @@ public class BasicTaskDefinition implements TaskDefinition {
 			action.execute(task);
 			if (endAction!=null)
 				endAction.execute(task);
-			task.setStatus(Task.DONE);
 		}
 		catch (RuntimeException e) {
 			errorCount++;
