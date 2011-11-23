@@ -15,6 +15,7 @@ import nl.duo.gft.odwek.ArchiveAction;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
+import org.kisst.gft.action.CreateDasfPdf;
 import org.kisst.gft.action.DecodeBase64ToFileAction;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.HttpHost;
@@ -93,6 +94,7 @@ public class GftContainer {
 		addAction("send_gft_message", SendGftMessageAction.class);
 		addAction("local_command", LocalCommandAction.class);
 		addAction("archive", ArchiveAction.class);
+		addAction("create_pdf_dasf", CreateDasfPdf.class);
 		addAction("decode", DecodeBase64ToFileAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
 		try {
