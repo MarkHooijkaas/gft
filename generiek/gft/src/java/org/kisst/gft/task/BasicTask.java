@@ -39,6 +39,7 @@ public class BasicTask implements Task {
 	public String getLastAction() { return lastAction; }
 	public void setLastAction(String act) {	this.lastAction=act; }
 
+	public Object getVar(String name) { return vars.get(name); }
 	public void setVar(String name, Object value) { vars.put(name, value); }
 	public SimpleProps getContext() { return context; }
 	
