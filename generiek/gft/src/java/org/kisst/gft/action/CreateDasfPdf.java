@@ -19,17 +19,13 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.io.StringWriter;
 import java.util.HashMap;
-import java.util.Map;
 
-import org.apache.log4j.chainsaw.Main;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.domain.Aanvraag;
 import org.kisst.gft.action.domain.Opleiding;
@@ -43,10 +39,10 @@ import org.slf4j.LoggerFactory;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
-import com.lowagie.text.Paragraph;
+import com.lowagie.text.html.HtmlParser;
+import com.lowagie.text.html.simpleparser.HTMLWorker;
 import com.lowagie.text.pdf.PdfWriter;
 
-import freemarker.template.TemplateException;
 import freemarker.template.utility.StringUtil;
 
 public class CreateDasfPdf implements Action {
@@ -114,11 +110,11 @@ public class CreateDasfPdf implements Action {
 		// we'll create the file in memory
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PdfWriter.getInstance(document, baos);
-		// step 3
 		document.open();
-		// step 4
-		document.add(new Paragraph(text));
-		// step 5
+		document.setMargins(10f, 10f, 10f, 10f);
+		
+		HTMLWorker htmlWorker = new HTMLWorker(document);
+		htmlWorker.parse(new StringReader(text));
 		document.close();
 
 		// let's write the file in memory to a file anyway
