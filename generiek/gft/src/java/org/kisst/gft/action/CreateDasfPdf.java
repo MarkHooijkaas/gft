@@ -71,6 +71,7 @@ public class CreateDasfPdf implements Action {
 		Persoon persoon= new Persoon();
 		persoon.naam=velden.get("11345");
 		persoon.voornamen=velden.get("11348");
+		persoon.geslacht=velden.get("11341");
 		
 		Woonadres woonadres= new Woonadres();
 		woonadres.regel1=velden.get("11347");
@@ -111,7 +112,7 @@ public class CreateDasfPdf implements Action {
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		PdfWriter.getInstance(document, baos);
 		document.open();
-		document.setMargins(10f, 10f, 10f, 10f);
+		document.setMargins(20f, 20f, 20f, 20f);
 		
 		HTMLWorker htmlWorker = new HTMLWorker(document);
 		htmlWorker.parse(new StringReader(text));
