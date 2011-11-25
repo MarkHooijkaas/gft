@@ -19,18 +19,18 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.HashMap;
+
+import nl.duo.parser.FieldGroup;
+import nl.duo.parser.HierarchicalPipedMessageParser;
+import nl.duo.parser.PipedMessageParser;
+import nl.duo.wsf.domain.Bericht;
+import nl.duo.wsf.mapper.FieldGroupToBerichtMapper;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.action.domain.Aanvraag;
-import org.kisst.gft.action.domain.Opleiding;
-import org.kisst.gft.action.domain.Persoon;
-import org.kisst.gft.action.domain.Woonadres;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
@@ -39,11 +39,8 @@ import org.slf4j.LoggerFactory;
 
 import com.lowagie.text.Document;
 import com.lowagie.text.DocumentException;
-import com.lowagie.text.html.HtmlParser;
 import com.lowagie.text.html.simpleparser.HTMLWorker;
 import com.lowagie.text.pdf.PdfWriter;
-
-import freemarker.template.utility.StringUtil;
 
 public class CreateDasfPdf implements Action {
 	private final static Logger logger = LoggerFactory
@@ -59,51 +56,25 @@ public class CreateDasfPdf implements Action {
 	@Override
 	public Object execute(Task task) {
 		FileTransferTask ft = (FileTransferTask) task;
-		String pipe = ft.getContent().getChildText("bestandsinhoud");
-		pipe = StringUtil.chomp(pipe);
-		pipe = pipe.trim();
-		logger.info("pipe {}", pipe);
+		PipedMessageParser pipedMessageParser = new HierarchicalPipedMessageParser();
+		FieldGroup fieldGroup = pipedMessageParser.parseMessage(
+				ft.getContent().getChildText("bestandsinhoud"));
 
-		HashMap<String, String> velden = parseStrings(pipe);
-		logger.info("velden {}", velden.toString());
-		HashMap<Object, Object> context = new HashMap<Object, Object>();
-		
-		Persoon persoon= new Persoon();
-		persoon.naam=velden.get("11345");
-		persoon.voornamen=velden.get("11348");
-		persoon.geslacht=velden.get("11341");
-		
-		Woonadres woonadres= new Woonadres();
-		woonadres.regel1=velden.get("11347");
-		
-		Opleiding opleiding = new Opleiding();
-		opleiding.soortStudie =velden.get("11349");
-		
-		Aanvraag aanvraag = new Aanvraag();
-		aanvraag.soortAanvraag =velden.get("11351");
-		
-		//context.put("naam", velden.get("11345"));
-		context.put("persoon", persoon);
-		context.put("woonadres", woonadres);
-		context.put("aanvraag", aanvraag);
-		context.put("opleiding", opleiding);
-		context.put("documentnummer", velden.get("11346"));
-		logger.info("context {}", context.toString());
-		String text = gft.processTemplate(templateName, context);
+		Bericht bericht = FieldGroupToBerichtMapper.map(fieldGroup);
+		String text = gft.processTemplate(templateName, bericht);
 		try {
 			MaakPdf(text, ft);
 		} catch (DocumentException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Fout tijdens creeeren PDF, " + e.getMessage());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			logger.error("Fout tijdens creeeren PDF, " + e.getMessage());
 		}
-		
+
 		return null;
 	}
 
-	private void MaakPdf(String text, FileTransferTask ft) throws DocumentException, IOException {
+	private void MaakPdf(String text, FileTransferTask ft)
+			throws DocumentException, IOException {
 		System.out.println("Create PDF eerste stap");
 		// step 1
 		Document document = new Document();
@@ -127,16 +98,5 @@ public class CreateDasfPdf implements Action {
 	@Override
 	public boolean safeToRetry() {
 		return false;
-	}
-
-	private static HashMap<String, String> parseStrings(String bericht) {
-		HashMap<String, String> result = new HashMap<String, String>();
-		String[] parts = bericht.split("[|]");
-		for (int i = 0; i < parts.length; i++) {
-			String key = parts[i].substring(0, 5);
-			String value = parts[i].substring(5);
-			result.put(key, value);
-		}
-		return result;
 	}
 }
