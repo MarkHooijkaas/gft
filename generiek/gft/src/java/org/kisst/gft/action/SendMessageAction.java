@@ -50,11 +50,15 @@ public class SendMessageAction  implements Action {
 	public boolean safeToRetry() { return safeToRetry; }
         
 	public Object execute(Task task) {
-		BasicTask basictask= (BasicTask) task;
 		logger.info("Sending message to queue {}",queue);
 		
-		String body=gft.processTemplate(templateName, basictask.getActionContext(this));
+		String body=getBody(task);
 		qmgr.getQueue(queue).send(body);
 		return null;
+	}
+	
+	protected String getBody(Task task) {
+		BasicTask basictask= (BasicTask) task;
+		return gft.processTemplate(templateName, basictask.getActionContext(this));
 	}
 }
