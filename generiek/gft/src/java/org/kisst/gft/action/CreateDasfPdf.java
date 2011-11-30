@@ -61,6 +61,9 @@ public class CreateDasfPdf implements Action {
 				ft.getContent().getChildText("bestandsinhoud"));
 
 		Bericht bericht = FieldGroupToBerichtMapper.map(fieldGroup);
+		
+		ft.setVar("bericht", bericht);
+		
 		String text = gft.processTemplate(templateName, bericht);
 		try {
 			MaakPdf(text, ft);
