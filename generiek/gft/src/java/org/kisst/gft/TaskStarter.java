@@ -22,10 +22,7 @@ public class TaskStarter implements MessageHandler {
 	public boolean handle(JmsMessage msg) {
 		Task task;
 		try {
-			XmlNode message=new XmlNode(msg.getData());
-			XmlNode content=message.getChild("Body").getChildren().get(0);
-			JmsTaskDefinition definition=(JmsTaskDefinition) gft.getTaskDefinition(content.getChildText("kanaal"));
-
+			JmsTaskDefinition definition = determineTaskDefinition(msg);
 			task=definition.createNewTask(msg);
 		}
 		catch (RuntimeException e) {
@@ -45,6 +42,16 @@ public class TaskStarter implements MessageHandler {
 		//if (! t.isDone())
 		//	t.save();
 		return true;
+	}
+	
+	protected JmsTaskDefinition determineTaskDefinition(JmsMessage msg) {
+		String txt = msg.getData().trim();
+		if (txt.startsWith("0"))
+			return null; // TODO
+		XmlNode message=new XmlNode(txt);
+		XmlNode content=message.getChild("Body").getChildren().get(0);
+		JmsTaskDefinition definition=(JmsTaskDefinition) gft.getTaskDefinition(content.getChildText("kanaal"));
+		return definition;
 	}
 
 }
