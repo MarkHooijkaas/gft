@@ -19,10 +19,10 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
+import nl.duo.gft.filetransfer.DuoFileTransferChannel;
 import nl.duo.gft.odwek.OnDemandChannel;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileTransferChannel;
 import org.kisst.gft.task.JmsXmlTask;
 import org.kisst.gft.task.SoapTask;
 import org.kisst.gft.task.Task;
@@ -58,7 +58,7 @@ public class SendReplyAction  implements Action {
 			logger.info("Sending reply with correlationId {} to queue {}",jmstask.getJmsMessage().getCorrelationId(), queue);
 		
 		XmlNode msg=ft.getMessage().clone();
-		if (task.getTaskDefinition() instanceof FileTransferChannel)
+		if (task.getTaskDefinition() instanceof DuoFileTransferChannel)
 			msg.getChild("Body/transferFile").element.setName("transferFileResponse");
 		else if (task.getTaskDefinition() instanceof OnDemandChannel)
 			msg.getChild("Body/archiveerBestand").element.setName("archiveerBestandResponse");

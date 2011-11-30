@@ -172,7 +172,7 @@ public class GftContainer {
 		Props channelProps=props.getProps("gft.channel");
 		for (String name: channelProps.keys()) {
 			Props p=channelProps.getProps(name);
-			String type2=p.getString("type","FileTransferChannel");
+			String type2=p.getString("type","Default");
 			Module mod=channelTypes.get(type2);
 			if (mod==null) {
 				String typenames="";

@@ -7,7 +7,7 @@ import org.kisst.gft.FunctionalException;
 import org.kisst.gft.task.JmsXmlTask;
 import org.kisst.jms.JmsMessage;
 
-public class FileTransferTask extends JmsXmlTask {
+public abstract class FileTransferTask extends JmsXmlTask {
 	public final Channel channel;
 	public final String srcpath;
 	public final String destpath;
@@ -19,10 +19,10 @@ public class FileTransferTask extends JmsXmlTask {
 		super(channel.gft, channel, msg); 
 		
 		this.channel= channel; 
-		if (channel==null)
-			throw new FunctionalException("Could not find channel with name "+getContent().getChildText("kanaal"));
+		//if (channel==null)
+		//	throw new FunctionalException("Could not find channel with name "+getContent().getChildText("kanaal"));
 		// Strip preceding slashes to normalize the path.
-		filename =getContent().getChildText("bestand");
+		this.filename = getFilename(); 
 
 		if ( filename.length()>1024)
 			throw new FunctionalException("Filename length should not exceed 1024 characters");
@@ -35,6 +35,8 @@ public class FileTransferTask extends JmsXmlTask {
 		for (String key : channel.getContext().keys())
 			getContext().put(key,channel.getContext().get(key));
 	}
+
+	abstract protected  String getFilename();
 
 	public String toString() { return "FileTransferTask("+srcpath+")"; } 
 	public void run() { channel.run(this); }

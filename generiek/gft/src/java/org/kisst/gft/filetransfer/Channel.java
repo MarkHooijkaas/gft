@@ -7,13 +7,12 @@ import org.kisst.gft.action.DecodeBase64ToFileAction;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.task.JmsTaskDefinition;
 import org.kisst.gft.task.Task;
-import org.kisst.jms.JmsMessage;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Channel extends JmsTaskDefinition {
+public abstract class Channel extends JmsTaskDefinition {
 	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
 
 	public final SshFileServer src;
@@ -89,9 +88,6 @@ public class Channel extends JmsTaskDefinition {
 	
 	public String getSrcPath(String file, FileTransferTask ft) { return calcPath(srcdir, file, ft); }
 	public String getDestPath(String file, FileTransferTask ft) {return calcPath(destdir, file, ft);	}
-
-	
-	public Task createNewTask(JmsMessage msg) { return new FileTransferTask(this, msg); }
 	
 	@Override
 	public void run(Task task) {
