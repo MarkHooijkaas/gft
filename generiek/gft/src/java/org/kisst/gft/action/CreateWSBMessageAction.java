@@ -65,6 +65,7 @@ public class CreateWSBMessageAction implements Action {
 
 		String text = gft.processTemplate(templateName, plexBericht);
 		qmgr.getQueue(queue).send(text);
+		logger.debug("executed CreateWSBMessageAction");
 		return null;
 	}
 	

@@ -24,9 +24,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 
-import nl.duo.parser.FieldGroup;
-import nl.duo.parser.HierarchicalPipedMessageParser;
-import nl.duo.parser.PipedMessageParser;
+import nl.duo.gft.parser.FieldGroup;
+import nl.duo.gft.parser.HierarchicalPipedMessageParser;
+import nl.duo.gft.parser.PipedMessageParser;
 import nl.duo.wsf.domain.Bericht;
 import nl.duo.wsf.mapper.FieldGroupToBerichtMapper;
 
