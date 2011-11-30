@@ -27,7 +27,6 @@ import nl.duo.wsf.mapper.BerichtToPlexHashMapMapper;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileTransferTask;
-import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
 import org.kisst.jms.JmsSystem;
 import org.kisst.props4j.Props;
