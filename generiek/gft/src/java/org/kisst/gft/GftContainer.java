@@ -11,18 +11,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
-import nl.duo.gft.odwek.ArchiveAction;
-import nl.duo.gft.odwek.CreateDasfPdf;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
-import org.kisst.gft.action.DecodeBase64ToFileAction;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.action.LocalCommandAction;
-import org.kisst.gft.action.SendGftMessageAction;
-import org.kisst.gft.action.SendReplyAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.filetransfer.FileTransferModule;
 import org.kisst.gft.ssh.As400SshHost;
@@ -90,12 +85,7 @@ public class GftContainer {
 		context.put("gft", this);
 	
 		this.configfile = configfile;
-		addAction("reply",SendReplyAction.class);
-		addAction("send_gft_message", SendGftMessageAction.class);
 		addAction("local_command", LocalCommandAction.class);
-		addAction("archive", ArchiveAction.class);
-		addAction("create_pdf_dasf", CreateDasfPdf.class);
-		addAction("decode", DecodeBase64ToFileAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();

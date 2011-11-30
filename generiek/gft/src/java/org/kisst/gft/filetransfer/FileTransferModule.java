@@ -1,7 +1,5 @@
 package org.kisst.gft.filetransfer;
 
-import nl.duo.gft.filetransfer.NotifyReceiver;
-
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.Module;
 import org.kisst.gft.filetransfer.action.CheckCopiedFile;
@@ -32,7 +30,6 @@ public class FileTransferModule implements Module {
 		gft.addAction("copy",CopyFile.class);
 		gft.addAction("check_copy",CheckCopiedFile.class);
 		gft.addAction("remove",DeleteSourceFile.class);
-		gft.addAction("notify",NotifyReceiver.class);
 		gft.addAction("fix_permissions",FixPermissions.class);
 		gft.addAction("sftp_get", SftpGetAction.class);
 		gft.addAction("sftp_put", SftpPutAction.class);
