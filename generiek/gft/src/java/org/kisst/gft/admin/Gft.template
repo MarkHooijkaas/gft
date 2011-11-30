@@ -26,8 +26,10 @@
 </table> 
 
 <h2>Logging</h2> 
-<a href=logging/days=1>View Logging in LOGB</a>
-
+<ul>
+<li><a href=logging/days=1>View ALL Logging in LOGB</a></li>
+<li><a href=logging/days=1&level=error>View ERROR Logging in LOGB</a></li>
+</ul>
 
 <h2>Pollers</h2> 
 <table> 
