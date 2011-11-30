@@ -1,12 +1,12 @@
 package org.kisst.gft;
 
+import java.util.ArrayList;
+
 import nl.duo.gft.LogUtil;
 
-import org.kisst.gft.task.JmsTaskDefinition;
-import org.kisst.gft.task.Task;
+import org.kisst.gft.task.JmsTask;
 import org.kisst.jms.JmsMessage;
 import org.kisst.jms.MessageHandler;
-import org.kisst.util.XmlNode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,19 +16,17 @@ import com.jamonapi.MonitorFactory;
 public class TaskStarter implements MessageHandler {
 	final static Logger logger=LoggerFactory.getLogger(TaskStarter.class); 
 
-	private final GftContainer gft;
+	public static interface JmsTaskCreator {
+		public JmsTask createJmsTask(JmsMessage msg);
+	}
 	
-	public TaskStarter(GftContainer gft) { this.gft=gft; }
+	private final ArrayList<JmsTaskCreator> creators = new ArrayList<JmsTaskCreator>();
+	
+	public void appendCreator(JmsTaskCreator creator) { creators.add(creator); }
+	
 	public boolean handle(JmsMessage msg) {
-		Task task;
-		try {
-			JmsTaskDefinition definition = determineTaskDefinition(msg);
-			task=definition.createNewTask(msg);
-		}
-		catch (RuntimeException e) {
-			LogUtil.log("error", "jms", "handle", "exception", e.getMessage());
-			throw e;
-		}
+		JmsTask task=createJmsTask(msg);
+		
 		if (logger.isInfoEnabled())
 			logger.info(task+" started");
 		
@@ -43,15 +41,20 @@ public class TaskStarter implements MessageHandler {
 		//	t.save();
 		return true;
 	}
-	
-	protected JmsTaskDefinition determineTaskDefinition(JmsMessage msg) {
-		String txt = msg.getData().trim();
-		if (txt.startsWith("0"))
-			return null; // TODO
-		XmlNode message=new XmlNode(txt);
-		XmlNode content=message.getChild("Body").getChildren().get(0);
-		JmsTaskDefinition definition=(JmsTaskDefinition) gft.getTaskDefinition(content.getChildText("kanaal"));
-		return definition;
-	}
 
+	protected JmsTask createJmsTask(JmsMessage msg) {
+		for (JmsTaskCreator c : creators) {
+			try {
+				JmsTask task = c.createJmsTask(msg);
+				if (task !=null)
+					return task;
+			}
+			catch (RuntimeException e) {
+				LogUtil.log("error", "jms", "handle", "exception", e.getMessage());
+				throw e;
+			}
+		}	
+		LogUtil.log("error", "jms", "handle", "exception", "could not determine task type of message "+msg);
+		throw new RuntimeException("could not determine task type of message "+msg);
+	}
 }

@@ -16,6 +16,7 @@ import nl.duo.gft.odwek.CreateDasfPdf;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
+import org.kisst.gft.TaskStarter.JmsTaskCreator;
 import org.kisst.gft.action.DecodeBase64ToFileAction;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.HttpHost;
@@ -30,7 +31,6 @@ import org.kisst.gft.ssh.WindowsSshHost;
 import org.kisst.gft.task.TaskDefinition;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
-import org.kisst.jms.MessageHandler;
 import org.kisst.jms.MultiListener;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
@@ -47,7 +47,7 @@ import org.slf4j.LoggerFactory;
 public class GftContainer {
 	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
 
-	private final MessageHandler starter = new TaskStarter(this); 
+	private final TaskStarter starter = new TaskStarter(); 
 	private final AdminServer admin=new AdminServer(this);
 	public Props props;
 
@@ -291,4 +291,6 @@ public class GftContainer {
 			throw new RuntimeException("TaskDefinitionType "+name+" is already registerd to module "+channelTypes.get(name)+" when trying to register it for module "+module);
 		channelTypes.put(name, module);
 	}
+	
+	public void appendJmsTaskCreator(JmsTaskCreator creator) {starter.appendCreator(creator); }
 }
