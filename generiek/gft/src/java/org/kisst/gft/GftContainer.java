@@ -12,10 +12,10 @@ import java.util.LinkedHashMap;
 import java.util.Properties;
 
 import nl.duo.gft.odwek.ArchiveAction;
+import nl.duo.gft.odwek.CreateDasfPdf;
 import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
-import org.kisst.gft.action.CreateDasfPdf;
 import org.kisst.gft.action.DecodeBase64ToFileAction;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.HttpHost;
