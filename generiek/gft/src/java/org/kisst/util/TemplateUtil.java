@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
@@ -25,22 +24,24 @@ public class TemplateUtil {
 
 	public static String processTemplate(String templateText, Object context) {
 		try {
-			StringWriter out=new StringWriter();
-			Template templ;
-			templ=new Template("InternalString", new StringReader(templateText),freemarkerConfig);
-			templ.process(context, out);
-			return out.toString();
+			Template templ = new Template("InternalString", new StringReader(templateText),freemarkerConfig);
+			return processTemplate(templ, context);
 		}
 		catch (IOException e) { throw new RuntimeException(e);} 
-		catch (TemplateException e) {  throw new RuntimeException(e);}
 	}
 
 	
 	public static String processTemplate(File template, Object context) {
 		try {
+			Template templ = new Template(((File) template).getName(), new FileReader(template),freemarkerConfig);
+			return processTemplate(templ, context);
+		}
+		catch (IOException e) { throw new RuntimeException(e);} 
+	}
+	
+	public static String processTemplate(Template templ, Object context) {
+		try {
 			StringWriter out=new StringWriter();
-			Template templ;
-			templ=new Template(((File) template).getName(), new FileReader(template),freemarkerConfig);
 			templ.process(context, out);
 			return out.toString();
 		}
