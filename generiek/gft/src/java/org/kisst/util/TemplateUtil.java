@@ -23,16 +23,24 @@ public class TemplateUtil {
 		freemarkerConfig.setObjectWrapper(wrapper);
 	}
 
-	public static String processTemplate(Object template, Object context) {
+	public static String processTemplate(String templateText, Object context) {
 		try {
 			StringWriter out=new StringWriter();
 			Template templ;
-			if (template instanceof File)
-				templ=new Template(((File) template).getName(), new FileReader((File) template),freemarkerConfig);
-			else if (template instanceof String)
-				templ=new Template("InternalString", new StringReader((String) template),freemarkerConfig);
-			else
-				throw new RuntimeException("Unsupported template type "+template.getClass());
+			templ=new Template("InternalString", new StringReader(templateText),freemarkerConfig);
+			templ.process(context, out);
+			return out.toString();
+		}
+		catch (IOException e) { throw new RuntimeException(e);} 
+		catch (TemplateException e) {  throw new RuntimeException(e);}
+	}
+
+	
+	public static String processTemplate(File template, Object context) {
+		try {
+			StringWriter out=new StringWriter();
+			Template templ;
+			templ=new Template(((File) template).getName(), new FileReader(template),freemarkerConfig);
 			templ.process(context, out);
 			return out.toString();
 		}
