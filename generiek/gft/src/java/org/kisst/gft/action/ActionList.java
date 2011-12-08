@@ -87,7 +87,7 @@ public class ActionList  implements Action {
 					// TODO: a more elegant solution is desired
 					task.setLastAction(name);
 				}
-				if (logger.isInfoEnabled())
+				if (done && logger.isInfoEnabled())
 					logger.info("action "+name+" succesful");
 			}
 		}
