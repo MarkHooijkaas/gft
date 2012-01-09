@@ -13,6 +13,8 @@ import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import nl.duo.gft.util.PlexUtil;
+
 import org.kisst.gft.FunctionalException;
 import org.kisst.gft.RetryableException;
 import org.kisst.props4j.Props;
@@ -273,6 +275,31 @@ public class JmsListener implements Runnable {
 		catch (JMSException e) { throw new RuntimeException(e);}
 		return true;
 	}
+	
+	
+	private static String getMQSignal(Message msg) {
+		String label="MQSignal";
+		try {
+			if (msg==null || ! (msg instanceof TextMessage))
+				return null;
+			String body = ((TextMessage)msg).getText();
+			return PlexUtil.getField(body, label, null);
+		}
+		catch (JMSException e) { throw new RuntimeException(e);}
+		
+	}
+	
+	// TODO: The next two methods are safer than the current checks, but this is not tested yet
+	static public boolean isStopMessageNew(Message msg) {
+		String mqSignal=getMQSignal(msg);
+		return "Stop".equals(mqSignal);
+	}
+	static public boolean isStartMessageNew(Message msg) {
+		String mqSignal=getMQSignal(msg);
+		return "Start".equals(mqSignal);
+	}
+
+	
 	static public boolean isStopMessage(Message msg) {
 		try {
 			if (msg==null || ! (msg instanceof TextMessage))
