@@ -47,6 +47,27 @@ public class FileUtil {
 		}
 	}
 
+	// The method java.io.File.canRead(), does not always give the correct answer under windows.
+	// (I had a case where read access was explicitely forbidden and granted, but traversel was OK). 
+	public static boolean canReallyRead(File f) {
+		if (! f.canRead())
+			return false;
+		FileInputStream inp = null;
+		try {
+			inp =new FileInputStream(f);
+			return true;
+		} 
+		catch (java.io.IOException e) { return false;}
+		finally {
+			try {
+				if (inp!=null) 
+					inp.close();
+			}
+			catch (java.io.IOException e) { throw new RuntimeException(e);  }
+		}
+	}
+
+	
 	public static void load(Properties props, String filename) {
 		FileInputStream inp = null;
 		try {

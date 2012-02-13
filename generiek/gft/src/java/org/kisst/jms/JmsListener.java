@@ -361,9 +361,11 @@ public class JmsListener implements Runnable {
 
 
 	private void handleMessage(Message message) {
+		boolean messageHandled = false;
 		try {
 			logger.debug("Handling {}",message.getJMSMessageID());
 			handler.handle(new JmsMessage(message)); 
+			messageHandled = true;
 		}
 		catch (Exception e) {
 			try {
@@ -384,11 +386,14 @@ public class JmsListener implements Runnable {
 
 				producer.close();
 				logger.info("message send to queue {}",queue);
+				messageHandled=true;
 			}
 			catch (JMSException e2) {throw new RuntimeException(e2); }
 		}
 		finally {
-			if (message!=null)
+			// The check for messageHandled is necessary because a Throwable error will not put the message on the error queue
+			// so the message should not be committed in this case.
+			if (message!=null && messageHandled)
 				try {
 					logger.debug("committing session with message {}", message.getJMSMessageID());
 					session.commit();
