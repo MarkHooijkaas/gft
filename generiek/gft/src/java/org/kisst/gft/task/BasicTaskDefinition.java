@@ -12,7 +12,7 @@ import org.kisst.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BasicTaskDefinition implements TaskDefinition {
+public abstract class BasicTaskDefinition implements TaskDefinition {
 	final static Logger logger=LoggerFactory.getLogger(BasicTaskDefinition.class); 
 
 	public final GftContainer gft;

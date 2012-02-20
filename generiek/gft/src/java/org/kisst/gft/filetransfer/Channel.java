@@ -1,5 +1,7 @@
 package org.kisst.gft.filetransfer;
 
+import java.io.PrintWriter;
+
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.action.ActionList;
@@ -88,4 +90,24 @@ public abstract class Channel extends JmsTaskDefinition {
 		super.run(task);
 	}
 	
+	
+	public void writeHtml(PrintWriter out) {
+		out.println("<h1>Channel "+getName()+"</h1>");
+		out.println("<h2>Directories</h2>");
+		out.println("<ul>");
+		out.println("<li>FROM: <a href=\"/dir/"+src.getSshHost().name+"/"+ srcdir +"\">"+src.getSshHost().name +"/"+src.getBasePath() + srcdir +"</a>");
+		out.println("<li>TO:   <a href=\"/dir/"+dest.getSshHost().name+"/"+destdir+"\">"+dest.getSshHost().name+"/"+dest.getBasePath()+ destdir+"</a>");
+		out.println("</ul>");
+
+		out.println("<h2>Logging</h2>");
+		out.println("<ul>");
+		out.println("<li><a href=\"/logging/days=1&channel="+getName()+"\">ALL Logging</a>");
+		out.println("<li><a href=\"/logging/days=1&channel="+getName()+"&level=error\">ERROR Logging</a>");
+		out.println("</ul>");
+		
+		out.println("<h2>Config</h2>");
+		out.println("<pre>");
+		out.println(props);
+		out.println("</pre>");
+	}
 }
