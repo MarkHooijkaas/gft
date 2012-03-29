@@ -4,16 +4,14 @@ import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
-import org.kisst.gft.action.ActionList;
 import org.kisst.gft.ssh.SshFileServer;
-import org.kisst.gft.task.JmsTaskDefinition;
+import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
-import org.kisst.props4j.SimpleProps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class Channel extends JmsTaskDefinition {
+public abstract class Channel extends BasicTaskDefinition {
 	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
 
 	public final SshFileServer src;
@@ -23,7 +21,7 @@ public abstract class Channel extends JmsTaskDefinition {
 	public final String mode;
 
 	public Channel(GftContainer gft, Props props) {
-		super(gft, props);
+		super(gft, props, null);
 		getContext().put("channel", this);
 		
 		this.src=gft.sshhosts.get(props.getString("src.host"));
@@ -44,17 +42,6 @@ public abstract class Channel extends JmsTaskDefinition {
 		this.mode=props.getString("mode", "push");
 		if (!("pull".equals(mode) || "push".equals(mode)))
 			throw new RuntimeException("mode should be push or pull, not "+mode);
-		
-		SimpleProps actprops=new SimpleProps();
-
-		actprops.put("actions", "log_error");
-		this.errorAction=new ActionList(this, actprops);
-
-		actprops.put("actions", "log_start");
-		this.startAction=new ActionList(this, actprops);
-		
-		actprops.put("actions", "log_completed");
-		this.endAction=new ActionList(this, actprops);
 	}
 	
 

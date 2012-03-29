@@ -34,6 +34,17 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 		this.props=props;
 		this.name=props.getLocalName();
 		this.action=new ActionList(this, props, defaultActions);
+		
+		SimpleProps actprops=new SimpleProps();
+
+		actprops.put("actions", "log_error");
+		this.errorAction=new ActionList(this, actprops);
+
+		actprops.put("actions", "log_start");
+		this.startAction=new ActionList(this, actprops);
+		
+		actprops.put("actions", "log_completed");
+		this.endAction=new ActionList(this, actprops);
 	}
 
 	public String getName() { return name; }

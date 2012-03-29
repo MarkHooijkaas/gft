@@ -4,10 +4,12 @@ import java.io.File;
 import java.util.regex.Pattern;
 
 import org.kisst.gft.FunctionalException;
+import org.kisst.gft.filetransfer.action.DestinationFile;
+import org.kisst.gft.filetransfer.action.SourceFile;
 import org.kisst.gft.task.JmsXmlTask;
 import org.kisst.jms.JmsMessage;
 
-public abstract class FileTransferTask extends JmsXmlTask {
+public abstract class FileTransferTask extends JmsXmlTask implements SourceFile, DestinationFile {
 	public final Channel channel;
 	public final String srcpath;
 	public final String destpath;
@@ -41,5 +43,10 @@ public abstract class FileTransferTask extends JmsXmlTask {
 	public String toString() { return "FileTransferTask("+srcpath+")"; } 
 	public void run() { channel.run(this); }
 	public File getTempFile() { return getTempFile(filename); }
+
+	@Override public String getSourceFilePath() { return srcpath; }
+	@Override public FileServer getSourceFileServer() { return channel.src;}
+	@Override public String getDestinationFilePath() { return destpath; }
+	@Override public FileServer getDestinationFileServer() { return channel.dest;}
 
 }
