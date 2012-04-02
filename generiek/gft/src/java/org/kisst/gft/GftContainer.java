@@ -62,7 +62,9 @@ public class GftContainer {
 	private JamonThread jamonThread;
 	
 	private final File configfile;
-
+	public final Date startupTime = new Date();
+	public Date getStartupTime() { return startupTime; }
+	
 	public JmsSystem queueSystem;
 	public String getVersion() {
 		InputStream in = GftContainer.class.getResourceAsStream("/version.properties");
