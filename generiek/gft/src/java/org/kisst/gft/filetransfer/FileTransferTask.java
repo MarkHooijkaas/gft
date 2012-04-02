@@ -32,8 +32,8 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 			throw new FunctionalException("Filename should only contain alphanumeric characters / . - or _");
 		if (filename.indexOf("..")>=0)
 			throw new FunctionalException("Filename ["+filename+"] is not allowed to contain .. pattern");
-		this.srcpath=channel.getSrcPath(filename, this);
-		this.destpath=channel.getDestPath(filename, this);
+		this.srcpath=calcPath(channel.srcdir, filename);
+		this.destpath=calcPath(channel.destdir, filename);
 		for (String key : channel.getContext().keys())
 			getContext().put(key,channel.getContext().get(key));
 	}

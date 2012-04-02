@@ -39,6 +39,18 @@ public class BasicTask implements Task {
 	public void setVar(String name, Object value) { vars.put(name, value); }
 	public SimpleProps getContext() { return context; }
 	
+	public String calcPath(String dir, String file) {
+		while (file.startsWith("/"))
+			file=file.substring(1);
+		// TODO: check for more unsafe constructs
+		if (dir.startsWith("dynamic:"))
+			return gft.processTemplate(dir.substring(8)+"/"+file, getContext());
+		else
+			return dir+"/"+file;
+	}
+
+	
+	
 	public SimpleProps getActionContext(Action action) {
 		SimpleProps result=getContext().shallowClone();
 		result.put("action", action);

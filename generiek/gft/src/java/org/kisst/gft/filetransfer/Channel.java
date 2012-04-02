@@ -56,20 +56,6 @@ public abstract class Channel extends BasicTaskDefinition {
 			throw new RetryableException("Destination system "+dest+" is not available tot transfer file "+ft.destpath+" for channel "+name);
 	}
 
-	private String calcPath(String dir, String file, FileTransferTask ft) {
-		while (file.startsWith("/"))
-			file=file.substring(1);
-		// TODO: check for more unsafe constructs
-		if (dir.startsWith("dynamic:"))
-			return gft.processTemplate(dir.substring(8)+"/"+file, ft.getContext());
-		else
-			return dir+"/"+file;
-	}
-
-	
-	public String getSrcPath(String file, FileTransferTask ft) { return calcPath(srcdir, file, ft); }
-	public String getDestPath(String file, FileTransferTask ft) {return calcPath(destdir, file, ft);	}
-	
 	@Override
 	public void run(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
