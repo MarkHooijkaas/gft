@@ -102,6 +102,7 @@ public class SshFileServerConnection implements FileServerConnection {
 
 	public void getToLocalFile(String remotepath, String localpath) {
 		remotepath=fileserver.unixPath(remotepath);
+		System.out.println(remotepath);
 		try {
 			logger.info("copy file from remote {} to local {}",remotepath,localpath);
 			sftp.get(remotepath, localpath);
