@@ -36,6 +36,12 @@ public class BasicTask implements Task {
 	public void setLastAction(String act) {	this.lastAction=act; }
 
 	public Object getVar(String name) { return vars.get(name,null); }
+	public String getStringVar(String name) { 
+		Object result = vars.get(name,null);
+		if (result == null || result instanceof String)
+			return (String) result;
+		throw new RuntimeException("Value of BasicTask variable "+name+" is not a String but a "+result.getClass()+" with value"+result);
+	}
 	public void setVar(String name, Object value) { vars.put(name, value); }
 	public SimpleProps getContext() { return context; }
 	
