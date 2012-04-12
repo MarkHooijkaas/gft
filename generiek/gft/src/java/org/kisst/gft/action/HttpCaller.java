@@ -31,6 +31,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.kisst.gft.GftContainer;
 import org.kisst.props4j.Props;
+import org.kisst.util.XmlNode;
 
 
 public class HttpCaller {
@@ -57,7 +58,16 @@ public class HttpCaller {
 	}
 
 
-	protected Object httpCall(String body) {
+	
+	protected XmlNode httpCall(XmlNode soap) {
+		String response = httpCall(soap.toString());
+		XmlNode result = new XmlNode(response);
+		//if (isSoapFault(result))
+		//	throw new RuntimeException("");
+		return result;
+	}
+	
+	protected String httpCall(String body) {
 		for (int i=0; i<hosts.length; i++) {
 			HttpHost host=hosts[i];
 			PostMethod method = createPostMethod(host, body);
@@ -66,9 +76,7 @@ public class HttpCaller {
 				method.setDoAuthentication(true);
 			try {
 				String result = httpCall(method, state);
-				if (result==null) // TODO check for SOAP Fault
-					throw new RuntimeException("SOAP Fault");
-				return null;
+				return result;
 			}
 			catch(RuntimeException e) {
 				if (i<hosts.length-1) {
