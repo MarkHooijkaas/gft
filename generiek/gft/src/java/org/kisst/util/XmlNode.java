@@ -81,6 +81,13 @@ public class XmlNode {
 			return (String) child;
 		return ((XmlNode) child).getText();
 	}
+	
+	public void setPrefix(String prefix) {
+		Namespace ns = element.getNamespace();
+		Namespace ns2 = Namespace.getNamespace(prefix, ns.getURI());
+		element.setNamespace(ns2);
+	}
+	
 	public void setChildText(String path, String value) {
 		if (path.indexOf("@")>=0)
 			throw new RuntimeException("changing an attribute not yet supported in path "+path);
@@ -148,7 +155,7 @@ public class XmlNode {
 		return this;
 	}
 	public XmlNode add(String name, String namespace) {
-		Element child=new Element(name, element.getNamespace());
+		Element child=new Element(name, namespace);
 		element.addContent(child);
 		return new XmlNode(child);
 	}
