@@ -1,4 +1,5 @@
 <h1>GFT version ${gft.version}</h1> 
+started on ${gft.startupTime?datetime}<br>
 <a href="config">Configuration</a><br> 
 
 <a href="reset">Reset JAMON logging</a><br>
@@ -8,8 +9,8 @@
   <tr>
     <td><b>name</b></td>
     <td><b>type</b></td>
-    <td><b>number of tasks</b></td>
-    <td><b>nuber of errors</b></td>
+    <td><b>#tasks</b></td>
+    <td><b>#errors</b></td>
     <td><b>from</b></td>
     <td><b>to</b></td>
   </tr>
