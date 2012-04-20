@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
-import nl.duo.gft.odwek.OnDemandHost;
 import nl.duo.gft.poller.Poller;
 
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
@@ -20,6 +19,8 @@ import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.action.LocalCommandAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.filetransfer.FileTransferModule;
+import org.kisst.gft.odwek.OnDemandHost;
+import org.kisst.gft.odwek.OnDemandHostList;
 import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.WindowsSshHost;
@@ -42,6 +43,20 @@ import org.slf4j.LoggerFactory;
 public class GftContainer {
 	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
 
+	/*
+	private final String SYSTEM_PACKAGES_EXTRA="nl.duo.gft.odwek; version=1.0.0"
+		+",nl.duo.gft.util; version=1.0.0"
+		+",org.kisst.gft; version=1.0.0"
+		+",org.kisst.gft.filetransfer; version=1.0.0"
+		+",org.kisst.gft.filetransfer.action; version=1.0.0"
+		+",org.kisst.gft.odwek; version=1.0.0"
+		+",org.kisst.gft.ssh; version=1.0.0"
+		+",org.kisst.gft.task; version=1.0.0"
+		+",org.kisst.jms; version=1.0.0"
+		+",org.kisst.props4j; version=1.0.0"
+		+",org.osgi.framework; version=1.0.0";
+	*/
+	
 	private final TaskStarter starter = new TaskStarter(); 
 	private final AdminServer admin=new AdminServer(this);
 	public Props props;
@@ -50,22 +65,26 @@ public class GftContainer {
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
 	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>();
-	public final HashMap<String, OnDemandHost>    ondemandhosts= new LinkedHashMap<String, OnDemandHost>();
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
 	private final HashMap<String, Module > channelTypes=new LinkedHashMap<String, Module>();
 	private final SimpleProps context = new SimpleProps();
 	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
+	private OnDemandHostList ondemandhosts = null;
 	private final String hostName;
 	private String tempdir;
 	private int dirVolgnr;
 	private JamonThread jamonThread;
+	
+	//private final  ModuleLoader loader;
+	//private final OsgiApplication osgiApplication=new OsgiApplication(SYSTEM_PACKAGES_EXTRA);
 	
 	private final File configfile;
 	public final Date startupTime = new Date();
 	public Date getStartupTime() { return startupTime; }
 	
 	public JmsSystem queueSystem;
+
 	public String getVersion() {
 		InputStream in = GftContainer.class.getResourceAsStream("/version.properties");
 		if (in==null)
@@ -93,11 +112,17 @@ public class GftContainer {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
+		//loader=new ModuleLoader("./modules");
 	}
+
 	public JmsSystem getQueueSystem() { return queueSystem; }
 	public SimpleProps getContext() {return context; }
+	//public ClassLoader getSpecialClassLoader() { return loader.getClassLoader(); }
 	
 	public void init(Props props) {
+		//osgiApplication.start();
+		
+		
 		this.jamonThread = new JamonThread(props);
 		this.props=props;
 		context.put("global", props.get("gft.global", null));
@@ -131,12 +156,9 @@ public class GftContainer {
 			}
 		}
 
-		if (props.get("gft.ondemand.host",null)!=null) {
-			Props hostProps=props.getProps("gft.ondemand.host");
-			for (String name: hostProps.keys()) {
-				Props p=hostProps.getProps(name);
-				ondemandhosts.put(name, new OnDemandHost(p));
-			}
+		Props ondemandhostProps=props.getProps("gft.ondemand.host");
+		if (ondemandhostProps!=null) {
+			ondemandhosts = new OnDemandHostList(ondemandhostProps);
 		}
 		
 		Props qmprops=props.getProps("gft.queueSystem");
@@ -238,6 +260,7 @@ public class GftContainer {
 			p.stop();
 		queueSystem.stop();
 		admin.stopListening();
+		//osgiApplication.shutdown();
 	}
 
 	private void addDynamicModules(Props props) {
@@ -286,4 +309,10 @@ public class GftContainer {
 	}
 	
 	public void appendJmsTaskCreator(JmsTaskCreator creator) {starter.appendCreator(creator); }
+
+	public OnDemandHost getOnDemandHost(String name) {
+		if (ondemandhosts==null)
+			throw new RuntimeException("No OnDemand hosts defined when looking for host "+name);
+		return ondemandhosts.getOnDemandHost(name);
+	}
 }

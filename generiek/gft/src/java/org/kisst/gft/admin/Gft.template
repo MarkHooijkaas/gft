@@ -66,13 +66,6 @@ started on ${gft.startupTime?datetime}<br>
 </#list> 
 </table> 
 
-<h2>OnDemand Hosts</h2> 
-<table> 
-<#list ondemandhosts?keys as name>
-<tr><td><a href=rest/ondemandhost/${name}>${name}</a></td><td>${ondemandhosts[name]}</td></tr> 
-</#list> 
-</table> 
-
 <h2>Actions</h2> 
 <table> 
 <#list actions?keys as name>
