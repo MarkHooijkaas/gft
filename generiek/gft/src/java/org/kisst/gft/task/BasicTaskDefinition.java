@@ -77,6 +77,15 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	}
 	
 	public Action createAction(Props props) {
+		try {
+			return myCreateAction(props);
+		}
+		catch (RuntimeException e) {
+			throw new RuntimeException("Error when creating action in channel "+getName(),e);
+		}
+	}
+	
+	private Action myCreateAction(Props props) {
 		String classname=props.getString("class",null);
 		if (classname==null)
 			return null;
