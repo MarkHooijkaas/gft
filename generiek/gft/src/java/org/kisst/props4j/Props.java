@@ -30,6 +30,7 @@ public interface Props extends MinimalProps {
 	public int    getInt(String string, int defaultValue);
 	public long   getLong(String string, long defaultValue);
 	public boolean getBoolean(String name, boolean defaultValue);
+	public Props getProps(String name, Props defaultValue);
 	public Props getProps(String name);
 	//public Iterable<String> keys();
 	

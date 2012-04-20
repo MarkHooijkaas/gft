@@ -99,6 +99,7 @@ public abstract class PropsBase implements Props {
 			throw new RuntimeException("property "+name+" should be true or false, not "+value);
 	}
 
+	public Props getProps(String name, Props defaultValue) { return (Props) get(name,defaultValue); }
 	public Props getProps(String name) { return (Props) get(name); }
 	public Sequence getSequence(String name) { return (Sequence) get(name); }
 
