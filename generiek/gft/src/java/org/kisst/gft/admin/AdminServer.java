@@ -40,6 +40,7 @@ public class AdminServer extends AbstractHandler {
         handlerMap.put("/poller", new PollerServlet(gft));
         handlerMap.put("/dir", new DirectoryServlet(gft));
         handlerMap.put("/listener", new ListenerServlet(gft));
+        handlerMap.put("/message", new JmsMessageServlet(gft));
         handlerMap.put("/config", new ConfigServlet(gft));
         handlerMap.put("/restart", new RestartServlet(gft));
         handlerMap.put("/reset", new ResetServlet(gft));

@@ -74,6 +74,7 @@ public class ListenerServlet extends BaseServlet {
 				while (e.hasMoreElements()) {
 					Message msg = (Message) e.nextElement();
 					out.println("<li> "+format.format(new Date(msg.getJMSTimestamp())));
+					out.println("<a href=\"/message/"+name+"/"+qname+"/"+msg.getJMSMessageID()+"\">");
 					try {
 						if (ControlMessage.isStartMessage(msg))
 							out.println("Start message");
@@ -88,6 +89,7 @@ public class ListenerServlet extends BaseServlet {
 					catch (RuntimeException ex) {
 						out.println("Unknown format, id="+msg.getJMSMessageID());
 					}
+					out.println("</a></li>");
 				}
 				out.println("</ul>");
 			}
