@@ -93,11 +93,18 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 			classname="org.kisst.gft.action."+classname;
 		if (classname.startsWith(".")) // Prefix a class in the default package with a .
 			classname=classname.substring(1);
-		Constructor<?> c=ReflectionUtil.getConstructor(classname, new Class<?>[] {Channel.class, Props.class} );
+		
+		Class<?> clz;
+		try {
+			clz= gft.getSpecialClassLoader().loadClass(classname);
+		} catch (ClassNotFoundException e) { throw new RuntimeException(e); }
+		
+		
+		Constructor<?> c=ReflectionUtil.getConstructor(clz, new Class<?>[] {Channel.class, Props.class} );
 		if (c!=null)
 			return (Action) ReflectionUtil.createObject(c, new Object[] {this, props} );
 
-		c=ReflectionUtil.getConstructor(classname, new Class<?>[] {GftContainer.class, Props.class} );
+		c=ReflectionUtil.getConstructor(clz, new Class<?>[] {GftContainer.class, Props.class} );
 		if (c==null)
 			return (Action) ReflectionUtil.createObject(classname);
 		else
