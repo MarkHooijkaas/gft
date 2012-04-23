@@ -31,6 +31,7 @@ import org.kisst.jms.MultiListener;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.util.JamonUtil;
+import org.kisst.util.JarLoader;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.JamonUtil.JamonThread;
@@ -43,23 +44,9 @@ import org.slf4j.LoggerFactory;
 public class GftContainer {
 	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
 
-	/*
-	private final String SYSTEM_PACKAGES_EXTRA="nl.duo.gft.odwek; version=1.0.0"
-		+",nl.duo.gft.util; version=1.0.0"
-		+",org.kisst.gft; version=1.0.0"
-		+",org.kisst.gft.filetransfer; version=1.0.0"
-		+",org.kisst.gft.filetransfer.action; version=1.0.0"
-		+",org.kisst.gft.odwek; version=1.0.0"
-		+",org.kisst.gft.ssh; version=1.0.0"
-		+",org.kisst.gft.task; version=1.0.0"
-		+",org.kisst.jms; version=1.0.0"
-		+",org.kisst.props4j; version=1.0.0"
-		+",org.osgi.framework; version=1.0.0";
-	*/
-	
 	private final TaskStarter starter = new TaskStarter(); 
 	private final AdminServer admin=new AdminServer(this);
-	public Props props;
+	public final SimpleProps props=new SimpleProps();
 
 	public final HashMap<String, TaskDefinition> channels= new LinkedHashMap<String, TaskDefinition>();
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
@@ -76,8 +63,7 @@ public class GftContainer {
 	private int dirVolgnr;
 	private JamonThread jamonThread;
 	
-	//private final  ModuleLoader loader;
-	//private final OsgiApplication osgiApplication=new OsgiApplication(SYSTEM_PACKAGES_EXTRA);
+	private final  JarLoader loader;
 	
 	private final File configfile;
 	public final Date startupTime = new Date();
@@ -106,25 +92,23 @@ public class GftContainer {
 		context.put("gft", this);
 	
 		this.configfile = configfile;
+		props.load(this.configfile);
+
 		addAction("local_command", LocalCommandAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
-		//loader=new ModuleLoader("./modules");
+		loader=new JarLoader("./modules");
 	}
 
 	public JmsSystem getQueueSystem() { return queueSystem; }
 	public SimpleProps getContext() {return context; }
-	//public ClassLoader getSpecialClassLoader() { return loader.getClassLoader(); }
+	public ClassLoader getSpecialClassLoader() { return loader.getClassLoader(); }
 	
-	public void init(Props props) {
-		//osgiApplication.start();
-		
-		
+	public void init() {
 		this.jamonThread = new JamonThread(props);
-		this.props=props;
 		context.put("global", props.get("gft.global", null));
 		
 		tempdir = context.getString("global.tempdir");
@@ -230,9 +214,7 @@ public class GftContainer {
 	public String processTemplate(String templateText, Object context) { return TemplateUtil.processTemplate(templateText, context); }
 
 	public void start() {
-		SimpleProps props=new SimpleProps();
-		props.load(configfile);
-		init(props);
+		init();
 		logger.info("Starting GftContainer on host "+hostName);
 		if (logger.isDebugEnabled()){
 			logger.debug("Starting GftContainer with props {}", props.toString());
@@ -260,7 +242,6 @@ public class GftContainer {
 			p.stop();
 		queueSystem.stop();
 		admin.stopListening();
-		//osgiApplication.shutdown();
 	}
 
 	private void addDynamicModules(Props props) {
@@ -271,17 +252,27 @@ public class GftContainer {
 		Props modules = (Props) moduleProps;
 		for (String name:modules.keys()) {
 			try {
-				addModule(name, modules.getProps(name));
+				Props modprops = modules.getProps(name);
+				String classname=modprops.getString("class");	
+				Class<?> cls = loader.getClass(classname);
+				addModule(cls, modprops);
 			} catch (Exception e) {
 				throw new RuntimeException("Could not load module class "+name, e);
 			}
 		}
+		for (Class<?> cls: loader.getMainClasses()) {
+			try {
+				Props modprops = modules.getProps(cls.getSimpleName(),null);
+				addModule(cls, modprops);
+			} catch (Exception e) {
+				throw new RuntimeException("Could not load module class "+cls.getSimpleName(), e);
+			}
+		}
 	}
-	private void addModule(String name, Props props) {
-		String classname=props.getString("class");
-		Constructor<?> cons=ReflectionUtil.getConstructor(classname, new Class<?>[] {GftContainer.class, String.class, Props.class});
-		Module mod= (Module) ReflectionUtil.createObject(cons, new Object[] {this, name, props});
-		modules.put(name, mod);
+	private void addModule(Class<?> cls,  Props props) {
+		Constructor<?> cons=ReflectionUtil.getConstructor(cls, new Class<?>[] {GftContainer.class, Props.class});
+		Module mod= (Module) ReflectionUtil.createObject(cons, new Object[] {this, props});
+		modules.put(mod.getName(), mod);
 	}
 	
 	private synchronized int getUniqueVolgnummer() {
