@@ -13,8 +13,6 @@ import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import nl.duo.gft.util.PlexUtil;
-
 import org.kisst.gft.FunctionalException;
 import org.kisst.gft.RetryableException;
 import org.kisst.props4j.Props;
@@ -153,14 +151,14 @@ public class JmsListener implements Runnable {
 			openConsumer();
 			Message message = consumer.receive(interval);
 			if (message!=null) {
-				if (isStopMessage(message)) {
+				if (ControlMessage.isStopMessage(message)) {
 					logger.info("Received a stop message on queue {}, rolling back the stop message",queue);
 					session.rollback(); // put the message back on the queue
 					closeSession(); // recover the session so it will see the stop message
 					enterBrowseMode();
 					return null;
 				}
-				else if (isStartMessage(message)) {
+				else if (ControlMessage.isStartMessage(message)) {
 					logger.info("Ignoring a received a start message on queue {}, because is already started",queue);
 					session.commit(); // remove the start message
 					return null;
@@ -205,7 +203,7 @@ public class JmsListener implements Runnable {
 				Message msg = (Message) e.nextElement();
 				if (logger.isDebugEnabled())
 					logger.debug("browsing message with id {}, content {}",msg.getJMSMessageID(),((TextMessage) msg).getText());
-				if (isStopMessage(msg) || isStartMessage(msg)) {
+				if (ControlMessage.isStopMessage(msg) || ControlMessage.isStartMessage(msg)) {
 					if (lastMessage!=null) {
 						logger.info("Removing control message from queue {} because there is a newer control messages",queue);
 						removeList.add(lastMessage.getJMSMessageID());
@@ -217,10 +215,10 @@ public class JmsListener implements Runnable {
 			}
 			if (lastMessage==null) // there were no control message on queue, no reason to stay in browsemode
 				browseMode=false;
-			else if (isStopMessage(lastMessage)) {
+			else if (ControlMessage.isStopMessage(lastMessage)) {
 				sleepSomeTime(this.interval);
 			}
-			else if (isStartMessage(lastMessage)) { // startMessage may be removed
+			else if (ControlMessage.isStartMessage(lastMessage)) { // startMessage may be removed
 				logger.info("Removing start message from queue {} because it is the last control message",queue);
 				removeList.add(lastMessage.getJMSMessageID());
 				browseMode=false;
@@ -277,47 +275,6 @@ public class JmsListener implements Runnable {
 	}
 	
 	
-	private static String getMQSignal(Message msg) {
-		String label="MQSignal";
-		try {
-			if (msg==null || ! (msg instanceof TextMessage))
-				return null;
-			String body = ((TextMessage)msg).getText();
-			return PlexUtil.getField(body, label, null);
-		}
-		catch (JMSException e) { throw new RuntimeException(e);}
-		
-	}
-	
-	// TODO: The next two methods are safer than the current checks, but this is not tested yet
-	static public boolean isStopMessageNew(Message msg) {
-		String mqSignal=getMQSignal(msg);
-		return "Stop".equals(mqSignal);
-	}
-	static public boolean isStartMessageNew(Message msg) {
-		String mqSignal=getMQSignal(msg);
-		return "Start".equals(mqSignal);
-	}
-
-	
-	static public boolean isStopMessage(Message msg) {
-		try {
-			if (msg==null || ! (msg instanceof TextMessage))
-				return false;
-			String body = ((TextMessage)msg).getText();
-			return body.startsWith("6") && body.indexOf("Stop")>0;
-		}
-		catch (JMSException e) { throw new RuntimeException(e);}
-	}
-	static public boolean isStartMessage(Message msg) {
-		try{
-			if (msg==null || ! (msg instanceof TextMessage))
-				return false;
-			String body = ((TextMessage)msg).getText();
-			return body.startsWith("6") && body.indexOf("Start")>0;
-		}
-		catch (JMSException e) { throw new RuntimeException(e);}
-	}
 
 	private void sleepSomeTime(long delay) {
 		try {

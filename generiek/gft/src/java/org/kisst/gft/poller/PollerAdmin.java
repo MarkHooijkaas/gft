@@ -1,4 +1,4 @@
-package org.kisst.gft.admin;
+package org.kisst.gft.poller;
 
 import java.util.HashMap;
 
@@ -9,54 +9,28 @@ import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
-import org.kisst.gft.GftContainer;
-import org.kisst.gft.admin.rest.MappedResource;
-import org.kisst.gft.admin.rest.ObjectResource;
-import org.kisst.gft.admin.rest.RestServlet;
+import org.kisst.gft.admin.BaseServlet;
+import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AdminServer extends AbstractHandler {
-	private final static Logger logger=LoggerFactory.getLogger(AdminServer.class); 
-	private final GftContainer gft;
+public class PollerAdmin extends AbstractHandler {
+	private final static Logger logger=LoggerFactory.getLogger(PollerAdmin.class); 
 	private Server server=null;
+	private final Props props;
 
-	public AdminServer(GftContainer gft)
+	public PollerAdmin(Props props)
 	{
-		this.gft=gft;
-	}
-	
-	public void addServlet(String url, BaseServlet servlet) {
-		handlerMap.put(url, servlet);
+		this.props=props;
 	}
 	
 	public void startListening() {
-		int port=gft.props.getInt("gft.admin.port",8080);
+		int port=props.getInt("gft.admin.port",8080);
 		logger.info("admin site running on port {}",port);
 		server = new Server(port);
         server.setHandler(this);
-        handlerMap.put("default", new TemplateServlet(gft));  //new HomeServlet(gft));
-        handlerMap.put("/channel", new ChannelServlet(gft));
-        handlerMap.put("/poller", new PollerServlet(gft));
-        handlerMap.put("/dir", new DirectoryServlet(gft));
-        handlerMap.put("/listener", new ListenerServlet(gft));
-        handlerMap.put("/config", new ConfigServlet(gft));
-        handlerMap.put("/restart", new RestartServlet(gft));
-        handlerMap.put("/reset", new ResetServlet(gft));
-        handlerMap.put("/shutdown", new ShutdownServlet(gft));
-        handlerMap.put("/encrypt", new EncryptServlet(gft));
+        //handlerMap.put("default", new ConfigServlet());  //new HomeServlet(gft));
         
-        RestServlet rest=new RestServlet(gft, "/rest/");
-        rest.map("gft",new ObjectResource(gft));
-        rest.map("channel",new MappedResource(gft.channels));
-        rest.map("action",new MappedResource(gft.actions));
-        rest.map("listener",new MappedResource(gft.listeners));
-        rest.map("httphost",new MappedResource(gft.httphosts));
-        rest.map("sshhost",new MappedResource(gft.sshhosts));
-        rest.map("poller",new MappedResource(gft.pollers));
-        // TODO: rest.map("ondemandhost",new MappedResource(gft.ondemandhosts));
-        
-        handlerMap.put(rest.getPrefix(), rest);
 		try {
 			server.start();
 		} catch (Exception e) { throw new RuntimeException(e);}

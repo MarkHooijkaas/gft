@@ -9,8 +9,6 @@ import javax.jms.Message;
 import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
-import nl.duo.gft.GftDuoModule;
-
 import org.apache.log4j.PropertyConfigurator;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.ssh.GenerateKey;
@@ -76,7 +74,7 @@ public class GftRunner {
 			showHelp();
 			return;
 		}
-		GftDuoModule.setKey();
+		CryptoUtil.setKey("-P34{-[u-C5x<I-v'D_^{79'3g;_2I-P_L0£_j3__5`y§%M£_C");
 		File configfile=new File(config.get());
 		if (putmsg.isSet()) {		// TODO: refactor this code dupplication
 			logger.info("gft put");

@@ -6,10 +6,10 @@ import java.io.PrintWriter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import nl.duo.gft.poller.Poller;
-import nl.duo.gft.poller.PollerJob;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.poller.Poller;
+import org.kisst.gft.poller.PollerJob;
 
 public class PollerServlet extends BaseServlet {
 	public PollerServlet(GftContainer gft) { super(gft);	}

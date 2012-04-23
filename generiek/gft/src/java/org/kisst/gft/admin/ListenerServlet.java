@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.jms.ControlMessage;
 import org.kisst.jms.JmsListener;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MultiListener;
@@ -74,9 +75,9 @@ public class ListenerServlet extends BaseServlet {
 					Message msg = (Message) e.nextElement();
 					out.println("<li> "+format.format(new Date(msg.getJMSTimestamp())));
 					try {
-						if (JmsListener.isStartMessage(msg))
+						if (ControlMessage.isStartMessage(msg))
 							out.println("Start message");
-						else if (JmsListener.isStopMessage(msg))
+						else if (ControlMessage.isStopMessage(msg))
 							out.println("Stop message");
 						else {
 							// TODO: handle all type of messages

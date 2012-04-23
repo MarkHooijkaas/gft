@@ -2,8 +2,6 @@ package org.kisst.gft;
 
 import java.util.ArrayList;
 
-import nl.duo.gft.LogUtil;
-
 import org.kisst.gft.task.JmsTask;
 import org.kisst.jms.JmsMessage;
 import org.kisst.jms.MessageHandler;
@@ -50,11 +48,11 @@ public class TaskStarter implements MessageHandler {
 					return task;
 			}
 			catch (RuntimeException e) {
-				LogUtil.log("error", "jms", "handle", "exception", e.getMessage());
+				LogService.log("error", "jms", "handle", "exception", e.getMessage());
 				throw e;
 			}
 		}	
-		LogUtil.log("error", "jms", "handle", "exception", "could not determine task type of message "+msg);
+		LogService.log("error", "jms", "handle", "exception", "could not determine task type of message "+msg);
 		throw new RuntimeException("could not determine task type of message "+msg);
 	}
 }

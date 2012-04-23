@@ -11,16 +11,20 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
-import nl.duo.gft.poller.Poller;
 
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.action.LocalCommandAction;
+import org.kisst.gft.action.LogCompleted;
+import org.kisst.gft.action.LogError;
+import org.kisst.gft.action.LogStart;
 import org.kisst.gft.admin.AdminServer;
+import org.kisst.gft.admin.BaseServlet;
 import org.kisst.gft.filetransfer.FileTransferModule;
 import org.kisst.gft.odwek.OnDemandHost;
 import org.kisst.gft.odwek.OnDemandHostList;
+import org.kisst.gft.poller.Poller;
 import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.WindowsSshHost;
@@ -96,6 +100,10 @@ public class GftContainer {
 
 		addAction("local_command", LocalCommandAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
+		addAction("log_start",LogStart.class);
+		addAction("log_completed",LogCompleted.class);
+		addAction("log_error",LogError.class);
+
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
@@ -213,6 +221,8 @@ public class GftContainer {
 	public String processTemplate(File template, Object context) { return TemplateUtil.processTemplate(template, context); }
 	public String processTemplate(String templateText, Object context) { return TemplateUtil.processTemplate(templateText, context); }
 
+	public void addServlet(String url, BaseServlet servlet) { admin.addServlet(url, servlet); }
+
 	public void start() {
 		init();
 		logger.info("Starting GftContainer on host "+hostName);
@@ -247,23 +257,23 @@ public class GftContainer {
 	private void addDynamicModules(Props props) {
 		modules.put("filetransfer", new FileTransferModule(this, props));
 		Object moduleProps = props.get("gft.modules",null);
-		if (! (moduleProps instanceof Props))
-			return;
-		Props modules = (Props) moduleProps;
-		for (String name:modules.keys()) {
-			try {
-				Props modprops = modules.getProps(name);
-				String classname=modprops.getString("class");	
-				Class<?> cls = loader.getClass(classname);
-				addModule(cls, modprops);
-			} catch (Exception e) {
-				throw new RuntimeException("Could not load module class "+name, e);
+		if (moduleProps instanceof Props) {
+			Props modules = (Props) moduleProps;
+			for (String name:modules.keys()) {
+				try {
+					Props modprops = modules.getProps(name);
+					String classname=modprops.getString("class");	
+					Class<?> cls = loader.getClass(classname);
+					addModule(cls, modprops);
+				} catch (Exception e) {
+					throw new RuntimeException("Could not load module class "+name, e);
+				}
 			}
 		}
+
 		for (Class<?> cls: loader.getMainClasses()) {
 			try {
-				Props modprops = modules.getProps(cls.getSimpleName(),null);
-				addModule(cls, modprops);
+				addModule(cls, null);
 			} catch (Exception e) {
 				throw new RuntimeException("Could not load module class "+cls.getSimpleName(), e);
 			}
