@@ -47,9 +47,11 @@ public class JarLoader {
 				URL url=new URL("jar:"+f.toURL()+"!/META-INF/MANIFEST.MF");
 				Manifest manifest =new Manifest(url.openStream());
 				String classname =  manifest.getMainAttributes().getValue("Main-Class");
-				System.out.println(url+"\t"+classname);
-				if (classname!=null)
-					result.add(getClass(classname));
+				if (classname!=null) {
+					Class<?> c = getClass(classname);
+					result.add(c);
+					System.out.println("Found "+c.getSimpleName()+"\tfrom file "+f);
+				}
 				
 			} catch (IOException e) { throw new RuntimeException(e);}
 		}
