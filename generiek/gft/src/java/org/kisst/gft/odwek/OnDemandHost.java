@@ -46,26 +46,12 @@ public class OnDemandHost {
 	}
 	
 	private static int nativeCount=0;
-	/**
-	 * This routine loads all dependent DLL's because this way they are searched in the java.library.path
-	 * The order of loading is important
-	 */
 	private void initNative() {
 		synchronized (OnDemandHost.class) {
 			if (nativeCount>0)
 				return;
 			nativeCount++;
-			//System.loadLibrary("icudt36");
-			//System.loadLibrary("icuuc36");
-			//System.loadLibrary("icule36"); // 8.4.0.0
-			//System.loadLibrary("icuin36");
-			//System.loadLibrary("icuio36"); // 8.4.1.8
-			//System.loadLibrary("iculx36"); // 8.4.0.0
-			//System.loadLibrary("arssck32");
-			//System.loadLibrary("ctreestd"); // 8.4.0.0
-			//System.loadLibrary("arswwwsl32");
 			System.loadLibrary("ars3wapi32");
-			//System.loadLibrary("ars3wapi32");
 		}
 	}
 	
