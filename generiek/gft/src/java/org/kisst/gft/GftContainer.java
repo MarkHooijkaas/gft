@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Properties;
 
-
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.HttpHost;
@@ -22,8 +21,6 @@ import org.kisst.gft.action.LogStart;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.admin.BaseServlet;
 import org.kisst.gft.filetransfer.FileTransferModule;
-import org.kisst.gft.odwek.OnDemandHost;
-import org.kisst.gft.odwek.OnDemandHostList;
 import org.kisst.gft.poller.Poller;
 import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
@@ -61,7 +58,6 @@ public class GftContainer {
 	private final HashMap<String, Module > channelTypes=new LinkedHashMap<String, Module>();
 	private final SimpleProps context = new SimpleProps();
 	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
-	private OnDemandHostList ondemandhosts = null;
 	private final String hostName;
 	private String tempdir;
 	private int dirVolgnr;
@@ -148,11 +144,6 @@ public class GftContainer {
 			}
 		}
 
-		Props ondemandhostProps=props.getProps("gft.ondemand.host");
-		if (ondemandhostProps!=null) {
-			ondemandhosts = new OnDemandHostList(ondemandhostProps);
-		}
-		
 		Props qmprops=props.getProps("gft.queueSystem");
 		String type=qmprops.getString("type");
 		if ("ActiveMq".equals(type))
@@ -310,10 +301,4 @@ public class GftContainer {
 	}
 	
 	public void appendJmsTaskCreator(JmsTaskCreator creator) {starter.appendCreator(creator); }
-
-	public OnDemandHost getOnDemandHost(String name) {
-		if (ondemandhosts==null)
-			throw new RuntimeException("No OnDemand hosts defined when looking for host "+name);
-		return ondemandhosts.getOnDemandHost(name);
-	}
 }
