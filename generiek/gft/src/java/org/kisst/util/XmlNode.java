@@ -175,5 +175,15 @@ public class XmlNode {
 		return xml;
 	}
 	public void save(String filename) { FileUtil.saveString(new File(filename), getPretty()); }
+
+	public XmlNode getRoot() {
+		Element e = element;
+		while (e.getParentElement()!=null)
+			e=e.getParentElement();
+		if (e==element)
+			return this;
+		else
+			return new XmlNode(e);
+	}
 }
 
