@@ -4,6 +4,7 @@ package org.kisst.gft.task;
 
 public interface Task {
 	public TaskDefinition getTaskDefinition();
+	public String getIdentification();
 	
 	public void run();
 
