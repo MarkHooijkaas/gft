@@ -41,6 +41,8 @@ public class SimpleProps extends PropsBase {
 	public String stringValue=null;
 	
 	public SimpleProps() { this(null,null); }
+	public SimpleProps(File file) { this(null, null); load(file); }
+
 	public SimpleProps(SimpleProps parent, String name) {
 		this.parent=parent;
 		if (name!=null && name.lastIndexOf(".")>0)
