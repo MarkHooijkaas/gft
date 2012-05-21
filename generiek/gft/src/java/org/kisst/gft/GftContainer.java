@@ -256,17 +256,25 @@ public class GftContainer {
 		admin.stopListening();
 	}
 
+	
+	public void addModule(Class<? extends Module> cls) {
+		boolean disabled = props.getBoolean("module."+cls.getSimpleName()+".disabled", false); 
+		try {
+			if (! disabled)
+				addModule(cls, null);
+		} catch (Exception e) {
+			throw new RuntimeException("Could not load module class "+cls.getSimpleName(), e);
+		}
+		
+	}
+	
+	@SuppressWarnings("unchecked")
 	private void addDynamicModules(Props props) {
-		modules.put("filetransfer", new FileTransferModule(this, props));
+		//modules.put("filetransfer", new FileTransferModule(this, props));
+		addModule(FileTransferModule.class);
 
 		for (Class<?> cls: loader.getMainClasses()) {
-			boolean disabled = props.getBoolean("module."+cls.getSimpleName()+".disabled", false); 
-			try {
-				if (! disabled)
-					addModule(cls, null);
-			} catch (Exception e) {
-				throw new RuntimeException("Could not load module class "+cls.getSimpleName(), e);
-			}
+			addModule((Class<? extends Module>) cls);
 		}
 	}
 	private void addModule(Class<?> cls,  Props props) {
