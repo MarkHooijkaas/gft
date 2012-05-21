@@ -15,9 +15,9 @@ public abstract class BaseServlet {
 	private final String adminPassword; 
 	public BaseServlet(GftContainer gft) {
 		this.gft=gft;
-		String password=gft.props.getString("gft.admin.password", null);
+		String password=gft.props.getString("admin.password", null);
 		if (password==null)
-			password=CryptoUtil.decrypt(gft.props.getString("gft.admin.encryptedPassword"));
+			password=CryptoUtil.decrypt(gft.props.getString("admin.encryptedPassword"));
 		this.adminPassword=password;
 	}
 

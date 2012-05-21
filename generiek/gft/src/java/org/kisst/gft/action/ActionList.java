@@ -34,7 +34,7 @@ public class ActionList  implements Action {
 		//this.actions=new Action[parts.length];
 		for (String name: parts) {
 			name=name.trim();
-			LayeredProps lprops=new LayeredProps(taskdef.gft.props.getProps("gft.global"));
+			LayeredProps lprops=new LayeredProps(taskdef.gft.props.getProps("global"));
 			SimpleProps top=new SimpleProps();
 			top.put("action",taskdef.gft.actions.get(name));
 			top.put("channel",props);

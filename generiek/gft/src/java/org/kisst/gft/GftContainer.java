@@ -45,9 +45,10 @@ import org.slf4j.LoggerFactory;
 public class GftContainer {
 	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
 
+	private final String topname;
 	private final TaskStarter starter = new TaskStarter(); 
 	private final AdminServer admin=new AdminServer(this);
-	public final SimpleProps props=new SimpleProps();
+	public final Props props;
 
 	public final HashMap<String, TaskDefinition> channels= new LinkedHashMap<String, TaskDefinition>();
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
@@ -87,12 +88,16 @@ public class GftContainer {
 		props.put("class", cls.getName());
 		actions.put(name, props);
 	}
-	public GftContainer(File configfile) {
+	public GftContainer(String topname, File configfile) {
+		this.topname=topname;
 		TemplateUtil.init(configfile.getParentFile());
-		context.put("gft", this);
+		context.put(topname, this);
 	
 		this.configfile = configfile;
-		props.load(this.configfile);
+		SimpleProps top = new SimpleProps();
+		top.load(this.configfile);
+		props=top.getProps(this.topname);
+		
 
 		addAction("local_command", LocalCommandAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
@@ -110,10 +115,11 @@ public class GftContainer {
 	public JmsSystem getQueueSystem() { return queueSystem; }
 	public SimpleProps getContext() {return context; }
 	public ClassLoader getSpecialClassLoader() { return loader.getClassLoader(); }
+	public String getTopname() { return topname; }
 	
 	public void init() {
 		this.jamonThread = new JamonThread(props);
-		context.put("global", props.get("gft.global", null));
+		context.put("global", props.get("global", null));
 		
 		tempdir = context.getString("global.tempdir");
 		dirVolgnr = 0;
@@ -122,14 +128,14 @@ public class GftContainer {
 			mod.init(props);
 
 		//actions.put("copy", new RemoteScpAction());
-		if (props.get("gft.http.host",null)!=null) {
-			Props hostProps=props.getProps("gft.http.host");
+		if (props.get("http.host",null)!=null) {
+			Props hostProps=props.getProps("http.host");
 			for (String name: hostProps.keys())
 				httphosts.put(name, new HttpHost(hostProps.getProps(name)));
 		}
 
-		if (props.get("gft.ssh.host",null)!=null) {
-			Props hostProps=props.getProps("gft.ssh.host");
+		if (props.get("ssh.host",null)!=null) {
+			Props hostProps=props.getProps("ssh.host");
 			for (String name: hostProps.keys()) {
 				Props p=hostProps.getProps(name);
 				String type=p.getString("type",null);
@@ -140,11 +146,11 @@ public class GftContainer {
 				else if ("AS400".equals(type))
 					sshhosts.put(name, new As400SshHost(p));
 				else 
-					throw new RuntimeException("property type for gft.ssh.host."+name+" should be WINDOWS, AS400 or UNIX, not "+type);
+					throw new RuntimeException("property type for "+name+".ssh.host."+name+" should be WINDOWS, AS400 or UNIX, not "+type);
 			}
 		}
 
-		Props qmprops=props.getProps("gft.queueSystem");
+		Props qmprops=props.getProps("queueSystem");
 		String type=qmprops.getString("type");
 		if ("ActiveMq".equals(type))
 			queueSystem=new ActiveMqSystem(qmprops);
@@ -153,39 +159,44 @@ public class GftContainer {
 		else 
 			throw new RuntimeException("Unknown type of queueing system "+type);
 
-		for (String lname: props.getProps("gft.listener").keys()) {
-			listeners.put(lname, new MultiListener(queueSystem, starter, props.getProps("gft.listener."+lname), context));
+		for (String lname: props.getProps("listener").keys()) {
+			listeners.put(lname, new MultiListener(queueSystem, starter, props.getProps("listener."+lname), context));
 		}
 
 
-		if (props.hasKey("gft.action")) {
-			Props actionProps=props.getProps("gft.action");
+		if (props.hasKey("action")) {
+			Props actionProps=props.getProps("action");
 			for (String name: actionProps.keys()) {
 				Props p=actionProps.getProps(name);
 				actions.put(name, p);
 			}
 		}
 
-		Props channelProps=props.getProps("gft.channel");
+		Props channelProps=props.getProps("channel");
 		for (String name: channelProps.keys()) {
 			Props p=channelProps.getProps(name);
-			String type2=p.getString("type","Default");
-			Module mod=channelTypes.get(type2);
-			if (mod==null) {
-				String typenames="";
-				String komma="";
-				for (String name2: channelTypes.keySet()) {
-					typenames+=komma+name2;
-					komma=",";
+			try {
+				String type2=p.getString("type","Default");
+				Module mod=channelTypes.get(type2);
+				if (mod==null) {
+					String typenames="";
+					String komma="";
+					for (String name2: channelTypes.keySet()) {
+						typenames+=komma+name2;
+						komma=",";
+					}
+					throw new RuntimeException("Unknown Channel type in channel "+name+": "+type2+" only the following types are allowed "+typenames);
 				}
-				throw new RuntimeException("Unknown Channel type in channel "+name+": "+type2+" only the following types are allowed "+typenames);
+				TaskDefinition channel = mod.createDefinition(type2, p);
+				channels.put(name, channel);
 			}
-			TaskDefinition channel = mod.createDefinition(type2, p);
-			channels.put(name, channel);
+			catch (RuntimeException e) {
+				throw new RuntimeException(e.getMessage()+" while reading channel "+name,e);
+			}
 		}
 
-		if (props.hasKey("gft.poller")) {
-			Props pollerProps=props.getProps("gft.poller");
+		if (props.hasKey("poller")) {
+			Props pollerProps=props.getProps("poller");
 			for (String name: pollerProps.keys())
 				//pollers.put(name, new Poller(this, pollerProps.getProps(name)));
 				pollers.put(name, new Poller(this, name, pollerProps.getProps(name)));
@@ -247,24 +258,12 @@ public class GftContainer {
 
 	private void addDynamicModules(Props props) {
 		modules.put("filetransfer", new FileTransferModule(this, props));
-		Object moduleProps = props.get("gft.modules",null);
-		if (moduleProps instanceof Props) {
-			Props modules = (Props) moduleProps;
-			for (String name:modules.keys()) {
-				try {
-					Props modprops = modules.getProps(name);
-					String classname=modprops.getString("class");	
-					Class<?> cls = loader.getClass(classname);
-					addModule(cls, modprops);
-				} catch (Exception e) {
-					throw new RuntimeException("Could not load module class "+name, e);
-				}
-			}
-		}
 
 		for (Class<?> cls: loader.getMainClasses()) {
+			boolean disabled = props.getBoolean("module."+cls.getSimpleName()+".disabled", false); 
 			try {
-				addModule(cls, null);
+				if (! disabled)
+					addModule(cls, null);
 			} catch (Exception e) {
 				throw new RuntimeException("Could not load module class "+cls.getSimpleName(), e);
 			}

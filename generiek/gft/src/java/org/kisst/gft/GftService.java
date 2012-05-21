@@ -7,7 +7,7 @@ import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
 
 public class GftService  implements WrapperListener  {
-	private GftRunner runner;
+	protected GftRunner runner;
 
 	public static void main(String[] args) {
 		// Start the application. If the JVM was launched from the native
@@ -25,7 +25,7 @@ public class GftService  implements WrapperListener  {
 		else
 			configfile=new File(args[0]);
 		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
-		runner= new GftRunner(configfile);
+		runner= new GftRunner("gft", configfile);
 		runner.start();
 		return null;
 	}

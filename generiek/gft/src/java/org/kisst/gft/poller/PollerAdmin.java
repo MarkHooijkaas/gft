@@ -25,7 +25,7 @@ public class PollerAdmin extends AbstractHandler {
 	}
 	
 	public void startListening() {
-		int port=props.getInt("gft.admin.port",8080);
+		int port=props.getInt("admin.port",8080);
 		logger.info("admin site running on port {}",port);
 		server = new Server(port);
         server.setHandler(this);

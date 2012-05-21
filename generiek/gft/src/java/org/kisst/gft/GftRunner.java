@@ -27,9 +27,12 @@ public class GftRunner {
 
 	private final File configfile;
 	private boolean running=false;
+	private final String topname;
 	private GftContainer gft;
+
 	
-	public GftRunner(File configfile) {
+	public GftRunner(String topname, File configfile) {
+		this.topname=topname;
 		this.configfile = configfile;
 	}
 
@@ -37,7 +40,7 @@ public class GftRunner {
 		if (gft!=null)
 			throw new RuntimeException("Gft already running");
 		running=true;
-		gft=new GftContainer(configfile);
+		gft=new GftContainer(topname, configfile);
 		gft.start();
 	}
 
@@ -62,13 +65,17 @@ public class GftRunner {
 	
 
 	private static Cli cli=new Cli();
-	private static Cli.StringOption config = cli.stringOption("c","config","configuration file", "config/gft.properties");
+	private static Cli.StringOption config;
 	private static Cli.Flag putmsg = cli.flag("p","putmsg", "puts a message on the input queue");
 	private static Cli.StringOption rmmsg = cli.stringOption("r","rmmsg","selector", null);
 	private static Cli.Flag help =cli.flag("h", "help", "show this help");
 	private static Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
 	private static Cli.StringOption encrypt = cli.stringOption("e","encrypt","key", null);
-	public static void main(String[] args) {
+
+	public static void main(String[] args) { main("gft", args); }
+	
+	public static void main(String topname, String[] args) {
+		config = cli.stringOption("c","config","configuration file", "config/"+topname+".properties");
 		cli.parse(args);
 		if (help.isSet()) {
 			showHelp();
@@ -127,7 +134,7 @@ public class GftRunner {
 		}
 
 		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
-		GftRunner runner= new GftRunner(configfile);
+		GftRunner runner= new GftRunner(topname, configfile);
 		runner.run();
 		
 		System.out.println("GFT stopped");
@@ -135,8 +142,8 @@ public class GftRunner {
 
 	private static String getQueue(SimpleProps props) {
 		HashMap<String, Object> context = new HashMap<String, Object>();
-		context.put("global", props.get("gft.global", null));
-		String queuename = TemplateUtil.processTemplate(props.getString("gft.listener.main.queue"), context);
+		//context.put("global", props.get("global", null));
+		String queuename = TemplateUtil.processTemplate(props.getString("listener.main.queue"), context);
 		return queuename;
 	}
 
@@ -146,7 +153,7 @@ public class GftRunner {
 	}
 
 	private static JmsSystem getQueueSystem(Props props) {
-		Props qmprops=props.getProps("gft.queueSystem");
+		Props qmprops=props.getProps("queueSystem");
 		String type=qmprops.getString("type");
 		if ("ActiveMq".equals(type))
 			return new ActiveMqSystem(qmprops);
