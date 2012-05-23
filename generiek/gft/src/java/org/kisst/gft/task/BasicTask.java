@@ -5,9 +5,13 @@ import java.io.File;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.props4j.SimpleProps;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class BasicTask implements Task {
+	private final static Logger logger=LoggerFactory.getLogger(BasicTask.class);
+
 	public final GftContainer gft;
 	private final TaskDefinition taskdef;
 	
@@ -43,7 +47,10 @@ public class BasicTask implements Task {
 			return (String) result;
 		throw new RuntimeException("Value of BasicTask variable "+name+" is not a String but a "+result.getClass()+" with value"+result);
 	}
-	public void setVar(String name, Object value) { vars.put(name, value); }
+	public void setVar(String name, Object value) {
+		logger.info("setting var "+name+" to "+value );
+		vars.put(name, value);
+	}
 	public SimpleProps getContext() { return context; }
 	
 	public String calcPath(String dir, String file) {
