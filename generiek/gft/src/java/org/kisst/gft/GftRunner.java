@@ -89,8 +89,8 @@ public class GftRunner {
 			SimpleProps props=new SimpleProps();
 			props.load(configfile);
 			logger.info("opening queuesystem");
-			JmsSystem queueSystem=getQueueSystem(props);
-			String queuename = getQueue(props);
+			JmsSystem queueSystem=getQueueSystem(topname, props);
+			String queuename = getQueue((SimpleProps) props.getProps(topname));
 			logger.info("loading data from standard input");
 
 			String data=FileUtil.loadString(new InputStreamReader(System.in));
@@ -104,7 +104,7 @@ public class GftRunner {
 		if (rmmsg.isSet()) {		// TODO: refactor this code dupplication
 			SimpleProps props=new SimpleProps();
 			props.load(configfile);
-			JmsSystem queueSystem=getQueueSystem(props);
+			JmsSystem queueSystem=getQueueSystem(topname,props);
 			String queuename = getQueue(props);
 			String selector=rmmsg.get();
 			logger.info("removing the following message "+selector);
@@ -142,7 +142,7 @@ public class GftRunner {
 
 	private static String getQueue(SimpleProps props) {
 		HashMap<String, Object> context = new HashMap<String, Object>();
-		//context.put("global", props.get("global", null));
+		context.put("global", props.get("global", null));
 		String queuename = TemplateUtil.processTemplate(props.getString("listener.main.queue"), context);
 		return queuename;
 	}
@@ -152,8 +152,10 @@ public class GftRunner {
 		System.out.println(cli.getSyntax(""));
 	}
 
-	private static JmsSystem getQueueSystem(Props props) {
-		Props qmprops=props.getProps("queueSystem");
+	private static JmsSystem getQueueSystem(String topname, Props props) {
+		System.out.println(topname+".queueSystem");
+		Props qmprops=props.getProps(topname+".queueSystem");
+		System.out.println(qmprops);
 		String type=qmprops.getString("type");
 		if ("ActiveMq".equals(type))
 			return new ActiveMqSystem(qmprops);
