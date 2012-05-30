@@ -150,7 +150,7 @@ public class GftContainer {
 			}
 		}
 
-		Props qmprops=props.getProps("queueSystem");
+		Props qmprops=props.getProps("mq.host.main");
 		String type=qmprops.getString("type");
 		if ("ActiveMq".equals(type))
 			queueSystem=new ActiveMqSystem(qmprops);

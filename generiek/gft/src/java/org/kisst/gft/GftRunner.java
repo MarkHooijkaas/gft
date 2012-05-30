@@ -153,9 +153,7 @@ public class GftRunner {
 	}
 
 	private static JmsSystem getQueueSystem(String topname, Props props) {
-		System.out.println(topname+".queueSystem");
-		Props qmprops=props.getProps(topname+".queueSystem");
-		System.out.println(qmprops);
+		Props qmprops=props.getProps(topname+".mq.host.main");
 		String type=qmprops.getString("type");
 		if ("ActiveMq".equals(type))
 			return new ActiveMqSystem(qmprops);
