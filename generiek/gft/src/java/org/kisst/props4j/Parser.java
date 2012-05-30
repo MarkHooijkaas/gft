@@ -254,12 +254,20 @@ public class Parser {
 
 
 	private void include(SimpleProps map, Parser inp) {
+		String postfix=null;
 		Object o=readObject();
 		File f=null;
 		if (o instanceof File)
 			f=(File) o;
-		else if (o instanceof String)
-			f=inp.getPath(o.toString());
+		else if (o instanceof String) {
+			String name=(String) o;
+			int pos=name.indexOf('*');
+			if (pos>0) {
+				postfix=name.substring(pos+1);
+				name=name.substring(0,pos);
+			}
+			f=inp.getPath(name);
+		}
 		else
 			throw inp.new ParseException("unknown type of object to include "+o);
 		if (f.isFile())
@@ -267,6 +275,8 @@ public class Parser {
 		else if (f.isDirectory()) {
 			File[] files = f.listFiles(); // TODO: filter
 			for (File f2: files) {
+				if (postfix!=null && ! f2.getName().endsWith(postfix))
+					continue;
 				if (f2.isFile())
 					map.load(f2);
 			}
