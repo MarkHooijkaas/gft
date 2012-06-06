@@ -1,4 +1,4 @@
-<h1>GFT version ${gft.version}</h1> 
+<h1>${gft.topname?upper_case} version ${gft.version}</h1> 
 started on ${gft.startupTime?datetime}<br>
 <a href="config">Configuration</a><br> 
 
