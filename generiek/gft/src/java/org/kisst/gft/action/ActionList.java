@@ -56,8 +56,8 @@ public class ActionList  implements Action {
 	public Object execute(Task task) {
 		for (String name: actions.keySet()) {
 			Action a=actions.get(name);
-			if (logger.isDebugEnabled())
-				logger.debug("action "+name+" started");
+			if (logger.isInfoEnabled())
+				logger.info("action "+name+" started");
 			boolean done=false;
 			int nrofTries=0;
 			while (! done){
