@@ -241,11 +241,13 @@ public class GftContainer {
 		admin.join();
 	}
 	public void reset() {
+		logger.info("Resetting GftContainer on host "+hostName);
 		JamonUtil.jamonLog(props, "RESET called, dumping all statistics");
 		jamonThread.reset();
 	}
 	
 	public void stop() {
+		logger.info("Stopping GftContainer on host "+hostName);
 		JamonUtil.jamonLog(props, "STOP called, dumping all statistics");
 		jamonThread.stop();
 		for (MultiListener q : listeners.values() )
