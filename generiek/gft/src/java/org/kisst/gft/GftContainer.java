@@ -228,6 +228,8 @@ public class GftContainer {
 	public void start() {
 		init();
 		logger.info("Starting GftContainer on host "+hostName);
+		LogService.log("info", "start", getTopname().toUpperCase()+" Service", hostName, "Starting "+getTopname().toUpperCase()+" Service on host "+ hostName);
+
 		if (logger.isDebugEnabled()){
 			logger.debug("Starting GftContainer with props {}", props.toString());
 		}
@@ -248,6 +250,7 @@ public class GftContainer {
 	
 	public void stop() {
 		logger.info("Stopping GftContainer on host "+hostName);
+		LogService.log("info", "stop", getTopname().toUpperCase()+" Service", hostName, "Stopping "+getTopname().toUpperCase()+" Service on host "+ hostName);
 		JamonUtil.jamonLog(props, "STOP called, dumping all statistics");
 		jamonThread.stop();
 		for (MultiListener q : listeners.values() )
