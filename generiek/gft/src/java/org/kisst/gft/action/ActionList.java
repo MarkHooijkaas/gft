@@ -2,6 +2,7 @@ package org.kisst.gft.action;
 
 import java.util.LinkedHashMap;
 
+import org.kisst.gft.FunctionalException;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
@@ -22,6 +23,7 @@ public class ActionList  implements Action {
 
 	private final int maxNrofTries;
 	private final long retryDelay;
+	private final boolean retryNonFunctionalExceptions;
 
 	public ActionList(BasicTaskDefinition taskdef, Props props) {
 		this(taskdef, props, null);
@@ -29,6 +31,7 @@ public class ActionList  implements Action {
 	public ActionList(BasicTaskDefinition taskdef, Props props, String defaultActions) {
 		maxNrofTries = props.getInt("maxNrofTries", 3);
 		retryDelay = props.getLong("retryDelay", 30000);
+		retryNonFunctionalExceptions = props.getBoolean("retryNonFunctionalExceptions", true);
 		String actions=props.getString("actions",defaultActions);
 		String[] parts=actions.split(",");
 		//this.actions=new Action[parts.length];
@@ -69,14 +72,26 @@ public class ActionList  implements Action {
 					a.execute(task);
 					done=true;
 				}
-				catch (RetryableException e) {
-					if (a.safeToRetry() && nrofTries <= maxNrofTries) {
+				catch (RuntimeException e) {
+					if (e instanceof FunctionalException) {
+						logger.error("action "+name+" had functional error: "+e.getMessage());
+						throw e;
+					}
+					if (! a.safeToRetry()) {
+						logger.error("action "+name+" (which is not safe to retry) had error: "+e.getMessage());
+						throw e;
+					}
+					if ( (!retryNonFunctionalExceptions) && ! (e instanceof RetryableException)) {
+						logger.error("action "+name+" had non-functional error: "+e.getMessage());
+						throw e;
+					}
+					if (nrofTries <= maxNrofTries) {
 						logger.warn("Error during action "+name+", try number "+nrofTries+", will retry after "+retryDelay/1000+" seconds, error was ", e);
 						nrofTries++;
 						ThreadUtil.sleep(retryDelay);
 					}
 					else {
-						logger.error("action "+name+" had error: "+e.getMessage());
+						logger.error("action "+name+" had "+(nrofTries+1)+" tries, last error: "+e.getMessage());
 						throw e;
 					}
 				}
