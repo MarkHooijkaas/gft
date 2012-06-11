@@ -71,6 +71,7 @@ public class GftRunner {
 	private static Cli.Flag help =cli.flag("h", "help", "show this help");
 	private static Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
 	private static Cli.StringOption encrypt = cli.stringOption("e","encrypt","key", null);
+	private static Cli.StringOption decrypt = cli.stringOption("d","decrypt","key", null);
 
 	public static void main(String[] args) { main("gft", args); }
 	
@@ -130,6 +131,11 @@ public class GftRunner {
 		}
 		if (encrypt.get()!=null) {
 			System.out.println(CryptoUtil.encrypt(encrypt.get()));
+			return;
+		}
+		if (decrypt.get()!=null) {
+			System.out.println("OPTION DISABLED");
+			//System.out.println(CryptoUtil.decrypt(decrypt.get()));
 			return;
 		}
 
