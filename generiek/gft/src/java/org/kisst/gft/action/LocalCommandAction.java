@@ -8,14 +8,14 @@ import org.slf4j.LoggerFactory;
 
 public class LocalCommandAction implements Action{
 	private static final Logger logger = LoggerFactory.getLogger(LocalCommandAction.class);
-	private String name;
-	private String command;
-
-
+	private final String name;
+	private final String command;
+	private final boolean safeToRetry;
 
 	public LocalCommandAction(GftContainer gft, Props props) {
 		name = props.getLocalName();
 		command = props.getString("command", null);
+		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 
 	public Object execute(Task task) {
@@ -54,8 +54,6 @@ public class LocalCommandAction implements Action{
 	}
 
 	@Override
-	public boolean safeToRetry() {
-		return false;
-	}
+	public boolean safeToRetry() { return safeToRetry; }
 
 }

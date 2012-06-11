@@ -38,7 +38,7 @@ public class DeleteLocalFileAction implements Action {
 		//Channel chan=null;
 		//if (chan instanceof ArchiveerChannel)
 		//	throw new RuntimeException("ArchiveAction moet in een ArchiveerChannel zitten, en dat is "+chan.name+" niet");
-		safeToRetry = props.getBoolean("safeToRetry", false);
+		safeToRetry = props.getBoolean("safeToRetry", true);
 			}
 
 	public boolean safeToRetry() { return safeToRetry; }

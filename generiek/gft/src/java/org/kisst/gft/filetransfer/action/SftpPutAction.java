@@ -34,7 +34,7 @@ public class SftpPutAction implements Action {
 	private final boolean safeToRetry;
 	
 	public SftpPutAction(GftContainer gft, Props props) {
-		safeToRetry = props.getBoolean("safeToRetry", false);
+		safeToRetry = props.getBoolean("safeToRetry", true);
 	}
 
 	public boolean safeToRetry() { return safeToRetry; }
