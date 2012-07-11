@@ -11,8 +11,10 @@ public class MultiListener implements Representable {
 	private final String name;
 	private final Props props;
 	public final JmsListener[] listeners;
+	private final JmsSystem queueSystem;
 
 	public MultiListener(JmsSystem system, MessageHandler handler, Props props, Object context) {
+		this.queueSystem = system;
 		this.name=props.getLocalName();
 		this.props=props;
 		int nrofThreads = props.getInt("nrofThreads",2);
@@ -21,6 +23,7 @@ public class MultiListener implements Representable {
 			listeners[i]=new JmsListener(system, handler, props, context);
 	}
 	
+	public JmsSystem getQueueSystem() { return queueSystem; }
 	public int getNrofListeners() { return listeners.length; }
 	public int getNrofActiveListeners() {
 		int count = 0;

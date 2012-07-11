@@ -24,6 +24,7 @@ import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
 import org.kisst.jms.JmsSystem;
 import org.kisst.props4j.Props;
+import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,8 @@ public class SendMessageAction  implements Action {
 	public SendMessageAction(GftContainer gft, Props props) {
 		this.gft=gft;
 		this.props=props;
-		this.qmgr=gft.getQueueSystem();
+		String queueSystemName = TemplateUtil.processTemplate(props.getString("queueSystem", "main"), gft.getContext());
+		this.qmgr=gft.getQueueSystem(queueSystemName);
 		this.queue=props.getString("queue");
 		this.templateName=props.getString("template");
 		safeToRetry = props.getBoolean("safeToRetry", false);

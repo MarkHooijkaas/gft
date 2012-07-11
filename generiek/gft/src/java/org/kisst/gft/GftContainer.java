@@ -70,7 +70,7 @@ public class GftContainer {
 	public final Date startupTime = new Date();
 	public Date getStartupTime() { return startupTime; }
 	
-	public JmsSystem queueSystem;
+	private final HashMap<String,JmsSystem> queueSystem = new LinkedHashMap<String,JmsSystem>();
 
 	public String getVersion() {
 		InputStream in = GftContainer.class.getResourceAsStream("/version.properties");
@@ -112,7 +112,12 @@ public class GftContainer {
 		loader=new JarLoader("./modules");
 	}
 
-	public JmsSystem getQueueSystem() { return queueSystem; }
+	public JmsSystem getQueueSystem(String name) { 
+		JmsSystem result = queueSystem.get(name);
+		if (result==null)
+			throw new RuntimeException("Unknown queueSystem "+name);
+		return result;
+	}
 	public SimpleProps getContext() {return context; }
 	public ClassLoader getSpecialClassLoader() { return loader.getClassLoader(); }
 	public String getTopname() { return topname; }
@@ -150,17 +155,22 @@ public class GftContainer {
 			}
 		}
 
-		Props qmprops=props.getProps("mq.host.main");
-		String type=qmprops.getString("type");
-		if ("ActiveMq".equals(type))
-			queueSystem=new ActiveMqSystem(qmprops);
-		else if ("Jms".equals(type))
-			queueSystem=new JmsSystem(qmprops);
-		else 
-			throw new RuntimeException("Unknown type of queueing system "+type);
-
+		Props qmhostProps=props.getProps("mq.host");
+		for (String name: qmhostProps.keys()) {
+			Props qmprops=qmhostProps.getProps(name);
+			String type=qmprops.getString("type");
+			if ("ActiveMq".equals(type))
+				queueSystem.put(name, new ActiveMqSystem(qmprops));
+			else if ("Jms".equals(type))
+				queueSystem.put(name, new JmsSystem(qmprops));
+			else 
+				throw new RuntimeException("Unknown type of queueing system "+type);
+		}
+		
 		for (String lname: props.getProps("listener").keys()) {
-			listeners.put(lname, new MultiListener(queueSystem, starter, props.getProps("listener."+lname), context));
+			Props listenerprops = props.getProps("listener."+lname);
+			String queueSystemName = props.getString("queueSystem", "main");
+			listeners.put(lname, new MultiListener(getQueueSystem(queueSystemName), starter, listenerprops, context));
 		}
 
 
@@ -257,7 +267,8 @@ public class GftContainer {
 			q.stop();
 		for (Poller p : pollers.values())
 			p.stop();
-		queueSystem.stop();
+		for (JmsSystem q : queueSystem.values())
+			q.stop();
 		admin.stopListening();
 	}
 

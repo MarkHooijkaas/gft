@@ -18,7 +18,6 @@ import javax.servlet.http.HttpServletResponse;
 import org.kisst.gft.GftContainer;
 import org.kisst.jms.ControlMessage;
 import org.kisst.jms.JmsListener;
-import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MultiListener;
 import org.kisst.util.XmlNode;
 
@@ -54,7 +53,7 @@ public class ListenerServlet extends BaseServlet {
 		
 		Session session=null;
 		try {
-			session = ((JmsSystem)gft.queueSystem).getConnection().createSession(true, Session.AUTO_ACKNOWLEDGE);
+			session = lstnr.getQueueSystem().getConnection().createSession(true, Session.AUTO_ACKNOWLEDGE);
 			for (String qname:queuenames.split("[,]")) {
 				String q;
 				if ("input".equals(qname))
