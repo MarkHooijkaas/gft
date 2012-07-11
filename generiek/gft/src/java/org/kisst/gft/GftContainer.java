@@ -169,7 +169,7 @@ public class GftContainer {
 		
 		for (String lname: props.getProps("listener").keys()) {
 			Props listenerprops = props.getProps("listener."+lname);
-			String queueSystemName = props.getString("queueSystem", "main");
+			String queueSystemName = listenerprops.getString("queueSystem", "main");
 			listeners.put(lname, new MultiListener(getQueueSystem(queueSystemName), starter, listenerprops, context));
 		}
 
