@@ -1,5 +1,7 @@
 package org.kisst.gft.odwek;
 
+import java.util.Properties;
+
 import org.apache.commons.pool.PoolableObjectFactory;
 import org.apache.commons.pool.impl.GenericObjectPool;
 import org.kisst.props4j.Props;
@@ -72,7 +74,10 @@ public class OnDemandHost {
 	
 	private class OnDemandConnectionFactory implements PoolableObjectFactory {
 		public Object makeObject() {
+			Properties props = new Properties();
+			props.setProperty(ODConfig.ODWEK_INSTALL_DIR, "odwek-8.5.0.5");
 			try {
+				
 				ODConfig cfg = new ODConfig(ODConstant.PLUGIN, // AfpViewer
 						ODConstant.APPLET, // LineViewer
 						null, // MetaViewer
@@ -81,12 +86,19 @@ public class OnDemandHost {
 						"ENU", // Language
 						"./logs", // TempDir
 						"./logs", // TraceDir
-						tracelevel); // TraceLevel
+						tracelevel, // TraceLevel
+						props);
 
 				ODServer odServer = new ODServer(cfg);
-				//odServer.setInstallDir("d:/gft/odwek");
+				//odServer..setInstallDir("odwek-8.5.0.5");
 				odServer.initialize("GFT");
-				odServer.logon(server, user, passwd, 'T', port, ".");
+				odServer.setServerName(server);
+				odServer.setUserId(user);
+				odServer.setPassword(passwd);
+				//odServer.setConnectType("T");
+				odServer.setPort(port);
+				odServer.logon();
+				//odServer.logon(server, user, passwd, 'T', port, ".");
 				return odServer;
 			}
 			catch (ODException e) { throw new RuntimeException(e.getMessage()+", id="+e.getErrorId()+", msg="+e.getErrorMsg(), e); } 
