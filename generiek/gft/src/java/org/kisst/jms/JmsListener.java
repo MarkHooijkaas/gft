@@ -14,7 +14,6 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.kisst.gft.FunctionalException;
-import org.kisst.gft.RetryableException;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.TimeWindowList;
@@ -29,7 +28,7 @@ public class JmsListener implements Runnable {
 	private final Props props;
 	public final String queue;
 	public final String errorqueue;
-	public final String retryqueue;
+	//public final String retryqueue;
 	private final int receiveErrorRetries;
 	private final int receiveErrorRetryDelay;
 	private final long interval;
@@ -54,7 +53,7 @@ public class JmsListener implements Runnable {
 
 		this.queue=TemplateUtil.processTemplate(props.getString("queue"), context);
 		this.errorqueue=TemplateUtil.processTemplate(props.getString("errorqueue"), context);
-		this.retryqueue=TemplateUtil.processTemplate(props.getString("retryqueue"), context);
+		//this.retryqueue=TemplateUtil.processTemplate(props.getString("retryqueue"), context);
 		this.receiveErrorRetries = props.getInt("receiveErrorRetries", 1000);
 		this.receiveErrorRetryDelay = props.getInt("receiveErrorRetryDelay", 60000);
 		String timewindow=props.getString("forbiddenTimes", null);
@@ -334,8 +333,8 @@ public class JmsListener implements Runnable {
 				else 
 					logger.error(code+": "+e.getMessage()+". When handling JMS message of type "+ message.getClass(),e);
 				String queue=errorqueue;
-				if (e instanceof RetryableException)
-					queue=retryqueue;
+				//if (e instanceof RetryableException)
+				//	queue=retryqueue;
 				Destination errordestination = session.createQueue(queue+system.sendParams);
 				MessageProducer producer = session.createProducer(errordestination);
 				Message errmsg=JmsUtil.cloneMessage(session, message);

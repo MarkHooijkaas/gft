@@ -46,8 +46,8 @@ public class JmsMessageServlet extends BaseServlet {
 				q=lstnr.getQueue();
 			else if ("error".equals(queuename))
 				q=lstnr.getErrorQueue();
-			else if ("retry".equals(queuename))
-				q=lstnr.getRetryQueue();
+			//else if ("retry".equals(queuename))
+			//	q=lstnr.getRetryQueue();
 			else
 				throw new RuntimeException("Invalid queuename "+queuename);
 

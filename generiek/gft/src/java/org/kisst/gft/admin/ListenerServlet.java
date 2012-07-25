@@ -33,7 +33,8 @@ public class ListenerServlet extends BaseServlet {
 		PrintWriter out = response.getWriter();
 		String url=request.getRequestURI();
 		String name=url.substring("/listener/".length());
-		String queuenames="input,error,retry";
+		//String queuenames="input,error,retry";
+		String queuenames="input,error";
 		int pos=name.indexOf("/");
 		if (pos>0) {
 			queuenames=name.substring(pos+1);
@@ -60,8 +61,8 @@ public class ListenerServlet extends BaseServlet {
 					q=lstnr.getQueue();
 				else if ("error".equals(qname))
 					q=lstnr.getErrorQueue();
-				else if ("retry".equals(qname))
-					q=lstnr.getRetryQueue();
+				//else if ("retry".equals(qname))
+				//	q=lstnr.getRetryQueue();
 				else
 					throw new RuntimeException("Invalid queuename "+qname);
 

@@ -36,7 +36,7 @@ public class MultiListener implements Representable {
 	public boolean listening() { return listeners!=null; }
 	public String getQueue() { return listeners[0].queue; }
 	public String getErrorQueue() { return listeners[0].errorqueue; }
-	public String getRetryQueue() { return listeners[0].retryqueue; }
+	//public String getRetryQueue() { return listeners[0].retryqueue; }
 	public String getRepresentation() { return props.toString(); }
 
 	public void stop() {
