@@ -5,8 +5,11 @@ import java.util.ArrayList;
 import javax.jms.Message;
 
 public class ControlMessage {	
-	private static final ArrayList<Recognizer> recognizers = new ArrayList<Recognizer>(); 
-	
+	private static final ArrayList<Recognizer> recognizers = new ArrayList<Recognizer>();
+
+	public static void addRecognizer(Recognizer r) {
+		recognizers.add(r);
+	}
 	public static interface Recognizer {
 		public boolean isStopMessage(Message msg);
 		public boolean isStartMessage(Message msg);

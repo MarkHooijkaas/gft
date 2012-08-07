@@ -212,8 +212,6 @@ public class GftContainer {
 				pollers.put(name, new Poller(this, name, pollerProps.getProps(name)));
 		}
 
-		
-		
 		if (logger.isDebugEnabled()) {
 			logger.debug("Using props "+props);
 			for (String name: channels.keySet())
