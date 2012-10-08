@@ -27,11 +27,11 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 		this.filename = getFilename(); 
 
 		if ( filename.length()>1024)
-			throw new FunctionalException("Filename length should not exceed 1024 characters");
+			throw new FunctionalException("Filename length should not exceed 1024 characters, in channel "+channel.getName()+", filename "+filename);
 		if (! validCharacters.matcher(filename).matches())
-			throw new FunctionalException("Filename should only contain alphanumeric characters / . - or _");
+			throw new FunctionalException("Filename should only contain alphanumeric characters / . - or _  in channel "+channel.getName()+", filename ["+filename+"]");
 		if (filename.indexOf("..")>=0)
-			throw new FunctionalException("Filename ["+filename+"] is not allowed to contain .. pattern");
+			throw new FunctionalException("Filename ["+filename+"] is not allowed to contain .. pattern, , in channel "+channel.getName());
 		this.srcpath=calcPath(channel.srcdir, filename);
 		this.destpath=calcPath(channel.destdir, filename);
 		for (String key : channel.getContext().keys())
