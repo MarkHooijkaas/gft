@@ -28,9 +28,9 @@ public class PollerJob extends BasicTaskDefinition {
 	private int delay;
 	private boolean paused = false;
 
-	private int runs = 1;
-	private int successes = 1;
-	private int errors = 1;
+	private int runs = 0;
+	private int successes = 0;
+	private int errors = 0;
 
 	public String currentFile;
 	
