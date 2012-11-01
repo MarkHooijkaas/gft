@@ -31,6 +31,7 @@ import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.kisst.gft.GftContainer;
 import org.kisst.props4j.Props;
+import org.kisst.util.SoapUtil;
 import org.kisst.util.XmlNode;
 
 
@@ -62,8 +63,9 @@ public class HttpCaller {
 	protected XmlNode httpCall(XmlNode soap) {
 		String response = httpCall(soap.toString());
 		XmlNode result = new XmlNode(response);
-		//if (isSoapFault(result))
-		//	throw new RuntimeException("");
+		String fault = SoapUtil.getSoapFaultMessage(result);
+		if (fault!=null)
+			throw new RuntimeException("SOAP:Fault: "+fault);
 		return result;
 	}
 	
@@ -80,7 +82,6 @@ public class HttpCaller {
 			}
 			catch(RuntimeException e) {
 				if (i<hosts.length-1) {
-					//RelayTrace.logger.log(Severity.WARN, "Error trying to call host "+hostname+" trying next host "+hostnames[i+1],e);
 				}
 				else
 					throw e;
