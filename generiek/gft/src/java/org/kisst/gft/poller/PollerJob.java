@@ -87,6 +87,15 @@ public class PollerJob extends BasicTaskDefinition {
 		return name;
 	}
 
+	public String getDir() {
+		return dir;
+	}
+
+	public String getMoveToDir() {
+		return moveToDir;
+	}
+
+	
 	public int getRuns() {
 		return runs;
 	}

@@ -36,6 +36,8 @@ public class PollerServlet extends BaseServlet {
 		out.println("<td>Successes</td>");
 		out.println("<td>Errors</td>");
 		out.println("<td>TotalCount</td>");
+		out.println("<td>Directory</td>");
+		out.println("<td>Move To Directory</td>");
 		out.println("</tr>");
 
 		for (PollerJob job : poller.getJobs()) {
@@ -45,6 +47,8 @@ public class PollerServlet extends BaseServlet {
 			out.println("<td>"+job.getSuccesses()+"</td>");
 			out.println("<td>"+job.getErrors()+"</td>");
 			out.println("<td>"+job.getTotalCount()+"</td>");
+			out.println("<td>"+job.getDir()+"</td>");
+			out.println("<td>"+job.getMoveToDir()+"</td>");
 			out.println("</tr>");
 		}
 		out.println("</table>");
