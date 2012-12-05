@@ -128,4 +128,32 @@ public class ReflectionUtil {
 		catch (IllegalAccessException e) { throw new RuntimeException(e); } 
 		catch (InstantiationException e) { throw new RuntimeException(e); }
 	}
+	
+
+	public static String toString(Object obj) { return toString(obj,0); }
+	public static String toString(Object obj, int depth) {
+		// TODO: special support for Hashmaps? Lists, etc. Better indentation, newline support etc?
+		if (obj==null)
+			return "null";
+		if (obj instanceof String)
+			return "\""+obj+"\""; // TODO: escape quotes?
+		if (obj instanceof Number)
+			return obj.toString();
+		if (depth<0)
+			return obj.toString();
+		depth--;
+		StringBuilder result= new StringBuilder();
+		result.append(obj.getClass().getCanonicalName()+")");
+		String sep="";
+		for (Field field : obj.getClass().getFields()) {
+			try {
+				result.append(sep+field.getName()+"="+field.get(toString(obj, depth)));
+				sep=", ";
+			} 
+			catch (IllegalArgumentException e) { throw new RuntimeException(e);} 
+			catch (IllegalAccessException e) { throw new RuntimeException(e);}
+		}
+		result.append(")");
+		return result.toString();
+	}
 }
