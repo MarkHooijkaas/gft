@@ -28,6 +28,14 @@ public class BasicTask implements Task {
 		this.context.put("task", this);
 		this.taskdef = taskdef;
 	}
+	
+	public String toString() {
+		StringBuilder result =new StringBuilder();
+		result.append(taskdef.getName());
+		result.append(vars);
+		return result.toString();
+	}
+	
 	public TaskDefinition getTaskDefinition() { return taskdef; }
 	@Override	public String getIdentification() { return this.toString(); }
 	public void run() { taskdef.run(this); }
