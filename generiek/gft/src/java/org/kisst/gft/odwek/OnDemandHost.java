@@ -17,6 +17,7 @@ public class OnDemandHost {
 	private final String passwd;
 	private final int port;
 	private final int tracelevel;
+	private final String arslib;
 
 	private final GenericObjectPool pool=new GenericObjectPool(new OnDemandConnectionFactory());
 
@@ -26,6 +27,7 @@ public class OnDemandHost {
 		this.passwd=props.getString("password");
 		this.port=props.getInt("port");
 		this.tracelevel=props.getInt("tracelevel",0);
+		this.arslib=props.getString("ars3wapidll","ars3wapi32");
 		initNative();
 		initPool(props);
 	}
@@ -53,7 +55,7 @@ public class OnDemandHost {
 			if (nativeCount>0)
 				return;
 			nativeCount++;
-			System.loadLibrary("ars3wapi32");
+			System.loadLibrary(arslib);
 		}
 	}
 	
