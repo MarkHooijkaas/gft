@@ -14,7 +14,7 @@ started on ${gft.startupTime?datetime}<br>
 <#list modules as mod>
   <tr>
     <td>${mod.file.name}</td>
-    <td>${mod.version}</td>
+    <td>${mod.version!"no version"}</td>
     <td>${mod.mainClassname}</td>
   </tr>
 </#list> 
