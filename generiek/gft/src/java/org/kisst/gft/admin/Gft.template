@@ -4,6 +4,23 @@ started on ${gft.startupTime?datetime}<br>
 
 <a href="reset">Reset JAMON logging</a><br>
 
+<h2>Modules</h2> 
+<table> 
+  <tr>
+    <td><b>file</b></td>
+    <td><b>version</b></td>
+    <td><b>main class</b></td>
+  </tr>
+<#list modules as mod>
+  <tr>
+    <td>${mod.file.name}</td>
+    <td>${mod.version}</td>
+    <td>${mod.mainClassname}</td>
+  </tr>
+</#list> 
+</table> 
+
+
 <h2>Channels</h2> 
 <table> 
   <tr>

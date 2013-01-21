@@ -9,6 +9,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Properties;
 
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
@@ -36,6 +37,7 @@ import org.kisst.util.JarLoader;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.JamonUtil.JamonThread;
+import org.kisst.util.JarLoader.ModuleInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -322,4 +324,9 @@ public class GftContainer {
 	}
 	
 	public void appendJmsTaskCreator(JmsTaskCreator creator) {starter.appendCreator(creator); }
+
+	public List<ModuleInfo> getModuleInfo() {
+		// TODO Auto-generated method stub
+		return loader.getModuleInfo();
+	}
 }
