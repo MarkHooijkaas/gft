@@ -44,11 +44,17 @@ public class SftpPutAction implements Action {
 		
 		FileServer fileserver= ft.channel.dest;
 		FileServerConnection fsconn=fileserver.openConnection();
-		String remotefile = ft.channel.destdir + "/" + ft.filename;
-		String localfile=ft.getTempFile().getPath();
-		logger.info("sftp put localfile {} to {}", localfile, remotefile);
-		fsconn.putFromLocalFile(localfile, remotefile);
-		
+		try {
+			String remotefile = ft.channel.destdir + "/" + ft.filename;
+			String localfile=ft.getTempFile().getPath();
+			logger.info("sftp put localfile {} to {}", localfile, remotefile);
+			fsconn.putFromLocalFile(localfile, remotefile);
+		}
+		finally {
+			if (fsconn!=null)
+				fsconn.close();
+		}
+
 		return null;
 	}
 
