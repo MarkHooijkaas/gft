@@ -2,7 +2,6 @@ package org.kisst.util;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -21,21 +20,12 @@ public class JarLoader {
 		public String getMainClassname() { return mainClassname; }
 		public ModuleInfo(File f) {
 			this.file=f;
-			String tmpversion;
 			try {
 				URL url=new URL("jar:"+f.toURL()+"!/META-INF/MANIFEST.MF");
 				Manifest manifest = new Manifest(url.openStream());
 				this.mainClassname =  manifest.getMainAttributes().getValue("Main-Class");
+				this.version = manifest.getMainAttributes().getValue("Implementation-Version");
 			} catch (IOException e) { throw new RuntimeException("Could not find module Main-Class in Manifest of "+f.getName(),e);}
-			try {
-				URL url=new URL("jar:"+f.toURL()+"!/version.properties");
-				tmpversion = FileUtil.loadString(new InputStreamReader(url.openStream())).trim();
-			}
-			catch (Exception e) {
-				e.printStackTrace();
-				tmpversion=null;
-			}
-			this.version=tmpversion;
 		}
 	}
 	
