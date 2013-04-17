@@ -130,7 +130,7 @@ public class XmlNode {
 			if (e==null && optional)
 				return null;
 			if (e==null)
-				throw new RuntimeException("Could not find non-optional element "+part+" in path "+path);
+				throw new RuntimeException("Could not find non-optional element "+part+" in path "+path+" in xml "+this+ " from total message "+ this.getRoot());
 		}
 		return new XmlNode(e);
 	}
