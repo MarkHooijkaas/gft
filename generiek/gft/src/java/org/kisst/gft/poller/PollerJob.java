@@ -21,7 +21,8 @@ public class PollerJob extends BasicTaskDefinition {
 
 	private final String dir;
 	private final String moveToDir;
-	private boolean pollForEntireDirectories;
+	private final int maxNrofMoveTries;
+	private final boolean pollForEntireDirectories;
 	private final HashMap<String, DirectorySnapshot> known = new HashMap<String, DirectorySnapshot>();
 	private final HashMap<String, Integer> retries = new HashMap<String, Integer>();
 	private final FileServer fileserver;
@@ -38,15 +39,16 @@ public class PollerJob extends BasicTaskDefinition {
 
 	private final HashMap<String, FileSnapshot> knownFile = new HashMap<String, FileSnapshot>();
 
+
 	public PollerJob(GftContainer gft,Props props, FileServer fileserver) {
 		super(gft, props, "send_gft_message");
 		this.fileserver = fileserver;
 		delay = props.getInt("delay", 10000);
 		dir = TemplateUtil.processTemplate(props.getString("pollerDirectory"),gft.getContext());
 		moveToDir = TemplateUtil.processTemplate(props.getString("moveToDirectory"),gft.getContext());
-		pollForEntireDirectories = props.getBoolean("pollForEntireDirectories",
-				false);
+		pollForEntireDirectories = props.getBoolean("pollForEntireDirectories",	false);
 		paused = props.getBoolean("paused", false);
+		maxNrofMoveTries=props.getInt("maxNrofMoveTries", 3);
 	}
 
 	public PollerJob(GftContainer gft,Props props) {
@@ -123,6 +125,10 @@ public class PollerJob extends BasicTaskDefinition {
 		for (String f : fsconn.getDirectoryEntries(dir).keySet()) {
 			if (".".equals(f) || "..".equals(f))
 				continue;
+			if (retries.get(f) >= maxNrofMoveTries )
+				continue; // this file has been tried to move too many times (probably a file is in the way), it should not clog the logfile
+
+			
 			if (fsconn.isDirectory(dir + "/" + f)){
 				logger.info("directory {} gevonden, deze wordt overgeslagen bij alleen file verwerking.", dir + "/" + f);
 				continue;
@@ -151,7 +157,9 @@ public class PollerJob extends BasicTaskDefinition {
 							fsconn.move(dir + "/" + f,	moveToDir + "/" + f);
 							moved=true;
 						}
-						catch (FileCouldNotBeMovedException e) { /* ignore */ }
+						catch (FileCouldNotBeMovedException e) { 
+							logger.warn("Could not move file "+f+" to " +moveToDir, e);
+						}
 						if (moved) {
 							FoundFileTask task=new FoundFileTask(gft,this, f);
 							run(task);
@@ -164,8 +172,7 @@ public class PollerJob extends BasicTaskDefinition {
 							int aantal = retries.get(f);
 							logger.debug("retrynummer {} van {}",
 									aantal, f);
-							if (retries.get(f) < props.getInt(
-									"moveRetries", 3)) {
+							if (retries.get(f) < maxNrofMoveTries) {
 								String s = name
 										+ " - verplaatsen van file "
 										+ f
@@ -203,6 +210,8 @@ public class PollerJob extends BasicTaskDefinition {
 		for (String f : fsconn.getDirectoryEntries(dir).keySet()) {
 			if (".".equals(f) || "..".equals(f))
 				continue;
+			if (retries.get(f) >= maxNrofMoveTries )
+				continue; // this file has been tried to move too many times (probably a file is in the way), it should not clog the logfile
 			if (fsconn.isDirectory(dir + "/" + f)) {
 				logger
 						.info(
@@ -245,8 +254,7 @@ public class PollerJob extends BasicTaskDefinition {
 								int aantal = retries.get(f);
 								logger.debug("retrynummer {} van {}",
 										aantal, f);
-								if (retries.get(f) < props.getInt(
-										"moveRetries", 3)) {
+								if (retries.get(f) < maxNrofMoveTries ) {
 									String s = name
 											+ " - verplaatsen van file "
 											+ f
@@ -256,6 +264,7 @@ public class PollerJob extends BasicTaskDefinition {
 									logger.warn(s);
 									retries.put(f, aantal + 1);
 								} else {
+									retries.put(f, aantal + 1);
 									String s = name
 											+ " - verplaatsen van file "
 											+ f
