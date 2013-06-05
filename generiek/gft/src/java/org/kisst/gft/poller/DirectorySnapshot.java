@@ -2,7 +2,7 @@ package org.kisst.gft.poller;
 
 import org.kisst.gft.filetransfer.FileServerConnection;
 
-public class DirectorySnapshot {
+public class DirectorySnapshot implements Snapshot {
 	private final long timestamp;
 	private final String snapshot;
 	
@@ -16,6 +16,10 @@ public class DirectorySnapshot {
 		snapshot=result.toString();
 	}
 	
-	public boolean equals(DirectorySnapshot other) { return snapshot.equals(other.snapshot); }
+	public boolean equals(Snapshot other) {
+		if (other instanceof DirectorySnapshot)
+			return snapshot.equals(((DirectorySnapshot)other).snapshot);
+		return false;
+	}
 	public long getTimestamp() { return timestamp; }
 }

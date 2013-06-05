@@ -2,7 +2,7 @@ package org.kisst.gft.poller;
 
 import org.kisst.gft.filetransfer.FileServerConnection;
 
-public class FileSnapshot {
+public class FileSnapshot implements Snapshot {
 	private final long timestamp;
 	private final long lastModified;
 	private final long fileSize; 
@@ -18,6 +18,10 @@ public class FileSnapshot {
 		
 	}
 	
-	public boolean equals(FileSnapshot other) { return fileSnapshot.equals(other.fileSnapshot); }
+	public boolean equals(Snapshot other) {
+		if (other instanceof FileSnapshot)
+			return fileSnapshot.equals(((FileSnapshot)other).fileSnapshot);
+		return false;
+	}
 	public long getTimestamp() { return timestamp; }
 }
