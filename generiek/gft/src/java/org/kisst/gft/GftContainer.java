@@ -202,9 +202,7 @@ public class GftContainer {
 				TaskDefinition channel = mod.createDefinition(type2, p);
 				channels.put(name, channel);
 			}
-			catch (RuntimeException e) {
-				throw new RuntimeException(e.getMessage()+" while reading channel "+name,e);
-			}
+			catch (RuntimeException e) { throw new RuntimeException(e.getMessage()+" while reading channel "+name,e); }
 		}
 
 		if (props.hasKey("poller")) {
