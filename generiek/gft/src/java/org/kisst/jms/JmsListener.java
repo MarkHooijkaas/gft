@@ -13,6 +13,7 @@ import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.kisst.gft.DetailedException;
 import org.kisst.gft.FunctionalException;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
@@ -328,10 +329,15 @@ public class JmsListener implements Runnable {
 				String code="TECHERR";
 				if (e instanceof FunctionalException)
 					code="FUNCERR";
+				String text=null;
 				if (message instanceof TextMessage)
-					logger.error(code+": "+e.getMessage()+". When handling JMS message "+((TextMessage) message).getText(),e);
+					text=code+": "+e.getMessage()+". When handling JMS message "+((TextMessage) message).getText();
 				else 
-					logger.error(code+": "+e.getMessage()+". When handling JMS message of type "+ message.getClass(),e);
+					text=code+": "+e.getMessage()+". When handling JMS message of type "+ message.getClass();
+				if (e instanceof DetailedException)
+					text+=((DetailedException)e).getDetails();
+				
+				logger.error(text,e);
 				String queue=errorqueue;
 				//if (e instanceof RetryableException)
 				//	queue=retryqueue;
