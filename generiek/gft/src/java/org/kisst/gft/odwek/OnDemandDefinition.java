@@ -11,6 +11,7 @@ public class OnDemandDefinition {
 		public final String fixedValue;
 		public final boolean optional;
 		public final int maxLength;
+		public final String varName;
 		
 		Field(Props props) {
 			this.alias = props.getString("alias", null);
@@ -18,6 +19,7 @@ public class OnDemandDefinition {
 			this.fixedValue = props.getString("fixedValue", null);
 			this.optional = props.getBoolean("optional", false);
 			this.maxLength = props.getInt("maxLength", -1);
+			this.varName= props.getString("varName", null);
 		}
 	}
 	
