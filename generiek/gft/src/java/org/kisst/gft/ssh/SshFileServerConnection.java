@@ -1,10 +1,14 @@
 package org.kisst.gft.ssh;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.util.LinkedHashMap;
 import java.util.Vector;
 
 import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
 import org.kisst.gft.filetransfer.FileServerConnection;
+import org.kisst.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -102,7 +106,6 @@ public class SshFileServerConnection implements FileServerConnection {
 
 	public void getToLocalFile(String remotepath, String localpath) {
 		remotepath=fileserver.unixPath(remotepath);
-		System.out.println(remotepath);
 		try {
 			logger.info("copy file from remote {} to local {}",remotepath,localpath);
 			sftp.get(remotepath, localpath);
@@ -110,6 +113,45 @@ public class SshFileServerConnection implements FileServerConnection {
 		catch (SftpException e) { throw new RuntimeException(e); }
 	}
 
+	public String getFileContentAsString(String remotepath) {
+		remotepath=fileserver.unixPath(remotepath);
+		InputStreamReader reader = null;
+		try {
+			logger.info("get file from remote {} ",remotepath);
+			reader = new InputStreamReader(sftp.get(remotepath));
+			return FileUtil.loadString(reader);
+		} 
+		catch (SftpException e) { throw new RuntimeException(e); }
+		finally {
+			if (reader!=null) {
+				try {
+					reader.close();
+				} 
+				catch (IOException e) { throw new RuntimeException(e);}
+			}
+		}
+	}
+
+	public void putStringAsFileContent(String remotepath, String content) {
+		remotepath=fileserver.unixPath(remotepath);
+		OutputStreamWriter writer = null;
+		try {
+			logger.info("put content to remote {} ",remotepath);
+			writer = new OutputStreamWriter(sftp.put(remotepath));
+			writer.write(content);
+		} 
+		catch (SftpException e) { throw new RuntimeException(e); }
+		catch (IOException e) { throw new RuntimeException(e); }
+		finally {
+			if (writer!=null) {
+				try {
+					writer.close();
+				} 
+				catch (IOException e) { throw new RuntimeException(e);}
+			}
+		}
+	}
+	
 	@Override
 	public void putFromLocalFile(String localpath, String remotepath) {
 		remotepath=fileserver.unixPath(remotepath);

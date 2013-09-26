@@ -27,4 +27,6 @@ public interface FileServerConnection {
 	public void move(String path, String newpath);
 	public void getToLocalFile(String remotepath, String localpath); 
 	public void putFromLocalFile(String localpath, String remotepath);
+	public String getFileContentAsString(String remotepath);
+	public void putStringAsFileContent(String remotepath, String content);
 }

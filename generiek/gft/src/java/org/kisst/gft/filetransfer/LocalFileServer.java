@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.LinkedHashMap;
 
 import org.kisst.props4j.Props;
+import org.kisst.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -59,6 +60,15 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 		throw new RuntimeException("not implemented yet");  // TODO: implement
 	}
 
+	public String getFileContentAsString(String remotepath) {
+		return FileUtil.loadString(remotepath);
+	}
+	@Override
+	public void putStringAsFileContent(String remotepath, String content) {
+		FileUtil.saveString(new File(remotepath), content);
+	}
+
+	
 	@Override
 	public void putFromLocalFile(String localpath, String remotepath) {
 		throw new RuntimeException("not implemented yet"); //TODO implement
