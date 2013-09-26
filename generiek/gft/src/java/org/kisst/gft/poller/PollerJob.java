@@ -134,9 +134,9 @@ public class PollerJob extends BasicTaskDefinition {
 							logger.info(name + " - "+logname+" " + f + " is verplaatst naar " + moveToDir);
 							Task task;
 							if (pollForEntireDirectories)
-								task=new FoundDirectoryTask(gft, this, dir + "/" + f);
+								task=new FoundDirectoryTask(gft, this, fsconn, dir + "/" + f);
 							else
-								task=new FoundFileTask(gft,this, f);
+								task=new FoundFileTask(gft,this, fsconn, f);
 							run(task);
 							known.remove(f);
 							listener.updateGuiSuccess(name, successes++);
