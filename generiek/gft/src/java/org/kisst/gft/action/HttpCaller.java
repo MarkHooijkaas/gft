@@ -43,6 +43,7 @@ public class HttpCaller {
 	private final long closeIdleConnections;
 	private final HttpHost[] hosts;
 	private final int timeout;
+	private final String urlPostfix;
 	protected final GftContainer gft;
 	
 	protected HttpCaller(GftContainer gft, Props props) {
@@ -56,10 +57,10 @@ public class HttpCaller {
 		for (String hostname: hostnames)
 			hosts[i++]=gft.getHost(hostname.trim());
 		timeout = props.getInt("timeout", 30000);
+		urlPostfix=props.getString("urlPostfix", null);
 	}
 
 
-	
 	protected XmlNode httpCall(XmlNode soap) {
 		String response = httpCall(soap.toString());
 		XmlNode result = new XmlNode(response);
@@ -68,7 +69,7 @@ public class HttpCaller {
 			throw new RuntimeException("SOAP:Fault: "+fault);
 		return result;
 	}
-	
+
 	protected String httpCall(String body) {
 		for (int i=0; i<hosts.length; i++) {
 			HttpHost host=hosts[i];
@@ -91,7 +92,10 @@ public class HttpCaller {
 	}
 	
 	private PostMethod createPostMethod(HttpHost host, String body) {
-	    PostMethod method = new PostMethod(host.url);
+		String url=host.url;
+		if (urlPostfix!=null)
+			url+=urlPostfix;
+	    PostMethod method = new PostMethod(url);
 	    method.getParams().setSoTimeout(timeout);
 		try {
 			method.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
