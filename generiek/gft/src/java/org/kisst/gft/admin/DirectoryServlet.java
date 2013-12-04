@@ -18,7 +18,7 @@ public class DirectoryServlet extends BaseServlet {
 	public DirectoryServlet(GftContainer gft) { super(gft);	}
 
 	
-	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
+	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_\\&-]*");
 
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
@@ -39,7 +39,7 @@ public class DirectoryServlet extends BaseServlet {
 		if (dir.length()>1024)
 			throw new FunctionalException("Dirname length should not exceed 1024 characters");
 		if (! validCharacters.matcher(dir).matches())
-			throw new FunctionalException("Dirname should only contain alphanumeric characters / . - or _");
+			throw new FunctionalException("Dirname should only contain alphanumeric characters / . - & or _");
 		if (dir.indexOf("..")>=0)
 			throw new FunctionalException("Dirname ["+dir+"] is not allowed to contain .. pattern");
 
