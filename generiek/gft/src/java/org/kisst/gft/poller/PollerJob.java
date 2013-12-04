@@ -100,10 +100,10 @@ public class PollerJob extends BasicTaskDefinition {
 		for (String f : fsconn.getDirectoryEntries(dir).keySet()) {
 			if (".".equals(f) || "..".equals(f))
 				continue;
-			logger.debug("wat is retries: "+ retries.get(f) );
-			// nullpointer?????
-//			if (retries.get(f) >= maxNrofMoveTries )
-//				continue; // this file has been tried to move too many times (probably a file is in the way), it should not clog the logfile
+			
+			Integer trycount = retries.get(f); // test for null, because of unboxing 
+			if (trycount!=null && trycount >= maxNrofMoveTries )
+				continue; // this file has been tried to move too many times (probably a file is in the way), it should not clog the logfile
 			if (fsconn.isDirectory(dir + "/" + f) && ! pollForEntireDirectories){
 				logger.info("directory {} gevonden, deze wordt overgeslagen bij alleen file verwerking.", dir + "/" + f);
 				continue;
