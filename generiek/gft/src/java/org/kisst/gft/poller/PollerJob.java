@@ -101,8 +101,11 @@ public class PollerJob extends BasicTaskDefinition {
 			if (".".equals(f) || "..".equals(f))
 				continue;
 			
-			Integer trycount = retries.get(f); // test for null, because of unboxing 
-			if (trycount!=null && trycount >= maxNrofMoveTries )
+			int trycount = 0;
+			Integer tmp = retries.get(f); 
+			if (tmp!=null)// test for null, because of unboxing
+				trycount=tmp;
+			if (trycount >= maxNrofMoveTries )
 				continue; // this file has been tried to move too many times (probably a file is in the way), it should not clog the logfile
 			if (fsconn.isDirectory(dir + "/" + f) && ! pollForEntireDirectories){
 				logger.info("directory {} gevonden, deze wordt overgeslagen bij alleen file verwerking.", dir + "/" + f);
@@ -144,15 +147,14 @@ public class PollerJob extends BasicTaskDefinition {
 							listener.updateGuiSuccess(name, successes++);
 						} else {
 							listener.updateGuiErrors(name, errors++);
-							int aantal = retries.get(f);
-							logger.debug("retrynummer {} van {}", aantal, f);
-							if (retries.get(f) < maxNrofMoveTries) {
+							logger.debug("retrynummer {} van {}", trycount, f);
+							if (trycount < maxNrofMoveTries) {
 								logger.warn(name + " - verplaatsen van file " + f + " naar " + moveToDir + " is niet gelukt. Dit wordt later nog een keer geprobeerd.");
 							} else {
-								logger.error(name + " - verplaatsen van file " + f + " naar " + moveToDir + " is niet gelukt niet na " + aantal + " keer proberen.");
+								logger.error(name + " - verplaatsen van file " + f + " naar " + moveToDir + " is niet gelukt niet na " + trycount + " keer proberen.");
 								known.remove(f); // Zodat het weer vanaf begin opnieuw gaat, maar er is wel en Error gegeven.
 							}
-							retries.put(f, aantal + 1);
+							retries.put(f, trycount + 1);
 						}
 					}
 				} else {
