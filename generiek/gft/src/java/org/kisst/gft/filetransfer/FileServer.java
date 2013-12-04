@@ -8,5 +8,6 @@ public interface FileServer {
 	public String getBasePath();
 	public boolean fileExists(String destpath);
 	public void deleteFile(String srcpath);
+	public String getName();
 	
 }

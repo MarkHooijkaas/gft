@@ -47,10 +47,15 @@ public class PollerServlet extends BaseServlet {
 			out.println("<td>"+job.getSuccesses()+"</td>");
 			out.println("<td>"+job.getErrors()+"</td>");
 			out.println("<td>"+job.getTotalCount()+"</td>");
-			out.println("<td>"+job.getDir()+"</td>");
-			out.println("<td>"+job.getMoveToDir()+"</td>");
+			out.println("<td><a href=\"/dir/"+job.getFileServer().getName()+job.getDir()+"\">"+job.getDir()+"</a></td>");
+			out.println("<td><a href=\"/dir/"+job.getFileServer().getName()+job.getMoveToDir()+"\">"+job.getMoveToDir()+"</a></td>");
 			out.println("</tr>");
 		}
+
+		out.println("<h2>Directories</h2>");
+		out.println("<ul>");
+		out.println("</ul>");
+
 		out.println("</table>");
 		
 		out.println("<h2>Config</h2>");

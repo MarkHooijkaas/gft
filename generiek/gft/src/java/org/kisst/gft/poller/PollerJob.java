@@ -3,8 +3,6 @@ package org.kisst.gft.poller;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
-
-import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
@@ -20,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class PollerJob extends BasicTaskDefinition {
 	private static final Logger logger = LoggerFactory.getLogger(PollerJob.class);
 
+	private final Poller parent;
 	private final String dir;
 	private final String moveToDir;
 	private final int maxNrofMoveTries;
@@ -38,8 +37,9 @@ public class PollerJob extends BasicTaskDefinition {
 	
 	private PollerJobListener listener = new DummyListener();
 
-	public PollerJob(GftContainer gft,Props props, FileServer fileserver) {
-		super(gft, props, "send_gft_message");
+	public PollerJob(Poller parent,Props props, FileServer fileserver) {
+		super(parent.gft, props, "send_gft_message");
+		this.parent=parent;
 		this.fileserver = fileserver;
 		delay = props.getInt("delay", 10000);
 		dir = TemplateUtil.processTemplate(props.getString("pollerDirectory"),gft.getContext());
@@ -49,10 +49,16 @@ public class PollerJob extends BasicTaskDefinition {
 		maxNrofMoveTries=props.getInt("maxNrofMoveTries", 3);
 	}
 
-	public PollerJob(GftContainer gft,Props props) {
-		this(gft, props, null);
+	public PollerJob(Poller parent,Props props) {
+		this(parent, props, null);
 	}
 
+	public FileServer getFileServer() { 
+		if (fileserver==null)
+			return parent.getFileServer();
+		else
+			return this.fileserver;
+	}
 
 	public void runOnce(FileServerConnection parentfsconn) {
 		if (paused)

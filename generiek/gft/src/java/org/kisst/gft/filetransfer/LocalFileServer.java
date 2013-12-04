@@ -73,4 +73,7 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 	public void putFromLocalFile(String localpath, String remotepath) {
 		throw new RuntimeException("not implemented yet"); //TODO implement
 	}
+
+	@Override
+	public String getName() { return "localhost"; }
 }

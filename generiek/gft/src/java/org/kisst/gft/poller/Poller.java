@@ -52,7 +52,7 @@ public class Poller implements Runnable {
 		jobs=new PollerJob[count];
 		int i=0;
 		for (String jobname: pollerProps.keys())
-			jobs[i++]=new PollerJob(gft, pollerProps.getProps(jobname));		
+			jobs[i++]=new PollerJob(this, pollerProps.getProps(jobname));		
 	}
 	public Poller(String name, Props props) {
 		this(null, name, props);
@@ -63,6 +63,8 @@ public class Poller implements Runnable {
 	public boolean isRunning() { return thread!=null; }
 	public int getInterval() { return interval; }
 	public Props getProps() { return props; }
+	public FileServer getFileServer() { return this.fileserver; }
+
 	
 	public PollerJob[] getJobs() { return jobs; }
 	
