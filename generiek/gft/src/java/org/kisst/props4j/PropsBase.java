@@ -39,7 +39,7 @@ public abstract class PropsBase implements Props {
 		if (result!=null)
 			return result;
 		else
-			throw new RuntimeException("Could not find property "+key+" in context "+getFullName()+"\n"+this);
+			throw new RuntimeException("Could not find property "+key+" in context "+getFullName());
 	}
 
 	public String getString(String key) { 
