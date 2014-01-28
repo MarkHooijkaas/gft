@@ -45,8 +45,12 @@ public class HttpCaller {
 	private final int timeout;
 	private final String urlPostfix;
 	protected final GftContainer gft;
+
 	
 	protected HttpCaller(GftContainer gft, Props props) {
+		this(gft, props, 30000, null);
+	}
+	protected HttpCaller(GftContainer gft, Props props, int defaultTimeout, String defaultPostfix) {
 		this.gft=gft;
 		this.props=props;
 		closeIdleConnections=props.getLong("closeIdleConnections",-1);
@@ -56,8 +60,8 @@ public class HttpCaller {
 		int i=0;
 		for (String hostname: hostnames)
 			hosts[i++]=gft.getHost(hostname.trim());
-		timeout = props.getInt("timeout", 30000);
-		urlPostfix=props.getString("urlPostfix", null);
+		timeout = props.getInt("timeout", defaultTimeout);
+		urlPostfix=props.getString("urlPostfix", defaultPostfix);
 	}
 
 
