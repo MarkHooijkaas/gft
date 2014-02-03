@@ -92,6 +92,8 @@ public class PollerJob extends BasicTaskDefinition {
 	public int getSuccesses() { return successes; }
 	public int getErrors() { return errors; }
 	public boolean isPaused() { return paused; }
+	public int getNumberOfDetectedFiles() { return known.size(); }
+	public int getNumberOfProblematicFiles() { return retries.size(); }
 
 	public void setListener(PollerJobListener listener) { this.listener = listener; }
 
