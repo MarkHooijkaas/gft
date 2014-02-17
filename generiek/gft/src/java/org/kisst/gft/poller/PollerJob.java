@@ -93,7 +93,7 @@ public class PollerJob extends BasicTaskDefinition {
 	public int getErrors() { return errors; }
 	public boolean isPaused() { return paused; }
 	public int getNumberOfDetectedFiles() { return known.size(); }
-	public int getNumberOfProblematicFiles() { return retries.size(); }
+	public int getNumberOfProblematicFiles() { return retries.size() - known.size(); }
 
 	public void setListener(PollerJobListener listener) { this.listener = listener; }
 
@@ -152,6 +152,7 @@ public class PollerJob extends BasicTaskDefinition {
 								task=new FoundFileTask(gft,this, fsconn, f);
 							run(task);
 							known.remove(f);
+							retries.remove(f);
 							listener.updateGuiSuccess(name, successes++);
 						} else {
 							listener.updateGuiErrors(name, errors++);
