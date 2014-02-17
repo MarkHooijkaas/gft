@@ -51,7 +51,7 @@ public class SoapUtil {
 		if ("Envelope".equals(node.getName()))
 			node=getBody(node);
 		if ("Body".equals(node.getName()))
-			node=node.getChild( /*soapNamespace,*/ "Fault");
+			node=node.getChild( /*soapNamespace,*/ "?Fault");
 		if ("Fault".equals(node.getName()) && soapNamespace.equals(node.getNamespace()))
 			return node;
 		else 
