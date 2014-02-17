@@ -44,15 +44,15 @@ public class SoapUtil {
 	 *  This is a helper routine that is generally called on the Envelope node, but can
 	 *  also be used on the Body node, or the Fault node directly (in which case it does nothing).
 	 *  
-	 * @param node the NOM node of a SOAP Envelope, Body or Fault
-	 * @return the NOM node of the SOAP Fault element, or 0 if it is not 
+	 * @param node the XmlNode of a SOAP Envelope, Body or Fault
+	 * @return the XmlNode of the SOAP Fault element, or null if it is not a SOAP:Fault 
 	 */
 	public static XmlNode getSoapFault(XmlNode node) {
 		if ("Envelope".equals(node.getName()))
 			node=getBody(node);
-		if ("Body".equals(node.getName()))
+		if (node!=null && "Body".equals(node.getName()))
 			node=node.getChild( /*soapNamespace,*/ "?Fault");
-		if ("Fault".equals(node.getName()) && soapNamespace.equals(node.getNamespace()))
+		if (node!=null && "Fault".equals(node.getName()) && soapNamespace.equals(node.getNamespace()))
 			return node;
 		else 
 			return null;
