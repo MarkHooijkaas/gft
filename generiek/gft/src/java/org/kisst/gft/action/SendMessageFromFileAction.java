@@ -19,8 +19,6 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-import java.io.File;
-
 import javax.jms.Destination;
 import javax.jms.JMSException;
 import javax.jms.MessageProducer;
