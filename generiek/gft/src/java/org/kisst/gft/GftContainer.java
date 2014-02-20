@@ -19,6 +19,7 @@ import org.kisst.gft.action.LocalCommandAction;
 import org.kisst.gft.action.LogCompleted;
 import org.kisst.gft.action.LogError;
 import org.kisst.gft.action.LogStart;
+import org.kisst.gft.action.SendMessageFromFileAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.admin.BaseServlet;
 import org.kisst.gft.filetransfer.FileTransferModule;
@@ -106,6 +107,7 @@ public class GftContainer {
 		addAction("log_start",LogStart.class);
 		addAction("log_completed",LogCompleted.class);
 		addAction("log_error",LogError.class);
+		addAction("send_message_from_file",SendMessageFromFileAction.class);
 		
 
 		try {
