@@ -43,7 +43,7 @@ public class PollerJob extends BasicTaskDefinition {
 	private PollerJobListener listener = new DummyListener();
 
 	public PollerJob(Poller parent,Props props, FileServer fileserver) {
-		super(parent.gft, props, "send_gft_message");
+		super(parent.gft, props, null, "send_gft_message");
 		this.parent=parent;
 		this.fileserver = fileserver;
 		delay = props.getInt("delay", 10000);
