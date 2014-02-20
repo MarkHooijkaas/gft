@@ -23,6 +23,9 @@ public class PollerJob extends BasicTaskDefinition {
 	private final String moveToDir;
 	private final int maxNrofMoveTries;
 	private final boolean pollForEntireDirectories;
+	// TODO: the map of known files should be cleared once a file disappears outside of the poller,
+	// e.g. when it has been handled by a poller on another machine.
+
 	private final HashMap<String, Snapshot> known = new HashMap<String, Snapshot>();
 	private final HashMap<String, Integer> retries = new HashMap<String, Integer>();
 	private final FileServer fileserver;
@@ -32,7 +35,9 @@ public class PollerJob extends BasicTaskDefinition {
 	private int runs = 0;
 	private int successes = 0;
 	private int errors = 0;
-
+	private int nrofDetectedFiles=0;
+	private int nrofIgnoredFiles=0;
+	
 	public String currentFile;
 	
 	private PollerJobListener listener = new DummyListener();
@@ -92,8 +97,8 @@ public class PollerJob extends BasicTaskDefinition {
 	public int getSuccesses() { return successes; }
 	public int getErrors() { return errors; }
 	public boolean isPaused() { return paused; }
-	public int getNumberOfDetectedFiles() { return known.size(); }
-	public int getNumberOfProblematicFiles() { return retries.size() - known.size(); }
+	public int getNumberOfDetectedFiles() { return nrofDetectedFiles; }
+	public int getNumberOfProblematicFiles() { return nrofIgnoredFiles; }
 
 	public void setListener(PollerJobListener listener) { this.listener = listener; }
 
@@ -104,7 +109,8 @@ public class PollerJob extends BasicTaskDefinition {
 			
 		// Verwerking voor een bestand in een directory
 		logger.info("getting {}-list in directory {}", logname, dir);
-		 
+		int tmpnrofIgnoredFiles=0;
+		int tmpnrofDetectedFiles=0;
 		for (String f : fsconn.getDirectoryEntries(dir).keySet()) {
 			if (".".equals(f) || "..".equals(f))
 				continue;
@@ -113,13 +119,16 @@ public class PollerJob extends BasicTaskDefinition {
 			Integer tmp = retries.get(f); 
 			if (tmp!=null)// test for null, because of unboxing
 				trycount=tmp;
-			if (trycount >= maxNrofMoveTries )
+			if (trycount >= maxNrofMoveTries ) {
+				tmpnrofIgnoredFiles++;
 				continue; // this file has been tried to move too many times (probably a file is in the way), it should not clog the logfile
+			}
 			if (fsconn.isDirectory(dir + "/" + f) && ! pollForEntireDirectories){
 				logger.info("directory {} gevonden, deze wordt overgeslagen bij alleen file verwerking.", dir + "/" + f);
 				continue;
 			}
-				
+			tmpnrofDetectedFiles++;
+			
 			logger.info(name+ " - {} {} gevonden, controleren tot er geen wijzigingen meer zijn.", logname, f);
 			Snapshot snapshot; 
 			if (pollForEntireDirectories)
@@ -172,6 +181,8 @@ public class PollerJob extends BasicTaskDefinition {
 				}
 			}
 		}
+		this.nrofDetectedFiles=tmpnrofDetectedFiles;
+		this.nrofIgnoredFiles=tmpnrofIgnoredFiles;
 	}
 
 	@Override
