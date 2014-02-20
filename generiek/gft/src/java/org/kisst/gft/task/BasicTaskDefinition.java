@@ -27,13 +27,18 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	private long totalCount=0;
 	private long errorCount=0;
 
-	public BasicTaskDefinition(GftContainer gft, Props props, String defaultActions) {
+	// This constructor has a bit bogus defaultActions parameter that is needed for the other constructor
+	// In future this parameter might be removed
+	public BasicTaskDefinition(GftContainer gft, Props props, Action flow, String defaultActions) {
 		this.gft=gft;
 		context=gft.getContext().shallowClone();
 
 		this.props=props;
 		this.name=props.getLocalName();
-		this.action=new ActionList(this, props, defaultActions);
+		if (flow!=null)
+			this.action=flow;
+		else
+			this.action=new ActionList(this, props, defaultActions);
 		
 		SimpleProps actprops=new SimpleProps();
 
@@ -44,7 +49,12 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 		this.startAction=new ActionList(this, actprops);
 		
 		actprops.put("actions", "log_completed");
-		this.endAction=new ActionList(this, actprops);
+		this.endAction=new ActionList(this, actprops);	
+	}
+
+	// This constructor is for backward compatibility 
+	public BasicTaskDefinition(GftContainer gft, Props props, String defaultActions) {
+		this(gft,props,null,defaultActions);
 	}
 
 	public String getName() { return name; }

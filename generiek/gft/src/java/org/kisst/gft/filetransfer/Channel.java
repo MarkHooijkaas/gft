@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
+import org.kisst.gft.action.Action;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
@@ -20,8 +21,8 @@ public abstract class Channel extends BasicTaskDefinition {
 	public final String destdir;
 	public final String mode;
 
-	public Channel(GftContainer gft, Props props) {
-		super(gft, props, null);
+	public Channel(GftContainer gft, Props props, Action flow) {
+		super(gft, props, flow, null);
 		getContext().put("channel", this);
 		
 		this.src=gft.sshhosts.get(props.getString("src.host"));
@@ -42,6 +43,11 @@ public abstract class Channel extends BasicTaskDefinition {
 		this.mode=props.getString("mode", "push");
 		if (!("pull".equals(mode) || "push".equals(mode)))
 			throw new RuntimeException("mode should be push or pull, not "+mode);
+		
+	}
+
+	public Channel(GftContainer gft, Props props) {
+		this(gft, props, null);
 	}
 	
 
