@@ -13,11 +13,11 @@ import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
-import org.kisst.gft.DetailedException;
-import org.kisst.gft.FunctionalException;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.TimeWindowList;
+import org.kisst.util.exception.HasDetails;
+import org.kisst.util.exception.FunctionalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -334,8 +334,8 @@ public class JmsListener implements Runnable {
 					text=code+": "+e.getMessage()+". When handling JMS message "+((TextMessage) message).getText();
 				else 
 					text=code+": "+e.getMessage()+". When handling JMS message of type "+ message.getClass();
-				if (e instanceof DetailedException)
-					text+=((DetailedException)e).getDetails();
+				if (e instanceof HasDetails)
+					text+=((HasDetails)e).getDetails();
 				
 				logger.error(text,e);
 				String queue=errorqueue;

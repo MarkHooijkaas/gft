@@ -2,7 +2,6 @@ package org.kisst.gft.action;
 
 import java.util.LinkedHashMap;
 
-import org.kisst.gft.FunctionalException;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
@@ -10,6 +9,7 @@ import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ThreadUtil;
+import org.kisst.util.exception.BasicFunctionalException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -73,7 +73,7 @@ public class ActionList  implements Action {
 					done=true;
 				}
 				catch (RuntimeException e) {
-					if (e instanceof FunctionalException) {
+					if (e instanceof BasicFunctionalException) {
 						logger.error("action "+name+" had functional error: "+e.getMessage());
 						throw e;
 					}

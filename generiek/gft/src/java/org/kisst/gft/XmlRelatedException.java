@@ -1,13 +1,14 @@
 package org.kisst.gft;
 
 import org.kisst.util.XmlNode;
+import org.kisst.util.exception.HasDetails;
 
-public class XmlRelatedException extends DetailedException {
+public class XmlRelatedException extends RuntimeException implements HasDetails {
 	private static final long serialVersionUID = 1L;
 	private final XmlNode xml;
 
-	public XmlRelatedException(String msg, XmlNode xml) { super(msg,null); this.xml=xml;}
-	public XmlRelatedException(String msg, Throwable err, XmlNode xml) { super(msg, err,null); this.xml=xml;}
+	public XmlRelatedException(String msg, XmlNode xml) { super(msg); this.xml=xml;}
+	public XmlRelatedException(String msg, Throwable err, XmlNode xml) { super(msg, err); this.xml=xml;}
 	
 	public XmlNode getEmbeddedXml() { return xml; } 
 	

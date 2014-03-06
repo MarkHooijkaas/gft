@@ -1,6 +1,6 @@
-package org.kisst.gft;
+package org.kisst.util.exception;
 
-public class DetailedException extends RuntimeException {
+public class DetailedException extends RuntimeException implements HasDetails {
 	private static final long serialVersionUID = 1L;
 	private final String details;
 

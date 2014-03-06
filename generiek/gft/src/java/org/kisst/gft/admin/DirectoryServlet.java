@@ -9,10 +9,10 @@ import java.util.regex.Pattern;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.kisst.gft.FunctionalException;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileServerConnection.FileAttributes;
+import org.kisst.util.exception.BasicFunctionalException;
 
 public class DirectoryServlet extends BaseServlet {
 	public DirectoryServlet(GftContainer gft) { super(gft);	}
@@ -37,11 +37,11 @@ public class DirectoryServlet extends BaseServlet {
 			name=name.substring(0,pos);
 		}
 		if (dir.length()>1024)
-			throw new FunctionalException("Dirname length should not exceed 1024 characters");
+			throw new BasicFunctionalException("Dirname length should not exceed 1024 characters");
 		if (! validCharacters.matcher(dir).matches())
-			throw new FunctionalException("Dirname should only contain alphanumeric characters / . - or _");
+			throw new BasicFunctionalException("Dirname should only contain alphanumeric characters / . - or _");
 		if (dir.indexOf("..")>=0)
-			throw new FunctionalException("Dirname ["+dir+"] is not allowed to contain .. pattern");
+			throw new BasicFunctionalException("Dirname ["+dir+"] is not allowed to contain .. pattern");
 
 		out.println("<h1>Directory "+name+"</h1>");
 		out.println("<table>");
