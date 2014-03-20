@@ -36,7 +36,7 @@ import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SendMessageFromFileAction extends HttpCaller implements Action {
+public class SendMessageFromFileAction implements Action {
 
     private final static Logger logger = LoggerFactory.getLogger(SendMessageFromFileAction.class);
 
@@ -45,7 +45,6 @@ public class SendMessageFromFileAction extends HttpCaller implements Action {
     private final String basePath;
 
     public SendMessageFromFileAction(GftContainer gft, Props props) {
-        super(gft, props);
         
         basePath = TemplateUtil.processTemplate(props.getString("moveToDirectory"),gft.getContext());
         
