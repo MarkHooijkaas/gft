@@ -12,4 +12,8 @@ public interface Task {
 	public Exception getLastError();
 	public String getLastAction();
 	public void setLastAction(String name);
+	
+	public void setVar(String name, Object value);
+	public Object getVar(String name);
+	public String getStringVar(String name);
 }
