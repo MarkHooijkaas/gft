@@ -1,5 +1,7 @@
 package org.kisst.gft.admin;
 
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 import javax.servlet.http.HttpServletRequest;
@@ -101,7 +103,16 @@ public class AdminServer extends AbstractHandler {
         	handlerMap.get("default").handle(request, response);
         }
         catch (Exception e) {
-        	logger.error("Error when handling "+path, e);
+        	try {
+				PrintWriter out = response.getWriter();
+				out.println(e.getMessage());
+				out.println("<pre>");
+				e.printStackTrace(out);
+				out.println("</pre>");
+			} catch (IOException e1) {
+				// ignore the new error, and now write to the logfile anyway
+				logger.error("Error when handling "+path, e);
+			}
         }
 	}
 }
