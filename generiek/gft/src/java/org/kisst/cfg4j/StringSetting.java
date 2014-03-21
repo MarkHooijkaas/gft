@@ -38,7 +38,7 @@ public class StringSetting extends Setting {
 		if (result!=null)
 			return result;
 		if (isRequired())
-			throw new RuntimeException("config value "+fullName+" is required but missing");
+			throw new RuntimeException("config value "+fullName+" is required but missing in properties "+props.getFullName());
 		else
 			return defaultValue;
 	}
