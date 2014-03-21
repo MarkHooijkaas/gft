@@ -30,6 +30,7 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
 import org.kisst.gft.GftContainer;
+import org.kisst.http4j.HttpHost;
 import org.kisst.props4j.Props;
 import org.kisst.util.SoapUtil;
 import org.kisst.util.XmlNode;
@@ -45,7 +46,7 @@ public class HttpCaller {
 	private final int timeout;
 	private final String urlPostfix;
 	protected final GftContainer gft;
-
+	
 	
 	protected HttpCaller(GftContainer gft, Props props) {
 		this(gft, props, 30000, null);
@@ -55,7 +56,12 @@ public class HttpCaller {
 		this.props=props;
 		closeIdleConnections=props.getLong("closeIdleConnections",-1);
 		
-		String[] hostnames = props.getString("hosts").split(",");
+		String hostnameList = props.getString("host", null);
+		if (hostnameList==null)
+			hostnameList = props.getString("hosts"); // old name for backward compatibility
+		if (hostnameList==null)
+			throw new RuntimeException("host config parameter should be set");
+		String[] hostnames = hostnameList.split(",");
 		hosts=new HttpHost[hostnames.length];
 		int i=0;
 		for (String hostname: hostnames)
@@ -94,7 +100,6 @@ public class HttpCaller {
 		}
 		return null;
 	}
-	
 	private PostMethod createPostMethod(HttpHost host, String body) {
 		String url=host.url;
 		if (urlPostfix!=null)

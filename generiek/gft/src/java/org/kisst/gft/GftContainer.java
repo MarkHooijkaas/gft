@@ -14,7 +14,6 @@ import java.util.Properties;
 
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
 import org.kisst.gft.action.DeleteLocalFileAction;
-import org.kisst.gft.action.HttpHost;
 import org.kisst.gft.action.LocalCommandAction;
 import org.kisst.gft.action.LogCompleted;
 import org.kisst.gft.action.LogError;
@@ -28,6 +27,7 @@ import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.WindowsSshHost;
 import org.kisst.gft.task.TaskDefinition;
+import org.kisst.http4j.HttpHost;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MultiListener;
