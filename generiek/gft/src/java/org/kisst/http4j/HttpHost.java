@@ -22,26 +22,42 @@ package org.kisst.http4j;
 import org.apache.commons.httpclient.Credentials;
 import org.apache.commons.httpclient.NTCredentials;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.kisst.cfg4j.CompositeSetting;
+import org.kisst.cfg4j.StringSetting;
 import org.kisst.props4j.Props;
 import org.kisst.util.CryptoUtil;
 
 public class HttpHost {
+	public static class Settings extends CompositeSetting {
+		public final StringSetting url = new StringSetting(this, "url", null); // TODO: mandatory?; 
+		public final StringSetting username = new StringSetting(this, "username", null);  
+		public final StringSetting password = new StringSetting(this, "password", null);
+		public final StringSetting encryptedPassword = new StringSetting(this, "encryptedPassword", null);
+		public final StringSetting ntlmhost   = new StringSetting(this, "ntlmhost", null); // TODO: is this necessary 
+		public final StringSetting ntlmdomain = new StringSetting(this, "ntlmdomain", null); 
+
+		public Settings(CompositeSetting parent, String name) { super(parent, name); }
+	}
+	
 	public final String url; 
 	public final String username;  
 	public final String password;
 	public final String ntlmhost; 
 	public final String ntlmdomain; 
 
+	private static Settings unconnectedSettings = new Settings(null,"");
+	
+	public HttpHost(Props props) { this(unconnectedSettings, props); }
 
-	public HttpHost(Props props) {
-		url=props.getString("url", null);
-		username=props.getString("username", null);
-		if (props.getString("password", null)!=null)
-			password=props.getString("password");
+	public HttpHost(Settings settings, Props props) {
+		url=settings.url.get(props);
+		username=settings.username.get(props);
+		if (settings.password.get(props)!=null)
+			password=settings.password.get(props);
 		else
-			password=CryptoUtil.decrypt(props.getString("encryptedPassword"));
-		ntlmhost=props.getString("ntlmhost", null);
-		ntlmdomain=props.getString("ntlmdomain", null);
+			password=CryptoUtil.decrypt(settings.encryptedPassword.get(props));
+		ntlmhost=settings.ntlmhost.get(props);
+		ntlmdomain=settings.ntlmdomain.get(props);
 	}
 	
 	public String toString() { return "HttpHost("+username+","+url+")"; }
