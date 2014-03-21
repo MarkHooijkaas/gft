@@ -28,6 +28,7 @@ import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.WindowsSshHost;
 import org.kisst.gft.task.TaskDefinition;
 import org.kisst.http4j.HttpHost;
+import org.kisst.http4j.HttpHostMap;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MultiListener;
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
 
 
 
-public class GftContainer {
+public class GftContainer implements HttpHostMap {
 	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
 
 	private final String topname;
@@ -126,6 +127,9 @@ public class GftContainer {
 	public SimpleProps getContext() {return context; }
 	public ClassLoader getSpecialClassLoader() { return loader.getClassLoader(); }
 	public String getTopname() { return topname; }
+	public HttpHost getHttpHost(String name) { return httphosts.get(name); }
+
+	
 	
 	public void init() {
 		this.jamonThread = new JamonThread(props);
