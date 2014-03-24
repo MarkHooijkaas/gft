@@ -21,25 +21,17 @@ package org.kisst.cfg4j;
 
 import org.kisst.props4j.Props;
 
-public class StringSetting extends Setting {
-	private final String defaultValue;
+public class StringSetting extends StringBasedSetting {
 
 	public StringSetting(CompositeSetting parent, String name) {
-		super(parent, name, true);
-		this.defaultValue=null;
+		super(parent, name);
 	}
 
 	public StringSetting(CompositeSetting parent, String name, String defaultValue) {
-		super(parent, name);
-		this.defaultValue=defaultValue;
+		super(parent, name, defaultValue);
 	}
-	public String get(Props props) {
-		String result = props.getString(fullName, null);
-		if (result!=null)
-			return result;
-		if (isRequired())
-			throw new RuntimeException("config value "+fullName+" is required but missing in properties "+props.getFullName());
-		else
-			return defaultValue;
-	}
+	
+	public String get(Props props) { return getStringValue(props); }
+
+	public DefaultSpecification useDefault(String defaultValue) { return new DefaultSpecification(this, defaultValue); }
 }

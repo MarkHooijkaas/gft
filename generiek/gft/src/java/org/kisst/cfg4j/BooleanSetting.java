@@ -21,16 +21,12 @@ package org.kisst.cfg4j;
 
 import org.kisst.props4j.Props;
 
-
-
-public class BooleanSetting extends Setting {
-	private final boolean defaultValue;
-
+public class BooleanSetting extends StringBasedSetting {
 	public BooleanSetting(CompositeSetting parent, String name, boolean defaultValue) {
-		super(parent, name);
-		this.defaultValue=defaultValue;
+		super(parent, name, convertToString(defaultValue));
 	}
-	public boolean get(Props props) {	
-		return props.getBoolean(fullName, defaultValue);
+	public boolean get(Props props) {	return Boolean.valueOf(getStringValue(props));  }
+	public DefaultSpecification useDefault(boolean defaultValue) { 
+		return new DefaultSpecification(this, convertToString(defaultValue));
 	}
 }

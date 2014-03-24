@@ -20,17 +20,35 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 package org.kisst.cfg4j;
 
 import java.util.ArrayList;
-
-//import org.apache.log4j.Logger;
+import java.util.HashMap;
 
 public class CompositeSetting extends Setting {
 	private final ArrayList<Setting> settings=new ArrayList<Setting>();
-	
+	private final HashMap<String, DefaultSpecification > defaults = new HashMap<String, DefaultSpecification>();
+
 	public CompositeSetting (String name) {
-		super(null, name);
+		this(null, name);
 	}
-	public CompositeSetting(CompositeSetting parent, String name) {
+
+	public CompositeSetting(CompositeSetting parent, String name, DefaultSpecification... otherDefaultValues) {
 		super(parent, name);
+		for (DefaultSpecification dv : otherDefaultValues) { 
+			if (dv.setting.parent!=null && dv.setting.parent.getClass()!=this.getClass())
+				throw new RuntimeException("Class of parent of changed default setting "+dv.setting+" is different from class composite setting "+this);
+			defaults.put(dv.setting.name, dv);
+		}
 	}
+
 	public void add(Setting s) { settings.add(s); }
+	
+	public DefaultSpecification getDefaultSpecification(StringBasedSetting setting) {
+		DefaultSpecification dv = defaults.get(setting.name);
+		if (dv==null)
+			return null;
+		if (dv.setting.getClass()!=setting.getClass())
+			throw new RuntimeException("Class of changed default setting "+dv.setting+" is different from class of setting "+setting);
+		return dv;
+	}
+	
+	
 }

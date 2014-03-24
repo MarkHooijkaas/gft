@@ -21,12 +21,13 @@ package org.kisst.cfg4j;
 
 import org.kisst.props4j.Props;
 
-public class LongSetting extends Setting {
-	private final long defaultValue;
+public class LongSetting extends StringBasedSetting {
 
 	public LongSetting(CompositeSetting parent, String name, long defaultValue) {
-		super(parent, name);
-		this.defaultValue=defaultValue;
+		super(parent, name, convertToString(defaultValue));
 	}
-	public long get(Props props) {	return props.getLong(fullName, defaultValue);  }
+	public long get(Props props) { return Long.valueOf(getStringValue(props));  }
+	public DefaultSpecification useDefault(long defaultValue) { 
+		return new DefaultSpecification(this, convertToString(defaultValue));
+	}
 }

@@ -21,12 +21,13 @@ package org.kisst.cfg4j;
 
 import org.kisst.props4j.Props;
 
-public class IntSetting extends Setting {
-	private final int defaultValue;
+public class IntSetting extends StringBasedSetting {
 
 	public IntSetting(CompositeSetting parent, String name, int defaultValue) {
-		super(parent, name);
-		this.defaultValue=defaultValue;
+		super(parent, name, convertToString(defaultValue));
 	}
-	public int get(Props props) {	return props.getInt(fullName, defaultValue);  }
+	public int get(Props props) {	return Integer.valueOf(getStringValue(props));  }
+	public DefaultSpecification useDefault(int defaultValue) { 
+		return new DefaultSpecification(this, convertToString(defaultValue));
+	}
 }
