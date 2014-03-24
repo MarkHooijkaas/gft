@@ -58,5 +58,7 @@ public class Setting {
 
 	public boolean isRequired() { return required; }
 	
-	// TODO: implement defaultValue as in StringSetting
+	public String toString() {
+		return this.getClass().getSimpleName()+"("+fullName+")";
+	}
 }
