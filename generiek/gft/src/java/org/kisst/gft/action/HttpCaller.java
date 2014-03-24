@@ -48,10 +48,10 @@ public class HttpCaller {
 	protected final GftContainer gft;
 	
 	
-	protected HttpCaller(GftContainer gft, Props props) {
+	public HttpCaller(GftContainer gft, Props props) {
 		this(gft, props, 30000, null);
 	}
-	protected HttpCaller(GftContainer gft, Props props, int defaultTimeout, String defaultPostfix) {
+	public HttpCaller(GftContainer gft, Props props, int defaultTimeout, String defaultPostfix) {
 		this.gft=gft;
 		this.props=props;
 		closeIdleConnections=props.getLong("closeIdleConnections",-1);
@@ -71,7 +71,7 @@ public class HttpCaller {
 	}
 
 
-	protected XmlNode httpCall(XmlNode soap) {
+	public XmlNode httpCall(XmlNode soap) {
 		String response = httpCall(soap.toString());
 		XmlNode result = new XmlNode(response);
 		String fault = SoapUtil.getSoapFaultMessage(result);
@@ -80,7 +80,7 @@ public class HttpCaller {
 		return result;
 	}
 
-	protected String httpCall(String body) {
+	public String httpCall(String body) {
 		for (int i=0; i<hosts.length; i++) {
 			HttpHost host=hosts[i];
 			PostMethod method = createPostMethod(host, body);
