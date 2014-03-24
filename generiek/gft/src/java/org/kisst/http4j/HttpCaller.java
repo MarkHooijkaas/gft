@@ -31,10 +31,26 @@ import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.kisst.cfg4j.CompositeSetting;
+import org.kisst.cfg4j.DefaultSpecification;
+import org.kisst.cfg4j.IntSetting;
+import org.kisst.cfg4j.LongSetting;
+import org.kisst.cfg4j.StringSetting;
 import org.kisst.props4j.Props;
 
 
 public class HttpCaller {
+	public static class Settings extends CompositeSetting {
+		public final StringSetting host = new StringSetting(this, "host");
+		public final LongSetting closeIdleConnections = new LongSetting(this, "closeIdleConnections", -1);  
+		public final IntSetting timeout = new IntSetting(this, "timeout", 30000);  
+		public final StringSetting urlPostfix = new StringSetting(this, "urlPostfix", null);
+
+		public Settings(CompositeSetting parent, String name, DefaultSpecification... args) { super(parent, name, args); }
+	}
+	
+	public static final Settings defaults= new Settings(null, null);
+
 	private static final MultiThreadedHttpConnectionManager connmngr = new MultiThreadedHttpConnectionManager();
 	private static final HttpClient client = new HttpClient(connmngr);
 
@@ -44,28 +60,21 @@ public class HttpCaller {
 	private final int timeout;
 	private final String urlPostfix;
 	
-	public static class Defaults {
-		private int timeout=30000;
-		private String urlPostfix=null;
-		public Defaults timeout(int timeout) {this.timeout=timeout; return this; }
-		public Defaults urlPostfix(String urlPostfix) {this.urlPostfix=urlPostfix; return this; }
-	}
-	private static Defaults defaults=new Defaults();
-	
+
 	public HttpCaller(HttpHostMap hostMap,  Props props) {
 		this(hostMap, props, defaults);
 	}
 	
-	public HttpCaller(HttpHostMap hostMap, Props props, Defaults defaults) {
+	public HttpCaller(HttpHostMap hostMap, Props props, Settings settings) {
 		this.props=props;
-		closeIdleConnections=props.getLong("closeIdleConnections",-1);
+		closeIdleConnections=settings.closeIdleConnections.get(props);
 		
-		String hostname = props.getString("host", null);
-		if (hostname==null)
-			throw new RuntimeException("host config parameter should be set");
+		String hostname = settings.host.get(props);
+		//if (hostname==null)
+		//	throw new RuntimeException("host config parameter should be set");
 		host=hostMap.getHttpHost(hostname.trim());
-		timeout = props.getInt("timeout", defaults.timeout);
-		urlPostfix=props.getString("urlPostfix", defaults.urlPostfix);
+		timeout = settings.timeout.get(props);
+		urlPostfix=settings.urlPostfix.get(props);
 	}
 
 	public String getCompleteUrl(String url) { return host.url+url+urlPostfix; } // TODO: make smarter with / and ? handling

@@ -45,7 +45,7 @@ public class HttpHost {
 	public final String ntlmhost; 
 	public final String ntlmdomain; 
 
-	private static Settings unconnectedSettings = new Settings(null,"");
+	private static Settings unconnectedSettings = new Settings(null, null);
 	
 	public HttpHost(Props props) { this(unconnectedSettings, props); }
 
