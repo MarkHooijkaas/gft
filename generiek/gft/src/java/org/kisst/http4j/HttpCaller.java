@@ -44,12 +44,12 @@ public class HttpCaller {
 		public final StringSetting host = new StringSetting(this, "host");
 		public final LongSetting closeIdleConnections = new LongSetting(this, "closeIdleConnections", -1);  
 		public final IntSetting timeout = new IntSetting(this, "timeout", 30000);  
-		public final StringSetting urlPostfix = new StringSetting(this, "urlPostfix", null);
+		//public final StringSetting urlPostfix = new StringSetting(this, "urlPostfix", null);
 
 		public Settings(CompositeSetting parent, String name, DefaultSpecification... args) { super(parent, name, args); }
 	}
 	
-	public static final Settings defaults= new Settings(null, null);
+	public static final Settings settings= new Settings(null, null);
 
 	private static final MultiThreadedHttpConnectionManager connmngr = new MultiThreadedHttpConnectionManager();
 	private static final HttpClient client = new HttpClient(connmngr);
@@ -58,11 +58,11 @@ public class HttpCaller {
 	private final long closeIdleConnections;
 	protected final HttpHost host;
 	private final int timeout;
-	private final String urlPostfix;
+	//private final String urlPostfix;
 	
 
 	public HttpCaller(HttpHostMap hostMap,  Props props) {
-		this(hostMap, props, defaults);
+		this(hostMap, props, settings);
 	}
 	
 	public HttpCaller(HttpHostMap hostMap, Props props, Settings settings) {
@@ -74,18 +74,18 @@ public class HttpCaller {
 		//	throw new RuntimeException("host config parameter should be set");
 		host=hostMap.getHttpHost(hostname.trim());
 		timeout = settings.timeout.get(props);
-		urlPostfix=settings.urlPostfix.get(props);
+		//urlPostfix=settings.urlPostfix.get(props);
 	}
 
-	public String getCompleteUrl(String url) { return host.url+url+urlPostfix; } // TODO: make smarter with / and ? handling
+	public String getCompleteUrl(String url) { return host.url+url; } // TODO: make smarter with / and ? handling
 
 	public String httpGet(String url) {
 	    GetMethod method = new GetMethod(getCompleteUrl(url)); 
 		return httpCall(method);
 	}
 	
-	public String httpPost(String body) {
-	    PostMethod method = new PostMethod(getCompleteUrl(""));
+	public String httpPost(String url, String body) {
+	    PostMethod method = new PostMethod(getCompleteUrl(url));
 		try {
 			method.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
 		}
