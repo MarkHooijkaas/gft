@@ -55,7 +55,6 @@ public class XmlNode {
 		catch (JDOMException e) { throw new RuntimeException(e); }
 		catch (IOException e) { throw new RuntimeException(e); }
 		this.element =doc.getRootElement();
-
 	}
 	
 	@Override public XmlNode clone() { return new XmlNode((Element) this.element.clone()); }
@@ -184,6 +183,15 @@ public class XmlNode {
 			return this;
 		else
 			return new XmlNode(e);
+	}
+	
+	public boolean equals(Object obj) {
+		if (obj==this)
+			return true;
+		if (! (obj instanceof XmlNode))
+			return false;
+		XmlNode other=(XmlNode) obj;
+		return this.element.equals(other.element);
 	}
 }
 
