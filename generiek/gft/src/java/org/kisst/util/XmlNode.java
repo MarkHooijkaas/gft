@@ -191,7 +191,22 @@ public class XmlNode {
 		if (! (obj instanceof XmlNode))
 			return false;
 		XmlNode other=(XmlNode) obj;
-		return this.element.equals(other.element);
+		if (! this.getName().equals(other.getName()))
+			return false;
+		if (! this.getNamespace().equals(other.getNamespace()))
+			return false;
+		if (! this.getText().equals(other.getText()))
+			return false;
+		List<XmlNode> c1 = this.getChildren();
+		List<XmlNode> c2 = this.getChildren();
+		if (c1.size()!=c2.size())
+			return false;
+		for (int i=0; i<c1.size(); i++) {
+			if (! c1.get(i).equals(c2.get(i)))
+				return false;
+		}
+		// TODO: compare attributes, but beware of order and xmlns definitions etc.
+		return true;
 	}
 }
 
