@@ -234,7 +234,6 @@ public class GftContainer implements HttpHostMap {
 		}
 	}
 	public TaskDefinition getTaskDefinition(String name) { return channels.get(name); }
-	public HttpHost getHost(String name) { return httphosts.get(name); }
 	public String processTemplate(File template, Object context) { return TemplateUtil.processTemplate(template, context); }
 	public String processTemplate(String templateText, Object context) { return TemplateUtil.processTemplate(templateText, context); }
 

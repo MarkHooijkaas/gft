@@ -65,7 +65,7 @@ public class HttpCaller {
 		hosts=new HttpHost[hostnames.length];
 		int i=0;
 		for (String hostname: hostnames)
-			hosts[i++]=gft.getHost(hostname.trim());
+			hosts[i++]=gft.getHttpHost(hostname.trim());
 		timeout = props.getInt("timeout", defaultTimeout);
 		urlPostfix=props.getString("urlPostfix", defaultPostfix);
 	}
