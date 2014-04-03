@@ -116,6 +116,7 @@ public class GftContainer implements HttpHostMap {
 		}
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
 		loader=new JarLoader("./modules");
+		init();
 	}
 
 	public JmsSystem getQueueSystem(String name) { 
@@ -131,8 +132,7 @@ public class GftContainer implements HttpHostMap {
 
 	
 	
-	public void init() {
-		this.jamonThread = new JamonThread(props);
+	private void init() {
 		context.put("global", props.get("global", null));
 		
 		tempdir = context.getString("global.tempdir");
@@ -241,10 +241,14 @@ public class GftContainer implements HttpHostMap {
 	public void addServlet(String url, BaseServlet servlet) { admin.addServlet(url, servlet); }
 
 	public void start() {
-		init();
 		logger.info("Starting GftContainer on host "+hostName);
 		LogService.log("info", "start", getTopname().toUpperCase()+" Service", hostName, "Starting "+getTopname().toUpperCase()+" Service on host "+ hostName);
 
+		this.jamonThread = new JamonThread(props);
+		Thread t = new Thread(jamonThread);
+		t.setDaemon(true);
+		t.start();
+		
 		if (logger.isDebugEnabled()){
 			logger.debug("Starting GftContainer with props {}", props.toString());
 		}
