@@ -28,8 +28,12 @@ public class BasicTask implements Task {
 		this.context.put("task", this);
 		this.taskdef = taskdef;
 	}
+
+	@Override
+	public String toString() { return toString(""); }
+	protected String toString(String details) {	return this.getClass().getSimpleName()+"("+this.taskdef.getName()+":"+details+")"; }
 	
-	public String toString() {
+	public String toFullString() {
 		StringBuilder result =new StringBuilder();
 		result.append(taskdef.getName());
 		result.append(vars);
@@ -37,7 +41,7 @@ public class BasicTask implements Task {
 	}
 	
 	public TaskDefinition getTaskDefinition() { return taskdef; }
-	@Override	public String getIdentification() { return this.toString(); }
+	@Override	public String getIdentification() { return toString(""); }
 	public void run() { taskdef.run(this); }
 	
 	public void save() {  throw new RuntimeException("save not implemented yet"); }

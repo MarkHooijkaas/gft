@@ -127,6 +127,6 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 			return  "bestand: "+ft.srcpath+ ", van: "+ft.channel.src+"/"+ft.srcpath+" naar: "+ft.channel.dest+"/"+ft.destpath;
 		}
 		else
-			return "";
+			return task.toString();
 	}
 }

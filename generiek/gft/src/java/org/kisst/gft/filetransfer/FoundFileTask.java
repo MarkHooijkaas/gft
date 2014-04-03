@@ -13,5 +13,5 @@ public class FoundFileTask extends BasicTask {
 		this.fsconn=fsconn;
 		this.filename = filename;
 	}
-
+	@Override public String toString() { return toString(filename); }
 }

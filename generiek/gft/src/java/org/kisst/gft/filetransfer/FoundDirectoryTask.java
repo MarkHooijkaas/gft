@@ -14,4 +14,5 @@ public class FoundDirectoryTask extends BasicTask {
 		this.filename = filename;
 	}
 
+	@Override public String toString() { return toString(filename); }
 }

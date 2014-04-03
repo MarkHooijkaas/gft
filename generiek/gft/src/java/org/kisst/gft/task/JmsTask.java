@@ -12,9 +12,7 @@ public class JmsTask extends BasicTask implements TextTask {
 		this.msg=msg;
 	}
 
-	public String toString() {
-		return super.toString()+",message=["+getText()+"]";
-	}
+	public String toString() {	return toString(msg==null ? "" : msg.getMessageId());}
 	
 	public JmsMessage getJmsMessage() { return msg; }
 
