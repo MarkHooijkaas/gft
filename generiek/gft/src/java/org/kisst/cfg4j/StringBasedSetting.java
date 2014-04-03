@@ -26,7 +26,11 @@ public class StringBasedSetting extends Setting {
 
 	protected StringBasedSetting(CompositeSetting parent, String name) {
 		super(parent, name, true);
-		this.defaultValue=null;
+		DefaultSpecification dv = parent.getDefaultSpecification(this);
+		if (dv==null)
+			this.defaultValue=null;
+		else
+			this.defaultValue=dv.defaultValue;
 	}
 
 	protected StringBasedSetting(CompositeSetting parent, String name, String defaultValue) {

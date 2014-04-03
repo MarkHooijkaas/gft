@@ -36,7 +36,10 @@ public class Setting {
 	public Setting(CompositeSetting parent, String name, boolean required) {
 		this.parent=parent;
 		this.name=name;
-		this.required=required;
+		if (parent==null)
+			this.required=required;
+		else
+			this.required= required && !parent.hasDefaultSpecification(this);
 		if(parent==null) 
 			fullName=name;
 		else {

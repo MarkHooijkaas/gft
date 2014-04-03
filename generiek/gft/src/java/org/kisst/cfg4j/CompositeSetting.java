@@ -49,6 +49,12 @@ public class CompositeSetting extends Setting {
 			throw new RuntimeException("Class of changed default setting "+dv.setting+" is different from class of setting "+setting);
 		return dv;
 	}
+
+	public boolean hasDefaultSpecification(Setting setting) {
+		if (! (setting instanceof StringBasedSetting))
+			return false;
+		return getDefaultSpecification((StringBasedSetting) setting)!=null;
+	}
 	
 	
 }
