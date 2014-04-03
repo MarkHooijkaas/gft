@@ -52,10 +52,16 @@ public class HttpHost {
 	public HttpHost(Settings settings, Props props) {
 		url=settings.url.get(props);
 		username=settings.username.get(props);
-		if (settings.password.get(props)!=null)
+		if (username==null)
+			password=null;
+		else if (settings.password.get(props)!=null)
 			password=settings.password.get(props);
-		else
-			password=CryptoUtil.decrypt(settings.encryptedPassword.get(props));
+		else {
+			String encryptedPassword = settings.encryptedPassword.get(props);
+			if (encryptedPassword==null)
+				throw new RuntimeException("Could not find a password or encrypted Password for http "+props.getFullName()+" with url "+url+" and with username "+username);
+			password=CryptoUtil.decrypt(encryptedPassword); 
+		}
 		ntlmhost=settings.ntlmhost.get(props);
 		ntlmdomain=settings.ntlmdomain.get(props);
 	}
