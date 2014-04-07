@@ -56,10 +56,10 @@ public class HomeServlet extends BaseServlet {
 		}
 		out.println("</table>");
 
-		out.println("<h2>HTTP Hosts</h2>");
+		out.println("<h2>HTTP Hostjes</h2>");
 		out.println("<table>");
-		for (String name : gft.httphosts.keySet()) {
-			out.println("<tr><td>"+name+"</td><td>"+gft.httphosts.get(name)+"</td></tr>");
+		for (String name : gft.getHttpHostNames()) {
+			out.println("<tr><td>"+name+"</td><td>"+gft.getHttpHost(name)+"</td></tr>");
 		}
 		out.println("</table>");
 

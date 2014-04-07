@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
 import org.kisst.gft.action.DeleteLocalFileAction;
@@ -27,6 +28,7 @@ import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.WindowsSshHost;
 import org.kisst.gft.task.TaskDefinition;
+import org.kisst.http4j.BasicHttpHostMap;
 import org.kisst.http4j.HttpHost;
 import org.kisst.http4j.HttpHostMap;
 import org.kisst.jms.ActiveMqSystem;
@@ -54,9 +56,12 @@ public class GftContainer implements HttpHostMap {
 	private final AdminServer admin=new AdminServer(this);
 	public final Props props;
 
+	private final BasicHttpHostMap httpHosts;
+	
 	public final HashMap<String, TaskDefinition> channels= new LinkedHashMap<String, TaskDefinition>();
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
-	public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
+	//public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
+	
 	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>();
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
@@ -116,6 +121,7 @@ public class GftContainer implements HttpHostMap {
 		}
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
 		loader=new JarLoader("./modules");
+		httpHosts = new BasicHttpHostMap(props.getProps("http.host"));
 		init();
 	}
 
@@ -128,8 +134,8 @@ public class GftContainer implements HttpHostMap {
 	public SimpleProps getContext() {return context; }
 	public ClassLoader getSpecialClassLoader() { return loader.getClassLoader(); }
 	public String getTopname() { return topname; }
-	public HttpHost getHttpHost(String name) { return httphosts.get(name); }
-
+	public HttpHost getHttpHost(String name) { return httpHosts.getHttpHost(name); }
+	public Set<String> getHttpHostNames() { return httpHosts.getHttpHostNames(); }
 	
 	
 	private void init() {
@@ -140,13 +146,6 @@ public class GftContainer implements HttpHostMap {
 		addDynamicModules(props);
 		for (Module mod: modules.values())
 			mod.init(props);
-
-		//actions.put("copy", new RemoteScpAction());
-		if (props.get("http.host",null)!=null) {
-			Props hostProps=props.getProps("http.host");
-			for (String name: hostProps.keys())
-				httphosts.put(name, new HttpHost(hostProps.getProps(name)));
-		}
 
 		if (props.get("ssh.host",null)!=null) {
 			Props hostProps=props.getProps("ssh.host");
@@ -225,8 +224,8 @@ public class GftContainer implements HttpHostMap {
 				logger.info("Channel {}\t{}",name,channels.get(name));
 			for (String name: actions.keySet())
 				logger.info("Action {}\t{}",name,actions.get(name));
-			for (String name: httphosts.keySet())
-				logger.info("HttpHost {}\t{}",name,httphosts.get(name));			
+			for (String name: getHttpHostNames())
+				logger.info("HttpHost {}\t{}",name,getHttpHost(name));			
 			for (String name: sshhosts.keySet())
 				logger.info("SshHost {}\t{}",name,sshhosts.get(name));			
 			for (String name: listeners.keySet())

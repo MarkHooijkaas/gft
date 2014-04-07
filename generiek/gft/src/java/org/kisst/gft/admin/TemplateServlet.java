@@ -36,7 +36,7 @@ public class TemplateServlet extends BaseServlet {
 			root.put("gft", gft);
 			root.put("channels", gft.channels);
 			root.put("sshhosts", gft.sshhosts);
-			root.put("httphosts", gft.httphosts);
+			//root.put("httphosts", gft.httphosts);
 			root.put("actions", gft.actions);
 			root.put("listeners", gft.listeners);
 			root.put("pollers", gft.pollers);
