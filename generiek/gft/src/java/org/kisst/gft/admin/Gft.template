@@ -102,8 +102,8 @@ started on ${gft.startupTime?datetime}<br>
 
 <h2>HTTP Hosts</h2> 
 <table> 
-<#list httphosts?keys as name>
-<tr><td><a href=rest/httphost/${name}>${name}</a></td><td>${httphosts[name]}</td></tr> 
+<#list gft.getHttpHostNames() as name>
+<tr><td><a href=rest/httphost/${name}>${name}</a></td><td>${gft.getHttpHost(name)}</td></tr> 
 </#list> 
 </table> 
 
