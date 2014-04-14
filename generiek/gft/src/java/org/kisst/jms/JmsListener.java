@@ -16,11 +16,16 @@ import javax.jms.TextMessage;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.TimeWindowList;
-import org.kisst.util.exception.HasDetails;
 import org.kisst.util.exception.FunctionalException;
+import org.kisst.util.exception.HasDetails;
+import org.kisst.util.exception.MappedStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ibm.mq.jms.JMSC;
+import com.ibm.mq.jms.MQQueue;
+
+@SuppressWarnings("deprecation")
 public class JmsListener implements Runnable {
 	private final static Logger logger=LoggerFactory.getLogger(JmsListener.class); 
 
@@ -29,6 +34,7 @@ public class JmsListener implements Runnable {
 	private final Props props;
 	public final String queue;
 	public final String errorqueue;
+	public final boolean useJmsPropsForErrorMessages;
 	//public final String retryqueue;
 	private final int receiveErrorRetries;
 	private final int receiveErrorRetryDelay;
@@ -57,6 +63,7 @@ public class JmsListener implements Runnable {
 		//this.retryqueue=TemplateUtil.processTemplate(props.getString("retryqueue"), context);
 		this.receiveErrorRetries = props.getInt("receiveErrorRetries", 1000);
 		this.receiveErrorRetryDelay = props.getInt("receiveErrorRetryDelay", 60000);
+		this.useJmsPropsForErrorMessages=props.getBoolean("useJmsPropsForErrorMessages", true);
 		String timewindow=props.getString("forbiddenTimes", null);
 		if (timewindow==null)
 			this.forbiddenTimes=null;
@@ -344,8 +351,13 @@ public class JmsListener implements Runnable {
 				Destination errordestination = session.createQueue(queue+system.sendParams);
 				MessageProducer producer = session.createProducer(errordestination);
 				Message errmsg=JmsUtil.cloneMessage(session, message);
+				if (useJmsPropsForErrorMessages && e instanceof MappedStateException) {
+					try { ((MQQueue) errordestination).setTargetClient(JMSC.MQJMS_CLIENT_JMS_COMPLIANT); } catch (Exception e2) { /* ignore */}
+					MappedStateException me = (MappedStateException) e;
+					for (String key: me.getKeys()) 
+						errmsg.setStringProperty("state_"+key, me.getState(key));
+				}
 				producer.send(errmsg);
-
 				producer.close();
 				logger.info("message send to queue {}",queue);
 				messageHandled=true;

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import org.kisst.gft.task.JmsTask;
 import org.kisst.jms.JmsMessage;
 import org.kisst.jms.MessageHandler;
+import org.kisst.util.exception.MappedStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +32,12 @@ public class TaskStarter implements MessageHandler {
 		Monitor mon1 = MonitorFactory.start("channel:"+task.getTaskDefinition().getName());
 		try {
 			task.run();
+		}
+		catch (Exception e) {
+			MappedStateException mse = new MappedStateException(e);
+			mse.addState("LAST_ACTION", task.getLastAction());
+			mse.addState("LAST_ERROR", task.getLastError().getMessage());
+			throw(mse);
 		}
 		finally {
 			mon1.stop();

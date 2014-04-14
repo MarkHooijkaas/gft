@@ -67,13 +67,14 @@ public class ListenerServlet extends BaseServlet {
 					throw new RuntimeException("Invalid queuename "+qname);
 
 				out.println("<h2>"+q+"</h2>");
-				out.println("<ul>");
+				out.println("<table>");
+				out.println("<tr><td width=800><b>message</b></td><td><b>action</b></td><td><b>error</b></td></tr>");
 				Queue destination = session.createQueue(q);
 				QueueBrowser browser = session.createBrowser(destination);
 				Enumeration<?> e = browser.getEnumeration();
 				while (e.hasMoreElements()) {
 					Message msg = (Message) e.nextElement();
-					out.println("<li> "+format.format(new Date(msg.getJMSTimestamp())));
+					out.println("<tr><td> "+format.format(new Date(msg.getJMSTimestamp())));
 					out.println("<a href=\"/message/"+name+"/"+qname+"/"+msg.getJMSMessageID()+"\">");
 					try {
 						if (ControlMessage.isStartMessage(msg))
@@ -89,9 +90,13 @@ public class ListenerServlet extends BaseServlet {
 					catch (RuntimeException ex) {
 						out.println("Unknown format, id="+msg.getJMSMessageID());
 					}
-					out.println("</a></li>");
+					out.println("</a></td>");
+					out.println("<td>"+msg.getStringProperty("state_LAST_ACTION")+"</td>");
+					out.println("<td>"+msg.getStringProperty("state_LAST_ERROR")+"</td>");
+					out.println("</tr>");
+					
 				}
-				out.println("</ul>");
+				out.println("</table>");
 			}
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
