@@ -34,7 +34,7 @@ public class JmsUtil {
 			if( src.getJMSMessageID() != null ) dest.setJMSMessageID( src.getJMSMessageID() );
 			if( src.getJMSCorrelationID() != null ) dest.setJMSCorrelationID( src.getJMSCorrelationID() );
 			if( src.getJMSReplyTo() != null ) dest.setJMSReplyTo( src.getJMSReplyTo() );
-			if( src.getJMSType() != null ) dest.setJMSType( src.getJMSType() );
+			if( src.getJMSType() != null ) 	dest.setJMSType( src.getJMSType() );
 			dest.setJMSDeliveryMode( src.getJMSDeliveryMode() );
 			dest.setJMSExpiration( src.getJMSExpiration() );
 			dest.setJMSPriority( src.getJMSPriority() );
