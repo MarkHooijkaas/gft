@@ -19,10 +19,11 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.http4j;
 
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.NTCredentials;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.NTCredentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.kisst.cfg4j.CompositeSetting;
+import org.kisst.cfg4j.IntSetting;
 import org.kisst.cfg4j.StringSetting;
 import org.kisst.props4j.Props;
 import org.kisst.util.CryptoUtil;
@@ -30,6 +31,7 @@ import org.kisst.util.CryptoUtil;
 public class HttpHost {
 	public static class Settings extends CompositeSetting {
 		public final StringSetting url = new StringSetting(this, "url", null); // TODO: mandatory?; 
+		public final IntSetting port = new IntSetting(this, "port", 80); // TODO: mandatory?; 
 		public final StringSetting username = new StringSetting(this, "username", null);  
 		public final StringSetting password = new StringSetting(this, "password", null);
 		public final StringSetting encryptedPassword = new StringSetting(this, "encryptedPassword", null);
@@ -40,6 +42,7 @@ public class HttpHost {
 	}
 	
 	public final String url; 
+	public final int port; 
 	public final String username;  
 	public final String password;
 	public final String ntlmhost; 
@@ -51,6 +54,7 @@ public class HttpHost {
 
 	public HttpHost(Settings settings, Props props) {
 		url=settings.url.get(props);
+		port=settings.port.get(props);
 		username=settings.username.get(props);
 		if (username==null)
 			password=null;

@@ -15,129 +15,155 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with the RelayConnector framework.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package org.kisst.gft.action;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.HttpState;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.StringRequestEntity;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.NTCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.AuthSchemes;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.kisst.gft.GftContainer;
 import org.kisst.http4j.HttpHost;
+import org.kisst.http4j.IdleConnectionMonitorThread;
 import org.kisst.props4j.Props;
 import org.kisst.util.SoapUtil;
 import org.kisst.util.XmlNode;
 
-
 public class HttpCaller {
-	private static final MultiThreadedHttpConnectionManager connmngr = new MultiThreadedHttpConnectionManager();
-	private static final HttpClient client = new HttpClient(connmngr);
 
-	protected final Props props;
-	private final long closeIdleConnections;
-	private final HttpHost[] hosts;
-	private final int timeout;
-	private final String urlPostfix;
-	protected final GftContainer gft;
-	
-	
-	public HttpCaller(GftContainer gft, Props props) {
-		this(gft, props, 30000, null);
-	}
-	public HttpCaller(GftContainer gft, Props props, int defaultTimeout, String defaultPostfix) {
-		this.gft=gft;
-		this.props=props;
-		closeIdleConnections=props.getLong("closeIdleConnections",-1);
-		
-		String hostnameList = props.getString("host", null);
-		if (hostnameList==null)
-			hostnameList = props.getString("hosts"); // old name for backward compatibility
-		if (hostnameList==null)
-			throw new RuntimeException("host config parameter should be set");
-		String[] hostnames = hostnameList.split(",");
-		hosts=new HttpHost[hostnames.length];
-		int i=0;
-		for (String hostname: hostnames)
-			hosts[i++]=gft.getHttpHost(hostname.trim());
-		timeout = props.getInt("timeout", defaultTimeout);
-		urlPostfix=props.getString("urlPostfix", defaultPostfix);
-	}
+    private static final PoolingHttpClientConnectionManager connmngr = new PoolingHttpClientConnectionManager();
+    private final IdleConnectionMonitorThread idleThread = new IdleConnectionMonitorThread(connmngr);//can not be static because multiple classes use this, so there are multiple instances
+    private static CloseableHttpClient client;
 
+    {
+        idleThread.setDaemon(true);
+        idleThread.start();
+    }
 
-	public XmlNode httpCall(XmlNode soap) {
-		String response = httpCall(soap.toString());
-		XmlNode result = new XmlNode(response);
-		String fault = SoapUtil.getSoapFaultMessage(result);
-		if (fault!=null)
-			throw new RuntimeException("SOAP:Fault: "+fault);
-		return result;
-	}
+    protected final Props props;
+    private final long closeIdleConnections;
+    private final HttpHost[] hosts;
+    private final int timeout;
+    private final String urlPostfix;
+    protected final GftContainer gft;
 
-	public String httpCall(String body) {
-		for (int i=0; i<hosts.length; i++) {
-			HttpHost host=hosts[i];
-			PostMethod method = createPostMethod(host, body);
-			HttpState state=createState(host);
-			if (state!=null)
-				method.setDoAuthentication(true);
-			try {
-				String result = httpCall(method, state);
-				return result;
-			}
-			catch(RuntimeException e) {
-				if (i<hosts.length-1) {
-				}
-				else
-					throw e;
-			}
-		}
-		return null;
-	}
-	private PostMethod createPostMethod(HttpHost host, String body) {
-		String url=host.url;
-		if (urlPostfix!=null)
-			url+=urlPostfix;
-	    PostMethod method = new PostMethod(url);
-	    method.getParams().setSoTimeout(timeout);
-		try {
-			method.setRequestEntity(new StringRequestEntity(body, "text/xml", "UTF-8"));
-		}
-		catch (UnsupportedEncodingException e) { throw new RuntimeException(e); }
-	    return method;
-	}
+    protected HttpCaller(GftContainer gft, Props props) {
+        this(gft, props, 30000, null);
+    }
 
-	private HttpState createState(HttpHost host) {
-		if (host.username == null)
-			return null;
-		HttpState state=new HttpState();
-		state.setCredentials(AuthScope.ANY, host.getCredentials());
-		return state;
-	}
+    protected HttpCaller(GftContainer gft, Props props, int defaultTimeout, String defaultPostfix) {
+        this.gft = gft;
+        this.props = props;
+        closeIdleConnections = props.getLong("closeIdleConnections", -1);
 
-	private String httpCall(final PostMethod method, HttpState state) {
-	    try {
-			if (closeIdleConnections>=0) // Hack because often some idle connections were closed which resulted in 401 errors
-				connmngr.closeIdleConnections(closeIdleConnections);
-	    	//int statusCode = client.executeMethod(method.getHostConfiguration(), method, state);
-	    	int statusCode = client.executeMethod(null, method, state);
-			byte[] response=method.getResponseBody();
-			String result = new String(response, "UTF-8");
-			if (statusCode >= 300) {
-				throw new RuntimeException("HTTP call returned "+statusCode+"\n"+result);
-			}
-			return result;
-	    }
-	    catch (HttpException e) { throw new RuntimeException(e); } 
-	    catch (IOException e) {  throw new RuntimeException(e); }
-	    finally {
-	    	method.releaseConnection(); // TODO: what if connection not yet borrowed?
-	    }
-	}
+        String[] hostnames = props.getString("hosts").split(",");
+        hosts = new HttpHost[hostnames.length];
+        int i = 0;
+        CredentialsProvider credsProvider = new BasicCredentialsProvider();
+        for (String hostname : hostnames) {
+            HttpHost host = gft.getHttpHost(hostname.trim());
+            hosts[i++] = host;
+            if (host.getCredentials() instanceof NTCredentials) {
+                credsProvider.setCredentials(
+                        new AuthScope(getHostFromUrl(host.url), host.port, AuthScope.ANY_REALM, AuthSchemes.NTLM),
+                        host.getCredentials());
+            } else {
+                credsProvider.setCredentials(
+                        new AuthScope(getHostFromUrl(host.url), host.port, AuthScope.ANY_REALM, AuthSchemes.BASIC),
+                        host.getCredentials());
+            }
+        }
+        timeout = props.getInt("timeout", defaultTimeout);
+        urlPostfix = props.getString("urlPostfix", defaultPostfix);
+
+        client = HttpClients.custom()
+                .setDefaultCredentialsProvider(credsProvider)
+                .setConnectionManager(connmngr)
+                .build();
+
+    }
+
+    public XmlNode httpCall(XmlNode soap) {
+        String response = httpCall(soap.toString());
+        XmlNode result = new XmlNode(response);
+        String fault = SoapUtil.getSoapFaultMessage(result);
+        if (fault != null)
+            throw new RuntimeException("SOAP:Fault: " + fault);
+        return result;
+    }
+
+    public String httpCall(String body) {
+        for (int i = 0; i < hosts.length; i++) {
+            HttpHost host = hosts[i];
+            HttpPost method = createPostMethod(host, body);
+            try {
+                String result = httpCall(method);
+                return result;
+            } catch (RuntimeException e) {
+                if (i < hosts.length - 1) {
+                }
+                else
+                    throw e;
+            }
+        }
+        return null;
+    }
+
+    private HttpPost createPostMethod(HttpHost host, String body) {
+        String url = host.url;
+        if (urlPostfix != null)
+            url += urlPostfix;
+
+        HttpPost method = new HttpPost(url);
+        method.setConfig(RequestConfig.custom().setSocketTimeout(timeout).build());// setStaleConnectionCheckEnabled()?
+        method.setEntity(new StringEntity(body, ContentType.create("text/xml", "UTF-8")));
+        return method;
+    }
+
+    private String httpCall(final HttpRequestBase method) {
+        method.setConfig(RequestConfig.custom().setSocketTimeout(timeout).build());// setStaleConnectionCheckEnabled()?
+        try {
+            if (closeIdleConnections >= 0) { // Hack because often some idle connections were closed which resulted in 401 errors
+                connmngr.closeIdleConnections(closeIdleConnections, TimeUnit.SECONDS);
+            }
+            CloseableHttpResponse response = client.execute(method);
+            byte[] responseBody = new byte[(int) response.getEntity().getContentLength()];
+            response.getEntity().getContent().read(responseBody);
+            String result = new String(responseBody, "UTF-8");
+            if (response.getStatusLine().getStatusCode() >= 300) {
+                throw new RuntimeException("HTTP call returned " + response.getStatusLine().getStatusCode() + "\n" + result);
+            }
+            return result;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        } finally {
+            method.releaseConnection(); // TODO: what if connection not yet borrowed?
+        }
+    }
+
+    private String getHostFromUrl(String url) {
+        String result = url;
+        if (url.contains("http://")) {
+            result = result.replaceAll("http://", "");
+        }
+        if (result.contains("/")) {
+            result = result.substring(0, result.indexOf("/"));
+        }
+
+        return result;
+    }
 }
