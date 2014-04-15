@@ -45,6 +45,11 @@ public class JmsUtil {
 			while( properties.hasMoreElements() ) {
 				String key = (String) properties.nextElement();
 				if( key.startsWith( "JMSX" ) ) continue;
+
+				// don't clone the JMS_IBM_Character_Set property since this won't work in MQ7.5
+				// Because we get a DetailedJMSException: JMSCMQ1006: The value for 'JMS_IBM_Character_Set':'IBM01140' is not valid.
+				// see http://pic.dhe.ibm.com/infocenter/wmqv7/v7r5/index.jsp?topic=%2Fcom.ibm.mq.mig.doc%2Fq001810_.htm
+				if (key.startsWith("JMS_IBM_Character_Set")) continue;
 				dest.setObjectProperty( key, src.getObjectProperty( key ) );
 			} 
 			return dest;
