@@ -72,7 +72,9 @@ public class HttpHost {
 	
 	public String toString() { return "HttpHost("+username+","+url+")"; }
 	public  Credentials getCredentials(){
-		if (ntlmdomain==null)
+		if (username==null)
+			return null;
+		else if (ntlmdomain==null)
 			return new UsernamePasswordCredentials(username, password);
 		else
 			return new NTCredentials(username, password, ntlmhost, ntlmdomain);
