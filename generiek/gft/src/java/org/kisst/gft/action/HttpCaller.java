@@ -46,10 +46,14 @@ import org.kisst.util.XmlNode;
 public class HttpCaller {
 
     private static final PoolingHttpClientConnectionManager connmngr = new PoolingHttpClientConnectionManager();
-    private final IdleConnectionMonitorThread idleThread = new IdleConnectionMonitorThread(connmngr);//can not be static because multiple classes use this, so there are multiple instances
-    private static CloseableHttpClient client;
+    private static final IdleConnectionMonitorThread idleThread = new IdleConnectionMonitorThread(connmngr);
+    private static final CredentialsProvider credsProvider = new BasicCredentialsProvider();
+    private static final CloseableHttpClient client = HttpClients.custom()
+    	.setDefaultCredentialsProvider(credsProvider)
+    	.setConnectionManager(connmngr)
+    	.build();
 
-    {
+    static {
         idleThread.setDaemon(true);
         idleThread.start();
     }
@@ -73,7 +77,6 @@ public class HttpCaller {
         String[] hostnames = props.getString("hosts").split(",");
         hosts = new HttpHost[hostnames.length];
         int i = 0;
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
         for (String hostname : hostnames) {
             HttpHost host = gft.getHttpHost(hostname.trim());
             hosts[i++] = host;
@@ -89,11 +92,6 @@ public class HttpCaller {
         }
         timeout = props.getInt("timeout", defaultTimeout);
         urlPostfix = props.getString("urlPostfix", defaultPostfix);
-
-        client = HttpClients.custom()
-                .setDefaultCredentialsProvider(credsProvider)
-                .setConnectionManager(connmngr)
-                .build();
 
     }
 

@@ -63,7 +63,7 @@ public class HttpCaller {
     public static final Settings settings = new Settings(null, null);
 
     private static final PoolingHttpClientConnectionManager connmngr = new PoolingHttpClientConnectionManager();
-    private final IdleConnectionMonitorThread idleThread = new IdleConnectionMonitorThread(connmngr);//can not be static because multiple classes use this, so there are multiple instances
+    private static final IdleConnectionMonitorThread idleThread = new IdleConnectionMonitorThread(connmngr);//can not be static because multiple classes use this, so there are multiple instances
 
 	private final static CredentialsProvider credsProvider = new BasicCredentialsProvider();
     private final static CloseableHttpClient client = HttpClients.custom()
@@ -71,7 +71,7 @@ public class HttpCaller {
     	.setConnectionManager(connmngr)
     	.build();
 
-    {
+    static {
         idleThread.setDaemon(true);
         idleThread.start();
     }
