@@ -140,6 +140,7 @@ public class JmsListener implements Runnable {
 		}
 		finally {
 			thread=null;
+			running=false;
 			logger.info("Stopped listening to queue {}", queue);
 			closeSession();
 		}
