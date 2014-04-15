@@ -68,29 +68,36 @@ public class ListenerServlet extends BaseServlet {
 
 				out.println("<h2>"+q+"</h2>");
 				out.println("<table>");
-				out.println("<tr><td width=800><b>message</b></td><td><b>action</b></td><td><b>error</b></td></tr>");
+				out.println("<tr><td><b>time</b></td><td><b>channel</b></td><td><b>id</b></td><td><b>action</b></td><td><b>error</b></td></tr>");
 				Queue destination = session.createQueue(q);
 				QueueBrowser browser = session.createBrowser(destination);
 				Enumeration<?> e = browser.getEnumeration();
 				while (e.hasMoreElements()) {
 					Message msg = (Message) e.nextElement();
-					out.println("<tr><td> "+format.format(new Date(msg.getJMSTimestamp())));
-					out.println("<a href=\"/message/"+name+"/"+qname+"/"+msg.getJMSMessageID()+"\">");
+					String channel=msg.getStringProperty("state_CHANNEL");
+					String id=msg.getStringProperty("state_ID");
+
 					try {
 						if (ControlMessage.isStartMessage(msg))
-							out.println("Start message");
+							channel="Start message";
 						else if (ControlMessage.isStopMessage(msg))
-							out.println("Stop message");
+							channel="Stop message";
 						else {
-							// TODO: handle all type of messages
-							XmlNode xml=new XmlNode(((TextMessage)msg).getText()).getChild("Body").getChildren().get(0);
-							out.println("kanaal: "+xml.getChildText("kanaal")+" bestand: "+xml.getChildText("bestand"));
+							if (channel==null) {
+								// TODO: handle all type of messages
+								XmlNode xml=new XmlNode(((TextMessage)msg).getText()).getChild("Body").getChildren().get(0);
+								channel=xml.getChildText("kanaal");
+								id=xml.getChildText("bestand");
+							}
 						}
 					}
 					catch (RuntimeException ex) {
-						out.println("Unknown format, id="+msg.getJMSMessageID());
+						channel="Unknown format";
+						id=msg.getJMSMessageID();
 					}
-					out.println("</a></td>");
+					out.println("<tr><td width=150> "+format.format(new Date(msg.getJMSTimestamp()))+"</td>");
+					out.println("<td>"+channel+"</td>");
+					out.println("<td><a href=\"/message/"+name+"/"+qname+"/"+msg.getJMSMessageID()+"\">"+id+"</a></td>");
 					out.println("<td>"+msg.getStringProperty("state_LAST_ACTION")+"</td>");
 					out.println("<td>"+msg.getStringProperty("state_LAST_ERROR")+"</td>");
 					out.println("</tr>");
