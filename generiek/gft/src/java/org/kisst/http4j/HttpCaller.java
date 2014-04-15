@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.AuthSchemes;
@@ -63,7 +64,12 @@ public class HttpCaller {
 
     private static final PoolingHttpClientConnectionManager connmngr = new PoolingHttpClientConnectionManager();
     private final IdleConnectionMonitorThread idleThread = new IdleConnectionMonitorThread(connmngr);//can not be static because multiple classes use this, so there are multiple instances
-    private static CloseableHttpClient client;
+
+	private final static CredentialsProvider credsProvider = new BasicCredentialsProvider();
+    private final static CloseableHttpClient client = HttpClients.custom()
+    	.setDefaultCredentialsProvider(credsProvider)
+    	.setConnectionManager(connmngr)
+    	.build();
 
     {
         idleThread.setDaemon(true);
@@ -91,21 +97,15 @@ public class HttpCaller {
         host = hostMap.getHttpHost(hostname.trim());
         timeout = settings.timeout.get(props);
         // urlPostfix=settings.urlPostfix.get(props);
-        CredentialsProvider credsProvider = new BasicCredentialsProvider();
-        if (host.getCredentials() instanceof NTCredentials) {
-            credsProvider.setCredentials(
-                    new AuthScope(getHostFromUrl(host.url), host.port, AuthScope.ANY_REALM, AuthSchemes.NTLM),
-                    host.getCredentials());
-        } else {
-            credsProvider.setCredentials(
-                    new AuthScope(getHostFromUrl(host.url), host.port, AuthScope.ANY_REALM, AuthSchemes.BASIC),
-                    host.getCredentials());
+        Credentials credentials = host.getCredentials();
+		if (credentials!=null) {
+	        AuthScope scope;
+        	if (credentials instanceof NTCredentials) 
+        		scope= new AuthScope(getHostFromUrl(host.url), host.port, AuthScope.ANY_REALM, AuthSchemes.NTLM);
+        	else
+        		scope=new AuthScope(getHostFromUrl(host.url), host.port, AuthScope.ANY_REALM, AuthSchemes.BASIC);
+    		credsProvider.setCredentials(scope, credentials);
         }
-
-        client = HttpClients.custom()
-                .setDefaultCredentialsProvider(credsProvider)
-                .setConnectionManager(connmngr)
-                .build();
     }
 
     public String getCompleteUrl(String url) {
