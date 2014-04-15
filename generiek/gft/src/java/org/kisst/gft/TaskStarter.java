@@ -35,8 +35,10 @@ public class TaskStarter implements MessageHandler {
 		}
 		catch (Exception e) {
 			MappedStateException mse = new MappedStateException(e);
-			mse.addState("LAST_ACTION", task.getLastAction());
-			mse.addState("LAST_ERROR", task.getLastError().getMessage());
+			try {
+				task.addState(mse);
+			}
+			catch (RuntimeException e2) { logger.error("Error when adding state info to Exception for task "+task,e2); }
 			throw(mse);
 		}
 		finally {

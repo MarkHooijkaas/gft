@@ -5,6 +5,7 @@ import java.io.File;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.props4j.SimpleProps;
+import org.kisst.util.exception.MappedStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,7 +76,16 @@ public class BasicTask implements Task {
 			return dir+"/"+file;
 	}
 
-	
+	public void addState(MappedStateException mse) {
+		mse.addState("CHANNEL", getTaskDefinition().getName());
+		mse.addState("ID", getIdentification());
+		mse.addState("LAST_ACTION", getLastAction());
+		mse.addState("LAST_ERROR", getLastError().getMessage());
+		for (String key: vars.keys())
+			mse.addState("VAR_"+key, ""+vars.get(key, null));
+		if (tempFile!=null)
+			mse.addState("TEMPFILE", tempFile.getAbsolutePath());
+	}
 	
 	public SimpleProps getActionContext(Action action) {
 		SimpleProps result=getContext().shallowClone();

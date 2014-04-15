@@ -2,9 +2,12 @@ package org.kisst.gft.admin;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 
 import javax.jms.JMSException;
+import javax.jms.Message;
 import javax.jms.Queue;
 import javax.jms.QueueBrowser;
 import javax.jms.Session;
@@ -18,6 +21,7 @@ import org.kisst.jms.MultiListener;
 public class JmsMessageServlet extends BaseServlet {
 	public JmsMessageServlet(GftContainer gft) { super(gft);	}
 
+	@SuppressWarnings("unchecked")
 	public void handle(HttpServletRequest request, HttpServletResponse response)
 	throws IOException {
 		if (getUser(request, response)==null)
@@ -36,7 +40,7 @@ public class JmsMessageServlet extends BaseServlet {
 		
 		//SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		out.println("<h1>Queue "+queuename+", msg"+msgid+"</h1>");
-
+		
 		MultiListener lstnr = (MultiListener) gft.listeners.get(listenername);
 		Session session=null;
 		try {
@@ -51,22 +55,34 @@ public class JmsMessageServlet extends BaseServlet {
 			else
 				throw new RuntimeException("Invalid queuename "+queuename);
 
-			out.println("<pre>");
 			Queue destination = session.createQueue(q);
 			QueueBrowser browser = session.createBrowser(destination, "JMSMessageID = '"+msgid+"'");
 			Enumeration<?> e = browser.getEnumeration();
 			while (e.hasMoreElements()) {
 				Object o = e.nextElement();
+				if (o instanceof Message) {
+					Message msg=(Message) o;
+					out.println("<table><tr><td><b>Property</b></td><td><b>Value</b></td><tr>");
+					ArrayList<String> keys = Collections.list(msg.getPropertyNames());
+					Collections.sort(keys);
+					for (String key: keys) {
+						if( key.startsWith( "state_" ) )
+							out.println("<tr><td>"+key+"</td><td>"+msg.getObjectProperty(key)+"</td></tr>");
+					} 
+					out.println("</table>");
+				}
+				
 				if ( o instanceof TextMessage) {
+					out.println("<pre>");
 					TextMessage msg = (TextMessage) o; 
 					String txt=msg.getText();
 					txt= txt.replaceAll("&", "&amp;");
 					txt= txt.replaceAll(">", "&gt;");
 					txt= txt.replaceAll("<", "&lt;");
 					out.println(txt);
+					out.println("</pre>");
 				}
 			}
-			out.println("</pre>");
 		}
 		catch (JMSException e) {throw new RuntimeException(e); }
 		finally {
