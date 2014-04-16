@@ -16,9 +16,6 @@ import java.util.Set;
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.LocalCommandAction;
-import org.kisst.gft.action.LogCompleted;
-import org.kisst.gft.action.LogError;
-import org.kisst.gft.action.LogStart;
 import org.kisst.gft.action.SendMessageFromFileAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.admin.BaseServlet;
@@ -36,6 +33,7 @@ import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MultiListener;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
+import org.kisst.util.CryptoUtil;
 import org.kisst.util.JamonUtil;
 import org.kisst.util.JarLoader;
 import org.kisst.util.ReflectionUtil;
@@ -70,7 +68,7 @@ public class GftContainer implements HttpHostMap {
 	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
 	private final String hostName;
 	private String tempdir;
-	private int dirVolgnr;
+	private int directorySequenceNumber=0;
 	private JamonThread jamonThread;
 	
 	private final  JarLoader loader;
@@ -107,20 +105,17 @@ public class GftContainer implements HttpHostMap {
 		top.load(this.configfile);
 		props=top.getProps(this.topname);
 		
-
 		addAction("local_command", LocalCommandAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
-		addAction("log_start",LogStart.class);
-		addAction("log_completed",LogCompleted.class);
-		addAction("log_error",LogError.class);
 		addAction("send_message_from_file",SendMessageFromFileAction.class);
-		
 
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
 		loader=new JarLoader("./modules");
+		addDynamicModules(props);
+		loadModuleSpecificCryptoKey();
 		httpHosts = new BasicHttpHostMap(props.getProps("http.host"));
 		init();
 	}
@@ -142,8 +137,7 @@ public class GftContainer implements HttpHostMap {
 		context.put("global", props.get("global", null));
 		
 		tempdir = context.getString("global.tempdir");
-		dirVolgnr = 0;
-		addDynamicModules(props);
+		directorySequenceNumber = 0;
 		for (Module mod: modules.values())
 			mod.init(props);
 
@@ -305,19 +299,26 @@ public class GftContainer implements HttpHostMap {
 		Module mod= (Module) ReflectionUtil.createObject(cons, new Object[] {this, props});
 		modules.put(mod.getName(), mod);
 	}
+	// This method is to give modules a way to set a cryptographic key very early in startup process.
+	// especially before the Host list with encrypted passwords is initialized 
+	private void loadModuleSpecificCryptoKey() {
+		for (Module mod: modules.values()) {
+			CryptoUtil.checkKeySetter(mod);
+		}
+	}
 	
-	private synchronized int getUniqueVolgnummer() {
-		dirVolgnr++;
-		if (dirVolgnr>1000000)
-			dirVolgnr=0;
-		return dirVolgnr;
+	private synchronized int getUniqueSequenceNumber() {
+		directorySequenceNumber++;
+		if (directorySequenceNumber>1000000)
+			directorySequenceNumber=0;
+		return directorySequenceNumber;
 	}
 
 
 	public File createUniqueDir(String subdir){
 		SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd-HH.mm.ss");
 		String date = formatter.format(new Date());
-		int volgnummer=getUniqueVolgnummer();
+		int volgnummer=getUniqueSequenceNumber();
 		File file = new File(tempdir +"/"+ subdir +"/"+ date + "-" + volgnummer);
 		file.mkdirs();
 		return file;
@@ -333,7 +334,6 @@ public class GftContainer implements HttpHostMap {
 	public void appendJmsTaskCreator(JmsTaskCreator creator) {starter.appendCreator(creator); }
 
 	public List<ModuleInfo> getModuleInfo() {
-		// TODO Auto-generated method stub
 		return loader.getModuleInfo();
 	}
 }
