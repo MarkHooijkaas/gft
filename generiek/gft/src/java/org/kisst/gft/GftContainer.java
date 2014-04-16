@@ -117,7 +117,7 @@ public class GftContainer implements HttpHostMap {
 		addDynamicModules(props);
 		loadModuleSpecificCryptoKey();
 		httpHosts = new BasicHttpHostMap(props.getProps("http.host"));
-		tempdir = props.getString(topname+".global.tempdir"); //MAYBE: provide default as working directory+"/temp"
+		tempdir = props.getString("global.tempdir"); //MAYBE: provide default as working directory+"/temp"
 		init();
 	}
 
