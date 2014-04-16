@@ -67,7 +67,7 @@ public class GftContainer implements HttpHostMap {
 	private final SimpleProps context = new SimpleProps();
 	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
 	private final String hostName;
-	private String tempdir;
+	private final String tempdir;
 	private int directorySequenceNumber=0;
 	private JamonThread jamonThread;
 	
@@ -117,6 +117,7 @@ public class GftContainer implements HttpHostMap {
 		addDynamicModules(props);
 		loadModuleSpecificCryptoKey();
 		httpHosts = new BasicHttpHostMap(props.getProps("http.host"));
+		tempdir = props.getString(topname+".global.tempdir"); //MAYBE: provide default as working directory+"/temp"
 		init();
 	}
 
@@ -136,8 +137,6 @@ public class GftContainer implements HttpHostMap {
 	private void init() {
 		context.put("global", props.get("global", null));
 		
-		tempdir = context.getString("global.tempdir");
-		directorySequenceNumber = 0;
 		for (Module mod: modules.values())
 			mod.init(props);
 
