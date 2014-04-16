@@ -25,6 +25,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
+//import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.RequestConfig;
@@ -32,8 +33,11 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
+//import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+//import org.apache.http.impl.auth.BasicScheme;
+//import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -65,15 +69,18 @@ public class HttpCaller {
     private static final PoolingHttpClientConnectionManager connmngr = new PoolingHttpClientConnectionManager();
     private static final IdleConnectionMonitorThread idleThread = new IdleConnectionMonitorThread(connmngr);//can not be static because multiple classes use this, so there are multiple instances
 
-	private final static CredentialsProvider credsProvider = new BasicCredentialsProvider();
-    private final static CloseableHttpClient client = HttpClients.custom()
+	private static final CredentialsProvider credsProvider = new BasicCredentialsProvider();
+    private static final CloseableHttpClient client = HttpClients.custom()
     	.setDefaultCredentialsProvider(credsProvider)
     	.setConnectionManager(connmngr)
     	.build();
-
+    //private static final AuthCache authCache = new BasicAuthCache();
+    //private static final BasicScheme basicAuth = new BasicScheme();
+    //private static final HttpClientContext localContext = HttpClientContext.create();
     static {
         idleThread.setDaemon(true);
         idleThread.start();
+        //localContext.setAuthCache(authCache);
     }
     
     protected final Props props;
@@ -129,6 +136,11 @@ public class HttpCaller {
             if (closeIdleConnections >= 0) { // Hack because often some idle connections were closed which resulted in 401 errors
                 connmngr.closeIdleConnections(closeIdleConnections, TimeUnit.SECONDS);
             }
+            
+        	//org.apache.http.HttpHost target = new org.apache.http.HttpHost("localhost", 80, "http");
+            //authCache.put(target, basicAuth);
+        	//CloseableHttpResponse response = client.execute(target, method, localContext);
+
             CloseableHttpResponse response = client.execute(method);
             byte[] responseBody = new byte[(int) response.getEntity().getContentLength()];
             response.getEntity().getContent().read(responseBody);
@@ -155,4 +167,6 @@ public class HttpCaller {
 
         return result;
     }
+
+
 }
