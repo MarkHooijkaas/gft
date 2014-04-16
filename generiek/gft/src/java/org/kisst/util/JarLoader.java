@@ -10,7 +10,26 @@ import java.util.Collections;
 import java.util.List;
 import java.util.jar.Manifest;
 
+import org.kisst.cfg4j.BooleanSetting;
+import org.kisst.cfg4j.CompositeSetting;
+import org.kisst.cfg4j.MappedSetting;
+import org.kisst.cfg4j.StringSetting;
+import org.kisst.props4j.Props;
+
 public class JarLoader {
+	public static class ModuleSetting extends CompositeSetting {
+		public final BooleanSetting skip = new BooleanSetting(this, "skip", false);
+		
+		public ModuleSetting(CompositeSetting parent, String name) { super(parent, name); }
+	}
+	
+	public static class Settings extends CompositeSetting {
+		public final StringSetting moduleDirectory = new StringSetting(this, "directory", "./modules");  
+		public final MappedSetting<ModuleSetting> module = new MappedSetting<ModuleSetting>(this, "module", ModuleSetting.class);
+		
+		public Settings(CompositeSetting parent, String name) { super(parent, name); }
+	}
+	
 	public static class ModuleInfo {
 		public final File file;
 		public final String mainClassname;
@@ -33,10 +52,10 @@ public class JarLoader {
 	private final ArrayList<ModuleInfo> modules=new ArrayList<ModuleInfo>();
 	private final URLClassLoader loader; 
 
-	public JarLoader(String filename) {
-		this.dir=new File(filename);
+	public JarLoader(Settings settings, Props props) {
+		this.dir=new File(settings.moduleDirectory.get(props));
 		if (! dir.isDirectory())
-			throw new IllegalArgumentException(filename+" should be a directory");
+			throw new IllegalArgumentException(dir+" should be a directory");
 		for (File f:dir.listFiles()) {
 			if (f.isFile() && f.getName().endsWith(".jar"))
 				modules.add(new ModuleInfo(f));

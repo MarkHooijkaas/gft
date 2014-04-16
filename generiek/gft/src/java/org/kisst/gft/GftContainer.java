@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.kisst.cfg4j.CompositeSetting;
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.LocalCommandAction;
@@ -48,11 +49,20 @@ import org.slf4j.LoggerFactory;
 
 public class GftContainer implements HttpHostMap {
 	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
+	
+	public static class Settings extends CompositeSetting {
+		// public final StringSetting moduleDirectory = new StringSetting(this, "moduleDirectory", "./modules");  
+		public JarLoader.Settings modules=new JarLoader.Settings(this, "modules");
+		
+		public Settings(CompositeSetting parent, String name) { super(parent, name); }
+	}
 
+	private final Settings settings;
 	private final String topname;
 	private final TaskStarter starter = new TaskStarter(); 
 	private final AdminServer admin=new AdminServer(this);
 	public final Props props;
+	private final SimpleProps topProps;
 
 	private final BasicHttpHostMap httpHosts;
 	
@@ -71,7 +81,7 @@ public class GftContainer implements HttpHostMap {
 	private int directorySequenceNumber=0;
 	private JamonThread jamonThread;
 	
-	private final  JarLoader loader;
+	private final  JarLoader jarloader;
 	
 	private final File configfile;
 	public final Date startupTime = new Date();
@@ -97,13 +107,15 @@ public class GftContainer implements HttpHostMap {
 	}
 	public GftContainer(String topname, File configfile) {
 		this.topname=topname;
+		this.settings=new Settings(null, topname);
+		
 		TemplateUtil.init(configfile.getParentFile());
 		context.put(topname, this);
 	
 		this.configfile = configfile;
-		SimpleProps top = new SimpleProps();
-		top.load(this.configfile);
-		props=top.getProps(this.topname);
+		topProps = new SimpleProps();
+		topProps.load(this.configfile);
+		props=topProps.getProps(this.topname);
 		
 		addAction("local_command", LocalCommandAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
@@ -113,7 +125,8 @@ public class GftContainer implements HttpHostMap {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
-		loader=new JarLoader("./modules");
+		
+		jarloader=new JarLoader(settings.modules, topProps);
 		addDynamicModules(props);
 		loadModuleSpecificCryptoKey();
 		httpHosts = new BasicHttpHostMap(props.getProps("http.host"));
@@ -128,7 +141,7 @@ public class GftContainer implements HttpHostMap {
 		return result;
 	}
 	public SimpleProps getContext() {return context; }
-	public ClassLoader getSpecialClassLoader() { return loader.getClassLoader(); }
+	public ClassLoader getSpecialClassLoader() { return jarloader.getClassLoader(); }
 	public String getTopname() { return topname; }
 	public HttpHost getHttpHost(String name) { return httpHosts.getHttpHost(name); }
 	public Set<String> getHttpHostNames() { return httpHosts.getHttpHostNames(); }
@@ -137,8 +150,14 @@ public class GftContainer implements HttpHostMap {
 	private void init() {
 		context.put("global", props.get("global", null));
 		
-		for (Module mod: modules.values())
-			mod.init(props);
+		for (Module mod: modules.values()) {
+			System.out.println(settings.modules.module.get(mod.getName()).skip.getFullName());
+			if (settings.modules.module.get(mod.getName()).skip.get(topProps)) {
+				System.out.println("Skipping module initialisation for "+mod.getName());
+			}
+			else
+				mod.init(props);
+		}
 
 		if (props.get("ssh.host",null)!=null) {
 			Props hostProps=props.getProps("ssh.host");
@@ -289,7 +308,7 @@ public class GftContainer implements HttpHostMap {
 		//modules.put("filetransfer", new FileTransferModule(this, props));
 		addModule(FileTransferModule.class);
 
-		for (Class<?> cls: loader.getMainClasses()) {
+		for (Class<?> cls: jarloader.getMainClasses()) {
 			addModule((Class<? extends Module>) cls);
 		}
 	}
@@ -333,6 +352,6 @@ public class GftContainer implements HttpHostMap {
 	public void appendJmsTaskCreator(JmsTaskCreator creator) {starter.appendCreator(creator); }
 
 	public List<ModuleInfo> getModuleInfo() {
-		return loader.getModuleInfo();
+		return jarloader.getModuleInfo();
 	}
 }
