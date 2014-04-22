@@ -108,6 +108,28 @@ public class SimpleProps extends PropsBase {
 			throw new RuntimeException("key "+getFullName()+"."+key+" already has value "+o+" when adding subkey "+keyremainder);
 	}
 
+	// TODO: code duplication with function above
+	SimpleProps getParentForKeyWithCreate(String key) {
+		int pos=key.indexOf('.');
+		if (pos<0)
+			return this;
+		String keystart=key.substring(0,pos);
+		String keyremainder=key.substring(pos+1);
+		Object o=values.get(keystart);
+		if (o==null || o instanceof String) {
+			SimpleProps props=new SimpleProps(this,keystart);
+			values.put(keystart, props);
+			if (o instanceof String)
+				props.stringValue= (String) o;
+			return props.getParentForKeyWithCreate(keyremainder);
+		}
+		else if (o instanceof SimpleProps)
+			return ((SimpleProps)o).getParentForKeyWithCreate(keyremainder);
+		else
+			throw new RuntimeException("key "+getFullName()+"."+key+" already has value "+o+" when adding subkey "+keyremainder);
+
+	}
+	
 	public Object get(String key, Object defaultValue) {
 		logger.debug("getting {}",key);
 		int pos=key.indexOf('.');
