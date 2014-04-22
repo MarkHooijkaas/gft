@@ -22,6 +22,7 @@ package org.kisst.props4j;
 
 
 public interface Props extends MinimalProps {
+	public Props getParent();
 	public String getLocalName();
 	//public String getFullName();
 	

@@ -11,6 +11,8 @@ public class XmlNodeProps extends PropsBase {
 		this.node = node;
 	}
 
+	@Override public Props getParent() { return null;	} // TODO
+
 	@Override
 	public Object get(String key, Object defaultValue) {
 		key=key.replace('.', '/');

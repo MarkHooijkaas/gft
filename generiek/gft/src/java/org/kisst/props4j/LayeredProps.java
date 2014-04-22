@@ -31,6 +31,8 @@ public class LayeredProps extends PropsBase {
 	}
 	public void addTopLayer(Props props) { if (props!=null) layers.add(0,props); }
 	public void addLayer(Props props)    { if (props!=null) layers.add(props); }
+
+	@Override public Props getParent() { return null;	}
 	
 	public Object get(String key, Object defaultValue) {
 		for (Props p:layers) {

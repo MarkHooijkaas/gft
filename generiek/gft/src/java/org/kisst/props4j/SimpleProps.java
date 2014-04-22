@@ -50,6 +50,7 @@ public class SimpleProps extends PropsBase {
 		else
 			this.name=name;
 	}
+	@Override public Props getParent() { return parent; }
 	@Override public String getLocalName() { return name; }
 	@Override public String getFullName() {
 		if (parent==null)
@@ -130,6 +131,7 @@ public class SimpleProps extends PropsBase {
 			return defaultValue;
 	}
 
+
 	public void load(String filename)  { load(new File(filename));	}
 	public void load(File file) {
 		InputStreamReader f = new InputStreamReader(FileUtil.open(file));
@@ -182,5 +184,4 @@ public class SimpleProps extends PropsBase {
 		}
 		return result.toString();
 	}
-
 }
