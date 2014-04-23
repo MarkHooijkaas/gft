@@ -70,10 +70,7 @@ public class BasicTask implements Task {
 		while (file.startsWith("/"))
 			file=file.substring(1);
 		// TODO: check for more unsafe constructs
-		if (dir.startsWith("dynamic:"))
-			return gft.processTemplate(dir.substring(8)+"/"+file, getContext());
-		else
-			return dir+"/"+file;
+		return dir+"/"+file;
 	}
 
 	public void addState(MappedStateException mse) {

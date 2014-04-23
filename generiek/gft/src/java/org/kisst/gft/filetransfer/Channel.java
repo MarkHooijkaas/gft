@@ -23,22 +23,12 @@ public abstract class Channel extends BasicTaskDefinition {
 
 	public Channel(GftContainer gft, Props props, Action flow) {
 		super(gft, props, flow, null);
-		getContext().put("channel", this);
 		
 		this.src=gft.sshhosts.get(props.getString("src.host"));
 		this.dest=gft.sshhosts.get(props.getString("dest.host"));
 
-		String dir=props.getString("src.dir",  "");
-		if (dir.startsWith("dynamic:"))
-			this.srcdir=dir;
-		else
-			this.srcdir =gft.processTemplate(dir, getContext()); 
-
-		dir=props.getString("dest.dir",  "");
-		if (dir.startsWith("dynamic:"))
-			this.destdir=dir;
-		else
-			this.destdir =gft.processTemplate(dir, getContext());
+		this.srcdir=props.getString("src.dir",  "");
+		this.destdir=props.getString("dest.dir",  "");
 
 		this.mode=props.getString("mode", "push");
 		if (!("pull".equals(mode) || "push".equals(mode)))
