@@ -9,7 +9,6 @@ import org.kisst.gft.action.ActionList;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.props4j.Props;
-import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,7 +21,6 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	protected final Action action;
 
 	public final Props props;
-	private final SimpleProps context;
 
 	private long totalCount=0;
 	private long errorCount=0;
@@ -31,8 +29,6 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	// In future this parameter might be removed
 	public BasicTaskDefinition(GftContainer gft, Props props, Action flow, String defaultActions) {
 		this.gft=gft;
-		context=gft.getContext().shallowClone();
-
 		this.props=props;
 		this.name=props.getLocalName();
 		if (flow!=null)
@@ -47,7 +43,6 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	}
 
 	public String getName() { return name; }
-	public SimpleProps getContext() { return context;}
 	public long getTotalCount() { return totalCount; }
 	public long getErrorCount() { return errorCount; }
 	

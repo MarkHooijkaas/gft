@@ -34,8 +34,6 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 			throw new BasicFunctionalException("Filename ["+filename+"] is not allowed to contain .. pattern, , in channel "+channel.getName());
 		this.srcpath=calcPath(channel.srcdir, filename);
 		this.destpath=calcPath(channel.destdir, filename);
-		for (String key : channel.getContext().keys())
-			getContext().put(key,channel.getContext().get(key));
 	}
 
 	abstract protected  String getFilename();
