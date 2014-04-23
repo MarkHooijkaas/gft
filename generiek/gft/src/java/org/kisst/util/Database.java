@@ -25,15 +25,16 @@ import java.sql.SQLException;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.kisst.gft.GftContainer;
 import org.kisst.props4j.Props;
-import org.kisst.props4j.SimpleProps;
 
 
 public class Database  {
 	private final BasicDataSource ds= new BasicDataSource();
 
-	public Database(GftContainer gft, Props props) {
-		SimpleProps context=gft.getContext(); // TODO: remove this dependency on GftContainer
+	// The following constructor is needed until all classes using this constructor are upgraded 
+	@Deprecated
+	public Database(GftContainer gft,Props props) { this(props); }
 
+	public Database(Props props) {
 		ds.setMinEvictableIdleTimeMillis(props.getLong("minEvictableIdleTimeMillis",10*60*1000));
 		ds.setTimeBetweenEvictionRunsMillis(props.getLong("timeBetweenEvictionRunsMillis",20*60*1000));
 		ds.setNumTestsPerEvictionRun(props.getInt("numTestsPerEvictionRun",8));
@@ -50,12 +51,12 @@ public class Database  {
 			ds.setValidationQuery(validationQuery);
 		
 		ds.setDriverClassName(props.getString("driver","com.ibm.as400.access.AS400JDBCDriver"));
-		ds.setUsername(TemplateUtil.processTemplate(props.getString("username"),context));
+		ds.setUsername(props.getString("username"));
 		String password=props.getString("password", null);
 		if (password==null)
 			password=CryptoUtil.decrypt(props.getString("encryptedPassword"));
 		ds.setPassword(password);
-		ds.setUrl(TemplateUtil.processTemplate(props.getString("url"),context));
+		ds.setUrl(props.getString("url"));
 	} 	
 
 	public Connection getConnection() throws SQLException { return ds.getConnection();	}
