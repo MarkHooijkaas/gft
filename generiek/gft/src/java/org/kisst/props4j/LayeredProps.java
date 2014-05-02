@@ -66,8 +66,8 @@ public class LayeredProps extends PropsBase {
 	public String toString() {
 		StringBuilder result=new StringBuilder();
 		for (Props layer: layers)
-			result.append(layer.toString()).append("\n");
-		result.append(global.toString()).append("\n");
+			result.append("#override layer\n").append(layer.toString()).append("\n");
+		result.append("#global properties\n").append(global.toString()).append("\n");
 		return result.toString(); 
 	}
 }
