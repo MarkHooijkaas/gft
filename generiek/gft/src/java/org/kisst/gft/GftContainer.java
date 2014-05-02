@@ -151,9 +151,8 @@ public class GftContainer implements HttpHostMap {
 		context.put("global", props.get("global", null));
 		
 		for (Module mod: modules.values()) {
-			System.out.println(settings.modules.module.get(mod.getName()).skip.getFullName());
 			if (settings.modules.module.get(mod.getName()).skip.get(topProps)) {
-				System.out.println("Skipping module initialisation for "+mod.getName());
+				logger.warn("Skipping module initialisation for {}",mod.getName());
 			}
 			else
 				mod.init(props);
