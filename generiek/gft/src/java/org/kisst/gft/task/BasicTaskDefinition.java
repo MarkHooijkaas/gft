@@ -9,6 +9,7 @@ import org.kisst.gft.action.ActionList;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.props4j.Props;
+import org.kisst.props4j.SimpleProps;
 import org.kisst.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +39,13 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	}
 
 	// This constructor is for backward compatibility 
+	@Deprecated
 	public BasicTaskDefinition(GftContainer gft, Props props, String defaultActions) {
 		this(gft,props,null,defaultActions);
 	}
+	// This method is for backward compatibility
+	@Deprecated
+	public SimpleProps getContext() { throw new RuntimeException("Deprecated method called in task "+getName()); }
 
 	public String getName() { return name; }
 	public long getTotalCount() { return totalCount; }
