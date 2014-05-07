@@ -52,16 +52,11 @@ import org.kisst.props4j.Props;
 public class HttpCaller {
 
     public static class Settings extends CompositeSetting {
-
+        public Settings(CompositeSetting parent, String name, DefaultSpecification... args) { super(parent, name, args); }
         public final StringSetting host = new StringSetting(this, "host");
         public final LongSetting closeIdleConnections = new LongSetting(this, "closeIdleConnections", -1);
         public final IntSetting timeout = new IntSetting(this, "timeout", 30000);
-
         // public final StringSetting urlPostfix = new StringSetting(this, "urlPostfix", null);
-
-        public Settings(CompositeSetting parent, String name, DefaultSpecification... args) {
-            super(parent, name, args);
-        }
     }
 
     private static final PoolingHttpClientConnectionManager connmngr = new PoolingHttpClientConnectionManager();
