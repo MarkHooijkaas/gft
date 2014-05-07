@@ -64,8 +64,6 @@ public class HttpCaller {
         }
     }
 
-    public static final Settings settings = new Settings(null, null);
-
     private static final PoolingHttpClientConnectionManager connmngr = new PoolingHttpClientConnectionManager();
     private static final IdleConnectionMonitorThread idleThread = new IdleConnectionMonitorThread(connmngr);//can not be static because multiple classes use this, so there are multiple instances
 
@@ -91,7 +89,7 @@ public class HttpCaller {
     // private final String urlPostfix;
 
     public HttpCaller(HttpHostMap hostMap, Props props) {
-        this(hostMap, props, settings);
+        this(hostMap, props, new Settings(null, null));
     }
 
     public HttpCaller(HttpHostMap hostMap, Props props, Settings settings) {
