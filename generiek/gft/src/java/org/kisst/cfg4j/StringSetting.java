@@ -33,5 +33,5 @@ public class StringSetting extends StringBasedSetting {
 	
 	public String get(Props props) { return getStringValue(props); }
 
-	public DefaultSpecification useDefault(String defaultValue) { return new DefaultSpecification(this, defaultValue); }
+	public DefaultSpecification overrideDefault(String defaultValue) { return new DefaultSpecification(this, defaultValue); }
 }
