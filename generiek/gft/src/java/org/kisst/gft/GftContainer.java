@@ -51,10 +51,8 @@ public class GftContainer implements HttpHostMap {
 	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
 	
 	public static class Settings extends CompositeSetting {
-		// public final StringSetting moduleDirectory = new StringSetting(this, "moduleDirectory", "./modules");  
-		public JarLoader.Settings modules=new JarLoader.Settings(this, "modules");
-		
 		public Settings(CompositeSetting parent, String name) { super(parent, name); }
+		public final JarLoader.Settings modules=new JarLoader.Settings(this, "modules");
 	}
 
 	private final Settings settings;

@@ -52,6 +52,7 @@ import org.kisst.props4j.Props;
 public class HttpCaller {
 
     public static class Settings extends CompositeSetting {
+        public Settings(CompositeSetting parent, String name) { super(parent, name); }
         public Settings(CompositeSetting parent, String name, DefaultSpecification... args) { super(parent, name, args); }
         public final StringSetting host = new StringSetting(this, "host");
         public final LongSetting closeIdleConnections = new LongSetting(this, "closeIdleConnections", -1);

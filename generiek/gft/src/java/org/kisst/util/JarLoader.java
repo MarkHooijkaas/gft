@@ -24,10 +24,9 @@ public class JarLoader {
 	}
 	
 	public static class Settings extends CompositeSetting {
+		public Settings(CompositeSetting parent, String name) { super(parent, name); }
 		public final StringSetting moduleDirectory = new StringSetting(this, "directory", "./modules");  
 		public final MappedSetting<ModuleSetting> module = new MappedSetting<ModuleSetting>(this, "module", ModuleSetting.class);
-		
-		public Settings(CompositeSetting parent, String name) { super(parent, name); }
 	}
 	
 	public static class ModuleInfo {

@@ -26,10 +26,9 @@ public class CompositeSetting extends Setting {
 	private final ArrayList<Setting> settings=new ArrayList<Setting>();
 	private final HashMap<String, DefaultSpecification > defaults = new HashMap<String, DefaultSpecification>();
 
-	public CompositeSetting (String name) {
-		this(null, name);
-	}
-
+	private static final DefaultSpecification[] emptyDefautlSpecs=new DefaultSpecification[0];
+	public CompositeSetting (String name) {	this(null, name); }
+	public CompositeSetting(CompositeSetting parent, String name) { this(parent,name,emptyDefautlSpecs); }
 	public CompositeSetting(CompositeSetting parent, String name, DefaultSpecification... otherDefaultValues) {
 		super(parent, name);
 		for (DefaultSpecification dv : otherDefaultValues) { 
