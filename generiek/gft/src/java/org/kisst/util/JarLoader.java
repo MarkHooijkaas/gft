@@ -7,6 +7,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.jar.Manifest;
 
@@ -18,14 +19,14 @@ import org.kisst.props4j.Props;
 
 public class JarLoader {
 	public static class ModuleSetting extends CompositeSetting {
-		public final BooleanSetting skip = new BooleanSetting(this, "skip", false);
-		
 		public ModuleSetting(CompositeSetting parent, String name) { super(parent, name); }
+		public final BooleanSetting skip = new BooleanSetting(this, "skip", false);
 	}
 	
 	public static class Settings extends CompositeSetting {
 		public Settings(CompositeSetting parent, String name) { super(parent, name); }
 		public final StringSetting moduleDirectory = new StringSetting(this, "directory", "./modules");  
+		public final BooleanSetting checkDuplicates = new BooleanSetting(this, "checkDuplicates", true);
 		public final MappedSetting<ModuleSetting> module = new MappedSetting<ModuleSetting>(this, "module", ModuleSetting.class);
 	}
 	
@@ -61,7 +62,15 @@ public class JarLoader {
 		}
 		int i=0;
 		URL[] urls = new URL[modules.size()];
+		boolean checkDuplicates=settings.checkDuplicates.get(props);
+		HashMap<String, ModuleInfo> alreadyLoadedModules = new HashMap<String, ModuleInfo>();
 		for (ModuleInfo m: modules) {
+			if (checkDuplicates) {
+				ModuleInfo info=alreadyLoadedModules.get(m.mainClassname);
+				if (info!=null)
+					throw new DuplicateModuleException(m, info);
+				alreadyLoadedModules.put(m.mainClassname, m);
+			}
 			try {
 				urls[i++]=m.file.toURL();
 			} 
@@ -80,6 +89,16 @@ public class JarLoader {
 		catch (ClassNotFoundException e) { throw new RuntimeException(e); }
 	}
 	
+	public class DuplicateModuleException extends RuntimeException {
+		private static final long serialVersionUID = 1L;
+		public final ModuleInfo mod1; 
+		public final ModuleInfo mod2; 
+		public DuplicateModuleException(ModuleInfo mod1, ModuleInfo mod2) {
+			super("Duplicate module files "+mod1.file+" and "+mod2.file+" found, both with main class "+mod1.mainClassname);
+			this.mod1=mod1;
+			this.mod2=mod2;
+		}
+	}
 	public List<Class<?>> getMainClasses() {
 		ArrayList<Class<?>> result=new ArrayList<Class<?>>();
 		for (ModuleInfo m: modules) {
