@@ -110,11 +110,11 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	
 	
 	private void logStart(Task task) {
-		LogService.log("info", "start", task.getTaskDefinition().getName(), "started", "Started"+getLogDetails(task)); 
+		LogService.log("info", "start", task.getTaskDefinition().getName(), "started", "Started "+getLogDetails(task)); 
 	}
 	
 	private void logCompleted(Task task) {
-		LogService.log("info", "done", task.getTaskDefinition().getName(), "completed","Completed"+getLogDetails(task));
+		LogService.log("info", "done", task.getTaskDefinition().getName(), "completed","Completed "+getLogDetails(task));
 	}
 	private void logError(Task task, RuntimeException e) {
 		String details = "Fout bij actie:"+task.getLastAction()+" fout:"+e.getMessage()+getLogDetails(task);
