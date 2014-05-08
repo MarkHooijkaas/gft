@@ -25,7 +25,6 @@ import java.util.concurrent.TimeUnit;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
-//import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.RequestConfig;
@@ -33,17 +32,13 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
-//import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-//import org.apache.http.impl.auth.BasicScheme;
-//import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.kisst.cfg4j.CompositeSetting;
-import org.kisst.cfg4j.DefaultSpecification;
 import org.kisst.cfg4j.IntSetting;
 import org.kisst.cfg4j.LongSetting;
 import org.kisst.cfg4j.StringSetting;
@@ -53,7 +48,6 @@ public class HttpCaller {
 
     public static class Settings extends CompositeSetting {
         public Settings(CompositeSetting parent, String name) { super(parent, name); }
-        public Settings(CompositeSetting parent, String name, DefaultSpecification... args) { super(parent, name, args); }
         public final StringSetting host = new StringSetting(this, "host");
         public final LongSetting closeIdleConnections = new LongSetting(this, "closeIdleConnections", -1);
         public final IntSetting timeout = new IntSetting(this, "timeout", 30000);
