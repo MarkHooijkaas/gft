@@ -6,7 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class DateUtil {
-
+	public static final String xsdFormat = "yyyy-MM-dd";
+	public static final String intFormat = "yyyyMMdd";
+	
 	public static Date parseDateWithFormat(String date, String format) {
 		DateFormat plex2date = new SimpleDateFormat(format);
 		try {
