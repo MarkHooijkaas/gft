@@ -44,7 +44,9 @@ public class ActionList  implements Action {
 			lprops.addLayer(top);
 			if (props.get(name,null) instanceof Props)
 				lprops.addLayer(props.getProps(name));
-			//lprops.addLayer(taskdef.gft.actions.get(name));
+			// TODO: the action layer is only needed for the class which is the only property in it.
+			// This could be simplified since no user defined actions are used any more
+			lprops.addLayer(taskdef.gft.actions.get(name));
 			lprops.addLayer(props);
 			//lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
 				
