@@ -39,12 +39,12 @@ public class ActionList  implements Action {
 			name=name.trim();
 			LayeredProps lprops=new LayeredProps(taskdef.gft.props.getProps("global"));
 			SimpleProps top=new SimpleProps();
-			top.put("action",taskdef.gft.actions.get(name));
+			//top.put("action",taskdef.gft.actions.get(name));
 			top.put("channel",props);
 			lprops.addLayer(top);
 			if (props.get(name,null) instanceof Props)
 				lprops.addLayer(props.getProps(name));
-			lprops.addLayer(taskdef.gft.actions.get(name));
+			//lprops.addLayer(taskdef.gft.actions.get(name));
 			lprops.addLayer(props);
 			//lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
 				
