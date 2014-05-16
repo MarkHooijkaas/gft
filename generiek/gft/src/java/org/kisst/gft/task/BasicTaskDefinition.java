@@ -3,7 +3,6 @@ package org.kisst.gft.task;
 import java.lang.reflect.Constructor;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.LogService;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.filetransfer.Channel;
@@ -14,63 +13,17 @@ import org.kisst.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class BasicTaskDefinition implements TaskDefinition {
+public abstract class BasicTaskDefinition extends AbstractTaskDefinition implements TaskDefinition {
 	final static Logger logger=LoggerFactory.getLogger(BasicTaskDefinition.class); 
-
-	public final GftContainer gft;
-	public final String name;
 	protected final Action action;
 
-	public final Props props;
-
-	private long totalCount=0;
-	private long errorCount=0;
-
-	// This constructor has a bit bogus defaultActions parameter that is needed for the other constructor
-	// In future this parameter might be removed
-	public BasicTaskDefinition(GftContainer gft, Props props, Action flow, String defaultActions) {
-		this.gft=gft;
-		this.props=props;
-		this.name=props.getLocalName();
-		if (flow!=null)
-			this.action=flow;
-		else
-			this.action=new ActionList(this, props, defaultActions);
-	}
-
-	// This constructor is for backward compatibility 
-	@Deprecated
 	public BasicTaskDefinition(GftContainer gft, Props props, String defaultActions) {
-		this(gft,props,null,defaultActions);
+		super(gft, props);
+		this.action=new ActionList(this, props, defaultActions);
 	}
-	// This method is for backward compatibility
-	@Deprecated
 	public SimpleProps getContext() { throw new RuntimeException("Deprecated method called in task "+getName()); }
 
-	public String getName() { return name; }
-	public long getTotalCount() { return totalCount; }
-	public long getErrorCount() { return errorCount; }
-	
-	public void run(Task task) {
-		try {
-			totalCount++;
-			logStart(task);
-			action.execute(task);
-			logCompleted(task);
-		}
-		catch (RuntimeException e) {
-			errorCount++;
-			task.setLastError(e);
-			try {
-				logError(task, e);
-			}
-			catch(RuntimeException e2) { 
-				logger.error("Could not perform the error actions ",e);
-				// ignore this error which occurred 
-			}
-			throw e;
-		}
-	}
+	@Override protected void executeTask(Task task) { this.action.execute(task); }
 	
 	public Action createAction(Props props) {
 		try {
@@ -84,7 +37,7 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	private Action myCreateAction(Props props) {
 		String classname=props.getString("class",null);
 		if (classname==null)
-			return null;
+			throw new RuntimeException("No action class provided "+props);
 		if (classname.indexOf('.')<0)
 			classname="org.kisst.gft.action."+classname;
 		if (classname.startsWith(".")) // Prefix a class in the default package with a .
@@ -108,20 +61,7 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 		
 	}
 	
-	
-	private void logStart(Task task) {
-		LogService.log("info", "start", task.getTaskDefinition().getName(), "started", "Started "+getLogDetails(task)); 
-	}
-	
-	private void logCompleted(Task task) {
-		LogService.log("info", "done", task.getTaskDefinition().getName(), "completed","Completed "+getLogDetails(task));
-	}
-	private void logError(Task task, RuntimeException e) {
-		String details = "Fout bij actie:"+task.getLastAction()+" fout:"+e.getMessage()+getLogDetails(task);
-		LogService.log("error", task.getLastAction(), task.getTaskDefinition().getName(), "error", details);
-	}
-	
-	private String getLogDetails(Task task) {
+	@Override protected String getLogDetails(Task task) {
 		if (task instanceof FileTransferTask) {
 			FileTransferTask ft = (FileTransferTask) task;
 			return  "bestand: "+ft.srcpath+ ", van: "+ft.channel.src+"/"+ft.srcpath+" naar: "+ft.channel.dest+"/"+ft.destpath;
