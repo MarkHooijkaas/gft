@@ -45,8 +45,11 @@ public class BasicLinearFlow {
 	}*/
 
 	protected boolean isSkippedAction(String name) { return skippedActions .contains(name); }
+	protected boolean isDisabledAction(String name) { return false; }
 	
 	private<T> T addAction(String name, T act) {
+		if (isDisabledAction(name))
+			return null;
 		if (! (act instanceof Action))
 			throw new IllegalArgumentException("Trying to add action "+act+" of type"+act.getClass().getName()+", which does not implement the Action interface");
 		Action act2 = actions.get(name);
@@ -58,6 +61,8 @@ public class BasicLinearFlow {
 	
 	@SuppressWarnings("unchecked")
 	protected<T> T addAction(String name, Class<T> cls) {
+		if (isDisabledAction(name))
+			return null;
 		Props props = getActionConstructorProps((Class<? extends Action>) cls);
 		if (props.getBoolean("skip", false))
 			skippedActions.add(name);
