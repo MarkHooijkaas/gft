@@ -1,5 +1,6 @@
 package org.kisst.gft.odwek;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 import org.kisst.props4j.Props;
@@ -43,4 +44,27 @@ public class OnDemandDefinition {
 			}
 		}
 	}
+	public void writeHtml(PrintWriter out) {
+		out.println("<h2>Kenmerken</h2>");
+		out.println("<table>");
+		out.print("<tr>");
+		out.print("<td><b>name</b></td>");
+		out.print("<td><b>alias</b></td>");
+		out.print("<td><b>defaultValue</b></td>");
+		out.print("<td><b>fixedValue</b></td>");
+		out.print("<td><b>optional</b></td>");
+		out.println("</tr>");
+		for (String name: fields.keySet()) { 
+			Field fld = fields.get(name);
+			out.print("<tr>");
+			out.print("<td>"+name+"</td>");
+			out.print("<td>"+fld.alias+"</td>");
+			out.print("<td>"+fld.defaultValue+"</td>");
+			out.print("<td>"+fld.fixedValue+"</td>");
+			out.print("<td>"+fld.optional+"</td>");
+			out.println("</tr>");
+		}
+		out.println("</table>");
+	}
+
 }
