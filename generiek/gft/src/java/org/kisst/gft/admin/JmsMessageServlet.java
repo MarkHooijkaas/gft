@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.jms.JmsUtil;
 import org.kisst.jms.MultiListener;
 
 public class JmsMessageServlet extends BaseServlet {
@@ -84,13 +85,13 @@ public class JmsMessageServlet extends BaseServlet {
 				}
 			}
 		}
-		catch (JMSException e) {throw new RuntimeException(e); }
+        catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		finally {
 			try {
 				if (session!=null)
 					session.close();
 			}
-			catch (JMSException e) {throw new RuntimeException(e); }
+            catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		}
 	}
 

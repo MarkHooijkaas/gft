@@ -12,12 +12,14 @@ public class JmsMessage {
 	public void done() { 
 		try {
 			msg.acknowledge();
-		} catch (JMSException e) { throw new RuntimeException(e);}
+		}
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); } 
 	}
 	public String getData() {
 		try {
 			return ((TextMessage) msg).getText();
-		} catch (JMSException e) { throw new RuntimeException(e); }
+		}
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
 	public String getReplyTo() { 
 		try {
@@ -26,16 +28,19 @@ public class JmsMessage {
 				return null;
 			else
 				return msg.getJMSReplyTo().toString();
-		} catch (JMSException e) { throw new RuntimeException(e); } 
+		}
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); } 
 	}
 	public String getMessageId() { 
 		try {
 			return msg.getJMSMessageID();
-		} catch (JMSException e) { throw new RuntimeException(e); } 
+		}
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); } 
 	}
 	public String getCorrelationId() { 
 		try {
 			return msg.getJMSCorrelationID();
-		} catch (JMSException e) { throw new RuntimeException(e); } 
+		}
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); } 
 	}
 }

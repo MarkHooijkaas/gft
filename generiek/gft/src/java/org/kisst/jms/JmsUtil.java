@@ -54,6 +54,13 @@ public class JmsUtil {
 			} 
 			return dest;
 		}
-		catch (JMSException e) { throw new RuntimeException(e);}
+		catch (JMSException e) { throw wrapJMSException(e);}
+	}
+	
+	public static RuntimeException wrapJMSException(JMSException e) {
+		Exception linked = e.getLinkedException();
+		if (linked!=null && linked!=e)
+			return new RuntimeException(e.getMessage()+"\nLinkedException: "+linked.getMessage(),e);
+		return new RuntimeException(e);
 	}
 }

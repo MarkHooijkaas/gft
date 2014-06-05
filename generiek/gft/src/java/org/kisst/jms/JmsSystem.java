@@ -40,7 +40,7 @@ public class JmsSystem {
 			}
 			connection.start();
 		}
-		catch (JMSException e) {throw new RuntimeException(e); }
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
 
 	protected ConnectionFactory createConnectionFactory() {
@@ -79,12 +79,13 @@ public class JmsSystem {
 		try {
 			connection.close();
 		}
-		catch (JMSException e) {throw new RuntimeException(e); }
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
 	
 	public void stop() {
 		try {
 			connection.close();
-		} catch (JMSException e) { throw new RuntimeException(e);}
+		}
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
 }

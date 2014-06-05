@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletResponse;
 import org.kisst.gft.GftContainer;
 import org.kisst.jms.ControlMessage;
 import org.kisst.jms.JmsListener;
+import org.kisst.jms.JmsUtil;
 import org.kisst.jms.MultiListener;
 import org.kisst.util.XmlNode;
 
@@ -106,13 +107,13 @@ public class ListenerServlet extends BaseServlet {
 				out.println("</table>");
 			}
 		}
-		catch (JMSException e) {throw new RuntimeException(e); }
+        catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		finally {
 			try {
 				if (session!=null)
 					session.close();
 			}
-			catch (JMSException e) {throw new RuntimeException(e); }
+            catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		}
 	}
 

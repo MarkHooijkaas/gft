@@ -30,6 +30,7 @@ import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FoundFileTask;
 import org.kisst.gft.task.Task;
 import org.kisst.jms.JmsSystem;
+import org.kisst.jms.JmsUtil;
 import org.kisst.jms.MultiListener;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
@@ -89,16 +90,15 @@ public class SendMessageFromFileAction implements Action {
             producer.send(message);
             session.commit();
             logger.info("verzonden bericht \n {}", content);
-        } catch (JMSException e) {
-            throw new RuntimeException(e);
-        } finally {
+        }
+        catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
+        finally {
             try {
                 if (session != null) {
                     session.close();
                 }
-            } catch (JMSException e) {
-                throw new RuntimeException(e);
             }
+            catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
         }
     }
 }

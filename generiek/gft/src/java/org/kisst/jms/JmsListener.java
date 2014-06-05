@@ -240,12 +240,13 @@ public class JmsListener implements Runnable {
 				logger.info("Exiting browse mode on queue {}",queue);
 			return browseMode;
 		}
-		catch (JMSException e) { throw new RuntimeException(e);}
+        catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		finally {
 			try {
 				if (browser!=null)
 					browser.close();
-			} catch (JMSException e) { throw new RuntimeException(e); }
+			} 
+            catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		}
 	}
 
@@ -278,7 +279,7 @@ public class JmsListener implements Runnable {
 			}
 			closeSession();
 		}
-		catch (JMSException e) { throw new RuntimeException(e);}
+        catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		return true;
 	}
 	
@@ -346,6 +347,11 @@ public class JmsListener implements Runnable {
 					text+=((HasDetails)e).getDetails();
 				
 				logger.error(text,e);
+				if (e instanceof JMSException) {
+					Exception linked = ((JMSException) e).getLinkedException();
+					if (e!=null)
+						logger.error("LinkedException: ", linked);
+				}
 				String queue=errorqueue;
 				//if (e instanceof RetryableException)
 				//	queue=retryqueue;
@@ -363,16 +369,19 @@ public class JmsListener implements Runnable {
 				logger.info("message send to queue {}",queue);
 				messageHandled=true;
 			}
-			catch (JMSException e2) {throw new RuntimeException(e2); }
+            catch (JMSException e2) { throw JmsUtil.wrapJMSException(e2); }
+
 		}
 		finally {
 			// The check for messageHandled is necessary because a Throwable error will not put the message on the error queue
 			// so the message should not be committed in this case.
-			if (message!=null && messageHandled)
+			if (message!=null && messageHandled) {
 				try {
 					logger.debug("committing session with message {}", message.getJMSMessageID());
 					session.commit();
-				} catch (JMSException e) { throw new RuntimeException(e); }
+				}
+				catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
+			}
 		}
 	}
 

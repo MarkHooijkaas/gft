@@ -14,6 +14,7 @@ import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.ssh.GenerateKey;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
+import org.kisst.jms.JmsUtil;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.util.CryptoUtil;
@@ -121,7 +122,7 @@ public class GftRunner {
 				}
 				queueSystem.close();
 			}
-			catch (JMSException e) { throw new RuntimeException(e); }
+            catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 			return;
 		}
 

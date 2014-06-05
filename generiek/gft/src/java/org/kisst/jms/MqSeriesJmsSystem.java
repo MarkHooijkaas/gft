@@ -30,7 +30,8 @@ public class MqSeriesJmsSystem extends JmsSystem {
 			//cf.setTransportType(JMSC.MQJMS_TP_DIRECT_TCPIP);
 			cf.setQueueManager("WINONT");
 			cf.setChannel("ONT.ESBCLIENT.CH"); //SYSTEM.DEF.SVRCONN
-		} catch (JMSException e) { throw new RuntimeException(e); }
+		}
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		return cf;
 	}
 	*/

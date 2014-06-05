@@ -46,18 +46,13 @@ public class JmsQueue {
 			producer.send(message);
 			session.commit();
 		}
-		catch (JMSException e) {
-			Exception linked = e.getLinkedException();
-			if (linked!=null && linked!=e)
-				throw new RuntimeException(e.getMessage()+"\nLinkedException: "+linked.getMessage(),e);
-			throw new RuntimeException(e);
-		}
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		finally {
 			try {
 				if (session!=null)
 					session.close();
 			}
-			catch (JMSException e) {throw new RuntimeException(e); }
+			catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		}
 	}
 }
