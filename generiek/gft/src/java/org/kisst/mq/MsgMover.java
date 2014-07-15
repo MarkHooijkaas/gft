@@ -1,11 +1,9 @@
 package org.kisst.mq;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Hashtable;
 
 import org.kisst.props4j.Props;
-
 import org.kisst.props4j.SimpleProps;
 
 //import com.ibm.mq.MQC;
@@ -33,43 +31,6 @@ public class MsgMover
 			MsgMover.moveAllMessages(props, srcqueue, destqueue);
 		} 
 		catch (MQException e) { e.printStackTrace(); }
-	}
-
-	public static MQMessage cloneMessage(MQMessage src) throws IOException {
-		MQMessage dest = new MQMessage();
-		dest.report = src.report;
-		dest.messageType = src.messageType;
-		dest.expiry = src.expiry;
-		dest.feedback = src.feedback;
-		dest.encoding = src.encoding;
-		dest.characterSet = src.characterSet;
-		//localMQMessage.feedback = src.
-		dest.format = src.format;
-		dest.priority = src.priority;
-		dest.persistence = src.persistence;
-		dest.messageId=src.messageId.clone();
-		dest.correlationId=src.correlationId.clone();
-		dest.backoutCount = src.backoutCount;
-		dest.replyToQueueName = src.replyToQueueName;
-		dest.replyToQueueManagerName = src.replyToQueueManagerName;
-		dest.userId = src.userId;
-		dest.accountingToken=src.accountingToken;
-		dest.applicationIdData = src.applicationIdData;
-		dest.putApplicationType = src.putApplicationType;
-		dest.putApplicationName = src.putApplicationName;
-		dest.putDateTime = src.putDateTime;
-		dest.applicationOriginData = src.applicationOriginData;
-		dest.groupId=src.groupId;
-		dest.messageSequenceNumber = src.messageSequenceNumber;
-		dest.offset = src.offset;
-		dest.messageFlags = src.messageFlags;
-		dest.originalLength = src.originalLength;
-
-		src.seek(0);
-		byte[] arrayOfByte = new byte[src.getMessageLength()];
-		src.readFully(arrayOfByte);
-		dest.write(arrayOfByte);
-		return dest;
 	}
 
 	public static MQQueueManager createQueueManager(Props props) {
