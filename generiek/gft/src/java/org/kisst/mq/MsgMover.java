@@ -6,6 +6,8 @@ import java.util.Hashtable;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 
+
+
 //import com.ibm.mq.MQC;
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQGetMessageOptions;
@@ -17,7 +19,6 @@ import com.ibm.mq.constants.MQConstants;
 
 public class MsgMover
 {
-
 	public static void main(String[] args) {
 		if (args.length!=2)
 			throw new RuntimeException("Correct syntax java -jar MsgMover.jar srcqueue dstqueue");
@@ -56,11 +57,16 @@ public class MsgMover
 				MQConstants.MQOO_FAIL_IF_QUIESCING
 				);
 		MQQueue destq = qMgr.accessQueue(dest, MQConstants.MQOO_OUTPUT| MQConstants.MQOO_SET_ALL_CONTEXT);
+		boolean commitPending=false;
 		try {
 			MQGetMessageOptions gmo = new MQGetMessageOptions();
-			gmo.options=MQConstants.MQGMO_WAIT ; // | MQConstants.MQGMO_BROWSE_FIRST| MQConstants.MQGMO_SYNCPOINT;
+			gmo.options=
+					MQConstants.MQGMO_NO_WAIT | 
+					MQConstants.MQGMO_SYNCPOINT | // best practice MQConstants.MQGMO_SYNCPOINT_IF_PERSISTENT |
+					MQConstants.MQGMO_FAIL_IF_QUIESCING // for nice shutdown. Not really necessary, but best practice in general
+					; 
 			gmo.matchOptions=MQConstants.MQGMO_NONE;
-			gmo.waitInterval=50;
+			// gmo.waitInterval=50;
 
 			MQPutMessageOptions pmo = new MQPutMessageOptions();
 			pmo.options=MQConstants.MQPMO_SET_ALL_CONTEXT;
@@ -69,6 +75,7 @@ public class MsgMover
 			while (true) { //srcq.getCurrentDepth()>0) {    
 				MQMessage msg = new MQMessage();
 				try {
+					commitPending=true;
 					srcq.get(msg, gmo);
 				}
 				catch(MQException e) {
@@ -81,11 +88,14 @@ public class MsgMover
 				System.out.print("Moving message "+i+" ... ");
 				destq.put(msg, pmo); 
 				qMgr.commit();
+				commitPending=false;
 				System.out.println("OK");
 				i++;
 			}
 		}
 		finally {
+			if (commitPending)
+				qMgr.backout();
 			srcq.close();
 			destq.close();
 			qMgr.disconnect();
