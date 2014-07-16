@@ -1,12 +1,9 @@
 package org.kisst.mq;
 
 import java.io.File;
-import java.util.Hashtable;
 
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
-
-
 
 //import com.ibm.mq.MQC;
 import com.ibm.mq.MQException;
@@ -14,7 +11,6 @@ import com.ibm.mq.MQGetMessageOptions;
 import com.ibm.mq.MQMessage;
 import com.ibm.mq.MQPutMessageOptions;
 import com.ibm.mq.MQQueue;
-import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.constants.MQConstants;
 
 public class MsgMover
@@ -34,30 +30,16 @@ public class MsgMover
 		catch (MQException e) { e.printStackTrace(); }
 	}
 
-	public static MQQueueManager createQueueManager(Props props) {
-		Hashtable<String, Object> mqprops = new Hashtable<String, Object>();
-		mqprops.put(MQConstants.CHANNEL_PROPERTY, props.getString("channel","WINCLIENT"));
-		mqprops.put(MQConstants.PORT_PROPERTY, props.getInt("port", 1414));
-		mqprops.put(MQConstants.HOST_NAME_PROPERTY, props.get("hostName"));
-
-		String qManager = props.getString("queueManager"); 
-		try {
-			return new MQQueueManager(qManager, mqprops);
-		}
-		catch (MQException e) { throw new RuntimeException(e); }
-	}
 
 	public static void moveAllMessages(Props props, String src, String dest) throws MQException {
-		MQException.log = null; // To prevent logging the 2033 tot stderr
-		MQQueueManager qMgr = createQueueManager(props);
-		MQQueue srcq = qMgr.accessQueue(src, 
+		QueueManager qm=new QueueManager(props);
+		MQQueue srcq = qm.getQueue(src, 
 				MQConstants.MQOO_INPUT_SHARED |
 				MQConstants.MQOO_INQUIRE | 
 				MQConstants.MQOO_SAVE_ALL_CONTEXT |
 				MQConstants.MQOO_FAIL_IF_QUIESCING
 				);
-		MQQueue destq = qMgr.accessQueue(dest, MQConstants.MQOO_OUTPUT| MQConstants.MQOO_SET_ALL_CONTEXT);
-		boolean commitPending=false;
+		MQQueue destq = qm.getQueue(dest, MQConstants.MQOO_OUTPUT| MQConstants.MQOO_SET_ALL_CONTEXT);
 		try {
 			MQGetMessageOptions gmo = new MQGetMessageOptions();
 			gmo.options=
@@ -66,7 +48,6 @@ public class MsgMover
 					MQConstants.MQGMO_FAIL_IF_QUIESCING // for nice shutdown. Not really necessary, but best practice in general
 					; 
 			gmo.matchOptions=MQConstants.MQGMO_NONE;
-			// gmo.waitInterval=50;
 
 			MQPutMessageOptions pmo = new MQPutMessageOptions();
 			pmo.options=MQConstants.MQPMO_SET_ALL_CONTEXT;
@@ -75,7 +56,6 @@ public class MsgMover
 			while (true) { //srcq.getCurrentDepth()>0) {    
 				MQMessage msg = new MQMessage();
 				try {
-					commitPending=true;
 					srcq.get(msg, gmo);
 				}
 				catch(MQException e) {
@@ -87,18 +67,15 @@ public class MsgMover
 				}
 				System.out.print("Moving message "+i+" ... ");
 				destq.put(msg, pmo); 
-				qMgr.commit();
-				commitPending=false;
+				qm.commit();
 				System.out.println("OK");
 				i++;
 			}
 		}
 		finally {
-			if (commitPending)
-				qMgr.backout();
 			srcq.close();
 			destq.close();
-			qMgr.disconnect();
+			qm.close();
 		}
 	}
 
