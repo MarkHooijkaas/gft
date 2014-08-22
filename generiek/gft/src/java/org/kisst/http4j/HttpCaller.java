@@ -38,6 +38,7 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.util.EntityUtils;
 import org.kisst.cfg4j.CompositeSetting;
 import org.kisst.cfg4j.IntSetting;
 import org.kisst.cfg4j.LongSetting;
@@ -130,9 +131,13 @@ public class HttpCaller {
         	//CloseableHttpResponse response = client.execute(target, method, localContext);
 
             CloseableHttpResponse response = client.execute(method);
-            byte[] responseBody = new byte[(int) response.getEntity().getContentLength()];
-            response.getEntity().getContent().read(responseBody);
-            String result = new String(responseBody, "UTF-8");
+            
+            // Note: we used to hardcode UTF-8 as character set. 
+            // The toString below should be better (gets the charset from the HTTP Header),
+            // but defaults tot ISO-8859-1 (as the HTTP standard prescribes). 
+            // This should be better, but long ago I have seen problems when the embedded XML wants to use UTF-8.  
+            String result = EntityUtils.toString(response.getEntity()); 
+
             if (response.getStatusLine().getStatusCode() >= 300) {
                 throw new RuntimeException("HTTP call returned " + response.getStatusLine().getStatusCode() + "\n" + result);
             }
