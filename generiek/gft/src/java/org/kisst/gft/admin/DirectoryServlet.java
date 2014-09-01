@@ -62,7 +62,7 @@ public class DirectoryServlet extends BaseServlet {
 					txt = "<tr><td><a href="+filename+">" + filename + "</td><td ALIGN=RIGHT>DIR</td>";
 				else
 					txt = "<tr><td>" + filename + "</td><td ALIGN=RIGHT>"+attr.size+"</td>";
-				txt=txt+"<td>"+new Date(attr.modifyTime)+ "</td></tr>";
+				txt=txt+"<td>"+new Date(attr.modifyTimeMilliSecs)+ "</td></tr>";
 				out.println(txt);
 				count++;
 			}

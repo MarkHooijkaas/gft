@@ -64,14 +64,14 @@ public class SshFileServerConnection implements FileServerConnection {
 		} catch (SftpException e) { throw new RuntimeException(e); }
 	}
 	public long fileSize(String path) { return getFileAttributes(path).size; }
-	public long lastModified(String path) { return getFileAttributes(path).modifyTime; }
+	public long lastModified(String path) { return getFileAttributes(path).modifyTimeMilliSecs; }
 	public boolean isDirectory(String path) { return getFileAttributes(path).isDirectory; }
 	
 	public FileAttributes getFileAttributes(String path) {
 		path=fileserver.unixPath(path);
 		try {
 			SftpATTRS attr = sftp.lstat(path);
-			return new FileAttributes(attr.getATime(), attr.getMTime(), attr.isDir(), attr.getSize());
+			return new FileAttributes(1000L*attr.getATime(), 1000L*attr.getMTime(), attr.isDir(), attr.getSize());
 		} catch (SftpException e) { throw new RuntimeException(e); }
 	}
 	
