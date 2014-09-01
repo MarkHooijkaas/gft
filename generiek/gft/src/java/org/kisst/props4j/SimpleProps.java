@@ -33,7 +33,7 @@ import org.slf4j.LoggerFactory;
 
 public class SimpleProps extends PropsBase {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleProps.class);
-	private static final long serialVersionUID = 1L;
+	//private static final long serialVersionUID = 1L;
 
 	private final SimpleProps parent;
 	private final String name; 

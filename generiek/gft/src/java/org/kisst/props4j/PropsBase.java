@@ -24,7 +24,7 @@ import java.io.File;
 import org.kisst.util.FileUtil;
 
 public abstract class PropsBase implements Props {
-	private static final long serialVersionUID = 1L;
+	//private static final long serialVersionUID = 1L;
 	abstract public Object get(String key, Object defaultValue);
 
 	public boolean hasKey(String key) { return get(key,null)!=null;	}
