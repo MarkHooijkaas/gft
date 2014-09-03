@@ -1,5 +1,6 @@
 package org.kisst.jms;
 
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 
@@ -13,6 +14,7 @@ import javax.jms.QueueBrowser;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.kisst.gft.LogService;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.TimeWindowList;
@@ -135,6 +137,12 @@ public class JmsListener implements Runnable {
 		}
 		catch (Throwable e) { // DLL link errors
 			logger.error("Unrecoverable error during listening, stopped listening", e);
+			String hostName="unknown";
+			try {
+				hostName = java.net.InetAddress.getLocalHost().getHostName();
+			} catch (UnknownHostException e1) {/* ignore, is only nice to have info for logging purposes */ }
+			LogService.log("info", "start", "Listener", hostName, "Unrecoverable error during listening, stopped listening thread "+thread.getName()+" on host "+ hostName+": "+e.getMessage());
+
 			if (props.getBoolean("exitOnUnrecoverableListenerError", false))
 				System.exit(1);
 		}
