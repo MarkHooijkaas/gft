@@ -50,7 +50,7 @@ public class ActionList  implements Action {
 			lprops.addLayer(props);
 			//lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
 				
-			Action a=taskdef.createAction(lprops);
+			Action a=taskdef.createAction(name, lprops);
 			if (a==null)
 				throw new RuntimeException("Unknown action "+name);
 			this.actions.put(name,a);

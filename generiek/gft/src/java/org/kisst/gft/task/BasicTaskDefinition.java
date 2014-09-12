@@ -25,12 +25,12 @@ public abstract class BasicTaskDefinition extends AbstractTaskDefinition impleme
 
 	@Override protected void executeTask(Task task) { this.action.execute(task); }
 	
-	public Action createAction(Props props) {
+	public Action createAction(String name, Props props) {
 		try {
 			return myCreateAction(props);
 		}
 		catch (RuntimeException e) {
-			throw new RuntimeException("Error when creating action in channel "+getName(),e);
+			throw new RuntimeException("Error when creating action "+name+" in channel "+getName(),e);
 		}
 	}
 	
