@@ -40,6 +40,7 @@ public class JarLoader {
 		public ModuleInfo(File f) {
 			this.file=f;
 			try {
+				@SuppressWarnings("deprecation")
 				URL url=new URL("jar:"+f.toURL()+"!/META-INF/MANIFEST.MF");
 				Manifest manifest = new Manifest(url.openStream());
 				this.mainClassname =  manifest.getMainAttributes().getValue("Main-Class");
@@ -52,6 +53,7 @@ public class JarLoader {
 	private final ArrayList<ModuleInfo> modules=new ArrayList<ModuleInfo>();
 	private final URLClassLoader loader; 
 
+	@SuppressWarnings("deprecation")
 	public JarLoader(Settings settings, Props props) {
 		this.dir=new File(settings.moduleDirectory.get(props));
 		if (! dir.isDirectory())
