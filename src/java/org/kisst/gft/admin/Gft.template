@@ -1,0 +1,115 @@
+<h1>${gft.topname?upper_case} version ${gft.version}</h1> 
+started on ${gft.startupTime?datetime}<br>
+<a href="config">Configuration</a><br> 
+
+<a href="reset">Reset JAMON logging</a><br>
+
+<h2>Modules</h2> 
+<table> 
+  <tr>
+    <td><b>file</b></td>
+    <td><b>version</b></td>
+    <td><b>main class</b></td>
+  </tr>
+<#list modules as mod>
+  <tr>
+    <td>${mod.file.name}</td>
+    <td>${mod.version!"no version"}</td>
+    <td>${mod.mainClassname}</td>
+  </tr>
+</#list> 
+</table> 
+
+
+<h2>Channels</h2> 
+<table> 
+  <tr>
+    <td><b>name</b></td>
+    <td><b>type</b></td>
+    <td><b>#tasks</b></td>
+    <td><b>#errors</b></td>
+    <td><b>from</b></td>
+    <td><b>to</b></td>
+  </tr>
+<#list channels?keys as name>
+  <tr>
+    <td><a href="channel/${name}"><b>${name}</b></a></td>
+    <td>${channels[name].class.simpleName}</td>
+    <td>${channels[name].totalCount}</td>
+    <td>${channels[name].errorCount}</td>
+    <td>${channels[name].srcDescription}</td>
+    <td>${channels[name].destDescription}</td>
+  </tr>
+</#list> 
+</table> 
+
+<h2>Logging</h2> 
+<ul>
+<li><a href=logging/days=1>View ALL Logging in LOGB</a></li>
+<li><a href=logging/days=1&level=error>View ERROR Logging in LOGB</a></li>
+</ul>
+
+<h2>Pollers</h2> 
+<table> 
+<tr>
+  <td><b>interval</b></td>
+  <td><b>poller/job name</b></td>
+  <td><b>directory</b></td>
+  <td><b>inprogress directory</b></td>
+  <td><b>runs</b></td>
+  <td><b>successes</b></td>
+  <td><b>errors</b></td>
+  <td><b>paused</b></td>
+  <td><b>#current files</b></td>
+  <td><b>#problematic files</b></td>
+<tr>
+<#list pollers?keys as name>
+<tr><td>${pollers[name].interval}</td><td><a href=poller/${name}>${name}</a></td></tr> 
+<#list pollers[name].jobs as job>
+<tr><td></td><td>${job.name}</td>
+  <td>${job.dir}</td>
+  <td>${job.moveToDir}</td>
+  <td>${job.runs}</td>
+  <td>${job.successes}</td>
+  <td>${job.errors}</td>
+  <td>${job.paused?string("PAUSED","active")}</td>
+  <td>${job.numberOfDetectedFiles}</td>
+  <td>${job.numberOfProblematicFiles}</td>
+  </tr>
+</#list> 
+</#list> 
+</table> 
+
+
+<h2>Listeners</h2> 
+<table> 
+<tr><td>name</td><td>queue</td><td>STATUS</td><td>threads</td><td>active</td></tr>
+<#list listeners?keys as name>
+<tr><td><a href=rest/listener/${name}>${name}</a></td><td>${listeners[name].queue}</td><td><a href=listener/${name}>VIEW STATUS and QUEUES</a></td>
+<td>${listeners[name].nrofListeners}</td>
+<td>${listeners[name].nrofActiveListeners}</td>
+</tr> 
+</#list> 
+</table> 
+
+
+<h2>SSH Hosts</h2> 
+<table> 
+<#list sshhosts?keys as name>
+<tr><td><a href=rest/sshhost/${name}>${name}</a></td><td>${sshhosts[name]}</td><td><a href=dir/${name}>DIR</a></td></tr> 
+</#list> 
+</table> 
+
+<h2>HTTP Hosts</h2> 
+<table> 
+<#list gft.getHttpHostNames() as name>
+<tr><td><a href=rest/httphost/${name}>${name}</a></td><td>${gft.getHttpHost(name)}</td></tr> 
+</#list> 
+</table> 
+
+<h2>Actions</h2> 
+<table> 
+<#list actions?keys as name>
+<tr><td><a href=rest/action/${name}>${name}</a></td><td>${actions[name]}</td></tr> 
+</#list> 
+</table> 
