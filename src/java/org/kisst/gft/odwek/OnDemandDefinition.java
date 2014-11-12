@@ -1,12 +1,17 @@
 package org.kisst.gft.odwek;
 
 import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
+
+import nl.duo.gft.gas.KenmerkenTask;
 
 import org.kisst.props4j.Props;
 
 public class OnDemandDefinition {
-	public static class Field {
+	private static class Field {
 		public final String alias;
 		public final String defaultValue;
 		public final String fixedValue;
@@ -27,8 +32,10 @@ public class OnDemandDefinition {
 	public final String odfolder;
 	public final String odapplgroup;
 	public final String odapplication;
-	public final HashMap<String, Field> fields = new HashMap<String, Field>();
-	
+	private final HashMap<String, Field> fields = new HashMap<String, Field>();
+
+	private final String datumFormaat;
+
 	public OnDemandDefinition(Props props) {
 		props = props.getProps("ondemand");
 		
@@ -43,7 +50,69 @@ public class OnDemandDefinition {
 				fields.put(name, new Field(fieldprops.getProps(name)));
 			}
 		}
+		datumFormaat = props.getString("ondemand.datumformaat",  "MM/dd/yy"); 
+
 	}
+
+	@Override public String toString() { return "OnDemand("+odfolder+","+odapplgroup+","+odapplication+")"; }
+	
+	
+
+	public void storeKenmerkVariabelen(KenmerkenTask kenmerktask) {
+		for (String name: fields.keySet()) {
+			Field fielddef = fields.get(name);
+			if (fielddef.varName==null)
+				break;
+			String kenmerkNaam=fielddef.alias;
+			if (kenmerkNaam==null)
+				kenmerkNaam=name;
+			Object waarde = kenmerktask.getKenmerk(kenmerkNaam);
+			if (waarde!=null)
+				kenmerktask.setVar(fielddef.varName, waarde);
+			else if (! fielddef.optional)
+				throw new RuntimeException("Non optional field "+name+" is not available to store in variable "+fielddef.varName);
+		}
+
+	}
+	
+	public String getKenmerkString(KenmerkenTask kenmerktask, String docField) {
+		
+		String waarde=null;
+		Field fielddef=fields.get(docField);
+		if (fielddef!=null) {
+			String kenmerkNaam=fielddef.alias;
+			if (kenmerkNaam==null)
+				kenmerkNaam=docField;
+			Object kenmerk = kenmerktask.getKenmerk(kenmerkNaam);
+			if (kenmerk instanceof String)
+				waarde = (String) kenmerk;
+			else if (kenmerk instanceof Date) {
+				DateFormat date2odwek = new SimpleDateFormat(datumFormaat);
+				waarde = date2odwek.format((Date)kenmerk);
+			}
+			else 
+				waarde=null;
+			if (fielddef.fixedValue != null) {
+				if (waarde!=null)
+					throw new RuntimeException("kenmerk "+docField+" heeft fixedValue, maar ook een waarde in XML bericht: "+waarde);
+				waarde=fielddef.fixedValue;
+			}
+			else {
+				if (waarde==null && fielddef.defaultValue!=null)
+					waarde=fielddef.defaultValue;
+				if (waarde==null && fielddef.optional==false)
+					throw new RuntimeException("veld "+docField+" is niet optioneel en niet meegegeven");
+			}
+			if (waarde!=null && fielddef.maxLength>=0 && waarde.length()>fielddef.maxLength)
+				throw new RuntimeException("Veld "+docField+" heeft waarde ["+waarde+"] met lengte "+waarde.length()+", maar mag maximale lengte hebben van "+fielddef.maxLength);
+		}
+		else {
+			if (waarde==null)
+				throw new RuntimeException("veld "+docField+" is niet optioneel en niet meegegeven");
+		}
+		return waarde;
+	}
+	
 	public void writeHtml(PrintWriter out) {
 		out.println("<h2>Kenmerken</h2>");
 		out.println("<table>");
