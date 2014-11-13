@@ -17,7 +17,6 @@ public class OnDemandDefinition {
 		public final String fixedValue;
 		public final boolean optional;
 		public final int maxLength;
-		public final String varName;
 		
 		Field(Props props) {
 			this.alias = props.getString("alias", null);
@@ -25,7 +24,6 @@ public class OnDemandDefinition {
 			this.fixedValue = props.getString("fixedValue", null);
 			this.optional = props.getBoolean("optional", false);
 			this.maxLength = props.getInt("maxLength", -1);
-			this.varName= props.getString("varName", null);
 		}
 	}
 	
@@ -56,27 +54,7 @@ public class OnDemandDefinition {
 
 	@Override public String toString() { return "OnDemand("+odfolder+","+odapplgroup+","+odapplication+")"; }
 	
-	
-
-	public void storeKenmerkVariabelen(KenmerkenTask kenmerktask) {
-		for (String name: fields.keySet()) {
-			Field fielddef = fields.get(name);
-			if (fielddef.varName==null)
-				break;
-			String kenmerkNaam=fielddef.alias;
-			if (kenmerkNaam==null)
-				kenmerkNaam=name;
-			Object waarde = kenmerktask.getKenmerk(kenmerkNaam);
-			if (waarde!=null)
-				kenmerktask.setVar(fielddef.varName, waarde);
-			else if (! fielddef.optional)
-				throw new RuntimeException("Non optional field "+name+" is not available to store in variable "+fielddef.varName);
-		}
-
-	}
-	
 	public String getKenmerkString(KenmerkenTask kenmerktask, String docField) {
-		
 		String waarde=null;
 		Field fielddef=fields.get(docField);
 		if (fielddef!=null) {
