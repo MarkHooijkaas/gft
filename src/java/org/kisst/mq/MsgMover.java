@@ -16,16 +16,18 @@ import com.ibm.mq.constants.MQConstants;
 public class MsgMover
 {
 	public static void main(String[] args) {
-		if (args.length!=2)
-			throw new RuntimeException("Correct syntax java -jar MsgMover.jar srcqueue dstqueue");
+		if (args.length<2 || args.length>3)
+			throw new RuntimeException("Correct syntax java -jar MsgMover.jar srcqueue dstqueue [qmgr]");
 		String srcqueue=args[0];
 		String destqueue=args[1];
 		File configfile=new File("MsgMover.properties");
 		SimpleProps props = new SimpleProps();
 		props.load(configfile);
-		
 		try {
-			MsgMover.moveAllMessages(props, srcqueue, destqueue);
+			if (args.length==3)
+				MsgMover.moveAllMessages(props.getProps("qm."+args[2]), srcqueue, destqueue);
+			else
+				MsgMover.moveAllMessages(props, srcqueue, destqueue);
 		} 
 		catch (MQException e) { e.printStackTrace(); }
 	}
