@@ -35,7 +35,13 @@ public class BasicLinearFlow {
 		retryDelay = props.getLong("retryDelay", 30000);
 		retryNonFunctionalExceptions = props.getBoolean("retryNonFunctionalExceptions", true);
 	}
-	public boolean safeToRetry() { return false; } // TODO:
+	public boolean safeToRetry() { 
+		for (Action a: actions.values()) {
+			if (! a.safeToRetry())
+				return false;
+		}
+		return true;
+	}
 	/*
 	protected void initFlow() {
 		LinkedHashMap<String, Action> result = ReflectionUtil.findFieldsImplementing(this, Action.class);
