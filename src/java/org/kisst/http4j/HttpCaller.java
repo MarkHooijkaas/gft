@@ -49,7 +49,7 @@ public class HttpCaller {
 
     public static class Settings extends CompositeSetting {
         public Settings(CompositeSetting parent, String name) { super(parent, name); }
-        public final StringSetting host = new StringSetting(this, "host");
+        public final StringSetting host = new StringSetting(this, "host","esb1");
         public final LongSetting closeIdleConnections = new LongSetting(this, "closeIdleConnections", -1);
         public final IntSetting timeout = new IntSetting(this, "timeout", 30000);
         // public final StringSetting urlPostfix = new StringSetting(this, "urlPostfix", null);
