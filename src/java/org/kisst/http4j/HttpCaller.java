@@ -119,7 +119,7 @@ public class HttpCaller {
         return httpCall(method);
     }
 
-    private String httpCall(final HttpRequestBase method) {
+    protected String httpCall(final HttpRequestBase method) {
         method.setConfig(RequestConfig.custom().setSocketTimeout(timeout).build());// setStaleConnectionCheckEnabled()?
         try {
             if (closeIdleConnections >= 0) { // Hack because often some idle connections were closed which resulted in 401 errors
