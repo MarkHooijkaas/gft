@@ -58,10 +58,7 @@ public class OnDemandDefinition {
 		out.println("<table>");
 		out.print("<tr>");
 		out.print("<td><b>name</b></td>");
-		out.print("<td><b>alias</b></td>");
-		out.print("<td><b>defaultValue</b></td>");
-		out.print("<td><b>fixedValue</b></td>");
-		out.print("<td><b>optional</b></td>");
+		out.print("<td><b>definition</b></td>");
 		out.println("</tr>");
 		for (String name: fields.keySet()) { 
 			OnDemandField fld = fields.get(name);
