@@ -1,19 +1,16 @@
 package org.kisst.gft.odwek;
 
+import org.kisst.props4j.Props;
 
-public class MandatoryField implements OnDemandField {
-	private final String name;
 
-	public MandatoryField(String name) {
-		this.name=name;
-	}
-	@Override public String getName() { return name; } 
+public class MandatoryField  extends OptionalField {
+	public MandatoryField(String name) { super(name); }
+	public MandatoryField(String name, Props props) { super(name, props); }
+
 	@Override public String getValue(OnDemandTask task) {
-		Object result= task.getOnDemandFieldValue(name);
+		String result=super.getValue(task);
 		if (result==null )
-			throw new RuntimeException("Mandatory field "+name+" did not return a null value");
+			throw new RuntimeException("Mandatory field "+getName()+" did not return a null value");
 		return result.toString();
 	}
-	
-	@Override public String toString() { return "MandatoryField("+name+")"; }
 }
