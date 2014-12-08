@@ -4,27 +4,31 @@ import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.LogService;
+import org.kisst.gft.action.Action;
+import org.kisst.gft.admin.WritesHtml;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class AbstractTaskDefinition implements TaskDefinition {
+public class AbstractTaskDefinition implements TaskDefinition {
 	final static Logger logger=LoggerFactory.getLogger(AbstractTaskDefinition.class); 
-	abstract protected void executeTask(Task task);
-	abstract protected String getLogDetails(Task task);
+	//abstract protected void executeTask(Task task);
+	protected String getLogDetails(Task task) { return task.toString(); }
 
+	
 	public final GftContainer gft;
 	public final String name;
+	private final Action flow;
+
 
 	public final Props props;
 
 	private long totalCount=0;
 	private long errorCount=0;
 
-	// This constructor has a bit bogus defaultActions parameter that is needed for the other constructor
-	// In future this parameter might be removed
-	public AbstractTaskDefinition(GftContainer gft, Props props) {
+	public AbstractTaskDefinition(GftContainer gft, Action flow, Props props) {
 		this.gft=gft;
+		this.flow=flow;
 		this.props=props;
 		this.name=props.getLocalName();
 	}
@@ -32,6 +36,7 @@ public abstract class AbstractTaskDefinition implements TaskDefinition {
 	public String getName() { return name; }
 	public long getTotalCount() { return totalCount; }
 	public long getErrorCount() { return errorCount; }
+	public Action getFlow() { return flow; }
 	
 	public void run(Task task) {
 		try {
@@ -74,6 +79,8 @@ public abstract class AbstractTaskDefinition implements TaskDefinition {
 		out.println("<li><a href=\"/logging/days=1&channel="+getName()+"\">ALL Logging</a>");
 		out.println("<li><a href=\"/logging/days=1&channel="+getName()+"&level=error\">ERROR Logging</a>");
 		out.println("</ul>");
+		if (flow instanceof WritesHtml)
+			((WritesHtml)flow).writeHtml(out);
 	}
 	protected void writeHtmlFooter(PrintWriter out) {
 		out.println("<h2>Config</h2>");
@@ -82,4 +89,10 @@ public abstract class AbstractTaskDefinition implements TaskDefinition {
 		out.println("</pre>");
 	}
 
+	protected void executeTask(Task task) { flow.execute(task); }
+
+	@Override public void writeHtml(PrintWriter out) {
+		writeHtmlHeader(out);
+		writeHtmlFooter(out);
+	}
 }

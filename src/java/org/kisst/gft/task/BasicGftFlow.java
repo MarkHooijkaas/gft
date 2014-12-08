@@ -6,11 +6,12 @@ import java.lang.reflect.Constructor;
 import org.kisst.flow4j.BasicLinearFlow;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
+import org.kisst.gft.admin.WritesHtml;
 import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.Props;
 import org.kisst.util.ReflectionUtil;
 
-public class BasicGftFlow extends BasicLinearFlow {
+public class BasicGftFlow extends BasicLinearFlow implements Action, WritesHtml {
 	private final GftContainer gft;
 	public BasicGftFlow(GftContainer gft, Props props) { 
 		super(createChannelProps(gft,props));
@@ -34,7 +35,7 @@ public class BasicGftFlow extends BasicLinearFlow {
 		return super.myCreateAction(clz, props); 
 	}
 	
-	public void writeHtml(PrintWriter out) {
+	@Override public void writeHtml(PrintWriter out) {
 		out.println("<h2>Flow</h2>");
 		out.println("<table>");
 		out.print("<tr>");

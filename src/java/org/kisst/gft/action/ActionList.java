@@ -1,13 +1,17 @@
 package org.kisst.gft.action;
 
+import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 
+import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
-import org.kisst.gft.task.BasicTaskDefinition;
+import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
+import org.kisst.util.ReflectionUtil;
 import org.kisst.util.ThreadUtil;
 import org.kisst.util.exception.BasicFunctionalException;
 import org.slf4j.Logger;
@@ -16,19 +20,22 @@ import org.slf4j.LoggerFactory;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 
-public class ActionList  implements Action {
+public class ActionList  implements Action, WritesHtml {
 	final static Logger logger=LoggerFactory.getLogger(ActionList.class); 
 	
 	private final LinkedHashMap<String,Action> actions=new LinkedHashMap<String,Action>();
 
+	private final GftContainer gft;
 	private final int maxNrofTries;
 	private final long retryDelay;
 	private final boolean retryNonFunctionalExceptions;
 
-	public ActionList(BasicTaskDefinition taskdef, Props props) {
-		this(taskdef, props, null);
+
+	public ActionList(GftContainer gft, Props props) {
+		this(gft, props, null);
 	}
-	public ActionList(BasicTaskDefinition taskdef, Props props, String defaultActions) {
+	public ActionList(GftContainer gft, Props props, String defaultActions) {
+		this.gft = gft;
 		maxNrofTries = props.getInt("maxNrofTries", 3);
 		retryDelay = props.getLong("retryDelay", 30000);
 		retryNonFunctionalExceptions = props.getBoolean("retryNonFunctionalExceptions", true);
@@ -37,7 +44,7 @@ public class ActionList  implements Action {
 		//this.actions=new Action[parts.length];
 		for (String name: parts) {
 			name=name.trim();
-			LayeredProps lprops=new LayeredProps(taskdef.gft.props.getProps("global"));
+			LayeredProps lprops=new LayeredProps(gft.props.getProps("global"));
 			SimpleProps top=new SimpleProps();
 			//top.put("action",taskdef.gft.actions.get(name));
 			top.put("channel",props);
@@ -46,11 +53,11 @@ public class ActionList  implements Action {
 				lprops.addLayer(props.getProps(name));
 			// TODO: the action layer is only needed for the class which is the only property in it.
 			// This could be simplified since no user defined actions are used any more
-			lprops.addLayer(taskdef.gft.actions.get(name));
+			lprops.addLayer(gft.actions.get(name));
 			lprops.addLayer(props);
 			//lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
 				
-			Action a=taskdef.createAction(name, lprops);
+			Action a=createAction(name, lprops);
 			if (a==null)
 				throw new RuntimeException("Unknown action "+name);
 			this.actions.put(name,a);
@@ -118,4 +125,47 @@ public class ActionList  implements Action {
 		}
 		return false;
 	}
+	
+	public Action createAction(String name, Props props) {
+		try {
+			return myCreateAction(props);
+		}
+		catch (RuntimeException e) {
+			throw new RuntimeException("Error when creating action "+name+" in channel "+name,e);
+		}
+	}
+	
+	private  Action myCreateAction(Props props) {
+		String classname=props.getString("class",null);
+		if (classname==null)
+			throw new RuntimeException("No action class provided "+props);
+		if (classname.indexOf('.')<0)
+			classname="org.kisst.gft.action."+classname;
+		if (classname.startsWith(".")) // Prefix a class in the default package with a .
+			classname=classname.substring(1);
+		
+		Class<?> clz;
+		try {
+			clz= gft.getSpecialClassLoader().loadClass(classname);
+		} catch (ClassNotFoundException e) { throw new RuntimeException(e); }
+		
+		
+		Constructor<?> c = ReflectionUtil.getConstructor(clz, new Class<?>[] {GftContainer.class, Props.class} );
+		if (c==null)
+			return (Action) ReflectionUtil.createObject(classname);
+		else
+			return (Action) ReflectionUtil.createObject(c, new Object[] {gft, props} );
+		
+	}
+	@Override
+	public void writeHtml(PrintWriter out) {
+		out.println("<h2>Actions</h2>");
+		out.println("<table>");
+		//out.println("<tr><td>"+name+"</td><td>"+actions.get(name).toString()+"</td></tr>")
+		for (String name: actions.keySet()) {
+			out.println("<tr><td>"+name+"</td><td>"+actions.get(name).toString()+"</td></tr>");
+		}
+		out.println("</table>");
+	}
+
 }

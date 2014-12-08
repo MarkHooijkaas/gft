@@ -3,6 +3,7 @@ package org.kisst.gft.poller;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
@@ -15,7 +16,7 @@ import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class PollerJob extends BasicTaskDefinition {
+public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private static final Logger logger = LoggerFactory.getLogger(PollerJob.class);
 
 	private final Poller parent;
@@ -184,9 +185,8 @@ public class PollerJob extends BasicTaskDefinition {
 		this.nrofDetectedFiles=tmpnrofDetectedFiles;
 		this.nrofIgnoredFiles=tmpnrofIgnoredFiles;
 	}
-
-	@Override
-	public void writeHtml(PrintWriter out) {
+	
+	@Override public void writeHtml(PrintWriter out) {
 		out.println("<H1>PollerJob</H1>");
 		out.println("No specific data");
 	}

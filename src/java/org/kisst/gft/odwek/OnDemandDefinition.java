@@ -4,9 +4,10 @@ import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
+import org.kisst.gft.admin.WritesHtml;
 import org.kisst.props4j.Props;
 
-public class OnDemandDefinition {
+public class OnDemandDefinition implements WritesHtml {
 	public final String odfolder;
 	public final String odapplgroup;
 	public final String odapplication;
@@ -78,7 +79,7 @@ public class OnDemandDefinition {
 	}
 
 
-	public void writeHtml(PrintWriter out) {
+	@Override public void writeHtml(PrintWriter out) {
 		out.println("<h2>Kenmerken</h2>");
 		out.println("<table>");
 		out.print("<tr>");

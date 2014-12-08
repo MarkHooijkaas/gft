@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
+import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
@@ -11,7 +12,7 @@ import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class Channel extends BasicTaskDefinition {
+public abstract class Channel extends BasicTaskDefinition  implements WritesHtml {
 	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
 
 	public final SshFileServer src;
@@ -46,31 +47,30 @@ public abstract class Channel extends BasicTaskDefinition {
 			throw new RetryableException("Destination system "+dest+" is not available tot transfer file "+ft.destpath+" for channel "+name);
 	}
 
-	@Override
-	public void run(Task task) {
+	@Override public void run(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		checkSystemsAvailable(ft);
 		super.run(task);
 	}
 	
 	
-	public void writeHtml(PrintWriter out) {
-		out.println("<h1>Channel "+getName()+"</h1>");
+	@Override protected String getLogDetails(Task task) {
+		if (task instanceof FileTransferTask) {
+			FileTransferTask ft = (FileTransferTask) task;
+			return  "bestand: "+ft.srcpath+ ", van: "+ft.channel.src+"/"+ft.srcpath+" naar: "+ft.channel.dest+"/"+ft.destpath;
+		}
+		else
+			return task.toString();
+	}
+	
+	@Override public void writeHtml(PrintWriter out) {
+		writeHtmlHeader(out);
 		out.println("<h2>Directories</h2>");
 		out.println("<ul>");
 		out.println("<li>FROM: <a href=\"/dir/"+src.getSshHost().name+"/"+ srcdir +"\">"+src.getSshHost().name +"/"+src.getBasePath() + srcdir +"</a>");
 		out.println("<li>TO:   <a href=\"/dir/"+dest.getSshHost().name+"/"+destdir+"\">"+dest.getSshHost().name+"/"+dest.getBasePath()+ destdir+"</a>");
 		out.println("</ul>");
-
-		out.println("<h2>Logging</h2>");
-		out.println("<ul>");
-		out.println("<li><a href=\"/logging/days=1&channel="+getName()+"\">ALL Logging</a>");
-		out.println("<li><a href=\"/logging/days=1&channel="+getName()+"&level=error\">ERROR Logging</a>");
-		out.println("</ul>");
-		
-		out.println("<h2>Config</h2>");
-		out.println("<pre>");
-		out.println(props);
-		out.println("</pre>");
+	
+		writeHtmlFooter(out);
 	}
 }
