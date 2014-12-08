@@ -3,6 +3,7 @@ package org.kisst.gft.poller;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import org.kisst.gft.action.ActionList;
 import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
 import org.kisst.gft.filetransfer.FileServer;
@@ -44,7 +45,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private PollerJobListener listener = new DummyListener();
 
 	public PollerJob(Poller parent,Props props, FileServer fileserver) {
-		super(parent.gft, props, "send_gft_message");
+		super(parent.gft, new ActionList(parent.gft, props, "send_gft_message"), props);
 		this.parent=parent;
 		this.fileserver = fileserver;
 		delay = props.getInt("delay", 10000);

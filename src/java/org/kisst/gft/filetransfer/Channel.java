@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
+import org.kisst.gft.action.ActionList;
 import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.task.BasicTaskDefinition;
@@ -22,7 +23,7 @@ public abstract class Channel extends BasicTaskDefinition  implements WritesHtml
 	public final String mode;
 
 	public Channel(GftContainer gft, Props props) {
-		super(gft, props, null);
+		super(gft, new ActionList(gft, props, null), props);
 		
 		this.src=gft.sshhosts.get(props.getString("src.host"));
 		this.dest=gft.sshhosts.get(props.getString("dest.host"));
