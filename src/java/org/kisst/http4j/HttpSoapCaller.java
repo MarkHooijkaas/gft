@@ -16,7 +16,7 @@ public class HttpSoapCaller extends HttpCaller {
 	public XmlNode createMethod(String name, String namespace) {
 		XmlNode envelope = new XmlNode("Envelope", "http://schemas.xmlsoap.org/soap/envelope/");
 		envelope.setPrefix("SOAP");
-		//XmlNode header = envelope.add("Header");
+		envelope.add("Header");
 
 		XmlNode body = envelope.add("Body");
 		XmlNode method=body.add(name, namespace);
