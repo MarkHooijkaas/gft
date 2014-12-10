@@ -44,8 +44,12 @@ import org.kisst.cfg4j.IntSetting;
 import org.kisst.cfg4j.LongSetting;
 import org.kisst.cfg4j.StringSetting;
 import org.kisst.props4j.Props;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class HttpCaller {
+	private final static Logger logger=LoggerFactory.getLogger(HttpCaller.class); 
+
 
     public static class Settings extends CompositeSetting {
         public Settings(CompositeSetting parent, String name) { super(parent, name); }
@@ -110,6 +114,7 @@ public class HttpCaller {
 
     public String httpGet(String url) {
         HttpGet method = new HttpGet(getCompleteUrl(url));
+		logger.info("Calling url: {}", url);
         return httpCall(method);
     }
 
