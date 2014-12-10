@@ -31,13 +31,13 @@ public class CryptoUtil {
 		else {
 			// Old method for module that does not know yet of new CryptoUtil.KeySetter interface
 			// to be removed in future
-			Method method = ReflectionUtil.getMethod(obj.getClass(),"setKey", new Class<?>[]{});
-			if (method!=null) {
-				if (Modifier.isStatic(method.getModifiers())) {
-					logger.warn("Using old deprecated way (calling setKey through reflection) for setting cryptoKey in object "+obj);
-					ReflectionUtil.invoke(null, method, null);
-				}
-			}
+			//Method method = ReflectionUtil.getMethod(obj.getClass(),"setKey", new Class<?>[]{});
+			//if (method!=null) {
+			//	if (Modifier.isStatic(method.getModifiers())) {
+			//		logger.warn("Using old deprecated way (calling setKey through reflection) for setting cryptoKey in object "+obj);
+			//		ReflectionUtil.invoke(null, method, null);
+			//	}
+			//}
 		}
 	}
 

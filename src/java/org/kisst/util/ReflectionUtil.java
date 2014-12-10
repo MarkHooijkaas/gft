@@ -146,7 +146,20 @@ public class ReflectionUtil {
 		catch (InstantiationException e) { throw new RuntimeException(e); }
 	}
 	
-
+	public static String toString(Object obj, String... fields) {
+		StringBuilder result= new StringBuilder(obj.getClass().getSimpleName()+"(");
+		String sep="";
+		if (fields!=null) for (String field: fields) {
+			if (field!=null) {
+				result.append(sep);
+				result.append(field);
+				sep=",";
+			}
+		}
+		result.append(")");
+		return result.toString();
+	}
+	
 	public static String toString(Object obj) { return toString(obj,0); }
 	public static String toString(Object obj, int depth) {
 		// TODO: special support for Hashmaps? Lists, etc. Better indentation, newline support etc?

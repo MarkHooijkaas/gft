@@ -15,32 +15,30 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with the RelayConnector framework.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package org.kisst.gft.filetransfer.action;
 
-import org.kisst.gft.GftContainer;
-import org.kisst.gft.action.Action;
+import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.task.BasicTask;
+import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SftpGetAction implements Action {
+public class SftpGetAction extends BaseAction {
 	private final static Logger logger=LoggerFactory.getLogger(SftpGetAction.class);
-	private final boolean safeToRetry;
-	
-	public SftpGetAction(GftContainer gft, Props props) {
-		safeToRetry = props.getBoolean("safeToRetry", true);
+
+	public SftpGetAction(BasicTaskDefinition taskdef, Props props) { 
+		super(taskdef, props, getSourceField(taskdef));
 	}
 
-	public boolean safeToRetry() { return safeToRetry; }
-        
+
 	public Object execute(Task task) {
 		SourceFile src= (SourceFile) task;
-		
+
 		FileServerConnection fsconn=src.getSourceFileServer().openConnection();
 		try {
 			String remotefile = src.getSourceFilePath();
@@ -52,7 +50,7 @@ public class SftpGetAction implements Action {
 			if (fsconn!=null)
 				fsconn.close();
 		}
-		
+
 		return null;
 	}
 
