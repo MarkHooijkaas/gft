@@ -15,9 +15,9 @@ public abstract class OnDemandChannel extends BasicTaskDefinition {
 	public OnDemandChannel(GftContainer gft, Props props, OnDemandDefinition def) {
 		super(gft, props);
 		if (def==null)
-			this.def = new OnDemandDefinition(props.getProps("ondemand"));
+			this.def = new OnDemandDefinition(props.getProps("ondemand",null));
 		else
-			this.def = new OnDemandDefinition(def, props.getProps("ondemand"));
+			this.def = new OnDemandDefinition(def, props.getProps("ondemand",null));
 	}
 
 	public OnDemandDefinition getOnDemandDefinition() { return def; }
