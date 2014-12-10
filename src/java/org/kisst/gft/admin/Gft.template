@@ -107,9 +107,3 @@ started on ${gft.startupTime?datetime}<br>
 </#list> 
 </table> 
 
-<h2>Actions</h2> 
-<table> 
-<#list actions?keys as name>
-<tr><td><a href=rest/action/${name}>${name}</a></td><td>${actions[name]}</td></tr> 
-</#list> 
-</table> 
