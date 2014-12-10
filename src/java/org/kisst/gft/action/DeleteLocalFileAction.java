@@ -21,27 +21,18 @@ package org.kisst.gft.action;
 
 import java.io.File;
 
-import org.kisst.gft.GftContainer;
 import org.kisst.gft.task.BasicTask;
+import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeleteLocalFileAction implements Action {
+public class DeleteLocalFileAction extends BaseAction {
 	private final static Logger logger=LoggerFactory.getLogger(DeleteLocalFileAction.class);
-	private final boolean safeToRetry;
 
 	
-	public DeleteLocalFileAction(GftContainer gft, Props props) {
-		// TODO: we willen channel weten
-		//Channel chan=null;
-		//if (chan instanceof ArchiveerChannel)
-		//	throw new RuntimeException("ArchiveAction moet in een ArchiveerChannel zitten, en dat is "+chan.name+" niet");
-		safeToRetry = props.getBoolean("safeToRetry", true);
-			}
-
-	public boolean safeToRetry() { return safeToRetry; }
+	public DeleteLocalFileAction(BasicTaskDefinition taskdef, Props props) { super(taskdef, props); }
         
 	public Object execute(Task task) {
 		BasicTask ft= (BasicTask) task;
