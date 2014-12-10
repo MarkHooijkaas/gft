@@ -52,7 +52,24 @@ public class ReflectionUtil {
 		}
 		return null;
 	}
-	
+
+	public static Constructor<?> getFirstCompatibleConstructor(Class<?> cls, Class<?>[] signature) {
+		Constructor<?>[] consarr = cls.getDeclaredConstructors();
+		for (int i=0; i<consarr.length; i++) {
+			Class<?>[] paramtypes = consarr[i].getParameterTypes();
+			if (paramtypes.length!=signature.length)
+				continue;
+			boolean compatible=true;
+			for (int j=0; j<signature.length; j++) {
+				if (!signature[j].isAssignableFrom(paramtypes[j]))
+					compatible=false;
+			}
+			if (compatible)
+				return consarr[i];
+		}
+		return null;
+	}
+
 	public static Constructor<?> getConstructor(Class<?> cls, Class<?>[] signature) {
 		Constructor<?>[] consarr = cls.getDeclaredConstructors();
 		for (int i=0; i<consarr.length; i++) {

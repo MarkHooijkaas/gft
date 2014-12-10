@@ -149,7 +149,7 @@ public class ActionList  implements Action, WritesHtml {
 		} catch (ClassNotFoundException e) { throw new RuntimeException(e); }
 		
 		
-		Constructor<?> c = ReflectionUtil.getConstructor(clz, new Class<?>[] {BasicTaskDefinition.class, Props.class} );
+		Constructor<?> c = ReflectionUtil.getFirstCompatibleConstructor(clz, new Class<?>[] {BasicTaskDefinition.class, Props.class} );
 		if (c!=null)
 			return (Action) ReflectionUtil.createObject(c, new Object[] {taskdef, props} );
 
@@ -157,7 +157,7 @@ public class ActionList  implements Action, WritesHtml {
 		if (c!=null)
 			return (Action) ReflectionUtil.createObject(c, new Object[] {taskdef.gft, props} );
 		
-		return (Action) ReflectionUtil.createObject(classname);		
+		return (Action) ReflectionUtil.createObject(clz);		
 	}
 	@Override
 	public void writeHtml(PrintWriter out) {
