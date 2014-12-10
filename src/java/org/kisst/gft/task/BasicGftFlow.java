@@ -47,7 +47,7 @@ public class BasicGftFlow extends BasicLinearFlow implements Action, WritesHtml 
 			Action act=actions.get(name);
 			out.print("<tr>");
 			out.print("<td>"+name+"</td>");
-			out.print("<td>"+act.getClass().getSimpleName()+"</td>");
+			out.print("<td>"+act.toString()+"</td>");
 			if (isSkippedAction(name))
 				out.print("<td>SKIPPED</td>");
 			out.println("</tr>");
