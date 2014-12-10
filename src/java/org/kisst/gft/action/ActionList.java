@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.admin.WritesHtml;
+import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.Props;
@@ -25,26 +26,24 @@ public class ActionList  implements Action, WritesHtml {
 	
 	private final LinkedHashMap<String,Action> actions=new LinkedHashMap<String,Action>();
 
-	private final GftContainer gft;
+	private final BasicTaskDefinition taskdef;
 	private final int maxNrofTries;
 	private final long retryDelay;
 	private final boolean retryNonFunctionalExceptions;
 
+	
 
-	public ActionList(GftContainer gft, Props props) {
-		this(gft, props, null);
-	}
-	public ActionList(GftContainer gft, Props props, String defaultActions) {
-		this.gft = gft;
+	public ActionList(BasicTaskDefinition taskdef, Props props) {
+		this.taskdef=taskdef;
 		maxNrofTries = props.getInt("maxNrofTries", 3);
 		retryDelay = props.getLong("retryDelay", 30000);
 		retryNonFunctionalExceptions = props.getBoolean("retryNonFunctionalExceptions", true);
-		String actions=props.getString("actions",defaultActions);
+		String actions=props.getString("actions");
 		String[] parts=actions.split(",");
 		//this.actions=new Action[parts.length];
 		for (String name: parts) {
 			name=name.trim();
-			LayeredProps lprops=new LayeredProps(gft.props.getProps("global"));
+			LayeredProps lprops=new LayeredProps(taskdef.gft.props.getProps("global"));
 			SimpleProps top=new SimpleProps();
 			//top.put("action",taskdef.gft.actions.get(name));
 			top.put("channel",props);
@@ -53,7 +52,7 @@ public class ActionList  implements Action, WritesHtml {
 				lprops.addLayer(props.getProps(name));
 			// TODO: the action layer is only needed for the class which is the only property in it.
 			// This could be simplified since no user defined actions are used any more
-			lprops.addLayer(gft.actions.get(name));
+			lprops.addLayer(taskdef.gft.actions.get(name));
 			lprops.addLayer(props);
 			//lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
 				
@@ -146,16 +145,19 @@ public class ActionList  implements Action, WritesHtml {
 		
 		Class<?> clz;
 		try {
-			clz= gft.getSpecialClassLoader().loadClass(classname);
+			clz= taskdef.gft.getSpecialClassLoader().loadClass(classname);
 		} catch (ClassNotFoundException e) { throw new RuntimeException(e); }
 		
 		
-		Constructor<?> c = ReflectionUtil.getConstructor(clz, new Class<?>[] {GftContainer.class, Props.class} );
-		if (c==null)
-			return (Action) ReflectionUtil.createObject(classname);
-		else
-			return (Action) ReflectionUtil.createObject(c, new Object[] {gft, props} );
+		Constructor<?> c = ReflectionUtil.getConstructor(clz, new Class<?>[] {BasicTaskDefinition.class, Props.class} );
+		if (c!=null)
+			return (Action) ReflectionUtil.createObject(c, new Object[] {taskdef, props} );
+
+		c = ReflectionUtil.getConstructor(clz, new Class<?>[] {GftContainer.class, Props.class} );
+		if (c!=null)
+			return (Action) ReflectionUtil.createObject(c, new Object[] {taskdef.gft, props} );
 		
+		return (Action) ReflectionUtil.createObject(classname);		
 	}
 	@Override
 	public void writeHtml(PrintWriter out) {

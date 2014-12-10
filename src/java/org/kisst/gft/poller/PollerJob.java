@@ -3,6 +3,9 @@ package org.kisst.gft.poller;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
+import nl.duo.gft.filetransfer.SendGftMessageAction;
+
+import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
@@ -20,6 +23,7 @@ import org.slf4j.LoggerFactory;
 public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private static final Logger logger = LoggerFactory.getLogger(PollerJob.class);
 
+	private final Action flow;
 	private final Poller parent;
 	private final String dir;
 	private final String moveToDir;
@@ -44,8 +48,13 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	
 	private PollerJobListener listener = new DummyListener();
 
+
 	public PollerJob(Poller parent,Props props, FileServer fileserver) {
-		super(parent.gft, new ActionList(parent.gft, props, "send_gft_message"), props);
+		super(parent.gft, props);
+		if (props.getString("actions",null)==null)
+			this.flow= new SendGftMessageAction(gft, props); 
+		else 
+			this.flow=new ActionList(this, props);
 		this.parent=parent;
 		this.fileserver = fileserver;
 		delay = props.getInt("delay", 10000);
@@ -56,6 +65,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		maxNrofMoveTries=props.getInt("maxNrofMoveTries", 3);
 	}
 
+	@Override public Action getFlow() { return this.flow;}
 	public PollerJob(Poller parent,Props props) {
 		this(parent, props, null);
 	}

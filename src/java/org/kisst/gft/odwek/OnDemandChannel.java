@@ -3,18 +3,17 @@ package org.kisst.gft.odwek;
 import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.action.Action;
 import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 
 
-public class OnDemandChannel extends BasicTaskDefinition {
+public abstract class OnDemandChannel extends BasicTaskDefinition {
 	private final OnDemandDefinition def;
 
-	public OnDemandChannel (GftContainer gft, Action flow, Props props) { this(gft, flow, props, null); }
-	public OnDemandChannel(GftContainer gft, Action flow, Props props, OnDemandDefinition def) {
-		super(gft, flow, props);
+	public OnDemandChannel (GftContainer gft,  Props props) { this(gft, props, null); }
+	public OnDemandChannel(GftContainer gft, Props props, OnDemandDefinition def) {
+		super(gft, props);
 		if (def==null)
 			this.def = new OnDemandDefinition(props.getProps("ondemand"));
 		else

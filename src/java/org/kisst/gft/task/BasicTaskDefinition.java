@@ -10,7 +10,7 @@ import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BasicTaskDefinition implements TaskDefinition {
+public abstract class BasicTaskDefinition implements TaskDefinition {
 	final static Logger logger=LoggerFactory.getLogger(BasicTaskDefinition.class); 
 	//abstract protected void executeTask(Task task);
 	protected String getLogDetails(Task task) { return task.toString(); }
@@ -18,7 +18,6 @@ public class BasicTaskDefinition implements TaskDefinition {
 	
 	public final GftContainer gft;
 	public final String name;
-	private final Action flow;
 
 
 	public final Props props;
@@ -26,9 +25,8 @@ public class BasicTaskDefinition implements TaskDefinition {
 	private long totalCount=0;
 	private long errorCount=0;
 
-	public BasicTaskDefinition(GftContainer gft, Action flow, Props props) {
+	public BasicTaskDefinition(GftContainer gft, Props props) {
 		this.gft=gft;
-		this.flow=flow;
 		this.props=props;
 		this.name=props.getLocalName();
 	}
@@ -36,7 +34,7 @@ public class BasicTaskDefinition implements TaskDefinition {
 	public String getName() { return name; }
 	public long getTotalCount() { return totalCount; }
 	public long getErrorCount() { return errorCount; }
-	public Action getFlow() { return flow; }
+	abstract public Action getFlow();
 	
 	public void run(Task task) {
 		try {
@@ -79,8 +77,8 @@ public class BasicTaskDefinition implements TaskDefinition {
 		out.println("<li><a href=\"/logging/days=1&channel="+getName()+"\">ALL Logging</a>");
 		out.println("<li><a href=\"/logging/days=1&channel="+getName()+"&level=error\">ERROR Logging</a>");
 		out.println("</ul>");
-		if (flow instanceof WritesHtml)
-			((WritesHtml)flow).writeHtml(out);
+		if (getFlow() instanceof WritesHtml)
+			((WritesHtml)getFlow()).writeHtml(out);
 	}
 	protected void writeHtmlFooter(PrintWriter out) {
 		out.println("<h2>Config</h2>");
@@ -89,7 +87,7 @@ public class BasicTaskDefinition implements TaskDefinition {
 		out.println("</pre>");
 	}
 
-	protected void executeTask(Task task) { flow.execute(task); }
+	protected void executeTask(Task task) { getFlow().execute(task); }
 
 	@Override public void writeHtml(PrintWriter out) {
 		writeHtmlHeader(out);
