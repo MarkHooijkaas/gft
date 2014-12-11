@@ -1,7 +1,7 @@
 package org.kisst.gft.filetransfer.action;
 
 import org.kisst.gft.action.BaseAction;
-import org.kisst.gft.filetransfer.FileServer;
+import org.kisst.gft.filetransfer.FileLocation;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
@@ -13,15 +13,15 @@ public class CheckDestFileDoesNotExist extends BaseAction {
 
 	public class Problem extends BasicFunctionalException {
 		private static final long serialVersionUID = 1L;
-		public Problem(FileServer fileServer, String path) { super("On host "+fileServer+" there already is a file "+path); }
+		public Problem(FileLocation loc) { super("On host "+loc.getFileServer()+" there already is a file "+loc.getPath()); }
 	}
 
 	public boolean safeToRetry() { return true; }
 
 	public Object execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
-		if (ft.channel.dest.fileExists(ft.destpath))
-				throw new Problem(ft.channel.dest, ft.destpath);
+		if (ft.getDestinationFile().fileExists())
+				throw new Problem(ft.getDestinationFile());
 		return null;
 	}
 

@@ -11,9 +11,12 @@ import org.kisst.util.exception.BasicFunctionalException;
 
 public abstract class FileTransferTask extends JmsXmlTask implements SourceFile, DestinationFile {
 	public final Channel channel;
-	public final String srcpath;
-	public final String destpath;
+	//public final String srcpath;
+	//public final String destpath;
 	public final String filename;
+	
+	private final FileLocation src;
+	private final FileLocation dest;
 	
 	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
 
@@ -32,22 +35,19 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 			throw new BasicFunctionalException("Filename should only contain alphanumeric characters / . - or _  in channel "+channel.getName()+", filename ["+filename+"]");
 		if (filename.indexOf("..")>=0)
 			throw new BasicFunctionalException("Filename ["+filename+"] is not allowed to contain .. pattern, , in channel "+channel.getName());
-		this.srcpath=calcPath(channel.srcdir, filename);
-		this.destpath=calcPath(channel.destdir, filename);
+		this.src=new FileLocation(channel.getSourceFile(), filename);
+		this.dest=new FileLocation(channel.getDestinationFile(), filename);
 	}
 
 	abstract protected  String getFilename();
 	@Override public String getIdentification() { return getFilename(); }
 
 
-	public String toString() { return toString(" from:"+channel.src+"/"+srcpath+", to: "+channel.dest+"/"+destpath);
+	public String toString() { return toString(" from:"+src+", to: "+dest);
 } 
 	public void run() { channel.run(this); }
 	public File getTempFile() { return getTempFile(filename); }
 
-	@Override public String getSourceFilePath() { return srcpath; }
-	@Override public FileServer getSourceFileServer() { return channel.src;}
-	@Override public String getDestinationFilePath() { return destpath; }
-	@Override public FileServer getDestinationFileServer() { return channel.dest;}
-
+	@Override public FileLocation getSourceFile() { return src;}
+	@Override public FileLocation getDestinationFile() { return dest; }
 }

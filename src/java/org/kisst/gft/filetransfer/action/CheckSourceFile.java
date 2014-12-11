@@ -14,8 +14,8 @@ public class CheckSourceFile extends BaseAction {
 	public Object execute(Task task) {
 		SourceFile src= (SourceFile) task;
 		// TODO: remember filesize
-		if (! src.getSourceFileServer().fileExists(src.getSourceFilePath()))
-				throw new BasicFunctionalException("Source file "+src.getSourceFilePath()+" does not exist or is not accessible");
+		if (! src.getSourceFile().fileExists())
+				throw new BasicFunctionalException("Source file "+src.getSourceFile()+" does not exist or is not accessible");
 		return null;
 	}
 

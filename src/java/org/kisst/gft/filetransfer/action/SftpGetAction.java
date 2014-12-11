@@ -39,9 +39,9 @@ public class SftpGetAction extends BaseAction {
 	public Object execute(Task task) {
 		SourceFile src= (SourceFile) task;
 
-		FileServerConnection fsconn=src.getSourceFileServer().openConnection();
+		FileServerConnection fsconn=src.getSourceFile().getFileServer().openConnection();
 		try {
-			String remotefile = src.getSourceFilePath();
+			String remotefile = src.getSourceFile().getPath();
 			String localfile=((BasicTask)task).getTempFile().getPath();
 			logger.info("sftp get {} to localfile {}",remotefile, localfile);
 			fsconn.getToLocalFile(remotefile, localfile);

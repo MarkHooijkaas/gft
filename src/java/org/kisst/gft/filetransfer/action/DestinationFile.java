@@ -1,8 +1,7 @@
 package org.kisst.gft.filetransfer.action;
 
-import org.kisst.gft.filetransfer.FileServer;
+import org.kisst.gft.filetransfer.FileLocation;
 
 public interface DestinationFile {
-	public FileServer getDestinationFileServer();
-	public String getDestinationFilePath();
+	public FileLocation getDestinationFile();
 }

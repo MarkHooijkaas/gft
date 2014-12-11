@@ -17,7 +17,7 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 		this.basePath=props.getString("basePath","").trim();
 	}
 	
-	private File file(String path) { return new File(path); }
+	private File file(String path) { return new File(basePath+path); }
 	
 	@Override public boolean fileExists(String path) { return file(path).exists(); }
 	@Override public void deleteFile(String path) { file(path).delete(); }
@@ -46,7 +46,6 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 	@Override public FileServerConnection openConnection() { return this;}
 	@Override public void close() {}
 	@Override public boolean isAvailable() { return true; }
-	@Override public String getBasePath() { return basePath; }
 
 	@Override public FileAttributes getFileAttributes(String path) {
 		File f=new File(path);

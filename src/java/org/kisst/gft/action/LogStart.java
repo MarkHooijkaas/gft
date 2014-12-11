@@ -37,8 +37,8 @@ public class LogStart  implements Action {
 		if (t instanceof FileTransferTask) {
 			FileTransferTask ft = (FileTransferTask) t;
 			details = "Start GFT filetransfer, kanaal: "+ft.channel.name+
-				", van: "+ft.channel.src+":"+ft.srcpath
-				+", naar:"+ft.channel.dest+":"+ft.destpath;
+				", van: "+ft.getSourceFile()
+				+", naar:"+ft.getDestinationFile();
 		}
 		LogService.log("info", "start", t.getTaskDefinition().getName(), "started", details); 
 		return null;

@@ -36,7 +36,7 @@ public class LogError implements Action {
 		String details = t.getLastError().getMessage();
 		if (t instanceof FileTransferTask) {
 			FileTransferTask ft = (FileTransferTask) t;
-			details = "Fout bij GFT filetransfer, kanaal: "+ft.channel.name+", van: "+ft.channel.src+"/"+ft.srcpath+" naar: "+ft.channel.dest+"/"+ft.destpath+" actie:"+ft.getLastAction()+" fout:"+ft.getLastError().getMessage();
+			details = "Fout bij GFT filetransfer, kanaal: "+ft.channel.name+", van: "+ft.getSourceFile()+" naar: "+ft.getDestinationFile()+" actie:"+ft.getLastAction()+" fout:"+ft.getLastError().getMessage();
 		}
 		LogService.log("error", t.getLastAction(), t.getTaskDefinition().getName(), "error", details);
 		return null;

@@ -37,10 +37,10 @@ public class SftpPutAction extends BaseAction {
 	public Object execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		
-		FileServer fileserver= ft.channel.dest;
+		FileServer fileserver= ft.getDestinationFile().getFileServer();
 		FileServerConnection fsconn=fileserver.openConnection();
 		try {
-			String remotefile = ft.channel.destdir + "/" + ft.filename;
+			String remotefile = ft.getDestinationFile().getPath();
 			String localfile=ft.getTempFile().getPath();
 			logger.info("sftp put localfile {} to {}", localfile, remotefile);
 			fsconn.putFromLocalFile(localfile, remotefile);

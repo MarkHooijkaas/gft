@@ -45,7 +45,7 @@ public abstract class BaseAction implements Action {
 	static protected String getSourceField(BasicTaskDefinition taskdef) {
 		if (taskdef instanceof SourceFile) {
 			SourceFile src=(SourceFile) taskdef;
-			return "from:"+src.getSourceFileServer()+"/"+src.getSourceFilePath();
+			return "from:"+src.getSourceFile();
 		}
 		return null;
 	}
@@ -53,7 +53,7 @@ public abstract class BaseAction implements Action {
 	static protected String getDestField(BasicTaskDefinition taskdef) {
 		if (taskdef instanceof DestinationFile) {
 			DestinationFile dest=(DestinationFile) taskdef;
-			return "to:"+dest.getDestinationFileServer()+"/"+dest.getDestinationFilePath();
+			return "to:"+dest.getDestinationFile();
 		}
 		return null;
 	}

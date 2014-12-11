@@ -11,8 +11,7 @@ public class DeleteSourceFile extends BaseAction {
 	public boolean safeToRetry() { return true; }
 
 	public Object execute(Task task) {
-		SourceFile src= (SourceFile) task;
-		src.getSourceFileServer().deleteFile(src.getSourceFilePath());
+		((SourceFile) task).getSourceFile().deleteFile();
 		return null;
 	}
 

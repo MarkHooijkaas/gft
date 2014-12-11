@@ -14,8 +14,8 @@ public class CheckCopiedFile extends BaseAction {
 	public Object execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		// TODO: remember filesize
-		if (! ft.channel.dest.fileExists(ft.destpath))
-				throw new RuntimeException("Copied file "+ft.destpath+" does not seem to exist");
+		if (! ft.getDestinationFile().fileExists())
+				throw new RuntimeException("Copied file "+ft.getDestinationFile()+" does not seem to exist");
 		return null;
 	}
 }

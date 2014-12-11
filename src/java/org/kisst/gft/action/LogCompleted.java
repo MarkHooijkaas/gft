@@ -37,7 +37,7 @@ public class LogCompleted implements Action {
 		String details="";
 		if (t instanceof FileTransferTask) {
 			FileTransferTask ft = (FileTransferTask) t;
-			details= "GFT geslaagd, kanaal: "+ft.channel.name+", bestand: "+ft.srcpath+ ", van: "+ft.channel.src+"/"+ft.srcpath+" naar: "+ft.channel.dest+"/"+ft.destpath;
+			details= "GFT geslaagd, kanaal: "+ft.channel.name+", bestand: "+ft.filename+ ", van: "+ft.getSourceFile()+" naar: "+ft.getDestinationFile();
 		}
 		LogService.log("info", "done", t.getTaskDefinition().getName(), "completed",details); 
 				

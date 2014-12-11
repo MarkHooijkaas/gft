@@ -35,6 +35,8 @@ public class DirectoryServlet extends BaseServlet {
 		if (pos>0) {
 			dir=name.substring(pos+1);
 			name=name.substring(0,pos);
+			if (name.endsWith(":"))
+				name=name.substring(0,pos-1);
 		}
 		if (dir.length()>1024)
 			throw new BasicFunctionalException("Dirname length should not exceed 1024 characters");
