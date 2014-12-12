@@ -202,4 +202,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		out.println("No specific data");
 	}
 
+	@Override public String getSrcDescription() { return dir; }
+	@Override public String getDestDescription() { return moveToDir;}
+
 }

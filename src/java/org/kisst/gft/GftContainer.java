@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import org.kisst.cfg4j.BooleanSetting;
 import org.kisst.cfg4j.CompositeSetting;
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
 import org.kisst.gft.action.DeleteLocalFileAction;
@@ -53,6 +54,7 @@ public class GftContainer implements HttpHostMap {
 	public static class Settings extends CompositeSetting {
 		public Settings(CompositeSetting parent, String name) { super(parent, name); }
 		public final JarLoader.Settings modules=new JarLoader.Settings(this, "modules");
+		public final BooleanSetting continueIfConfigBroken=new BooleanSetting(this, "continueIfConfigBroken", false);
 	}
 
 	private final Settings settings;
@@ -61,7 +63,8 @@ public class GftContainer implements HttpHostMap {
 	private final AdminServer admin=new AdminServer(this);
 	public final Props props;
 	private final SimpleProps topProps;
-
+	private final boolean configBroken;
+	
 	private final BasicHttpHostMap httpHosts;
 	
 	public final HashMap<String, TaskDefinition> channels= new LinkedHashMap<String, TaskDefinition>();
@@ -129,7 +132,16 @@ public class GftContainer implements HttpHostMap {
 		loadModuleSpecificCryptoKey();
 		httpHosts = new BasicHttpHostMap(props.getProps("http.host"));
 		tempdir = props.getString("global.tempdir"); //MAYBE: provide default as working directory+"/temp"
-		init();
+		configBroken=init();
+		if (configBroken) {
+			boolean continueAnyways = settings.continueIfConfigBroken.get(topProps);
+			String message = "Errors during initialization, using property "+settings.continueIfConfigBroken.getFullName()+"="+continueAnyways;
+			if (continueAnyways)
+				logger.error(message);
+			else
+				throw new RuntimeException("FATAL "+message);
+		}
+			
 	}
 
 	public JmsSystem getQueueSystem(String name) { 
@@ -143,9 +155,10 @@ public class GftContainer implements HttpHostMap {
 	public String getTopname() { return topname; }
 	public HttpHost getHttpHost(String name) { return httpHosts.getHttpHost(name); }
 	public Set<String> getHttpHostNames() { return httpHosts.getHttpHostNames(); }
+	public boolean isConfigBroken() { return configBroken; }
 	
-	
-	private void init() {
+	private boolean init() {
+		boolean configBroken=false;
 		context.put("global", props.get("global", null));
 		
 		for (Module mod: modules.values()) {
@@ -217,7 +230,12 @@ public class GftContainer implements HttpHostMap {
 				TaskDefinition channel = mod.createDefinition(type2, p);
 				channels.put(name, channel);
 			}
-			catch (RuntimeException e) { throw new RuntimeException(e.getMessage()+" while reading channel "+name,e); }
+			catch (RuntimeException e) {
+				logger.error("Error when loading channel "+name, e);
+				configBroken=true;
+				channels.put(name, new BrokenChannel(this, props, e));
+			}
+			
 		}
 
 		if (props.hasKey("poller")) {
@@ -240,6 +258,7 @@ public class GftContainer implements HttpHostMap {
 			for (String name: listeners.keySet())
 				logger.info("Listener {}\t{}",name,listeners.get(name));
 		}
+		return configBroken;
 	}
 	public TaskDefinition getTaskDefinition(String name) { return channels.get(name); }
 	public String processTemplate(File template, Object context) { return TemplateUtil.processTemplate(template, context); }

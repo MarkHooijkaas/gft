@@ -1,3 +1,8 @@
+<#if gft.configBroken>
+  <body bgcolor="#FF4444">
+  <h1>Warning Configuration is Broken</h1>
+</#if>
+
 <h1>${gft.topname?upper_case} version ${gft.version}</h1> 
 started on ${gft.startupTime?datetime}<br>
 <a href="config">Configuration</a><br> 
