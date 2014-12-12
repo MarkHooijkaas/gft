@@ -4,6 +4,7 @@ import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
+import org.kisst.gft.TaskStarter;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.admin.WritesHtml;
@@ -15,7 +16,7 @@ import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public abstract class Channel extends BasicTaskDefinition  implements SourceFile, DestinationFile, WritesHtml {
+public abstract class Channel extends BasicTaskDefinition  implements SourceFile, DestinationFile, WritesHtml, TaskStarter.JmsTaskCreator {
 	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
 
 	private final FileLocation src; 
