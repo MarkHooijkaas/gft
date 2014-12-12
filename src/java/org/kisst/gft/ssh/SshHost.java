@@ -18,6 +18,7 @@ public class SshHost implements Representable {
 	public final HostKey hostKey=null;
 	public final String known_hosts;
 	public final Ssh.Credentials cred;
+	public final String preferredAuthentications;
 	private final String keyfile;
 	private final TimeWindowList forbiddenTimes;
 
@@ -27,6 +28,7 @@ public class SshHost implements Representable {
 		this.host=props.getString("host");
 		this.user=props.getString("user");
 		this.port=props.getInt("port",22);
+		this.preferredAuthentications=props.getString("preferredAuthentications", "publickey,password,keyboard-interactive");
 		String password=props.getString("password",null);
 		Object tmpkeyfile=props.get("keyfile",null);
 		if (tmpkeyfile instanceof File)

@@ -139,6 +139,7 @@ public class Ssh {
 				jsch.addIdentity(cred.keyfile);
 			}
 			Session session=jsch.getSession(cred.user, host.host, 22);
+			session.setConfig("PreferredAuthentications",  host.preferredAuthentications);
 
 			// username and password will be given via UserInfo interface.
 			session.setUserInfo(cred);
