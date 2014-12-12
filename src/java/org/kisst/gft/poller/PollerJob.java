@@ -204,5 +204,10 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	@Override public String getSrcDescription() { return dir; }
 	@Override public String getDestDescription() { return moveToDir;}
-
+	public String getKanaalNaam() {
+		if (flow instanceof SendGftMessageAction)
+			return ((SendGftMessageAction)flow).getKanaalNaam();
+		else
+			return "";
+	}
 }

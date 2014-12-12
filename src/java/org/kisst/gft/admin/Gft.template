@@ -59,27 +59,27 @@ started on ${gft.startupTime?datetime}<br>
 <tr>
   <td><b>interval</b></td>
   <td><b>poller/job name</b></td>
-  <td><b>directory</b></td>
-  <td><b>inprogress directory</b></td>
   <td><b>runs</b></td>
   <td><b>successes</b></td>
   <td><b>errors</b></td>
   <td><b>paused</b></td>
   <td><b>#current files</b></td>
   <td><b>#problematic files</b></td>
+  <td><b>directory</b></td>
+  <td><b>inprogress directory</b></td>
 <tr>
 <#list pollers?keys as name>
 <tr><td>${pollers[name].interval}</td><td><a href=poller/${name}>${name}</a></td></tr> 
 <#list pollers[name].jobs as job>
 <tr><td></td><td>${job.name}</td>
-  <td>${job.dir}</td>
-  <td>${job.moveToDir}</td>
   <td>${job.runs}</td>
   <td>${job.successes}</td>
   <td>${job.errors}</td>
   <td>${job.paused?string("PAUSED","active")}</td>
   <td>${job.numberOfDetectedFiles}</td>
   <td>${job.numberOfProblematicFiles}</td>
+  <td>${job.dir}</td>
+  <td>${job.moveToDir}</td>
   </tr>
 </#list> 
 </#list> 
