@@ -15,10 +15,11 @@ public class OptionalField implements OnDemandField {
 	private final String dateFormat;
 	
 
-	public OptionalField(String name) {
+	public OptionalField(String name) { this (name, (String) null); }
+	public OptionalField(String name, String defaultValue) {
 		this.name=name;
 		this.alias=name;
-		this.defaultValue=null;
+		this.defaultValue=defaultValue;
 		this.dateFormat="MM/dd/yy";
 	}
 

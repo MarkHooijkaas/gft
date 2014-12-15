@@ -42,6 +42,7 @@ public class OnDemandDefinition implements WritesHtml {
 	
 	public OnDemandDefinition addField(String name, OnDemandField f) { fields.put(name, f); return this; }
 	public OnDemandDefinition addOptionalField(String name) { return addField(name, new OptionalField(name)); }
+	public OnDemandDefinition addOptionalField(String name, String defaultValue) { return addField(name, new OptionalField(name, defaultValue)); }
 	public OnDemandDefinition addMandatoryField(String name) { return addField(name, new MandatoryField(name)); }
 	public OnDemandDefinition addFixedField(String name, String fixedValue) { return addField(name, new FixedField(name, fixedValue)); }
 	public OnDemandDefinition addFields(OnDemandDefinition def) {
