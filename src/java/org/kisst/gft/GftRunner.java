@@ -15,6 +15,7 @@ import org.kisst.gft.ssh.GenerateKey;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.JmsUtil;
+import org.kisst.mq.MsgMover;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.util.CryptoUtil;
@@ -22,6 +23,8 @@ import org.kisst.util.FileUtil;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.ibm.mq.MQException;
 
 public class GftRunner {
 	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
@@ -67,8 +70,9 @@ public class GftRunner {
 
 	private static Cli cli=new Cli();
 	private static Cli.StringOption config;
-	private static Cli.Flag putmsg = cli.flag("p","putmsg", "puts a message on the input queue");
-	private static Cli.StringOption rmmsg = cli.stringOption("r","rmmsg","selector", null);
+	private static Cli.StringOption putmsg = cli.stringOption("p","putmsg", "puts a message form file on the input queue",null);
+	private static Cli.StringOption delmsg = cli.stringOption("d","delmsg","selector", null);
+	private static Cli.StringOption retrymsg = cli.stringOption("r","retrymsg","selector", null);
 	private static Cli.Flag help =cli.flag("h", "help", "show this help");
 	private static Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
 	private static Cli.StringOption encrypt = cli.stringOption("e","encrypt","key", null);
@@ -85,66 +89,31 @@ public class GftRunner {
 		}
 		CryptoUtil.setKey("-P34{-[u-C5x<I-v'D_^{79'3g;_2I-P_L0£_j3__5`y§%M£_C");
 		File configfile=new File(config.get());
-		if (putmsg.isSet()) {		// TODO: refactor this code dupplication
-			logger.info("gft put");
-			logger.info("loading props");
-			SimpleProps props=new SimpleProps();
-			props.load(configfile);
-			logger.info("opening queuesystem");
-			JmsSystem queueSystem=getQueueSystem(topname, props);
-			String queuename = getQueue((SimpleProps) props.getProps(topname));
-			logger.info("loading data from standard input");
-
-			String data=FileUtil.loadString(new InputStreamReader(System.in));
-			logger.info("sending message");
-			queueSystem.getQueue(queuename).send(data);
-			logger.info("send the following message to the queue {}",queuename);
-			logger.debug("data send was {}",data);
-			queueSystem.close();
-			return;
-		}
-		if (rmmsg.isSet()) {		// TODO: refactor this code dupplication
-			SimpleProps props=new SimpleProps();
-			props.load(configfile);
-			JmsSystem queueSystem=getQueueSystem(topname,props);
-			String queuename = getQueue(props);
-			String selector=rmmsg.get();
-			logger.info("removing the following message "+selector);
-			try {
-				Session session = queueSystem.getConnection().createSession(true, Session.SESSION_TRANSACTED);
-				MessageConsumer consumer = session.createConsumer(session.createQueue(queuename), selector);
-				Message msg = consumer.receive(5000);
-				if (msg==null)
-					logger.info("Could not find message "+selector);
-				else {
-					session.commit();
-					logger.info("Removed message "+selector);
-				}
-				queueSystem.close();
-			}
-            catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
-			return;
-		}
-
-		if (keygen.isSet()) {
+		SimpleProps props=new SimpleProps();
+		props.load(configfile);
+		props=(SimpleProps) props.getProps(topname);
+		if (keygen.isSet())
 			GenerateKey.generateKey(configfile.getParentFile().getAbsolutePath()+"/ssh/id_dsa_gft"); // TODO: should be from config file
-			return;
-		}
-		if (encrypt.get()!=null) {
+		else if (encrypt.get()!=null)
 			System.out.println(CryptoUtil.encrypt(encrypt.get()));
-			return;
-		}
-		if (decrypt.get()!=null) {
+		else if (decrypt.get()!=null) {
 			System.out.println("OPTION DISABLED");
 			//System.out.println(CryptoUtil.decrypt(decrypt.get()));
-			return;
 		}
+		else if (putmsg.isSet())	
+			putmsg(props,putmsg.get());
+		else if (delmsg.isSet())
+			delmsg(props, delmsg.get());
+		else if (retrymsg.isSet())
+			retrymsg(props, retrymsg.get());
+		else {
+			// Run GFT
+			PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
+			GftRunner runner= new GftRunner(topname, configfile);
+			runner.run();
 
-		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
-		GftRunner runner= new GftRunner(topname, configfile);
-		runner.run();
-		
-		System.out.println("GFT stopped");
+			System.out.println("GFT stopped");
+		}
 	}
 
 	private static String getQueue(SimpleProps props) {
@@ -159,8 +128,8 @@ public class GftRunner {
 		System.out.println(cli.getSyntax(""));
 	}
 
-	private static JmsSystem getQueueSystem(String topname, Props props) {
-		Props qmprops=props.getProps(topname+".mq.host.main");
+	private static JmsSystem getQueueSystem(Props props) {
+		Props qmprops=props.getProps("mq.host.main");
 		String type=qmprops.getString("type");
 		if ("ActiveMq".equals(type))
 			return new ActiveMqSystem(qmprops);
@@ -170,4 +139,48 @@ public class GftRunner {
 			throw new RuntimeException("Unknown type of queueing system "+type);
 	}
 
+	private static void putmsg(SimpleProps props, String filename) {
+		logger.info("gft put");
+		logger.info("loading props");
+		logger.info("opening queuesystem");
+		JmsSystem queueSystem=getQueueSystem(props);
+		String queuename = getQueue(props);
+		logger.info("loading data from standard input");
+
+		String data=FileUtil.loadString(new InputStreamReader(System.in));
+		logger.info("sending message");
+		queueSystem.getQueue(queuename).send(data);
+		logger.info("send the following message to the queue {}",queuename);
+		logger.debug("data send was {}",data);
+		queueSystem.close();
+	}
+
+	private static void delmsg(SimpleProps props,String selector) {
+		JmsSystem queueSystem=getQueueSystem(props);
+		String queuename = getQueue(props);
+		logger.info("removing the following message "+selector);
+		try {
+			Session session = queueSystem.getConnection().createSession(true, Session.SESSION_TRANSACTED);
+			MessageConsumer consumer = session.createConsumer(session.createQueue(queuename), selector);
+			Message msg = consumer.receive(5000);
+			if (msg==null)
+				logger.info("Could not find message "+selector);
+			else {
+				session.commit();
+				logger.info("Removed message "+selector);
+			}
+			queueSystem.close();
+		}
+		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
+	}
+
+	private static void retrymsg(Props props, String msgid) {
+		String src=props.getString("listener.main.errorqueue");
+		String dest=props.getString("listener.main.queue");
+		try {
+			MsgMover.moveMessage(props.getProps("mq.host.main"), src, dest, msgid);
+		}
+		catch (MQException e) { throw new RuntimeException(e); }
+	}
+	
 }
