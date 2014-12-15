@@ -17,6 +17,7 @@ public class BasicGftFlow extends BasicLinearFlow implements Action, WritesHtml 
 		super(createChannelProps(taskdef.gft,props));
 		this.taskdef=taskdef;
 	}
+	public BasicTaskDefinition getTaskDef() { return taskdef; }
 	public GftContainer getGft() { return taskdef.gft; }
 	private static Props createChannelProps(GftContainer gft, Props props) {
 		LayeredProps lprops=new LayeredProps(gft.props.getProps("global"));
