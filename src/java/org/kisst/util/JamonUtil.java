@@ -68,7 +68,6 @@ public class JamonUtil {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	public static void jamonLog(Props props, String message) {
 		if (props==null) {
 			//logger.warn("Could not perform jamon logging because properties are not available for jamonLog: "+message);
@@ -78,9 +77,9 @@ public class JamonUtil {
 			return;
 		String filename=GftSettings.jamonfilename.get(props);
 		Date now = new Date();
-		filename = filename.replace("${yyyy}", ""+(now.getYear()+1900));
-		filename = filename.replace("${mm}", ""+(now.getMonth()+1));
-		filename = filename.replace("${dd}", ""+(now.getDate()));
+		filename = filename.replace("${yyyy}", new SimpleDateFormat("yyyy").format(now));
+		filename = filename.replace("${mm}", new SimpleDateFormat("MM").format(now));
+		filename = filename.replace("${dd}", new SimpleDateFormat("dd").format(now));
 		filename = filename.replace("${dollar}", "$");
 		JamonUtil.logAndResetAllTimers(filename, message);
 	}
