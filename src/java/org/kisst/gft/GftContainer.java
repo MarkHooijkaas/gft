@@ -240,9 +240,18 @@ public class GftContainer implements HttpHostMap {
 
 		if (props.hasKey("poller")) {
 			Props pollerProps=props.getProps("poller");
-			for (String name: pollerProps.keys())
-				//pollers.put(name, new Poller(this, pollerProps.getProps(name)));
-				pollers.put(name, new Poller(this, name, pollerProps.getProps(name)));
+			for (String name: pollerProps.keys()) {
+				try {
+					//pollers.put(name, new Poller(this, pollerProps.getProps(name)));
+					pollers.put(name, new Poller(this, name, pollerProps.getProps(name)));
+				}
+				catch (RuntimeException e) {
+					logger.error("Error when loading poller "+name, e);
+					configBroken=true;
+					channels.put(name, new BrokenChannel(this, props, e));
+				}
+			}
+
 		}
 
 		if (logger.isDebugEnabled()) {
