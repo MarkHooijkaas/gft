@@ -75,8 +75,8 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 		out.println("<h1>Channel "+getName()+"</h1>");
 		out.println("<h2>Logging</h2>");
 		out.println("<ul>");
-		out.println("<li><a href=\"/logging/days=1&channel="+getName()+"\">ALL Logging</a>");
-		out.println("<li><a href=\"/logging/days=1&channel="+getName()+"&level=error\">ERROR Logging</a>");
+		out.println("<li><a href=\"/logging/hours=1&channel="+getName()+"\">ALL Logging</a>");
+		out.println("<li><a href=\"/logging/hours=1&channel="+getName()+"&level=error\">ERROR Logging</a>");
 		out.println("</ul>");
 		if (getFlow() instanceof WritesHtml)
 			((WritesHtml)getFlow()).writeHtml(out);

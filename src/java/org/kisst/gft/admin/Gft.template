@@ -50,8 +50,8 @@ started on ${gft.startupTime?datetime}<br>
 
 <h2>Logging</h2> 
 <ul>
-<li><a href=logging/days=1>View ALL Logging in LOGB</a></li>
-<li><a href=logging/days=1&level=error>View ERROR Logging in LOGB</a></li>
+<li><a href=logging/hours=1>View ALL Logging in LOGB</a></li>
+<li><a href=logging/hours=1&level=error>View ERROR Logging in LOGB</a></li>
 </ul>
 
 <h2>Pollers</h2> 
