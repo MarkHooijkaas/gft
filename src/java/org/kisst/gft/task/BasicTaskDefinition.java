@@ -31,6 +31,7 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 		this.name=props.getLocalName();
 	}
 
+	@Override public Props getProps() { return props; }
 	public String getName() { return name; }
 	public long getTotalCount() { return totalCount; }
 	public long getErrorCount() { return errorCount; }

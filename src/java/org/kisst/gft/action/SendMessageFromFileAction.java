@@ -19,86 +19,30 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.MessageProducer;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FoundFileTask;
 import org.kisst.gft.task.Task;
-import org.kisst.jms.JmsSystem;
-import org.kisst.jms.JmsUtil;
-import org.kisst.jms.MultiListener;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class SendMessageFromFileAction implements Action {
+public class SendMessageFromFileAction extends SendTransactedMessageAction {
 
-    private final static Logger logger = LoggerFactory.getLogger(SendMessageFromFileAction.class);
-
-    private final JmsSystem qmgr;
-    private final String queueName;
     private final String basePath;
 
     public SendMessageFromFileAction(GftContainer gft, Props props) {
-        
+    	super(gft, props);
         basePath = TemplateUtil.processTemplate(props.getString("moveToDirectory"),gft.getContext());
-        
-        String queueSystemName = TemplateUtil.processTemplate(props.getString("queueSystem", "main"), gft.getContext());
-
-        this.qmgr = gft.getQueueSystem(queueSystemName);
-
-        String firstListenerQueue = null;
-        for (MultiListener l : gft.listeners.values()) {
-            firstListenerQueue = l.getQueue();
-            break;
-        }
-        this.queueName = props.getString("queue", firstListenerQueue);
-        if (queueName == null)
-            throw new RuntimeException("No queue defined for action " + props.getLocalName());
     }
 
-    public boolean safeToRetry() {
-        return false;
-    }
-
-    public Object execute(Task task) {
-        FoundFileTask foundFileTask = (FoundFileTask) task;
-        String filename = basePath + "/" + foundFileTask.filename;
-        FileServerConnection fsconn = foundFileTask.fsconn;
-        String content = fsconn.getFileContentAsString(filename);
-        sendMessage(content);
-        fsconn.deleteFile(filename);
-        return null;
-    }
-
-    public void sendMessage(String content) {
-        Session session = null;
-        try {
-            session = qmgr.getConnection().createSession(true, Session.SESSION_TRANSACTED);
-
-            Destination destination = session.createQueue(queueName + qmgr.sendParams);
-            MessageProducer producer = session.createProducer(destination);
-            logger.info("Sending message to queue {}", queueName);
-            TextMessage message = session.createTextMessage();
-            message.setText(content);
-            producer.send(message);
-            session.commit();
-            logger.info("verzonden bericht \n {}", content);
-        }
-        catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
-        finally {
-            try {
-                if (session != null) {
-                    session.close();
-                }
-            }
-            catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
-        }
-    }
+	public void prepareTransaction(FoundFileTask task) {
+		super.prepareTransaction(task);
+		sendMessage(task);
+	}
+	
+    public Object execute(Task task) { return null; } // the message is already sent in the prepare statement
+	
+	@Override protected String getMessageContent(FoundFileTask task) {
+        String filename = basePath + "/" + task.filename;
+        return task.fsconn.getFileContentAsString(filename);
+	}
 }

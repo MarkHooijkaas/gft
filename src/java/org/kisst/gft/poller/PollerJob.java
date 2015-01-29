@@ -11,10 +11,8 @@ import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
-import org.kisst.gft.filetransfer.FoundDirectoryTask;
 import org.kisst.gft.filetransfer.FoundFileTask;
 import org.kisst.gft.task.BasicTaskDefinition;
-import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
@@ -22,12 +20,21 @@ import org.slf4j.LoggerFactory;
 
 public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private static final Logger logger = LoggerFactory.getLogger(PollerJob.class);
+	
+	public static interface Transaction {
+		public void prepareTransaction(FoundFileTask task);
+		public void commitTransaction(FoundFileTask task);
+		public void rollbackTransaction(FoundFileTask task);
+	}
+
+	
 
 	private final Action flow;
 	private final Poller parent;
 	private final String dir;
 	private final String moveToDir;
 	private final int maxNrofMoveTries;
+	private final boolean deleteInProgressFile;
 	private final boolean pollForEntireDirectories;
 	// TODO: the map of known files should be cleared once a file disappears outside of the poller,
 	// e.g. when it has been handled by a poller on another machine.
@@ -35,6 +42,8 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private final HashMap<String, Snapshot> known = new HashMap<String, Snapshot>();
 	private final HashMap<String, Integer> retries = new HashMap<String, Integer>();
 	private final FileServer fileserver;
+	private final String logname;
+
 	private int delay;
 	private boolean paused = false;
 
@@ -60,9 +69,15 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		delay = props.getInt("delay", 10000);
 		dir = TemplateUtil.processTemplate(props.getString("pollerDirectory"),gft.getContext());
 		moveToDir = TemplateUtil.processTemplate(props.getString("moveToDirectory"),gft.getContext());
+		deleteInProgressFile = props.getBoolean("deleteInProgressFile",	true);
 		pollForEntireDirectories = props.getBoolean("pollForEntireDirectories",	false);
 		paused = props.getBoolean("paused", false);
 		maxNrofMoveTries=props.getInt("maxNrofMoveTries", 3);
+		if (pollForEntireDirectories)
+			logname="directory";
+		else
+			logname="file";
+			
 	}
 
 	@Override public Action getFlow() { return this.flow;}
@@ -102,6 +117,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		this.paused = paused;
 		logger.info("Folder {} pause = {}", dir, paused);
 	}
+	public String getFullName() { return parent.getName()+"."+name; }
 	public String getName() { return name; }
 	public String getDir() { return dir; }
 	public String getMoveToDir() { return moveToDir; }
@@ -115,87 +131,126 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	public void setListener(PollerJobListener listener) { this.listener = listener; }
 
 	private void pollOnce(FileServerConnection fsconn) {
-		String logname="file";
-		if (pollForEntireDirectories)
-			logname="directory";
-			
 		// Verwerking voor een bestand in een directory
 		logger.info("getting {}-list in directory {}", logname, dir);
 		int tmpnrofIgnoredFiles=0;
 		int tmpnrofDetectedFiles=0;
-		for (String f : fsconn.getDirectoryEntries(dir).keySet()) {
-			if (".".equals(f) || "..".equals(f))
+		for (String filename : fsconn.getDirectoryEntries(dir).keySet()) {
+			if (".".equals(filename) || "..".equals(filename))
 				continue;
-			
-			int trycount = 0;
-			Integer tmp = retries.get(f); 
-			if (tmp!=null)// test for null, because of unboxing
-				trycount=tmp;
-			if (trycount >= maxNrofMoveTries ) {
-				tmpnrofIgnoredFiles++;
-				continue; // this file has been tried to move too many times (probably a file is in the way), it should not clog the logfile
-			}
-			if (fsconn.isDirectory(dir + "/" + f) && ! pollForEntireDirectories){
-				logger.info("directory {} gevonden, deze wordt overgeslagen bij alleen file verwerking.", dir + "/" + f);
-				continue;
-			}
 			tmpnrofDetectedFiles++;
-			
-			logger.info(name+ " - {} {} gevonden, controleren tot er geen wijzigingen meer zijn.", logname, f);
-			Snapshot snapshot; 
-			if (pollForEntireDirectories)
-				snapshot= new DirectorySnapshot(fsconn, dir + "/"+ f);
-			else
-				snapshot= new FileSnapshot(fsconn, dir + "/"+ f);
-			Snapshot otherSnapshot = known.get(f);
-			if (otherSnapshot == null) {
-				known.put(f, snapshot);
-				retries.put(f, 1);
-			} else {
-				if (snapshot.equals(otherSnapshot)) {
-					long timestamp = new java.util.Date().getTime();
-					if (otherSnapshot.getTimestamp() + delay < timestamp) {
-						logger.debug(name+" - {} {} is klaar om verplaatst te worden.",logname, dir + "/" + f);
-						boolean moved = false;
-						try {
-							fsconn.move(dir + "/" + f,	moveToDir + "/" + f);
-							moved=true;
-						}
-						catch (FileCouldNotBeMovedException e) { 
-							logger.warn("Could not move "+logname+" "+f+" to " +moveToDir, e);
-						}
-						if (moved) {
-							logger.info(name + " - "+logname+" " + f + " is verplaatst naar " + moveToDir);
-							Task task;
-							if (pollForEntireDirectories)
-								task=new FoundDirectoryTask(gft, this, fsconn, dir + "/" + f);
-							else
-								task=new FoundFileTask(gft,this, fsconn, f);
-							run(task);
-							known.remove(f);
-							retries.remove(f);
-							listener.updateGuiSuccess(name, successes++);
-						} else {
-							listener.updateGuiErrors(name, errors++);
-							logger.debug("retrynummer {} van {}", trycount, f);
-							if (trycount < maxNrofMoveTries) {
-								logger.warn(name + " - verplaatsen van file " + f + " naar " + moveToDir + " is niet gelukt. Dit wordt later nog een keer geprobeerd.");
-							} else {
-								logger.error(name + " - verplaatsen van file " + f + " naar " + moveToDir + " is niet gelukt niet na " + trycount + " keer proberen.");
-								known.remove(f); // Zodat het weer vanaf begin opnieuw gaat, maar er is wel en Error gegeven.
-							}
-							retries.put(f, trycount + 1);
-						}
-					}
-				} else {
-					known.put(f, snapshot);
-					retries.put(f, 1);
-				}
+
+			if (shouldFileBeIgnored(fsconn,filename)) {
+				tmpnrofIgnoredFiles++;
+				continue;
 			}
+			
+			logger.info(name+ " - {} {} gevonden, controleren tot er geen wijzigingen meer zijn.", logname, filename);
+			if (isFileNotChangingAnymore(fsconn, filename))
+				processFile(fsconn, filename);
 		}
 		this.nrofDetectedFiles=tmpnrofDetectedFiles;
 		this.nrofIgnoredFiles=tmpnrofIgnoredFiles;
 	}
+
+	private void processFile(FileServerConnection fsconn, String filename) {
+		logger.debug(name+" - {} {} is klaar om verplaatst te worden.",logname, dir + "/" + filename);
+		FoundFileTask task=null;
+		if (pollForEntireDirectories)
+			task=new FoundFileTask(gft, this, fsconn, dir + "/" + filename);
+		else
+			task=new FoundFileTask(gft,this, fsconn, filename);
+		
+		task.startTransaction();
+		boolean completed=false;
+		try {
+			tryToMove(fsconn, filename);
+			logger.info(name + " - "+logname+" " + filename + " is verplaatst naar " + moveToDir);
+			run(task);
+			completed = true;
+			known.remove(filename);
+			retries.remove(filename);
+			listener.updateGuiSuccess(name, successes++);
+		}
+		finally {
+			if (completed) {
+				task.commit();
+				if (deleteInProgressFile)
+					fsconn.deleteFile(task.filename);
+			}
+			else
+				task.rollback();
+		}
+	}
+	
+	private boolean shouldFileBeIgnored(FileServerConnection fsconn, String filename) {
+		if (getTryCount(filename) >= maxNrofMoveTries ) {
+			return true; // this file has been tried to move too many times (probably a file is in the way), it should not clog the logfile
+		}
+		if (fsconn.isDirectory(dir + "/" + filename) && ! pollForEntireDirectories){
+			logger.info("directory {} gevonden, deze wordt overgeslagen bij alleen file verwerking.", dir + "/" + filename);
+			return true;
+		}
+		return false;
+	}
+
+	private boolean isFileNotChangingAnymore(FileServerConnection fsconn, String filename) {
+		Snapshot snapshot; 
+		if (pollForEntireDirectories)
+			snapshot= new DirectorySnapshot(fsconn, dir + "/"+ filename);
+		else
+			snapshot= new FileSnapshot(fsconn, dir + "/"+ filename);
+		Snapshot otherSnapshot = known.get(filename);
+		if (otherSnapshot == null) {
+			known.put(filename, snapshot);
+			retries.put(filename, 1);
+			return false;
+		} 
+		if (snapshot.equals(otherSnapshot)) {
+			long timestamp = new java.util.Date().getTime();
+			if (otherSnapshot.getTimestamp() + delay < timestamp)
+				return true;
+		} else {
+			known.put(filename, snapshot);
+			retries.put(filename, 1);
+		}
+		return false;
+	}
+	
+	
+	private void tryToMove(FileServerConnection fsconn, String filename) throws FileCouldNotBeMovedException {
+		try {
+			fsconn.move(dir + "/" + filename,	moveToDir + "/" + filename);
+		}
+		catch (RuntimeException e) { 
+			logger.warn("Could not move "+logname+" "+filename+" to " +moveToDir, e);
+			rememberFailedMove(filename);
+			if (e instanceof FileCouldNotBeMovedException)
+				throw e;
+			throw new FileCouldNotBeMovedException(filename, e);
+		}
+	}
+
+	private int getTryCount(String filename) {
+		Integer tmp = retries.get(filename); 
+		if (tmp==null)// test for null, because of unboxing
+			return 0;
+		return tmp;
+	}
+	
+	private void rememberFailedMove(String filename) {
+		int trycount=getTryCount(filename);
+		listener.updateGuiErrors(name, errors++);
+		logger.debug("retrynummer {} van {}", trycount, filename);
+		if (trycount < maxNrofMoveTries) {
+			logger.warn(name + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt. Dit wordt later nog een keer geprobeerd.");
+		} else {
+			logger.error(name + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt niet na " + trycount + " keer proberen.");
+			known.remove(filename); // Zodat het weer vanaf begin opnieuw gaat, maar er is wel en Error gegeven.
+		}
+		retries.put(filename, trycount + 1);
+	}
+
 	
 	@Override public void writeHtml(PrintWriter out) {
 		out.println("<H1>PollerJob</H1>");
