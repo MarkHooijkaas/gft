@@ -6,6 +6,7 @@ import org.kisst.gft.filetransfer.action.CheckCopiedFile;
 import org.kisst.gft.filetransfer.action.CheckDestFileDoesNotExist;
 import org.kisst.gft.filetransfer.action.CheckSourceFile;
 import org.kisst.gft.filetransfer.action.CopyFile;
+import org.kisst.gft.filetransfer.action.DeleteSourceDirectoryIfEmpty;
 import org.kisst.gft.filetransfer.action.DeleteSourceFile;
 import org.kisst.gft.filetransfer.action.FixPermissions;
 import org.kisst.gft.filetransfer.action.SftpGetAction;
@@ -30,6 +31,7 @@ public class FileTransferModule implements Module {
 		gft.addAction("copy",CopyFile.class);
 		gft.addAction("check_copy",CheckCopiedFile.class);
 		gft.addAction("remove",DeleteSourceFile.class);
+		gft.addAction("remove_src_dir_if_empty",DeleteSourceDirectoryIfEmpty.class);
 		gft.addAction("fix_permissions",FixPermissions.class);
 		gft.addAction("sftp_get", SftpGetAction.class);
 		gft.addAction("sftp_put", SftpPutAction.class);

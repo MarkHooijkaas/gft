@@ -19,6 +19,12 @@ public class FileLocation {
 
 	public FileServer getFileServer() { return fileServer; }
 	public String getPath() { return path; } 
+	public FileLocation getParentDirectory() { 
+		int pos=path.lastIndexOf('/');
+		if (pos>0)
+			return new FileLocation(fileServer, path.substring(0,pos-1));
+		throw new RuntimeException(path+" has no parentDirectory");
+	} 
 	
 	public boolean fileExists() { return this.fileServer.fileExists(this.path); }
 	public void deleteFile() { this.fileServer.deleteFile(this.path); }
