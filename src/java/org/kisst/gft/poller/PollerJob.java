@@ -60,10 +60,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	public PollerJob(Poller parent,Props props, FileServer fileserver) {
 		super(parent.gft, props);
-		if (props.getString("actions",null)==null)
-			this.flow= new SendGftMessageAction(gft, props); 
-		else 
-			this.flow=new ActionList(this, props);
+		this.flow=new ActionList(this, props, "send_gft_message");
 		this.parent=parent;
 		this.fileserver = fileserver;
 		delay = props.getInt("delay", 10000);

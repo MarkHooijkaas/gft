@@ -32,14 +32,14 @@ public class ActionList  implements Action, WritesHtml {
 	private final boolean retryNonFunctionalExceptions;
 
 	
-
-	public ActionList(BasicTaskDefinition taskdef, Props props) {
+	public ActionList(BasicTaskDefinition taskdef, Props props) { this(taskdef, props, null); }
+	public ActionList(BasicTaskDefinition taskdef, Props props, String defaultAction) {
 		this.taskdef=taskdef;
 		maxNrofTries = props.getInt("maxNrofTries", 3);
 		retryDelay = props.getLong("retryDelay", 30000);
 		boolean tmp = taskdef.gft.props.getBoolean("retryNonFunctionalExceptions", true); // TODO: better mechanism to globally define property
 		retryNonFunctionalExceptions = props.getBoolean("retryNonFunctionalExceptions", tmp);
-		String actions=props.getString("actions");
+		String actions=props.getString("actions", defaultAction);
 		String[] parts=actions.split(",");
 		//this.actions=new Action[parts.length];
 		for (String name: parts) {
