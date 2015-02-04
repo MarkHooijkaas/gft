@@ -31,8 +31,8 @@ public abstract class Channel extends BasicTaskDefinition  implements SourceFile
 	public Channel(GftContainer gft, Props props) {
 		super(gft, props);
 		this.flow= new ActionList(this, props);
-		this.src=new FileLocation(gft.sshhosts.get(props.getString("src.host")), props.getString("src.dir",  ""));
-		this.dest=new FileLocation(gft.sshhosts.get(props.getString("dest.host")), props.getString("dest.dir",  ""));
+		this.src=new FileLocation(gft.getFileServer(props.getString("src.host")), props.getString("src.dir",  ""));
+		this.dest=new FileLocation(gft.getFileServer(props.getString("dest.host")), props.getString("dest.dir",  ""));
 
 		this.mode=props.getString("mode", "push");
 		if (!("pull".equals(mode) || "push".equals(mode)))

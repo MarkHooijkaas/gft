@@ -35,7 +35,7 @@ public class Poller implements Runnable {
 			String hostname=props.getString("host",null);
 			if (hostname!=null) {
 				logger.info("using remote host {}",hostname);
-				fileserver= gft.sshhosts.get(hostname);
+				fileserver= gft.getFileServer(hostname);
 			}
 			else {
 				logger.info("using local host");

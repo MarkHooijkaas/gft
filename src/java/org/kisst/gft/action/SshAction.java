@@ -1,6 +1,8 @@
 package org.kisst.gft.action;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.filetransfer.FileServer;
+import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.SshHost;
 import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
@@ -18,7 +20,12 @@ public class SshAction implements Action {
 	public SshAction(GftContainer gft, Props props) {
 		this.gft=gft;
 		commandTemplate =props.getString("command");
-		host=gft.sshhosts.get(props.getString("host")).getSshHost();
+		String hostname=props.getString("host");
+		 FileServer server = gft.getFileServer(hostname);
+		 if (server instanceof SshFileServer)
+			this.host= ((SshFileServer)server).getSshHost();
+		 else
+			 throw new RuntimeException("Host "+hostname+" is not an SshFileServer");
 		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 

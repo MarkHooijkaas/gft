@@ -23,6 +23,7 @@ import org.kisst.gft.action.SendMessageFromFileAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.admin.BaseServlet;
 import org.kisst.gft.admin.QueueStatus;
+import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileTransferModule;
 import org.kisst.gft.poller.Poller;
 import org.kisst.gft.poller.ProblematicPollerFiles;
@@ -75,7 +76,7 @@ public class GftContainer implements HttpHostMap {
 	//public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	
 	public final ArrayList<StatusItem> statusItems =new ArrayList<StatusItem>();
-	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>();
+	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>(); 	 // TODO: make private
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
 	private final HashMap<String, Module > channelTypes=new LinkedHashMap<String, Module>();
@@ -148,6 +149,15 @@ public class GftContainer implements HttpHostMap {
 				throw new RuntimeException("FATAL "+message);
 		}
 			
+	}
+	
+
+	public Set<String> getFileServerNames() { return sshhosts.keySet(); } 
+	public FileServer getFileServer(String name) { 
+		SshFileServer result = sshhosts.get(name);
+		if (result==null)
+			throw new IllegalArgumentException("Unknown fileserver name "+name);
+		return result;
 	}
 
 	public JmsSystem getQueueSystem(String name) { 

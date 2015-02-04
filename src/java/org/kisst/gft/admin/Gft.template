@@ -119,8 +119,8 @@ started on ${gft.startupTime?datetime}<br>
 
 <h2>SSH Hosts</h2> 
 <table> 
-<#list sshhosts?keys as name>
-<tr><td><a href=rest/sshhost/${name}>${name}</a></td><td>${sshhosts[name]}</td><td><a href=dir/${name}>DIR</a></td></tr> 
+<#list gft.fileServerNames as name>
+<tr><td><a href=rest/sshhost/${name}>${name}</a></td><td>${gft.getFileServer(name)!""}</td><td><a href=dir/${name}>DIR</a></td></tr> 
 </#list> 
 </table> 
 

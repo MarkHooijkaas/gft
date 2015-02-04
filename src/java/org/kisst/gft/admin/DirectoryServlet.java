@@ -48,7 +48,7 @@ public class DirectoryServlet extends BaseServlet {
 		out.println("<h1>Directory "+name+"</h1>");
 		out.println("<table>");
 		out.println("<tr><td><b>filename</b></td><td width=100 ALIGN=RIGHT><b>filesize</b></td><td><b>modification date</b></td></tr>");
-		FileServerConnection conn = gft.sshhosts.get(name).openConnection();
+		FileServerConnection conn = gft.getFileServer(name).openConnection();
 		int count = 0;
 		try {
 			LinkedHashMap<String, FileAttributes> entries = conn.getDirectoryEntries(dir);
