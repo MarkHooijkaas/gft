@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 public class JmsSystem {
 	private final static Logger logger=LoggerFactory.getLogger(JmsSystem.class); 
 	protected final Props props;
+	private final ConnectionFactory connectionFactory;
 	private final Connection connection;
 	public final String sendParams;
 	
@@ -28,7 +29,7 @@ public class JmsSystem {
 		else
 			this.sendParams = "?"+props.getString("sendParams", "");
 		try {
-			ConnectionFactory connectionFactory = createConnectionFactory();
+			connectionFactory = createConnectionFactory();
 			String username=props.getString("username", null);
 			if (username==null)
 				connection = connectionFactory.createConnection();
@@ -42,6 +43,8 @@ public class JmsSystem {
 		}
 		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
+
+	public ConnectionFactory getConnectionFactory() { return connectionFactory; } 
 
 	protected ConnectionFactory createConnectionFactory() {
         Hashtable<String, String> env= new Hashtable<String,String>();

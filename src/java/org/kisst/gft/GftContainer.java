@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,8 +22,10 @@ import org.kisst.gft.action.LocalCommandAction;
 import org.kisst.gft.action.SendMessageFromFileAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.admin.BaseServlet;
+import org.kisst.gft.admin.QueueStatus;
 import org.kisst.gft.filetransfer.FileTransferModule;
 import org.kisst.gft.poller.Poller;
+import org.kisst.gft.poller.ProblematicPollerFiles;
 import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.WindowsSshHost;
@@ -71,6 +74,7 @@ public class GftContainer implements HttpHostMap {
 	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
 	//public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	
+	public final ArrayList<StatusItem> statusItems =new ArrayList<StatusItem>();
 	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>();
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
@@ -121,6 +125,8 @@ public class GftContainer implements HttpHostMap {
 		addAction("local_command", LocalCommandAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
 		addAction("send_message_from_file",SendMessageFromFileAction.class);
+		
+		statusItems.add(new ProblematicPollerFiles(this));
 
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
@@ -200,7 +206,10 @@ public class GftContainer implements HttpHostMap {
 		for (String lname: props.getProps("listener").keys()) {
 			Props listenerprops = props.getProps("listener."+lname);
 			String queueSystemName = listenerprops.getString("queueSystem", "main");
-			listeners.put(lname, new MultiListener(getQueueSystem(queueSystemName), starter, listenerprops, context));
+			MultiListener listener = new MultiListener(getQueueSystem(queueSystemName), starter, listenerprops, context);
+			listeners.put(lname, listener);
+			statusItems.add(new QueueStatus(listener.getQueueSystem(), listener.getQueue()));
+			statusItems.add(new QueueStatus(listener.getQueueSystem(), listener.getErrorQueue()));
 		}
 
 

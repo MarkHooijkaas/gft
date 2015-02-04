@@ -10,6 +10,8 @@ public class FileLocation {
 	
 	public FileLocation(FileLocation loc, String path) { this(loc.fileServer, join(loc.path,path)); }
 	public FileLocation(FileServer fileServer, String path) {
+		if (fileServer==null)
+			throw new IllegalArgumentException("Empty fileserver provided");
 		this.fileServer=fileServer;
 		this.path=path;
 	}

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.StatusItem;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -35,12 +36,15 @@ public class TemplateServlet extends BaseServlet {
 			HashMap<String, Object> root=new HashMap<String, Object>();
 			root.put("gft", gft);
 			root.put("channels", gft.channels);
-			root.put("sshhosts", gft.sshhosts);
+			//root.put("sshhosts", gft.sshhosts);
 			//root.put("httphosts", gft.httphosts);
 			root.put("actions", gft.actions);
 			root.put("listeners", gft.listeners);
 			root.put("pollers", gft.pollers);
 			root.put("modules", gft.getModuleInfo());
+			for (StatusItem item: gft.statusItems)
+				item.autoRefresh();
+			root.put("statusItems", gft.statusItems);
 			// TODO: root.put("ondemandhosts", gft.ondemandhosts);
 			Template temp = cfg.getTemplate("org/kisst/gft/admin/Gft.template");
 			Writer out = response.getWriter();

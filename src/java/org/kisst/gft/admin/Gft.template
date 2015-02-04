@@ -9,10 +9,29 @@ started on ${gft.startupTime?datetime}<br>
 
 <a href="reset">Reset JAMON logging</a><br>
 
-<h2>Modules</h2> 
 <table> 
   <tr>
-    <td><b>file</b></td>
+    <td><b>STATUS</b></td>
+    <td><b>count</b></td>
+    <td><b>message</b></td>
+    <td><b>refresh</b></td>
+    <td><b>last Updated</b></td>
+  </tr>
+<#list statusItems as item>
+  <tr bgcolor="${item.color!"white"}">
+    <td>${item.name}</td>
+    <td>${item.problemCount}</td>
+    <td>${item.message!""}</td>
+    <td><a href="statusItem/${item.name}">REFRESH</a></td>
+    <td>${item.lastUpdated!""}</td>
+  </tr>
+</#list> 
+</table> 
+
+
+<table> 
+  <tr>
+    <td><b>MODULE</b></td>
     <td><b>version</b></td>
     <td><b>main class</b></td>
   </tr>
