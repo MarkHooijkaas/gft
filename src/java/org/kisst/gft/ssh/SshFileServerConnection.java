@@ -54,14 +54,14 @@ public class SshFileServerConnection implements FileServerConnection {
 		catch (SftpException e) {
 			if (e.id==2) // && e.getMessage().equals("SfsStatusCode.NoSuchFile")) {
 				return false;
-			throw new RuntimeException(e); }
+			throw new RuntimeException(e+" for file "+path,e); }
 	}
 
 	public void deleteFile(String path) { 
 		path=fileserver.unixPath(path);
 		try {
 			sftp.rm(path);
-		} catch (SftpException e) { throw new RuntimeException(e); }
+		} catch (SftpException e) { throw new RuntimeException(e+" for file "+path,e); }
 	}
 	public long fileSize(String path) { return getFileAttributes(path).size; }
 	public long lastModified(String path) { return getFileAttributes(path).modifyTimeMilliSecs; }
@@ -72,7 +72,7 @@ public class SshFileServerConnection implements FileServerConnection {
 		try {
 			SftpATTRS attr = sftp.lstat(path);
 			return new FileAttributes(1000L*attr.getATime(), 1000L*attr.getMTime(), attr.isDir(), attr.getSize());
-		} catch (SftpException e) { throw new RuntimeException(e); }
+		} catch (SftpException e) { throw new RuntimeException(e+" for file "+path,e); }
 	}
 	
 	@Override
@@ -92,7 +92,7 @@ public class SshFileServerConnection implements FileServerConnection {
 			}
 			return result;
 		} 
-		catch (SftpException e) { throw new RuntimeException(e); }
+		catch (SftpException e) { throw new RuntimeException(e+" for directory "+path,e); }
 	}
 
 	public void move(String path, String newpath) {
@@ -110,7 +110,7 @@ public class SshFileServerConnection implements FileServerConnection {
 			logger.info("copy file from remote {} to local {}",remotepath,localpath);
 			sftp.get(remotepath, localpath);
 		} 
-		catch (SftpException e) { throw new RuntimeException(e); }
+		catch (SftpException e) { throw new RuntimeException(e+" for file "+remotepath,e); }
 	}
 
 	public String getFileContentAsString(String remotepath) {
@@ -121,7 +121,7 @@ public class SshFileServerConnection implements FileServerConnection {
 			reader = new InputStreamReader(sftp.get(remotepath));
 			return FileUtil.loadString(reader);
 		} 
-		catch (SftpException e) { throw new RuntimeException(e); }
+		catch (SftpException e) { throw new RuntimeException(e+" for file "+remotepath,e); }
 		finally {
 			if (reader!=null) {
 				try {
@@ -140,14 +140,14 @@ public class SshFileServerConnection implements FileServerConnection {
 			writer = new OutputStreamWriter(sftp.put(remotepath));
 			writer.write(content);
 		} 
-		catch (SftpException e) { throw new RuntimeException(e); }
-		catch (IOException e) { throw new RuntimeException(e); }
+		catch (SftpException e) { throw new RuntimeException(e+" for file "+remotepath,e); }
+		catch (IOException e) { throw new RuntimeException(e+" for file "+remotepath,e); }
 		finally {
 			if (writer!=null) {
 				try {
 					writer.close();
 				} 
-				catch (IOException e) { throw new RuntimeException(e);}
+				catch (IOException e) { throw new RuntimeException(e+" for file "+remotepath,e);}
 			}
 		}
 	}
@@ -159,7 +159,7 @@ public class SshFileServerConnection implements FileServerConnection {
 			logger.info("copy file from local {} to remote {}",localpath,remotepath);
 			sftp.put(localpath, remotepath);
 		} 
-		catch (SftpException e) { throw new RuntimeException(e); }
+		catch (SftpException e) { throw new RuntimeException(e+" for file "+remotepath,e); }
 	}
 
 }
