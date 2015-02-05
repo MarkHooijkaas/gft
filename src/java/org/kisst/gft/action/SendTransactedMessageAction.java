@@ -31,7 +31,6 @@ import org.kisst.gft.poller.PollerJob;
 import org.kisst.gft.task.Task;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.JmsUtil;
-import org.kisst.jms.MultiListener;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
@@ -67,12 +66,7 @@ public abstract class SendTransactedMessageAction implements Action, PollerJob.T
         String queueSystemName = TemplateUtil.processTemplate(props.getString("queueSystem", "main"), gft.getContext());
         this.qmgr = gft.getQueueSystem(queueSystemName);
 
-        String firstListenerQueue = null;
-        for (MultiListener l : gft.listeners.values()) {
-            firstListenerQueue = l.getQueue();
-            break;
-        }
-        this.queueName = props.getString("queue", firstListenerQueue);
+        this.queueName = props.getString("queue", gft.getMainQueue());
         if (queueName == null)
             throw new RuntimeException("No queue defined for action " + props.getLocalName());
     }

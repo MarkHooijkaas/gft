@@ -78,6 +78,7 @@ public class GftContainer implements HttpHostMap {
 	public final ArrayList<StatusItem> statusItems =new ArrayList<StatusItem>();
 	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>(); 	 // TODO: make private
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
+	private final HashMap<String,JmsSystem> queueSystem = new LinkedHashMap<String,JmsSystem>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
 	private final HashMap<String, Module > channelTypes=new LinkedHashMap<String, Module>();
 	private final SimpleProps context = new SimpleProps();
@@ -93,7 +94,6 @@ public class GftContainer implements HttpHostMap {
 	public final Date startupTime = new Date();
 	public Date getStartupTime() { return startupTime; }
 	
-	private final HashMap<String,JmsSystem> queueSystem = new LinkedHashMap<String,JmsSystem>();
 
 	public String getVersion() {
 		InputStream in = GftContainer.class.getResourceAsStream("/version.properties");
@@ -397,5 +397,12 @@ public class GftContainer implements HttpHostMap {
 
 	public List<ModuleInfo> getModuleInfo() {
 		return jarloader.getModuleInfo();
+	}
+
+
+	public String getMainQueue() {
+		for (MultiListener l : listeners.values())
+			return l.getQueue();
+		throw new RuntimeException("No main queue defined");
 	}
 }
