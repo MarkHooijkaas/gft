@@ -12,9 +12,6 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.admin.rest.MappedResource;
-import org.kisst.gft.admin.rest.ObjectResource;
-import org.kisst.gft.admin.rest.RestServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +34,7 @@ public class AdminServer extends AbstractHandler {
 		logger.info("admin site running on port {}",port);
 		server = new Server(port);
         server.setHandler(this);
-        handlerMap.put("default", new TemplateServlet(gft));  //new HomeServlet(gft));
+        handlerMap.put("default", new HomeServlet(gft));
         handlerMap.put("/channel", new ChannelServlet(gft));
         handlerMap.put("/poller", new PollerServlet(gft));
         handlerMap.put("/dir", new DirectoryServlet(gft));
@@ -49,6 +46,7 @@ public class AdminServer extends AbstractHandler {
         //handlerMap.put("/shutdown", new ShutdownServlet(gft));
         handlerMap.put("/encrypt", new EncryptServlet(gft));
         
+        /*
         RestServlet rest=new RestServlet(gft, "/rest/");
         rest.map("gft",new ObjectResource(gft));
         rest.map("channel",new MappedResource(gft.channels));
@@ -57,9 +55,10 @@ public class AdminServer extends AbstractHandler {
         //rest.map("httphost",new MappedResource(gft.httphosts));
         rest.map("poller",new MappedResource(gft.pollers));
         // TODO: rest.map("ondemandhost",new MappedResource(gft.ondemandhosts));
-        
         handlerMap.put(rest.getPrefix(), rest);
-		try {
+        */ 
+
+        try {
 			server.start();
 		} catch (Exception e) { throw new RuntimeException(e);}
 	}

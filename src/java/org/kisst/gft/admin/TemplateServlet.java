@@ -8,7 +8,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.StatusItem;
 
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
@@ -22,10 +21,18 @@ public class TemplateServlet extends BaseServlet {
 		cfg.setClassForTemplateLoading(TemplateServlet.class, "/");
 		cfg.setObjectWrapper(new DefaultObjectWrapper());
 	}
-	
-	
+
+
+	private final String templateName;
+
 	public TemplateServlet(GftContainer gft) {
 		super(gft);
+		this.templateName=this.getClass().getName().replace('.', '/')+".template";
+	}
+
+	public TemplateServlet(GftContainer gft, String templateName) {
+		super(gft);
+		this.templateName=templateName;
 	}
 
 	
@@ -35,18 +42,9 @@ public class TemplateServlet extends BaseServlet {
 		try {
 			HashMap<String, Object> root=new HashMap<String, Object>();
 			root.put("gft", gft);
-			root.put("channels", gft.channels);
-			//root.put("sshhosts", gft.sshhosts);
-			//root.put("httphosts", gft.httphosts);
-			root.put("actions", gft.actions);
-			root.put("listeners", gft.listeners);
-			root.put("pollers", gft.pollers);
-			root.put("modules", gft.getModuleInfo());
-			for (StatusItem item: gft.statusItems)
-				item.autoRefresh();
-			root.put("statusItems", gft.statusItems);
-			// TODO: root.put("ondemandhosts", gft.ondemandhosts);
-			Template temp = cfg.getTemplate("org/kisst/gft/admin/Gft.template");
+			addContext(root);
+
+			Template temp = cfg.getTemplate(templateName);
 			Writer out = response.getWriter();
 			temp.process(root, out);
 			out.flush();
@@ -54,4 +52,7 @@ public class TemplateServlet extends BaseServlet {
 		catch (TemplateException e) { throw new RuntimeException(e); } 
 		catch (IOException e)  { throw new RuntimeException(e); }
 	}
+
+
+	protected void addContext(HashMap<String, Object> root) {}
 }
