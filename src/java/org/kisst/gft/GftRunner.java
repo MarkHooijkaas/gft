@@ -70,7 +70,7 @@ public class GftRunner {
 
 	private static Cli cli=new Cli();
 	private static Cli.StringOption config;
-	private static Cli.StringOption putmsg = cli.stringOption("p","putmsg", "puts a message form file on the input queue",null);
+	private static Cli.StringOption putmsg = cli.stringOption("p","putmsg", "puts a message from the named file on the input queue",null);
 	private static Cli.StringOption delmsg = cli.stringOption("d","delmsg","selector", null);
 	private static Cli.StringOption retrymsg = cli.stringOption("r","retrymsg","selector", null);
 	private static Cli.Flag help =cli.flag("h", "help", "show this help");
@@ -89,6 +89,7 @@ public class GftRunner {
 		}
 		CryptoUtil.setKey("-P34{-[u-C5x<I-v'D_^{79'3g;_2I-P_L0£_j3__5`y§%M£_C");
 		File configfile=new File(config.get());
+		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
 		SimpleProps props=new SimpleProps();
 		props.load(configfile);
 		props=(SimpleProps) props.getProps(topname);
@@ -108,7 +109,6 @@ public class GftRunner {
 			retrymsg(props, retrymsg.get());
 		else {
 			// Run GFT
-			PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
 			GftRunner runner= new GftRunner(topname, configfile);
 			runner.run();
 
@@ -141,13 +141,17 @@ public class GftRunner {
 
 	private static void putmsg(SimpleProps props, String filename) {
 		logger.info("gft put");
-		logger.info("loading props");
-		logger.info("opening queuesystem");
 		JmsSystem queueSystem=getQueueSystem(props);
 		String queuename = getQueue(props);
-		logger.info("loading data from standard input");
-
-		String data=FileUtil.loadString(new InputStreamReader(System.in));
+		String data=null;
+		if (filename==null || "-".equals(filename)) {
+			logger.info("loading data from standard input");
+			data=FileUtil.loadString(new InputStreamReader(System.in));
+		}
+		else {
+			logger.info("loading data from file "+filename);
+			data=FileUtil.loadString(filename);
+		}
 		logger.info("sending message");
 		queueSystem.getQueue(queuename).send(data);
 		logger.info("send the following message to the queue {}",queuename);
