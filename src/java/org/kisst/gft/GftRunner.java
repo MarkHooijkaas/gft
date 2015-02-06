@@ -16,6 +16,7 @@ import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.JmsUtil;
 import org.kisst.mq.MsgMover;
+import org.kisst.mq.QueueManager;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.util.CryptoUtil;
@@ -72,7 +73,7 @@ public class GftRunner {
 	private static Cli.StringOption config;
 	private static Cli.StringOption putmsg = cli.stringOption("p","putmsg", "puts a message from the named file on the input queue",null);
 	private static Cli.StringOption delmsg = cli.stringOption("d","delmsg","selector", null);
-	private static Cli.StringOption retrymsg = cli.stringOption("r","retrymsg","selector", null);
+	private static Cli.StringOption mvmsg = cli.stringOption("m","mvmsg","move message with <str> as msgid (or @all) from errorqueue to main queue", null);
 	private static Cli.Flag help =cli.flag("h", "help", "show this help");
 	private static Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
 	private static Cli.StringOption encrypt = cli.stringOption("e","encrypt","key", null);
@@ -105,8 +106,8 @@ public class GftRunner {
 			putmsg(props,putmsg.get());
 		else if (delmsg.isSet())
 			delmsg(props, delmsg.get());
-		else if (retrymsg.isSet())
-			retrymsg(props, retrymsg.get());
+		else if (mvmsg.isSet())
+			moveMessage(props, mvmsg.get());
 		else {
 			// Run GFT
 			GftRunner runner= new GftRunner(topname, configfile);
@@ -178,11 +179,12 @@ public class GftRunner {
 		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
 
-	private static void retrymsg(Props props, String msgid) {
+	private static void moveMessage(Props props, String msgid) {
 		String src=props.getString("listener.main.errorqueue");
 		String dest=props.getString("listener.main.queue");
 		try {
-			MsgMover.moveMessage(props.getProps("mq.host.main"), src, dest, msgid);
+			JmsSystem jmsSystem = new JmsSystem(props.getProps("mq.host.main"));
+			MsgMover.moveMessage(new QueueManager(jmsSystem.createMQQueueManager()), src, dest, msgid);
 		}
 		catch (MQException e) { throw new RuntimeException(e); }
 	}

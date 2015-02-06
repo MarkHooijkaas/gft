@@ -42,12 +42,13 @@ public class MsgMover
 		moveMessage(props, src, dest, "@all");
 	}
 	
-	
 	public static void moveMessage(Props props, String src, String dest, String msgid) throws MQException {
+		moveMessage(new QueueManager(props), src, dest, msgid);
+	}	
+	public static void moveMessage(QueueManager qm, String src, String dest, String msgid) throws MQException {
 		if (msgid==null)
 			throw new RuntimeException("msgid==null is not allowed, use @all instead");
 		boolean moveAll=(msgid.equals("@all"));
-		QueueManager qm=new QueueManager(props);
 		MQQueue srcq = qm.getQueue(src, 
 				MQConstants.MQOO_INPUT_SHARED |
 				MQConstants.MQOO_INQUIRE | 
@@ -78,7 +79,7 @@ public class MsgMover
 				}
 				catch(MQException e) {
 					if (e.reasonCode==2033) { // MQRC_NO_MSG_AVAILABLE
-						System.out.println("no more messages");
+						System.out.println("completion for reason 2033: no more messages");
 						break;
 					}
 					throw e;

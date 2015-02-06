@@ -15,6 +15,12 @@ import org.kisst.util.CryptoUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.ibm.mq.MQC;
+import com.ibm.mq.MQEnvironment;
+import com.ibm.mq.MQException;
+import com.ibm.mq.MQQueueManager;
+import com.ibm.mq.jms.MQConnectionFactory;
+
 public class JmsSystem {
 	private final static Logger logger=LoggerFactory.getLogger(JmsSystem.class); 
 	protected final Props props;
@@ -44,8 +50,23 @@ public class JmsSystem {
 		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
 
-	public ConnectionFactory getConnectionFactory() { return connectionFactory; } 
-
+	@SuppressWarnings("unchecked")
+	public MQQueueManager createMQQueueManager() {
+		if (!(connectionFactory instanceof MQConnectionFactory))
+			return null;
+		
+		MQConnectionFactory mqconnfac =(MQConnectionFactory) connectionFactory;
+		MQEnvironment.channel = mqconnfac.getChannel();
+		MQEnvironment.port = mqconnfac.getPort();
+		MQEnvironment.hostname = mqconnfac.getHostName();
+		MQEnvironment.properties.put(MQC.TRANSPORT_PROPERTY, MQC.TRANSPORT_MQSERIES);
+		try {
+			return new MQQueueManager(mqconnfac.getQueueManager());
+		} 
+		catch (MQException e) { throw new RuntimeException(e);}
+	}
+	
+	
 	protected ConnectionFactory createConnectionFactory() {
         Hashtable<String, String> env= new Hashtable<String,String>();
         env.put( "java.naming.factory.initial", "com.sun.jndi.fscontext.RefFSContextFactory" );

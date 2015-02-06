@@ -1,16 +1,12 @@
 package org.kisst.gft.admin;
 
-import javax.jms.ConnectionFactory;
-
 import org.kisst.gft.StatusItem;
 import org.kisst.jms.JmsSystem;
 
 import com.ibm.mq.MQC;
-import com.ibm.mq.MQEnvironment;
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQQueue;
 import com.ibm.mq.MQQueueManager;
-import com.ibm.mq.jms.MQConnectionFactory;
 
 
 
@@ -19,26 +15,11 @@ public class QueueStatus extends StatusItem {
 	private final String queueName;
 	private final MQQueueManager qmgr;
 	
-	@SuppressWarnings("unchecked")
 	public QueueStatus(JmsSystem jmsSystem, String queuename) {
 		super(queuename.substring(queuename.lastIndexOf('/')+1));
-		//this.jmsSystem=jmsSystem;
 		
 		this.queueName=getName();
-		ConnectionFactory connfac = jmsSystem.getConnectionFactory();
-		MQQueueManager tmp=null;
-		if (connfac instanceof MQConnectionFactory) {
-			MQConnectionFactory mqconnfac =(MQConnectionFactory) connfac;
-			MQEnvironment.channel = mqconnfac.getChannel();
-			MQEnvironment.port = mqconnfac.getPort();
-			MQEnvironment.hostname = mqconnfac.getHostName();
-			MQEnvironment.properties.put(MQC.TRANSPORT_PROPERTY, MQC.TRANSPORT_MQSERIES);
-			try {
-				tmp= new MQQueueManager(mqconnfac.getQueueManager());
-			} catch (MQException e) { }
-		}
-		qmgr=tmp;
-		//System.out.println(jmsSystem.getQueue(queuename).getClass());
+		qmgr=jmsSystem.createMQQueueManager();
 	}
 
 	/*

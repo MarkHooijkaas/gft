@@ -40,7 +40,8 @@ public class QueueManager {
 		}
 		catch (MQException e) { throw new RuntimeException(e); }
 	}
-
+	public QueueManager(MQQueueManager qmgr) { this.qmgr=qmgr; }
+	
 	public MQQueueManager getMQQueueManager() { return qmgr; }
 	
     private static final String DEFAULT_MODEL_QUEUE ="SYSTEM.DEFAULT.MODEL.QUEUE";
@@ -126,6 +127,16 @@ public class QueueManager {
     }
 
 	public MQQueue getQueue(String queuename, int options) {
+		if (queuename.startsWith("queue://")) {
+			int pos=queuename.indexOf('/', 8);
+			String qmgrName=queuename.substring(8,pos);
+			String qname=queuename.substring(pos+1);
+			pos=qname.indexOf('?');
+			if (pos>0)
+				qname=qname.substring(0,pos-1);
+			System.out.println(qmgrName+"\t"+qname);
+			queuename=qname;
+		}
 		try {
 			return qmgr.accessQueue(queuename, options);
 		}
