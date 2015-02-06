@@ -27,7 +27,10 @@ public class OnDemandHost {
 		this.passwd=props.getString("password");
 		this.port=props.getInt("port");
 		this.tracelevel=props.getInt("tracelevel",0);
-		this.arslib=props.getString("ars3wapidll","ars3wapi32");
+		if ("64".equals(System.getProperty("sun.arch.data.model")))
+			this.arslib=props.getString("ars3wapidll","ars3wapi64");
+		else
+			this.arslib=props.getString("ars3wapidll","ars3wapi32");
 		initNative();
 		initPool(props);
 	}
