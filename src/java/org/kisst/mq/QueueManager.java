@@ -43,6 +43,12 @@ public class QueueManager {
 	public QueueManager(MQQueueManager qmgr) { this.qmgr=qmgr; }
 	
 	public MQQueueManager getMQQueueManager() { return qmgr; }
+	public String getName() { 
+		try {
+			return qmgr.getName();
+		} 
+		catch (MQException e) { throw new RuntimeException(e); } 
+	}
 	
     private static final String DEFAULT_MODEL_QUEUE ="SYSTEM.DEFAULT.MODEL.QUEUE";
     private static final String REPLYQUEUE = "REMOTE.MQSC.*";
@@ -127,20 +133,22 @@ public class QueueManager {
     }
 
 	public MQQueue getQueue(String queuename, int options) {
+		String origQueuename="";
 		if (queuename.startsWith("queue://")) {
+			origQueuename=" (original name: "+queuename+")";
 			int pos=queuename.indexOf('/', 8);
 			String qmgrName=queuename.substring(8,pos);
-			String qname=queuename.substring(pos+1);
-			pos=qname.indexOf('?');
+			if (! qmgrName.toUpperCase().equals(getName().toUpperCase()))
+				throw new IllegalArgumentException("Can not get queue on different QueueManager "+qmgrName+" for current queueManager "+getName()+" in queue "+queuename);
+			queuename=queuename.substring(pos+1);
+			pos=queuename.indexOf('?');
 			if (pos>0)
-				qname=qname.substring(0,pos-1);
-			System.out.println(qmgrName+"\t"+qname);
-			queuename=qname;
+				queuename=queuename.substring(0,pos);
 		}
 		try {
 			return qmgr.accessQueue(queuename, options);
 		}
-		catch (MQException e) { throw new RuntimeException(e); }
+		catch (MQException e) { throw new RuntimeException("Error opening queue "+queuename+origQueuename,e); }
 	}
 
 	public void commit() { 
