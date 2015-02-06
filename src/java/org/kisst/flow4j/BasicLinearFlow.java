@@ -33,7 +33,7 @@ public class BasicLinearFlow {
 		this.props=props;
 		maxNrofTries = props.getInt("maxNrofTries", 3);
 		retryDelay = props.getLong("retryDelay", 30000);
-		retryNonFunctionalExceptions = props.getBoolean("retryNonFunctionalExceptions", true);
+		retryNonFunctionalExceptions = props.getBoolean("retryNonFunctionalExceptions", false);
 	}
 	public boolean safeToRetry() { 
 		for (Action a: actions.values()) {
