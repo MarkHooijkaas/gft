@@ -55,7 +55,7 @@ public class MsgMover
 				MQConstants.MQOO_SAVE_ALL_CONTEXT |
 				MQConstants.MQOO_FAIL_IF_QUIESCING
 				);
-		MQQueue destq = qm.getQueue(dest, MQConstants.MQOO_OUTPUT| MQConstants.MQOO_SET_ALL_CONTEXT);
+		MQQueue destq = qm.getQueue(dest, MQConstants.MQOO_INQUIRE | MQConstants.MQOO_OUTPUT| MQConstants.MQOO_SET_ALL_CONTEXT);
 		try {
 			MQGetMessageOptions gmo = new MQGetMessageOptions();
 			gmo.options=

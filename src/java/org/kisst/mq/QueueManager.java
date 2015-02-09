@@ -2,6 +2,7 @@ package org.kisst.mq;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Enumeration;
 import java.util.Hashtable;
 
 import org.kisst.props4j.Props;
@@ -18,6 +19,9 @@ import com.ibm.mq.constants.MQConstants;
 import com.ibm.mq.pcf.MQCFH;
 import com.ibm.mq.pcf.MQCFIN;
 import com.ibm.mq.pcf.MQCFST;
+import com.ibm.mq.pcf.PCFException;
+import com.ibm.mq.pcf.PCFMessage;
+import com.ibm.mq.pcf.PCFMessageAgent;
 import com.ibm.mq.pcf.PCFParameter;
 
 public class QueueManager {
@@ -40,7 +44,9 @@ public class QueueManager {
 		}
 		catch (MQException e) { throw new RuntimeException(e); }
 	}
-	public QueueManager(MQQueueManager qmgr) { this.qmgr=qmgr; }
+	public QueueManager(MQQueueManager qmgr) { 
+		this.qmgr=qmgr;
+	}
 	
 	public MQQueueManager getMQQueueManager() { return qmgr; }
 	public String getName() { 
@@ -132,6 +138,43 @@ public class QueueManager {
         }
     }
 
+    
+    public String getTargetQueue(MQQueue q) {
+    	int[] selectors=new int[1];
+    	int[] intAttrs=new int[0];
+    	char[] charAttrs=new char[MQConstants.MQ_Q_NAME_LENGTH];
+    	selectors[0]=MQConstants.MQCA_BASE_Q_NAME;
+    	String name=null;
+    	try {
+    		if (q.getQueueType() !=MQConstants.MQQT_ALIAS)
+    			return q.getName();
+    		name=q.getName();
+			q.inquire(selectors, intAttrs, charAttrs);
+			return new String(charAttrs).trim();
+		}
+    	catch (MQException e) { throw new RuntimeException(e+" getting targetQueue for "+name, e);}
+    }
+    
+    public String inquirePcfQueue(MQQueue q) {
+    	try { 
+            PCFMessageAgent agent = new PCFMessageAgent(qmgr);
+            PCFMessage cmd = new PCFMessage(MQConstants.MQCMD_INQUIRE_Q);
+            cmd.addParameter(MQConstants.MQCA_Q_NAME, q.getName());
+            PCFMessage[] responses = agent.send(cmd);
+            Enumeration<?> e = responses[0].getParameters();
+            while (e.hasMoreElements()) {
+                PCFParameter parm = (PCFParameter) e.nextElement();
+                String name = parm.getParameterName().trim();
+                String value = parm.getStringValue().trim();
+                System.out.println("<" + name + ">" + value + "</" + name + ">");
+            }
+        } 
+        catch (PCFException e) { throw new RuntimeException(e); } 
+        catch (MQException e) {throw new RuntimeException(e); } 
+        catch (IOException e) {throw new RuntimeException(e); }
+    	return null;
+    }
+    
 	public MQQueue getQueue(String queuename, int options) {
 		String origQueuename="";
 		if (queuename.startsWith("queue://")) {
