@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import nl.duo.gft.filetransfer.SendGftMessageAction;
 
+import org.kisst.gft.LogService;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.admin.WritesHtml;
@@ -240,8 +241,10 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		listener.updateGuiErrors(name, errors++);
 		logger.debug("retrynummer {} van {}", trycount, filename);
 		if (trycount < maxNrofMoveTries) {
+			LogService.log("WARN", "failed_move", getFullName(), "poller", "failed to move file "+filename+" to "+moveToDir);
 			logger.warn(name + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt. Dit wordt later nog een keer geprobeerd.");
 		} else {
+			LogService.log("ERROR", "failed_move", getFullName(), "poller", "failed to move file "+filename+" to "+moveToDir);
 			logger.error(name + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt niet na " + trycount + " keer proberen.");
 			known.remove(filename); // Zodat het weer vanaf begin opnieuw gaat, maar er is wel en Error gegeven.
 		}
