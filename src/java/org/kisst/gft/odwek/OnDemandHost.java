@@ -80,7 +80,7 @@ public class OnDemandHost {
 	private class OnDemandConnectionFactory implements PoolableObjectFactory {
 		public Object makeObject() {
 			Properties props = new Properties();
-			props.setProperty(ODConfig.ODWEK_INSTALL_DIR, "odwek-8.5.0.5");
+			props.setProperty(ODConfig.ODWEK_INSTALL_DIR, "odwek-9.0.0.5");
 			try {
 				
 				ODConfig cfg = new ODConfig(ODConstant.PLUGIN, // AfpViewer
