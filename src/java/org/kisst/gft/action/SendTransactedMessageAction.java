@@ -92,8 +92,7 @@ public abstract class SendTransactedMessageAction implements Action, PollerJob.T
 		try {
 	    	if (getSession(fftask)==null)
 	    		prepareTransaction(fftask); // the session is not yet prepared
-	    	if (task.getVar(VAR_MESSAGE_SENT)==null)
-	    		sendMessage(fftask);
+    		sendMessage(fftask);
         	succesfull=true;
     	}
     	finally {
@@ -139,6 +138,9 @@ public abstract class SendTransactedMessageAction implements Action, PollerJob.T
 	}
 	
     public void sendMessage(FoundFileTask task) {
+        if ("true".equals(task.getVar(VAR_MESSAGE_SENT)))
+        	return;
+
         Session session = getSession(task);
         try {
             Destination destination = session.createQueue(queueName + qmgr.sendParams);
@@ -148,7 +150,6 @@ public abstract class SendTransactedMessageAction implements Action, PollerJob.T
             TextMessage message = session.createTextMessage();
 			message.setText(content);
             producer.send(message);
-            session.commit();
             task.setVar(VAR_MESSAGE_SENT, "true");
             logger.info("verzonden bericht \n {}", content);
         }
