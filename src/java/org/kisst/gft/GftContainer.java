@@ -17,6 +17,7 @@ import java.util.Set;
 import org.kisst.cfg4j.BooleanSetting;
 import org.kisst.cfg4j.CompositeSetting;
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
+import org.kisst.gft.action.Action;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.LocalCommandAction;
 import org.kisst.gft.action.SendMessageFromFileAction;
@@ -37,15 +38,16 @@ import org.kisst.http4j.HttpHostMap;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MultiListener;
+import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.util.CryptoUtil;
 import org.kisst.util.JamonUtil;
+import org.kisst.util.JamonUtil.JamonThread;
 import org.kisst.util.JarLoader;
+import org.kisst.util.JarLoader.ModuleInfo;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.TemplateUtil;
-import org.kisst.util.JamonUtil.JamonThread;
-import org.kisst.util.JarLoader.ModuleInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +74,7 @@ public class GftContainer implements HttpHostMap {
 	private final BasicHttpHostMap httpHosts;
 	
 	public final HashMap<String, TaskDefinition> channels= new LinkedHashMap<String, TaskDefinition>();
-	public final HashMap<String, Props>   actions= new LinkedHashMap<String, Props>();
+	private final HashMap<String, Class<?>>   actions= new LinkedHashMap<String, Class<?>>();
 	//public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	
 	public final ArrayList<StatusItem> statusItems =new ArrayList<StatusItem>();
@@ -107,9 +109,7 @@ public class GftContainer implements HttpHostMap {
 	}
 	
 	public void addAction(String name, Class<?> cls) {
-		SimpleProps props=new SimpleProps();
-		props.put("class", cls.getName());
-		actions.put(name, props);
+		actions.put(name, cls);
 	}
 	public GftContainer(String topname, File configfile) {
 		this.topname=topname;
@@ -220,15 +220,6 @@ public class GftContainer implements HttpHostMap {
 			listeners.put(lname, listener);
 			statusItems.add(new QueueStatus(listener.getQueueSystem(), listener.getQueue()));
 			statusItems.add(new QueueStatus(listener.getQueueSystem(), listener.getErrorQueue()));
-		}
-
-
-		if (props.hasKey("action")) {
-			Props actionProps=props.getProps("action");
-			for (String name: actionProps.keys()) {
-				Props p=actionProps.getProps(name);
-				actions.put(name, p);
-			}
 		}
 
 		Props channelProps=props.getProps("channel");
@@ -404,5 +395,46 @@ public class GftContainer implements HttpHostMap {
 		for (MultiListener l : listeners.values())
 			return l.getQueue();
 		throw new RuntimeException("No main queue defined");
+	}
+	
+	
+	
+	private LayeredProps getActionProps(Props channelprops, Class<?> clz, String actionname) {
+		LayeredProps lprops=new LayeredProps(this.props.getProps("global"));
+		SimpleProps top=new SimpleProps();
+		//top.put("action",taskdef.gft.actions.get(name));
+		top.put("channel",channelprops);
+		lprops.addLayer(top);
+		if (channelprops.get(clz.getSimpleName(),null) instanceof Props)
+			lprops.addLayer(channelprops.getProps(clz.getSimpleName()));
+
+		if (actionname!=null && channelprops.get(actionname,null) instanceof Props)
+			lprops.addLayer(channelprops.getProps(actionname));
+		lprops.addLayer(channelprops);
+		//lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
+		return lprops;
+	}
+
+	
+	public Action createAction(TaskDefinition taskdef, String actionname) {
+		return createAction(taskdef, actions.get(actionname), actionname);
+	}
+	public Action createAction(TaskDefinition taskdef, Class<?> cls) {
+		return createAction(taskdef, cls, null);
+	}
+	
+	private Action createAction(TaskDefinition taskdef, Class<?> clz, String actionname) {
+		if (clz==null)
+			throw new IllegalArgumentException("Unknown action name "+actionname+" when definining "+taskdef.getName());
+		Props actionprops=getActionProps(taskdef.getProps(), clz, actionname);
+		Constructor<?> c = ReflectionUtil.getFirstCompatibleConstructor(clz, new Class<?>[] {TaskDefinition.class, Props.class} );
+		if (c!=null)
+			return (Action) ReflectionUtil.createObject(c, new Object[] {taskdef, actionprops} );
+
+		c = ReflectionUtil.getConstructor(clz, new Class<?>[] {GftContainer.class, Props.class} );
+		if (c!=null)
+			return (Action) ReflectionUtil.createObject(c, new Object[] {this, actionprops} );
+		
+		return (Action) ReflectionUtil.createObject(clz);
 	}
 }

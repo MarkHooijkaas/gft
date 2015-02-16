@@ -10,7 +10,7 @@ public class HomeServlet extends TemplateServlet {
 
 	@Override protected void addContext(HashMap<String, Object> root) {
 		root.put("channels", gft.channels);
-		root.put("actions", gft.actions);
+		//root.put("actions", gft.actions);
 		root.put("listeners", gft.listeners);
 		root.put("pollers", gft.pollers);
 		root.put("modules", gft.getModuleInfo());

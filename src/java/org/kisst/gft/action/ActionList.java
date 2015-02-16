@@ -1,18 +1,13 @@
 package org.kisst.gft.action;
 
 import java.io.PrintWriter;
-import java.lang.reflect.Constructor;
 import java.util.LinkedHashMap;
 
-import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
-import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.Props;
-import org.kisst.props4j.SimpleProps;
-import org.kisst.util.ReflectionUtil;
 import org.kisst.util.ThreadUtil;
 import org.kisst.util.exception.BasicFunctionalException;
 import org.slf4j.Logger;
@@ -32,37 +27,35 @@ public class ActionList  implements Action, WritesHtml {
 	private final boolean retryNonFunctionalExceptions;
 
 	
-	public ActionList(BasicTaskDefinition taskdef, Props props) { this(taskdef, props, null); }
-	public ActionList(BasicTaskDefinition taskdef, Props props, String defaultAction) {
+	public ActionList(BasicTaskDefinition taskdef, String[] parts) {
+		Props props=taskdef.getProps();
 		this.taskdef=taskdef;
 		maxNrofTries = props.getInt("maxNrofTries", 3);
 		retryDelay = props.getLong("retryDelay", 30000);
 		boolean tmp = taskdef.gft.props.getBoolean("retryNonFunctionalExceptions", false); // TODO: better mechanism to globally define property
 		retryNonFunctionalExceptions = props.getBoolean("retryNonFunctionalExceptions", tmp);
-		String actions=props.getString("actions", defaultAction);
-		String[] parts=actions.split(",");
-		//this.actions=new Action[parts.length];
 		for (String name: parts) {
 			name=name.trim();
-			LayeredProps lprops=new LayeredProps(taskdef.gft.props.getProps("global"));
-			SimpleProps top=new SimpleProps();
-			//top.put("action",taskdef.gft.actions.get(name));
-			top.put("channel",props);
-			lprops.addLayer(top);
-			if (props.get(name,null) instanceof Props)
-				lprops.addLayer(props.getProps(name));
-			// TODO: the action layer is only needed for the class which is the only property in it.
-			// This could be simplified since no user defined actions are used any more
-			lprops.addLayer(taskdef.gft.actions.get(name));
-			lprops.addLayer(props);
-			//lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
-				
-			Action a=createAction(name, lprops);
+			Action a=createAction(name);
 			if (a==null)
 				throw new RuntimeException("Unknown action "+name);
 			this.actions.put(name,a);
 		}
 	}
+	
+	public static Action createAction(BasicTaskDefinition taskdef, Class<?> defaultActionClass) {
+		String actions=taskdef.getProps().getString("actions", null);
+		if (actions==null)
+			return taskdef.gft.createAction(taskdef, defaultActionClass);
+		String[] parts=actions.split(",");
+		if (parts.length==1) {
+			return taskdef.gft.createAction(taskdef,parts[0].trim());
+		}
+		else 
+			return new ActionList(taskdef, parts);
+	}
+	
+	
 	public boolean safeToRetry() { return false; } // TODO: 
 
 	public Object execute(Task task) {
@@ -126,42 +119,18 @@ public class ActionList  implements Action, WritesHtml {
 		return false;
 	}
 	
-	public Action createAction(String name, Props props) {
+	public Action createAction(String name) {
 		try {
-			return myCreateAction(props);
+			return taskdef.gft.createAction(taskdef, name);
 		}
 		catch (RuntimeException e) {
 			throw new RuntimeException("Error when creating action "+name+" in channel "+name,e);
 		}
 	}
 	
-	private  Action myCreateAction(Props props) {
-		String classname=props.getString("class",null);
-		if (classname==null)
-			throw new RuntimeException("No action class provided "+props);
-		if (classname.indexOf('.')<0)
-			classname="org.kisst.gft.action."+classname;
-		if (classname.startsWith(".")) // Prefix a class in the default package with a .
-			classname=classname.substring(1);
-		
-		Class<?> clz;
-		try {
-			clz= taskdef.gft.getSpecialClassLoader().loadClass(classname);
-		} catch (ClassNotFoundException e) { throw new RuntimeException(e); }
-		
-		
-		Constructor<?> c = ReflectionUtil.getFirstCompatibleConstructor(clz, new Class<?>[] {BasicTaskDefinition.class, Props.class} );
-		if (c!=null)
-			return (Action) ReflectionUtil.createObject(c, new Object[] {taskdef, props} );
 
-		c = ReflectionUtil.getConstructor(clz, new Class<?>[] {GftContainer.class, Props.class} );
-		if (c!=null)
-			return (Action) ReflectionUtil.createObject(c, new Object[] {taskdef.gft, props} );
-		
-		return (Action) ReflectionUtil.createObject(clz);		
-	}
-	@Override
-	public void writeHtml(PrintWriter out) {
+	
+	@Override public void writeHtml(PrintWriter out) {
 		out.println("<h2>Actions</h2>");
 		out.println("<table>");
 		//out.println("<tr><td>"+name+"</td><td>"+actions.get(name).toString()+"</td></tr>")

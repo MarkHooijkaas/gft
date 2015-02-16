@@ -3,8 +3,6 @@ package org.kisst.gft.poller;
 import java.io.PrintWriter;
 import java.util.HashMap;
 
-import nl.duo.gft.filetransfer.SendGftMessageAction;
-
 import org.kisst.gft.LogService;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
@@ -21,6 +19,8 @@ import org.slf4j.LoggerFactory;
 
 public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private static final Logger logger = LoggerFactory.getLogger(PollerJob.class);
+	private static Class<?> defaultAction=null; // TODO: better defaultAction
+	public static void setDefaultAcion(Class<?> defaultAction) { PollerJob.defaultAction=defaultAction; }
 	
 	public static interface Transaction {
 		public void prepareTransaction(FoundFileTask task);
@@ -58,12 +58,11 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	
 	private PollerJobListener listener = new DummyListener();
 
-
-	public PollerJob(Poller parent,Props props, FileServer fileserver) {
+	public PollerJob(Poller parent,Props props) {
 		super(parent.gft, props);
-		this.flow=new ActionList(this, props, "send_gft_message");
+		this.flow=ActionList.createAction(this, defaultAction);
 		this.parent=parent;
-		this.fileserver = fileserver;
+		this.fileserver = null; // TODO: remove
 		delay = props.getInt("delay", 10000);
 		dir = TemplateUtil.processTemplate(props.getString("pollerDirectory"),gft.getContext());
 		moveToDir = TemplateUtil.processTemplate(props.getString("moveToDirectory"),gft.getContext());
@@ -79,9 +78,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	}
 
 	@Override public Action getFlow() { return this.flow;}
-	public PollerJob(Poller parent,Props props) {
-		this(parent, props, null);
-	}
+
 
 	public FileServer getFileServer() { 
 		if (fileserver==null)
@@ -101,7 +98,6 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		if (fileserver != null)
 			fsconn = fileserver.openConnection();
 		try {
-			logger.info("pollForEntireDirectories = {}", pollForEntireDirectories);
 			pollOnce(fsconn);
 			listener.updateGuiStatus(name, false);
 		} finally {
@@ -130,7 +126,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	private void pollOnce(FileServerConnection fsconn) {
 		// Verwerking voor een bestand in een directory
-		logger.info("getting {}-list in directory {}", logname, dir);
+		logger.debug("getting {}-list in directory {}", logname, dir);
 		int tmpnrofIgnoredFiles=0;
 		int tmpnrofDetectedFiles=0;
 		for (String filename : fsconn.getDirectoryEntries(dir).keySet()) {
@@ -143,7 +139,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 				continue;
 			}
 			
-			logger.info(name+ " - {} {} gevonden, controleren tot er geen wijzigingen meer zijn.", logname, filename);
+			logger.info(getFullName()+ " - {} {} gevonden, controleren tot er geen wijzigingen meer zijn.", logname, filename);
 			if (isFileNotChangingAnymore(fsconn, filename))
 				processFile(fsconn, filename);
 		}
@@ -152,7 +148,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	}
 
 	private void processFile(FileServerConnection fsconn, String filename) {
-		logger.debug(name+" - {} {} is klaar om verplaatst te worden.",logname, dir + "/" + filename);
+		logger.info(getFullName()+" - {} {} is klaar om verplaatst te worden.",logname, dir + "/" + filename);
 		FoundFileTask task=null;
 		if (pollForEntireDirectories)
 			task=new FoundFileTask(gft, this, fsconn, dir + "/" + filename);
@@ -163,7 +159,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		boolean completed=false;
 		try {
 			tryToMove(fsconn, filename);
-			logger.info(name + " - "+logname+" " + filename + " is verplaatst naar " + moveToDir);
+			logger.info(getFullName() + " - "+logname+" " + filename + " is verplaatst naar " + moveToDir);
 			run(task);
 			completed = true;
 			known.remove(filename);
@@ -186,7 +182,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 			return true; // this file has been tried to move too many times (probably a file is in the way), it should not clog the logfile
 		}
 		if (fsconn.isDirectory(dir + "/" + filename) && ! pollForEntireDirectories){
-			logger.info("directory {} gevonden, deze wordt overgeslagen bij alleen file verwerking.", dir + "/" + filename);
+			logger.debug("directory {} gevonden, deze wordt overgeslagen bij alleen file verwerking.", dir + "/" + filename);
 			return true;
 		}
 		return false;
@@ -221,7 +217,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 			fsconn.move(dir + "/" + filename,	moveToDir + "/" + filename);
 		}
 		catch (RuntimeException e) { 
-			logger.warn("Could not move "+logname+" "+filename+" to " +moveToDir, e);
+			logger.warn(getFullName()+" Could not move "+logname+" "+filename+" to " +moveToDir, e);
 			rememberFailedMove(filename);
 			if (e instanceof FileCouldNotBeMovedException)
 				throw e;
@@ -242,10 +238,10 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		logger.debug("retrynummer {} van {}", trycount, filename);
 		if (trycount < maxNrofMoveTries) {
 			LogService.log("WARN", "failed_move", getFullName(), "poller", "failed to move file "+filename+" to "+moveToDir);
-			logger.warn(name + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt. Dit wordt later nog een keer geprobeerd.");
+			logger.warn(getFullName() + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt. Dit wordt later nog een keer geprobeerd.");
 		} else {
 			LogService.log("ERROR", "failed_move", getFullName(), "poller", "failed to move file "+filename+" to "+moveToDir);
-			logger.error(name + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt niet na " + trycount + " keer proberen.");
+			logger.error(getFullName() + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt niet na " + trycount + " keer proberen.");
 			known.remove(filename); // Zodat het weer vanaf begin opnieuw gaat, maar er is wel en Error gegeven.
 		}
 		retries.put(filename, trycount + 1);
@@ -259,10 +255,12 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	@Override public String getSrcDescription() { return dir; }
 	@Override public String getDestDescription() { return moveToDir;}
+	/*
 	public String getKanaalNaam() {
 		if (flow instanceof SendGftMessageAction)
 			return ((SendGftMessageAction)flow).getKanaalNaam();
 		else
 			return "";
 	}
+	*/
 }
