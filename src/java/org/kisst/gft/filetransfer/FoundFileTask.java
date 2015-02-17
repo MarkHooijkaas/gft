@@ -1,24 +1,23 @@
 package org.kisst.gft.filetransfer;
 
-import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
-import org.kisst.gft.poller.PollerJob.Transaction;
+import org.kisst.gft.action.Transaction;
+import org.kisst.gft.poller.PollerJob;
 import org.kisst.gft.task.BasicTask;
-import org.kisst.gft.task.TaskDefinition;
-import org.kisst.util.TemplateUtil;
 
 public class FoundFileTask extends BasicTask  {
 	
 	public final FileServerConnection fsconn;
 	public final String filename;
-	private final String basePath;
 	private final Transaction transaction;
+	private final PollerJob job;
+	private boolean inprogress=false;
 
-	public FoundFileTask(GftContainer gft, TaskDefinition taskdef, FileServerConnection fsconn, String filename) {
-		super(gft, taskdef);
+	public FoundFileTask(PollerJob taskdef, FileServerConnection fsconn, String filename) {
+		super(taskdef.gft, taskdef);
+		this.job=taskdef;
 		this.fsconn=fsconn;
 		this.filename = filename;
-        this.basePath = TemplateUtil.processTemplate(taskdef.getProps().getString("moveToDirectory"),gft.getContext());
         Action action = taskdef.getFlow();
         if (action instanceof Transaction)
         	transaction = (Transaction) action;
@@ -27,7 +26,25 @@ public class FoundFileTask extends BasicTask  {
 	}
 	@Override public String toString() { return toString(filename); }
 	
-	public String getFullPath() { return basePath + "/" + filename; }
+	public void moveToInProgress() throws FileCouldNotBeMovedException {
+		fsconn.move(getOrigPath(),	getInprogressPath());
+		inprogress=true;
+	}
+	public void deleteInProgressFile() throws FileCouldNotBeMovedException {
+		if (inprogress)
+			fsconn.deleteFile(getActivePath());
+		else
+			throw new RuntimeException("Trying to delete inprogress file that is not inprogress "+getActivePath());
+	}
+
+	public String getOrigPath() { return job.getDir() + "/" + filename; }
+	public String getInprogressPath() { return job.getMoveToDir() + "/" + filename; }
+	public String getActivePath() {
+		if (inprogress)
+			return getInprogressPath();
+		else
+			return getOrigPath();
+	}
 	
 	public void startTransaction() {
 		if (transaction!=null)

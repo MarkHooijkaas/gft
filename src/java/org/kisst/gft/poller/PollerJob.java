@@ -22,14 +22,6 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private static Class<?> defaultAction=null; // TODO: better defaultAction
 	public static void setDefaultAcion(Class<?> defaultAction) { PollerJob.defaultAction=defaultAction; }
 	
-	public static interface Transaction {
-		public void prepareTransaction(FoundFileTask task);
-		public void commitTransaction(FoundFileTask task);
-		public void rollbackTransaction(FoundFileTask task);
-	}
-
-	
-
 	private final Action flow;
 	private final Poller parent;
 	private final String dir;
@@ -151,14 +143,14 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		logger.info(getFullName()+" - {} {} is klaar om verplaatst te worden.",logname, dir + "/" + filename);
 		FoundFileTask task=null;
 		if (pollForEntireDirectories)
-			task=new FoundFileTask(gft, this, fsconn, dir + "/" + filename);
+			task=new FoundFileTask(this, fsconn, dir + "/" + filename);
 		else
-			task=new FoundFileTask(gft,this, fsconn, filename);
+			task=new FoundFileTask(this, fsconn, filename);
 		
 		task.startTransaction();
 		boolean completed=false;
 		try {
-			tryToMove(fsconn, filename);
+			tryToMove(task);
 			logger.info(getFullName() + " - "+logname+" " + filename + " is verplaatst naar " + moveToDir);
 			run(task);
 			completed = true;
@@ -170,7 +162,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 			if (completed) {
 				task.commit();
 				if (deleteInProgressFile)
-					fsconn.deleteFile(task.filename);
+					task.deleteInProgressFile();
 			}
 			else
 				task.rollback();
@@ -212,16 +204,16 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	}
 	
 	
-	private void tryToMove(FileServerConnection fsconn, String filename) throws FileCouldNotBeMovedException {
+	private void tryToMove(FoundFileTask task) throws FileCouldNotBeMovedException {
 		try {
-			fsconn.move(dir + "/" + filename,	moveToDir + "/" + filename);
+			task.moveToInProgress();
 		}
 		catch (RuntimeException e) { 
-			logger.warn(getFullName()+" Could not move "+logname+" "+filename+" to " +moveToDir, e);
-			rememberFailedMove(filename);
+			logger.warn(getFullName()+" Could not move "+logname+" "+task.filename+" to " +moveToDir, e);
+			rememberFailedMove(task.filename);
 			if (e instanceof FileCouldNotBeMovedException)
 				throw e;
-			throw new FileCouldNotBeMovedException(filename, e);
+			throw new FileCouldNotBeMovedException(task.filename, e);
 		}
 	}
 

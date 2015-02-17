@@ -23,26 +23,20 @@ import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FoundFileTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
-import org.kisst.util.TemplateUtil;
 
 public class SendMessageFromFileAction extends SendTransactedMessageAction {
 
-    private final String basePath;
+    public SendMessageFromFileAction(GftContainer gft, Props props) { super(gft, props); }
 
-    public SendMessageFromFileAction(GftContainer gft, Props props) {
-    	super(gft, props);
-        basePath = TemplateUtil.processTemplate(props.getString("moveToDirectory"),gft.getContext());
-    }
-
-	public void prepareTransaction(FoundFileTask task) {
+	@Override public void prepareTransaction(Task task) {
 		super.prepareTransaction(task);
 		sendMessage(task);
 	}
 	
     public Object execute(Task task) { return null; } // the message is already sent in the prepare statement
 	
-	@Override protected String getMessageContent(FoundFileTask task) {
-        String filename = basePath + "/" + task.filename;
-        return task.fsconn.getFileContentAsString(filename);
+	@Override protected String getMessageContent(Task task) {
+		FoundFileTask fftask=(FoundFileTask) task;
+        return fftask.fsconn.getFileContentAsString(fftask.getActivePath());
 	}
 }

@@ -27,7 +27,6 @@ import javax.jms.TextMessage;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FoundFileTask;
-import org.kisst.gft.poller.PollerJob;
 import org.kisst.gft.task.Task;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.JmsUtil;
@@ -52,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * or message is already sent it will not start over again.
  *
  */
-public abstract class SendTransactedMessageAction implements Action, PollerJob.Transaction {
+public abstract class SendTransactedMessageAction implements Action, Transaction {
 
     private static final String VAR_JMS_SESSION = "_jms_session";
     private static final String VAR_MESSAGE_SENT = "_message_sent";
@@ -71,15 +70,15 @@ public abstract class SendTransactedMessageAction implements Action, PollerJob.T
             throw new RuntimeException("No queue defined for action " + props.getLocalName());
     }
 
-    abstract String getMessageContent(FoundFileTask task);
+    abstract String getMessageContent(Task task);
     
     public boolean safeToRetry() {
         return false;
     }
 
-    private Session getSession(FoundFileTask task) { return (Session) task.getVar(VAR_JMS_SESSION); }
+    private Session getSession(Task task) { return (Session) task.getVar(VAR_JMS_SESSION); }
     
-	public void prepareTransaction(FoundFileTask task) {
+	@Override public void prepareTransaction(Task task) {
         try {
         	Session session = qmgr.getConnection().createSession(true, Session.SESSION_TRANSACTED);
         	task.setVar(VAR_JMS_SESSION, session);
@@ -104,7 +103,7 @@ public abstract class SendTransactedMessageAction implements Action, PollerJob.T
     	return null;
     }
 
-    public void commitTransaction(FoundFileTask task) {
+    @Override public void commitTransaction(Task task) {
         try {
         	Session sess=getSession(task);
         	if (sess!=null) {
@@ -115,7 +114,7 @@ public abstract class SendTransactedMessageAction implements Action, PollerJob.T
         catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
 	
-	public void rollbackTransaction(FoundFileTask task) {
+    @Override public void rollbackTransaction(Task task) {
         try {
         	Session sess=getSession(task);
         	if (sess!=null) {
@@ -126,7 +125,7 @@ public abstract class SendTransactedMessageAction implements Action, PollerJob.T
         catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
 	
-	private void closeSession(FoundFileTask task) {
+	private void closeSession(Task task) {
         Session session = getSession(task);
         try {
             if (session != null) {
@@ -137,7 +136,7 @@ public abstract class SendTransactedMessageAction implements Action, PollerJob.T
         catch (JMSException e) { throw JmsUtil.wrapJMSException(e); } 
 	}
 	
-    public void sendMessage(FoundFileTask task) {
+    public void sendMessage(Task task) {
         if ("true".equals(task.getVar(VAR_MESSAGE_SENT)))
         	return;
 
