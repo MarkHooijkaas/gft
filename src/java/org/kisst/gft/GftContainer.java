@@ -66,7 +66,7 @@ public class GftContainer implements HttpHostMap {
 	private final Settings settings;
 	private final String topname;
 	private final TaskStarter starter = new TaskStarter(); 
-	private final AdminServer admin=new AdminServer(this);
+	private final AdminServer admin;
 	public final Props props;
 	private final SimpleProps topProps;
 	private final boolean configBroken;
@@ -134,6 +134,7 @@ public class GftContainer implements HttpHostMap {
 		}
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
 		
+		admin=new AdminServer(this);	
 		jarloader=new JarLoader(settings.modules, topProps);
 		addDynamicModules(props);
 		loadModuleSpecificCryptoKey();
@@ -148,7 +149,6 @@ public class GftContainer implements HttpHostMap {
 			else
 				throw new RuntimeException("FATAL "+message);
 		}
-			
 	}
 	
 
