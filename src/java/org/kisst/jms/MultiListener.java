@@ -34,7 +34,17 @@ public class MultiListener implements Representable {
 		return count;
 	}
 	public boolean listening() { return listeners!=null; }
-	public String getQueue() { return listeners[0].queue; }
+	public String getName() { return name; }
+	public String getQueue(String name) {
+		if ("input".equals(name))
+			return getInputQueue();
+		else if ("error".equals(name))
+			return getErrorQueue();
+		else
+			throw new IllegalArgumentException("request queue "+name+" not allowed, only input or error allowed");
+	}
+	public String getQueue() { return getInputQueue(); }
+	public String getInputQueue() { return listeners[0].queue; }
 	public String getErrorQueue() { return listeners[0].errorqueue; }
 	//public String getRetryQueue() { return listeners[0].retryqueue; }
 	public String getRepresentation() { return props.toString(); }

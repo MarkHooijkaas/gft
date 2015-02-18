@@ -46,15 +46,7 @@ public class JmsMessageServlet extends BaseServlet {
 		Session session=null;
 		try {
 			session = lstnr.getQueueSystem().getConnection().createSession(true, Session.AUTO_ACKNOWLEDGE);
-			String q;
-			if ("input".equals(queuename))
-				q=lstnr.getQueue();
-			else if ("error".equals(queuename))
-				q=lstnr.getErrorQueue();
-			//else if ("retry".equals(queuename))
-			//	q=lstnr.getRetryQueue();
-			else
-				throw new RuntimeException("Invalid queuename "+queuename);
+			String q=lstnr.getQueue(queuename);
 
 			Queue destination = session.createQueue(q);
 			QueueBrowser browser = session.createBrowser(destination, "JMSMessageID = '"+msgid+"'");

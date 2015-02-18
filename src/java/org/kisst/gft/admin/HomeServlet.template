@@ -11,26 +11,6 @@ started on ${gft.startupTime?datetime}<br>
 
 <table> 
   <tr>
-    <td><b>STATUS</b></td>
-    <td><b>count</b></td>
-    <td><b>message</b></td>
-    <td><b>refresh</b></td>
-    <td><b>last Updated</b></td>
-  </tr>
-<#list statusItems as item>
-  <tr bgcolor="${item.color!"white"}">
-    <td>${item.name}</td>
-    <td>${item.problemCount}</td>
-    <td>${item.message!""}</td>
-    <td><a href="statusItem/${item.name}">REFRESH</a></td>
-    <td>${item.lastUpdated!""}</td>
-  </tr>
-</#list> 
-</table> 
-
-
-<table> 
-  <tr>
     <td><b>MODULE</b></td>
     <td><b>version</b></td>
     <td><b>main class</b></td>
@@ -43,6 +23,24 @@ started on ${gft.startupTime?datetime}<br>
   </tr>
 </#list> 
 </table> 
+<br/>
+<table> 
+  <tr>
+    <td><b>STATUS</b></td>
+    <td><b>count</b></td>
+    <td><b>message</b></td>
+    <td><b>last Updated</b></td>
+  </tr>
+<#list statusItems as item>
+  <tr bgcolor="${item.color!"white"}">
+    <td><a href="${item.url}">${item.name}</a></td>
+    <td>${item.problemCount}</td>
+    <td>${item.message!""}</td>
+    <td>${item.lastUpdated!""}</td>
+  </tr>
+</#list> 
+</table> 
+
 
 
 <h2>Channels</h2> 

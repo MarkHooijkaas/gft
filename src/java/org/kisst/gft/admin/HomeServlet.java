@@ -15,7 +15,7 @@ public class HomeServlet extends TemplateServlet {
 		root.put("pollers", gft.pollers);
 		root.put("modules", gft.getModuleInfo());
 		for (StatusItem item: gft.statusItems)
-			item.autoRefresh();
+			item.refresh();
 		root.put("statusItems", gft.statusItems);
 	}
 

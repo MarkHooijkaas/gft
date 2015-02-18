@@ -218,8 +218,8 @@ public class GftContainer implements HttpHostMap {
 			String queueSystemName = listenerprops.getString("queueSystem", "main");
 			MultiListener listener = new MultiListener(getQueueSystem(queueSystemName), starter, listenerprops, context);
 			listeners.put(lname, listener);
-			statusItems.add(new QueueStatus(listener.getQueueSystem(), listener.getQueue()));
-			statusItems.add(new QueueStatus(listener.getQueueSystem(), listener.getErrorQueue()));
+			statusItems.add(new QueueStatus(this, listener, "input"));
+			statusItems.add(new QueueStatus(this, listener, "error"));
 		}
 
 		Props channelProps=props.getProps("channel");
@@ -393,7 +393,7 @@ public class GftContainer implements HttpHostMap {
 
 	public String getMainQueue() {
 		for (MultiListener l : listeners.values())
-			return l.getQueue();
+			return l.getInputQueue();
 		throw new RuntimeException("No main queue defined");
 	}
 	

@@ -12,6 +12,7 @@ import org.eclipse.jetty.server.Request;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.handler.AbstractHandler;
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.StatusItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,6 +46,8 @@ public class AdminServer extends AbstractHandler {
         handlerMap.put("/reset", new ResetServlet(gft));
         //handlerMap.put("/shutdown", new ShutdownServlet(gft));
         handlerMap.put("/encrypt", new EncryptServlet(gft));
+        for (StatusItem item: gft.statusItems)
+        	handlerMap.put("/"+item.getUrl(), item);
         
         /*
         RestServlet rest=new RestServlet(gft, "/rest/");
