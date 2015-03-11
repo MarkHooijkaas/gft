@@ -14,7 +14,7 @@ public class ProblematicPollerFiles extends StatusItem {
 	}
 	@Override public void refresh() {
 		super.refresh();
-		int count=1;
+		int count=0;
 		String message="";
 		for (Poller poller: gft.pollers.values()) {
 			for (PollerJob job: poller.getJobs()) {
