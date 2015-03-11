@@ -108,14 +108,16 @@ public class Poller implements Runnable {
 				}
 				if (fileserver!=null)
 					fsconn.close();
-				sleeping=true;
-				Thread.sleep(interval);
-				sleeping=false;
 			} 
-			catch (InterruptedException e) { /*IGNORE*/ }
 			catch (Exception e) {
 				logger.error("error in poller "+getName(), e);
 			}
+			sleeping=true;
+			try {
+				Thread.sleep(interval);
+			}
+			catch (InterruptedException e) { /*IGNORE*/ }
+			sleeping=false;
 		}
 		logger.info("Stopped poller {}",name);
 		
