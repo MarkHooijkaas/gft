@@ -60,6 +60,7 @@ public class ActionExecutor {
 			mon2=MonitorFactory.start("channel:"+channelName+":action:"+name);
 			try {
 				tryToExecute(a, task);
+				done=true;
 			}
 			catch (RuntimeException e) {
 				if (e instanceof BasicFunctionalException) {
