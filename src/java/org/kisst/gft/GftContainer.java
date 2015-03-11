@@ -127,8 +127,6 @@ public class GftContainer implements HttpHostMap {
 		addAction("delete_local_file", DeleteLocalFileAction.class);
 		addAction("send_message_from_file",SendMessageFromFileAction.class);
 		
-		statusItems.add(new ProblematicPollerFiles(this));
-
 		try {
 			this.hostName= java.net.InetAddress.getLocalHost().getHostName();
 		}
@@ -149,6 +147,7 @@ public class GftContainer implements HttpHostMap {
 			else
 				throw new RuntimeException("FATAL "+message);
 		}
+		statusItems.add(new ProblematicPollerFiles(this));
 	}
 	
 
