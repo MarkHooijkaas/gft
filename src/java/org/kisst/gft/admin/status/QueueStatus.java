@@ -1,9 +1,9 @@
-package org.kisst.gft.admin;
+package org.kisst.gft.admin.status;
 
 import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.StatusItem;
+import org.kisst.gft.admin.ListenerServlet;
 import org.kisst.jms.MultiListener;
 import org.kisst.mq.QueueManager;
 
@@ -58,7 +58,6 @@ public class QueueStatus extends StatusItem {
 	
 	
 	@Override public void refresh() {
-		super.refresh();
 		this.problemCount=depth();
 	}
 

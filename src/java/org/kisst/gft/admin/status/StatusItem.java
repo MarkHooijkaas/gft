@@ -1,4 +1,4 @@
-package org.kisst.gft;
+package org.kisst.gft.admin.status;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -8,13 +8,14 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.kisst.gft.GftContainer;
 import org.kisst.gft.admin.BaseServlet;
 
 public abstract class StatusItem extends BaseServlet {
 	private final String name;
 	private final String description;
 
-	protected String timestamp;
+	private String timestamp;
 	protected int problemCount;
 	
 	protected StatusItem(GftContainer gft, String name) { this(gft, name, name); }
@@ -47,6 +48,8 @@ public abstract class StatusItem extends BaseServlet {
 	
 	@Override public void handle(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		System.out.println("call to "+getUrl());
+
 		if (getUser(request, response)==null)
 			return;
 		response.setContentType("text/html;charset=utf-8");

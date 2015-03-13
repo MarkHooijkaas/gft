@@ -6,7 +6,6 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -23,11 +22,11 @@ import org.kisst.gft.action.LocalCommandAction;
 import org.kisst.gft.action.SendMessageFromFileAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.admin.BaseServlet;
-import org.kisst.gft.admin.QueueStatus;
+import org.kisst.gft.admin.status.ProblematicPollerFiles;
+import org.kisst.gft.admin.status.QueueStatus;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileTransferModule;
 import org.kisst.gft.poller.Poller;
-import org.kisst.gft.poller.ProblematicPollerFiles;
 import org.kisst.gft.ssh.As400SshHost;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.ssh.WindowsSshHost;
@@ -77,7 +76,6 @@ public class GftContainer implements HttpHostMap {
 	private final HashMap<String, Class<?>>   actions= new LinkedHashMap<String, Class<?>>();
 	//public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
 	
-	public final ArrayList<StatusItem> statusItems =new ArrayList<StatusItem>();
 	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>(); 	 // TODO: make private
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String,JmsSystem> queueSystem = new LinkedHashMap<String,JmsSystem>();
@@ -147,7 +145,7 @@ public class GftContainer implements HttpHostMap {
 			else
 				throw new RuntimeException("FATAL "+message);
 		}
-		statusItems.add(new ProblematicPollerFiles(this));
+		admin.addStatusItem(new ProblematicPollerFiles(this));
 	}
 	
 
@@ -217,8 +215,8 @@ public class GftContainer implements HttpHostMap {
 			String queueSystemName = listenerprops.getString("queueSystem", "main");
 			MultiListener listener = new MultiListener(getQueueSystem(queueSystemName), starter, listenerprops, context);
 			listeners.put(lname, listener);
-			statusItems.add(new QueueStatus(this, listener, "input"));
-			statusItems.add(new QueueStatus(this, listener, "error"));
+			admin.addStatusItem(new QueueStatus(this, listener, "input"));
+			admin.addStatusItem(new QueueStatus(this, listener, "error"));
 		}
 
 		Props channelProps=props.getProps("channel");

@@ -1,12 +1,18 @@
 package org.kisst.gft.admin;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.StatusItem;
+import org.kisst.gft.admin.status.StatusItem;
 
 public class HomeServlet extends TemplateServlet {
-	public HomeServlet(GftContainer gft) { super(gft); }
+	private final ArrayList<StatusItem> statusItems;
+
+	public HomeServlet(GftContainer gft, ArrayList<StatusItem> statusItems) { 
+		super(gft);
+		this.statusItems=statusItems;
+	}
 
 	@Override protected void addContext(HashMap<String, Object> root) {
 		root.put("channels", gft.channels);
@@ -14,9 +20,7 @@ public class HomeServlet extends TemplateServlet {
 		root.put("listeners", gft.listeners);
 		root.put("pollers", gft.pollers);
 		root.put("modules", gft.getModuleInfo());
-		for (StatusItem item: gft.statusItems)
-			item.refresh();
-		root.put("statusItems", gft.statusItems);
+		root.put("statusItems", statusItems);
 	}
 
 }

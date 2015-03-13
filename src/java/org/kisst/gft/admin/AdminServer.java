@@ -1,21 +1,24 @@
 package org.kisst.gft.admin;
 
+import java.util.ArrayList;
+
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.StatusItem;
+import org.kisst.gft.admin.status.StatusItem;
 import org.kisst.servlet4j.ServletContainer;
 
 public class AdminServer extends ServletContainer {
 
 	private final GftContainer gft;
+	private final ArrayList<StatusItem> statusItems =new ArrayList<StatusItem>();
 
-	public AdminServer(GftContainer gft)
-	{
+	public AdminServer(GftContainer gft) {
 		super(gft.props);
 		this.gft=gft;
 	}
+	public void addStatusItem(StatusItem item) { statusItems.add(item); }
 	
 	@Override public void startListening() { 
-		addServlet("default", new HomeServlet(gft));
+		addServlet("default", new HomeServlet(gft, statusItems));
 		addServlet("/channel", new ChannelServlet(gft));
 		addServlet("/poller", new PollerServlet(gft));
 		addServlet("/dir", new DirectoryServlet(gft));
@@ -26,10 +29,11 @@ public class AdminServer extends ServletContainer {
 		addServlet("/reset", new ResetServlet(gft));
         //handlerMap.put("/shutdown", new ShutdownServlet(gft));
 		addServlet("/encrypt", new EncryptServlet(gft));
-        for (StatusItem item: gft.statusItems)
+        for (StatusItem item: statusItems)
         	addServlet("/"+item.getUrl(), item);
         
         super.startListening();
 	}
+
 
 }
