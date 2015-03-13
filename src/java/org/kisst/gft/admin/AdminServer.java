@@ -3,6 +3,9 @@ package org.kisst.gft.admin;
 import java.util.ArrayList;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.admin.status.InProgressPollerFiles;
+import org.kisst.gft.admin.status.NotListeningListenerThreads;
+import org.kisst.gft.admin.status.ProblematicPollerFiles;
 import org.kisst.gft.admin.status.StatusItem;
 import org.kisst.servlet4j.ServletContainer;
 
@@ -14,7 +17,11 @@ public class AdminServer extends ServletContainer {
 	public AdminServer(GftContainer gft) {
 		super(gft.props);
 		this.gft=gft;
+		addStatusItem(new ProblematicPollerFiles(gft));
+		addStatusItem(new InProgressPollerFiles(gft));
+		addStatusItem(new NotListeningListenerThreads(gft));
 	}
+
 	public void addStatusItem(StatusItem item) { statusItems.add(item); }
 	
 	@Override public void startListening() { 
