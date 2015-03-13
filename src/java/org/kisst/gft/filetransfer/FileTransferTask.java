@@ -17,6 +17,7 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 	
 	private final FileLocation src;
 	private final FileLocation dest;
+	private final FileLocation finaldest;
 	
 	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
 
@@ -37,6 +38,10 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 			throw new BasicFunctionalException("Filename ["+filename+"] is not allowed to contain .. pattern, , in channel "+channel.getName());
 		this.src=new FileLocation(channel.getSourceFile(), filename);
 		this.dest=new FileLocation(channel.getDestinationFile(), filename);
+		if (channel.getFinalDestinationFile()==null)
+			this.finaldest=null;
+		else
+			this.finaldest=new FileLocation(channel.getFinalDestinationFile(),filename);
 	}
 
 	abstract protected  String getFilename();
@@ -50,4 +55,5 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 
 	@Override public FileLocation getSourceFile() { return src;}
 	@Override public FileLocation getDestinationFile() { return dest; }
+	@Override public FileLocation getFinalDestinationFile() { return finaldest; }
 }

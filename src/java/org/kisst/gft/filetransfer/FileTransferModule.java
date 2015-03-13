@@ -9,6 +9,7 @@ import org.kisst.gft.filetransfer.action.CopyFile;
 import org.kisst.gft.filetransfer.action.DeleteSourceDirectoryIfEmpty;
 import org.kisst.gft.filetransfer.action.DeleteSourceFile;
 import org.kisst.gft.filetransfer.action.FixPermissions;
+import org.kisst.gft.filetransfer.action.MoveDestFileToFinalDestination;
 import org.kisst.gft.filetransfer.action.SftpGetAction;
 import org.kisst.gft.filetransfer.action.SftpPutAction;
 import org.kisst.gft.task.TaskDefinition;
@@ -35,6 +36,7 @@ public class FileTransferModule implements Module {
 		gft.addAction("fix_permissions",FixPermissions.class);
 		gft.addAction("sftp_get", SftpGetAction.class);
 		gft.addAction("sftp_put", SftpPutAction.class);
+		gft.addAction("move_to_final_dest", MoveDestFileToFinalDestination.class);
 	}
 
 	@Override public void reset(Props props) {}

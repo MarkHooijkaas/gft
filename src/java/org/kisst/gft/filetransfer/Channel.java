@@ -21,6 +21,7 @@ public abstract class Channel extends BasicTaskDefinition  implements SourceFile
 
 	private final FileLocation src; 
 	private final FileLocation dest; 
+	private final FileLocation finalDest; 
 	//public final SshFileServer src;
 	//public final SshFileServer dest;
 	//public final String srcdir;
@@ -33,6 +34,10 @@ public abstract class Channel extends BasicTaskDefinition  implements SourceFile
 		this.flow= ActionList.createAction(this, null);
 		this.src=new FileLocation(gft.getFileServer(props.getString("src.host")), props.getString("src.dir",  ""));
 		this.dest=new FileLocation(gft.getFileServer(props.getString("dest.host")), props.getString("dest.dir",  ""));
+		if (props.getString("finaldest.dir",  null)==null)
+			this.finalDest=null;
+		else
+			this.finalDest=new FileLocation(dest.getFileServer(), props.getString("finaldest.dir",  ""));
 
 		this.mode=props.getString("mode", "push");
 		if (!("pull".equals(mode) || "push".equals(mode)))
@@ -42,6 +47,7 @@ public abstract class Channel extends BasicTaskDefinition  implements SourceFile
 
 	@Override public FileLocation getSourceFile() { return src; }
 	@Override public FileLocation getDestinationFile() { return dest; }
+	@Override public FileLocation getFinalDestinationFile() { return finalDest; }
 
 	@Override public Action getFlow() { return this.flow;} 
 	public String getSrcDescription() {	return src.getShortString(); } // TODO:remove
