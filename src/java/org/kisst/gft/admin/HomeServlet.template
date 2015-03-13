@@ -93,8 +93,8 @@ started on ${gft.startupTime?datetime}<br>
   <td>${job.paused?string("PAUSED","active")}</td>
   <td>${job.numberOfDetectedFiles}</td>
   <td>${job.numberOfProblematicFiles}</td>
-  <td>${job.dir}</td>
-  <td>${job.moveToDir}</td>
+  <td><a href="/dir/${pollers[name].fileServer.name}/${job.dir}">${job.dir}</a></td>
+  <td><a href="/dir/${pollers[name].fileServer.name}/${job.moveToDir}">${job.moveToDir}</a></td>
   </tr>
 </#list> 
 </#list> 
