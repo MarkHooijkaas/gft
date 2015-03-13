@@ -66,16 +66,26 @@ public class ListenerServlet extends BaseServlet {
 
 			out.println("<h2>"+q+"</h2>");
 			out.println("<table>");
-			out.println("<tr><td><b>time</b></td><td><b>channel</b></td><td><b>id</b></td><td><b>action</b></td><td><b>error</b></td></tr>");
+			out.println("<tr><td><b>time</b></td><td><b>channel</b></td><td><b>msgid</b></td><td><b>info</b></td><td><b>action</b></td><td><b>error</b></td></tr>");
 			Queue destination = session.createQueue(q);
 			QueueBrowser browser = session.createBrowser(destination);
 			Enumeration<?> e = browser.getEnumeration();
+			int count=0;
 			while (e.hasMoreElements()) {
+				count++;
 				Message msg = (Message) e.nextElement();
 				String channel=msg.getStringProperty("state_CHANNEL");
 				String id=msg.getStringProperty("state_ID");
 
 				try {
+					if (id!=null && id.startsWith("msgid:ID:")) {
+						// fix: old messages were saved with their (original) messageid
+						int pos=id.indexOf(',');
+						if (pos>0 && pos+1<id.length())
+							id=id.substring(pos+1);
+						else
+							id="";
+					}
 					if (ControlMessage.isStartMessage(msg))
 						channel="Start message";
 					else if (ControlMessage.isStopMessage(msg))
@@ -84,24 +94,26 @@ public class ListenerServlet extends BaseServlet {
 						if (channel==null) {
 							// TODO: handle all type of messages
 							XmlNode xml=new XmlNode(((TextMessage)msg).getText()).getChild("Body").getChildren().get(0);
-							channel=xml.getChildText("kanaal");
+							channel="???"+xml.getChildText("kanaal")+"???";
 							id=xml.getChildText("bestand");
 						}
 					}
 				}
 				catch (RuntimeException ex) {
 					channel="Unknown format";
-					id=msg.getJMSMessageID();
 				}
+				String msgid=msg.getJMSMessageID();
 				out.println("<tr><td width=150> "+format.format(new Date(msg.getJMSTimestamp()))+"</td>");
 				out.println("<td>"+channel+"</td>");
-				out.println("<td><a href=\"/message/"+listener.getName()+"/"+qname+"/"+msg.getJMSMessageID()+"\">"+id+"</a></td>");
+				out.println("<td><a href=\"/message/"+listener.getName()+"/"+qname+"/"+msgid+"\">"+msgid+"</a></td>");
+				out.println("<td>"+id+"</td>");
 				out.println("<td>"+msg.getStringProperty("state_LAST_ACTION")+"</td>");
 				out.println("<td>"+msg.getStringProperty("state_LAST_ERROR")+"</td>");
 				out.println("</tr>");
 
 			}
 			out.println("</table>");
+			out.println("Found "+count+" messages");
 		}
 		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 		finally {

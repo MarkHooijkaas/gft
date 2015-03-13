@@ -19,6 +19,6 @@ public class JmsTask extends BasicTask implements TextTask {
 	@Override
 	public String getText() { return getJmsMessage().getData();} 
 	
-	@Override public String getIdentification() { return "msgid:"+msg.getMessageId(); }
+	@Override public String getIdentification() { return ""; }
 
 }

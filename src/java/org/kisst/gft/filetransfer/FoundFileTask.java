@@ -25,7 +25,8 @@ public class FoundFileTask extends BasicTask  {
         	transaction=null;
 	}
 	@Override public String toString() { return toString(filename); }
-	
+	@Override public String getIdentification() { return filename; }
+
 	public void moveToInProgress() throws FileCouldNotBeMovedException {
 		fsconn.move(getOrigPath(),	getInprogressPath());
 		inprogress=true;
