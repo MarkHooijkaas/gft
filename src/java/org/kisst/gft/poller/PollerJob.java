@@ -45,6 +45,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private int errors = 0;
 	private int nrofDetectedFiles=0;
 	private int nrofIgnoredFiles=0;
+	private int nrofInProgressFiles=0;
 	
 	public String currentFile;
 	
@@ -113,6 +114,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	public boolean isPaused() { return paused; }
 	public int getNumberOfDetectedFiles() { return nrofDetectedFiles; }
 	public int getNumberOfProblematicFiles() { return nrofIgnoredFiles; }
+	public int getNumberOfInProgressFiles() { return nrofInProgressFiles; }
 
 	public void setListener(PollerJobListener listener) { this.listener = listener; }
 
@@ -137,7 +139,12 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		}
 		this.nrofDetectedFiles=tmpnrofDetectedFiles;
 		this.nrofIgnoredFiles=tmpnrofIgnoredFiles;
+		try {
+			this.nrofInProgressFiles=fsconn.getDirectoryEntries(moveToDir).size()-2;
+		}
+		catch (Exception e) { this.nrofInProgressFiles=9999; } // signal problem (e.g. missing directory)
 	}
+	
 
 	private void processFile(FileServerConnection fsconn, String filename) {
 		logger.info(getFullName()+" - {} {} is klaar om verplaatst te worden.",logname, dir + "/" + filename);

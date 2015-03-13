@@ -22,7 +22,6 @@ import org.kisst.gft.action.LocalCommandAction;
 import org.kisst.gft.action.SendMessageFromFileAction;
 import org.kisst.gft.admin.AdminServer;
 import org.kisst.gft.admin.BaseServlet;
-import org.kisst.gft.admin.status.ProblematicPollerFiles;
 import org.kisst.gft.admin.status.QueueStatus;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileTransferModule;
@@ -145,7 +144,6 @@ public class GftContainer implements HttpHostMap {
 			else
 				throw new RuntimeException("FATAL "+message);
 		}
-		admin.addStatusItem(new ProblematicPollerFiles(this));
 	}
 	
 

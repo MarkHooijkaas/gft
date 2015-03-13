@@ -29,14 +29,12 @@ started on ${gft.startupTime?datetime}<br>
     <td><b>STATUS</b></td>
     <td><b>count</b></td>
     <td><b>message</b></td>
-    <td><b>last Updated</b></td>
   </tr>
 <#list statusItems as item>
   <tr bgcolor="${item.color!"white"}">
     <td><a href="${item.url}">${item.name}</a></td>
     <td>${item.problemCount}</td>
     <td>${item.message!""}</td>
-    <td>${item.lastUpdated!""}</td>
   </tr>
 </#list> 
 </table> 
