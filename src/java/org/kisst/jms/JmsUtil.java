@@ -8,7 +8,12 @@ import javax.jms.Message;
 import javax.jms.Session;
 import javax.jms.TextMessage;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class JmsUtil {
+	private final static Logger logger=LoggerFactory.getLogger(JmsUtil.class); 
+
 	public static Message cloneMessage(Session session, Message src ) {
 		try {
 			Message dest;
@@ -50,7 +55,11 @@ public class JmsUtil {
 				// Because we get a DetailedJMSException: JMSCMQ1006: The value for 'JMS_IBM_Character_Set':'IBM01140' is not valid.
 				// see http://pic.dhe.ibm.com/infocenter/wmqv7/v7r5/index.jsp?topic=%2Fcom.ibm.mq.mig.doc%2Fq001810_.htm
 				if (key.startsWith("JMS_IBM_Character_Set")) continue;
-				dest.setObjectProperty( key, src.getObjectProperty( key ) );
+				try {
+					dest.setObjectProperty( key, src.getObjectProperty( key ) );
+				}
+				catch (Exception e2) { logger.warn("could not set JMS property ["+key+"] to value ["+src.getObjectProperty(key)+"]",e2); }
+
 			} 
 			return dest;
 		}

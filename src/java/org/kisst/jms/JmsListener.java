@@ -369,8 +369,16 @@ public class JmsListener implements Runnable {
 				if (useJmsPropsForErrorMessages && e instanceof MappedStateException) {
 					try { ((MQQueue) errordestination).setTargetClient(JMSC.MQJMS_CLIENT_JMS_COMPLIANT); } catch (Exception e2) { /* ignore */}
 					MappedStateException me = (MappedStateException) e;
-					for (String key: me.getKeys()) 
-						errmsg.setStringProperty("state_"+key, me.getState(key));
+					for (String key: me.getKeys()) {
+						String value=null;
+						try{
+							value=me.getState(key);
+							if (value==null)
+								value="";
+							errmsg.setStringProperty("state_"+key, value);
+						}
+						catch (RuntimeException e2) { logger.warn("could not set JMS property ["+key+"] to value ["+value+"]",e2); }
+					}
 				}
 				producer.send(errmsg);
 				producer.close();
