@@ -129,10 +129,10 @@ public class GftContainer implements HttpHostMap {
 		}
 		catch (UnknownHostException e) { throw new RuntimeException(e); }
 		
-		admin=new AdminServer(this);	
 		jarloader=new JarLoader(settings.modules, topProps);
 		addDynamicModules(props);
 		loadModuleSpecificCryptoKey();
+		admin=new AdminServer(this);	
 		httpHosts = new BasicHttpHostMap(props.getProps("http.host"));
 		tempdir = props.getString("global.tempdir"); //MAYBE: provide default as working directory+"/temp"
 		configBroken=init();
