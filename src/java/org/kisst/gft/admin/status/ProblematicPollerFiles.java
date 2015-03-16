@@ -32,12 +32,14 @@ public class ProblematicPollerFiles extends StatusItem {
 	
 	@Override public void writeDetails(PrintWriter out) {
 		super.writeDetails(out);
-		out.write("<table><tr><td><b>Job</b></td><td><b>count</b></td></tr></h3>\n");
+		out.write("<table><tr><td><b>Poller</b></td><td><b>Job</b></td><td><b>dir</b></td><td><b>count</b></td></tr></h3>\n");
 		for (Poller poller: gft.pollers.values()) {
-			out.write("<h3>"+poller.getName()+"</h3>\n");
 			for (PollerJob job: poller.getJobs()) {
 				int tmp = job.getNumberOfProblematicFiles();
-				out.write("<tr><td>"+poller.getName()+"/"+job.name+"</td><td>"+tmp+"</td></tr>\n");
+				out.write("<tr><td>"+poller.getName()+"</td>");
+				out.write("<td>"+job.name+"</td>");
+				out.write("<td><a href=\"/dir/"+poller.getFileServer().getName()+"/"+job.getDir()+"\">"+job.getDir()+"</a></td>");
+				out.write("<td>"+tmp+"</td></tr>\n");
 			}
 		}
 		out.write("</table>\n");
