@@ -26,7 +26,7 @@ public class OptionalField implements OnDemandField {
 	public OptionalField(String name, Props props) {
 		this.name=name;
 		this.alias=props.getString("alias",name);
-		this.dateFormat = props.getString("dateFormat", "MM/dd/yy");
+		this.dateFormat = props.getString("dateFormat", "yyyy-MM-dd");
 		this.defaultValue = props.getString("defaultValue", null);
 	}
 
