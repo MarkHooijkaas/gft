@@ -24,6 +24,7 @@ import org.kisst.util.FileUtil;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.eclipse.jgit.pgm.Main;
 
 import com.ibm.mq.MQException;
 
@@ -78,12 +79,13 @@ public class GftRunner {
 	private static Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
 	private static Cli.StringOption encrypt = cli.stringOption("e","encrypt","key", null);
 	private static Cli.StringOption decrypt = cli.stringOption("d","decrypt","key", null);
+	private static Cli.SubCommand jgit =cli.subCommand("jgit", "run jgit CLI");
 
 	public static void main(String[] args) { main("gft", args); }
 	
 	public static void main(String topname, String[] args) {
 		config = cli.stringOption("c","config","configuration file", "config/"+topname+".properties");
-		cli.parse(args);
+		String[] newargs = cli.parse(args);
 		if (help.isSet()) {
 			showHelp();
 			return;
@@ -94,7 +96,12 @@ public class GftRunner {
 		SimpleProps props=new SimpleProps();
 		props.load(configfile);
 		props=(SimpleProps) props.getProps(topname);
-		if (keygen.isSet())
+		if (jgit.isSet()) {
+			if (System.getProperty("jgit.gitprefix")==null)
+				System.setProperty("jgit.gitprefix",props.getString("jgit.gitprefix","D:\\git"));
+			Main.main(newargs);
+		}
+		else if (keygen.isSet())
 			GenerateKey.generateKey(configfile.getParentFile().getAbsolutePath()+"/ssh/id_dsa_gft"); // TODO: should be from config file
 		else if (encrypt.get()!=null)
 			System.out.println(CryptoUtil.encrypt(encrypt.get()));
