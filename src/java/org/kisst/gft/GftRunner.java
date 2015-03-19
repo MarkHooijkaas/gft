@@ -2,6 +2,7 @@ package org.kisst.gft;
 
 import java.io.File;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.util.HashMap;
 
 import javax.jms.JMSException;
@@ -10,6 +11,9 @@ import javax.jms.MessageConsumer;
 import javax.jms.Session;
 
 import org.apache.log4j.PropertyConfigurator;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.Status;
+import org.eclipse.jgit.pgm.Main;
 import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.ssh.GenerateKey;
 import org.kisst.jms.ActiveMqSystem;
@@ -24,7 +28,6 @@ import org.kisst.util.FileUtil;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.eclipse.jgit.pgm.Main;
 
 import com.ibm.mq.MQException;
 
@@ -81,6 +84,7 @@ public class GftRunner {
 	private static Cli.StringOption decrypt = cli.stringOption("d","decrypt","key", null);
 	private static Cli.SubCommand jgit =cli.subCommand("jgit", "run jgit CLI");
 	private static Cli.SubCommand git =cli.subCommand("git", "run jgit CLI");
+	private static Cli.SubCommand backup =cli.subCommand("backup", "backup the config directory to git");
 
 	public static void main(String[] args) { main("gft", args); }
 	
@@ -101,6 +105,9 @@ public class GftRunner {
 			if (System.getProperty("jgit.gitprefix")==null)
 				System.setProperty("jgit.gitprefix",props.getString("jgit.gitprefix","D:\\git"));
 			Main.main(newargs);
+		}
+		else if (backup.isSet()) {
+			backup(newargs, props); 
 		}
 		else if (keygen.isSet())
 			GenerateKey.generateKey(configfile.getParentFile().getAbsolutePath()+"/ssh/id_dsa_gft"); // TODO: should be from config file
@@ -123,6 +130,65 @@ public class GftRunner {
 
 			System.out.println("GFT stopped");
 		}
+	}
+
+	private static void backup(String[] args, SimpleProps props) {
+		if (System.getProperty("jgit.gitprefix")==null)
+			System.setProperty("jgit.gitprefix",props.getString("jgit.gitprefix","D:\\git"));
+		try {
+			boolean newRepo=false;
+			if (! new File(".git").isDirectory()) {
+				System.out.println("No backup repository yet, will create a new git repository");
+				if (! new File(".gitignore").isFile()) {
+					System.out.println("No .gitignore file, will create default, ignoring logs and ssh keys");
+					PrintWriter writer = new PrintWriter(".gitignore", "UTF-8");
+					writer.println("config/ssh");
+					writer.println("logs");
+					writer.close();
+				}
+				newRepo=true;
+			}
+			Git git = Git.init().call();
+			Status status= git.status().call();
+			boolean newConfigFile=false;
+			for (String str: status.getUntracked()	) {
+				if (str.startsWith("config/")) {
+					System.out.println("New      "+str);
+					newConfigFile=true;
+				}
+			}
+			if (newConfigFile || newRepo || status.hasUncommittedChanges()) {
+				git.add().addFilepattern("config").call();
+				git.add().addFilepattern(".gitignore").call();
+				for (String str: status.getAdded())    { System.out.println("Added    "+str); }
+				for (String str: status.getChanged())  { System.out.println("Changed  "+str); }
+				for (String str: status.getMissing())  { System.out.println("Missing  "+str); }
+				for (String str: status.getModified()) { System.out.println("Modified "+str); }
+				for (String str: status.getRemoved())  { System.out.println("Removed  "+str); }
+				for (String str: status.getUncommittedChanges())  { System.out.println("Uncommitted  "+str); }
+				String comment = getGitComment(args);
+				if (comment.length()==0) 
+					System.out.println("Nothng backed up, commit is mandatory");
+				else {
+					for (String str: status.getMissing())  { git.rm().addFilepattern(str).call(); }
+					git.commit().setMessage(comment).call();
+				}
+			}
+			else
+				System.out.println("No changes to backup");
+		} 
+		catch (Exception e) { throw new RuntimeException(e); }
+	}
+
+	private static String getGitComment(String[] args) {
+		if (args.length==0) {
+			System.out.println("commit commentaar is verplicht, type een regel die beschrijft waarom of wat er veranderd is, b.v. een RFC nummer");
+			return System.console().readLine().trim();
+		}
+		String comment=args[0];
+		for (int i=1; i<args.length; i++)
+			comment+=" "+args[i];
+		return comment;
 	}
 
 	private static String getQueue(SimpleProps props) {
