@@ -80,6 +80,7 @@ public class GftRunner {
 	private static Cli.StringOption encrypt = cli.stringOption("e","encrypt","key", null);
 	private static Cli.StringOption decrypt = cli.stringOption("d","decrypt","key", null);
 	private static Cli.SubCommand jgit =cli.subCommand("jgit", "run jgit CLI");
+	private static Cli.SubCommand git =cli.subCommand("git", "run jgit CLI");
 
 	public static void main(String[] args) { main("gft", args); }
 	
@@ -96,7 +97,7 @@ public class GftRunner {
 		SimpleProps props=new SimpleProps();
 		props.load(configfile);
 		props=(SimpleProps) props.getProps(topname);
-		if (jgit.isSet()) {
+		if (jgit.isSet() || git.isSet()) {
 			if (System.getProperty("jgit.gitprefix")==null)
 				System.setProperty("jgit.gitprefix",props.getString("jgit.gitprefix","D:\\git"));
 			Main.main(newargs);
