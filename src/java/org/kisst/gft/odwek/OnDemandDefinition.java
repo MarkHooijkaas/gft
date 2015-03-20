@@ -8,6 +8,12 @@ import org.kisst.gft.admin.WritesHtml;
 import org.kisst.props4j.Props;
 
 public class OnDemandDefinition implements WritesHtml {
+	private static LinkedHashMap<String,OnDemandDefinition> standardDefinitions=new LinkedHashMap<String,OnDemandDefinition>();
+	public static void addStandardDefinition(String name, OnDemandDefinition def) { standardDefinitions.put(name, def); }
+	public static OnDemandDefinition getStandardDefinition(String application) { return standardDefinitions.get(application);}
+	public static Set<String> getStandardDefinitionNames() { return standardDefinitions.keySet(); } 
+
+	
 	public final String odfolder;
 	public final String odapplgroup;
 	public final String odapplication;
@@ -20,24 +26,39 @@ public class OnDemandDefinition implements WritesHtml {
 		this.odapplication=odapplication;
 	}
 
-	public OnDemandDefinition(Props props) {
-		this(props.getString("folder"),  props.getString("applgroup"),  props.getString("application"));
-		addFields(props);
-	}
-
+	public OnDemandDefinition(Props props) { this(null, props); }
+	public OnDemandDefinition(OnDemandDefinition def) { this(def,null); }
 	public OnDemandDefinition(OnDemandDefinition def, Props props) {
-		addFields(def);
 		if (props==null) {
+			if (def==null)
+				throw new IllegalArgumentException("OnDemandDefintion should have non-null props or default definition");
 			this.odfolder=def.odfolder;
 			this.odapplgroup=def.odapplgroup;
 			this.odapplication=def.odapplication;
 		}
 		else {
-			this.odfolder=props.getString("folder",def.odfolder); 
-			this.odapplgroup=props.getString("applgroup", def.odapplgroup); 
-			this.odapplication=props.getString("application",def.odapplication);
-			addFields(props);
+			String defName = props.getString("standardDefinition",null);
+			if (defName!=null) {
+				def=getStandardDefinition(defName);
+				if (def==null)
+					throw new RuntimeException("Unknown name ["+defName+"] for standard OnDemand definition "+props.getFullName());
+			}
+			if (def==null) {
+				this.odfolder=props.getString("folder"); 
+				this.odapplgroup=props.getString("applgroup"); 
+				this.odapplication=props.getString("application");
+			}
+			else {
+				this.odfolder=props.getString("folder",def.odfolder); 
+				this.odapplgroup=props.getString("applgroup", def.odapplgroup); 
+				this.odapplication=props.getString("application",def.odapplication);
+
+			}
 		}
+		if (def!=null)
+			addFields(def);
+		if (props!=null)
+			addFields(props);
 	}
 	
 	public OnDemandDefinition addField(String name, OnDemandField f) { fields.put(name, f); return this; }
