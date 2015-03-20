@@ -373,6 +373,7 @@ public class GftContainer implements HttpHostMap {
 		
 	}
 
+	public void registerDefinitionType(Class<?> cls, Module module) { registerDefinitionType(cls.getClass().getSimpleName(), module); }
 	public void registerDefinitionType(String name, Module module) {
 		if (channelTypes.get(name)!=null)
 			throw new RuntimeException("TaskDefinitionType "+name+" is already registerd to module "+channelTypes.get(name)+" when trying to register it for module "+module);
