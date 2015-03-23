@@ -12,7 +12,6 @@ import org.kisst.gft.filetransfer.action.FixPermissions;
 import org.kisst.gft.filetransfer.action.MoveDestFileToFinalDestination;
 import org.kisst.gft.filetransfer.action.SftpGetAction;
 import org.kisst.gft.filetransfer.action.SftpPutAction;
-import org.kisst.gft.task.TaskDefinition;
 import org.kisst.props4j.Props;
 
 public class FileTransferModule implements Module {
@@ -40,10 +39,4 @@ public class FileTransferModule implements Module {
 	}
 
 	@Override public void reset(Props props) {}
-
-	@Override
-	public TaskDefinition createDefinition(String type, Props props) {
-		throw new RuntimeException("Cannot creat channel of type "+type); // this should never happen
-	}
-
 }

@@ -79,7 +79,7 @@ public class GftContainer implements HttpHostMap {
 	public final HashMap<String, MultiListener>  listeners= new LinkedHashMap<String, MultiListener>();
 	private final HashMap<String,JmsSystem> queueSystem = new LinkedHashMap<String,JmsSystem>();
 	private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
-	private final HashMap<String, Module > channelTypes=new LinkedHashMap<String, Module>();
+	private final HashMap<String, Constructor<?>> channelTypes=new LinkedHashMap<String, Constructor<?>>();
 	private final SimpleProps context = new SimpleProps();
 	public final HashMap<String, Poller> pollers= new LinkedHashMap<String, Poller>();
 	private final String hostName;
@@ -221,18 +221,7 @@ public class GftContainer implements HttpHostMap {
 		for (String name: channelProps.keys()) {
 			Props p=channelProps.getProps(name);
 			try {
-				String type2=p.getString("type","Default");
-				Module mod=channelTypes.get(type2);
-				if (mod==null) {
-					String typenames="";
-					String komma="";
-					for (String name2: channelTypes.keySet()) {
-						typenames+=komma+name2;
-						komma=",";
-					}
-					throw new RuntimeException("Unknown Channel type in channel "+name+": "+type2+" only the following types are allowed "+typenames);
-				}
-				TaskDefinition channel = mod.createDefinition(type2, p);
+				TaskDefinition channel = createChannel(name, p);
 				channels.put(name, channel);
 			}
 			catch (RuntimeException e) {
@@ -273,6 +262,23 @@ public class GftContainer implements HttpHostMap {
 				logger.info("Listener {}\t{}",name,listeners.get(name));
 		}
 		return configBroken;
+	}
+
+
+	private TaskDefinition createChannel(String name, Props props) {
+		String type=props.getString("type","Default");
+		Constructor<?> cons=channelTypes.get(type);
+		if (cons==null) {
+			String typenames="";
+			String komma="";
+			for (String name2: channelTypes.keySet()) {
+				typenames+=komma+name2;
+				komma=",";
+			}
+			throw new RuntimeException("Unknown Channel type in channel "+name+": "+type+" only the following types are allowed "+typenames);
+		}
+		TaskDefinition channel = (TaskDefinition) ReflectionUtil.createObject(cons, new Object[] {this, props} );
+		return channel;
 	}
 	public TaskDefinition getTaskDefinition(String name) { return channels.get(name); }
 	public String processTemplate(File template, Object context) { return TemplateUtil.processTemplate(template, context); }
@@ -373,11 +379,12 @@ public class GftContainer implements HttpHostMap {
 		
 	}
 
-	public void registerDefinitionType(Class<?> cls, Module module) { registerDefinitionType(cls.getClass().getSimpleName(), module); }
-	public void registerDefinitionType(String name, Module module) {
+	public void registerDefinitionType(Class<?> cls) { registerDefinitionType(cls.getSimpleName(), cls); }
+	public void registerDefinitionType(String name, Class<?> cls) {
 		if (channelTypes.get(name)!=null)
-			throw new RuntimeException("TaskDefinitionType "+name+" is already registerd to module "+channelTypes.get(name)+" when trying to register it for module "+module);
-		channelTypes.put(name, module);
+			throw new RuntimeException("TaskDefinitionType "+name+" is already registerd to class "+channelTypes.get(name)+" when trying to register it for class "+cls);
+		Constructor<?> cons = ReflectionUtil.getConstructor(cls, new Class<?>[] { GftContainer.class, Props.class} );
+		channelTypes.put(name, cons);
 	}
 	
 	public void appendJmsTaskCreator(JmsTaskCreator creator) {starter.appendCreator(creator); }
