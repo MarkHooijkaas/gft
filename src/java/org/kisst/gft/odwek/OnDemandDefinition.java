@@ -37,7 +37,7 @@ public class OnDemandDefinition implements WritesHtml {
 			this.odapplication=def.odapplication;
 		}
 		else {
-			String defName = props.getString("standardDefinition",null);
+			String defName = props.getString("definition",null);
 			if (defName!=null) {
 				def=getStandardDefinition(defName);
 				if (def==null)
