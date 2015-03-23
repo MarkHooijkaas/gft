@@ -266,6 +266,9 @@ public class GftContainer implements HttpHostMap {
 
 
 	private TaskDefinition createChannel(String name, Props props) {
+		//LayeredProps lprops=new LayeredProps(this.props.getProps("global"));
+		//lprops.addLayer(props);
+
 		String type=props.getString("type","Default");
 		Constructor<?> cons=channelTypes.get(type);
 		if (cons==null) {

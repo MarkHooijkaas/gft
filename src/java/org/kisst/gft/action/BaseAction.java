@@ -19,42 +19,17 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.action;
 
-import org.kisst.gft.filetransfer.action.DestinationFile;
-import org.kisst.gft.filetransfer.action.SourceFile;
-import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.props4j.Props;
 import org.kisst.util.ReflectionUtil;
 
 public abstract class BaseAction implements Action {
 	private final boolean safeToRetry;
-	private final BasicTaskDefinition taskdef;
-	private final String[] stringFields;
 	
-	public BaseAction(BasicTaskDefinition taskdef, Props props, String... fields) {
-		this.taskdef=taskdef;
+	public BaseAction(Props props) {
 		this.safeToRetry = props.getBoolean("safeToRetry", true);
-		this.stringFields=fields;
-		
 	}
-	public BasicTaskDefinition getTaskDef() { return taskdef; }
 	public boolean safeToRetry() { return safeToRetry; }
 	
-	protected String[] getStringFields() { return stringFields;}
-	@Override public String toString() { return ReflectionUtil.toString(this,getStringFields());}
-	
-	static protected String getSourceField(BasicTaskDefinition taskdef) {
-		if (taskdef instanceof SourceFile) {
-			SourceFile src=(SourceFile) taskdef;
-			return "from:"+src.getSourceFile();
-		}
-		return null;
-	}
-
-	static protected String getDestField(BasicTaskDefinition taskdef) {
-		if (taskdef instanceof DestinationFile) {
-			DestinationFile dest=(DestinationFile) taskdef;
-			return "to:"+dest.getDestinationFile();
-		}
-		return null;
-	}
+	//@Override public String toString() { return this.getClass().getSimpleName()+"()";}
+	@Override public String toString() { return ReflectionUtil.toString(this);}
 }

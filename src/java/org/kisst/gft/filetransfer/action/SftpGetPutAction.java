@@ -21,7 +21,6 @@ package org.kisst.gft.filetransfer.action;
 
 import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.filetransfer.FileServerConnection;
-import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
@@ -31,8 +30,8 @@ public class SftpGetPutAction extends BaseAction {
 	private final static Logger logger=LoggerFactory.getLogger(SftpGetPutAction.class);
 
 	private final boolean resumeAllowed;
-	public SftpGetPutAction(BasicTaskDefinition taskdef, Props props) { 
-		super(taskdef, props, getSourceField(taskdef));
+	public SftpGetPutAction(Props props) { 
+		super(props);
 		this.resumeAllowed=props.getBoolean("resumeAllowed", true);
 	}
 

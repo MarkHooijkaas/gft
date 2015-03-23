@@ -35,6 +35,7 @@ public class BasicLinearFlow {
 		retryDelay = props.getLong("retryDelay", 30000);
 		retryNonFunctionalExceptions = props.getBoolean("retryNonFunctionalExceptions", false);
 	}
+	public Props getProps() { return props; }
 	public boolean safeToRetry() { 
 		for (Action a: actions.values()) {
 			if (! a.safeToRetry())
@@ -146,6 +147,9 @@ public class BasicLinearFlow {
 		Constructor<?> c=ReflectionUtil.getConstructor(clz, new Class<?>[] {BasicLinearFlow.class, Props.class} );
 		if (c!=null)
 			return (Action) ReflectionUtil.createObject(c, new Object[] {this, props} );
+		c=ReflectionUtil.getConstructor(clz, new Class<?>[] {Props.class} );
+		if (c!=null)
+			return (Action) ReflectionUtil.createObject(c, new Object[] {props} );
 		return (Action) ReflectionUtil.createObject(clz);
 	}
 

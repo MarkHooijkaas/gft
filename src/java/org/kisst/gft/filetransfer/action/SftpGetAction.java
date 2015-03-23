@@ -22,7 +22,6 @@ package org.kisst.gft.filetransfer.action;
 import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.task.BasicTask;
-import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
@@ -31,8 +30,8 @@ import org.slf4j.LoggerFactory;
 public class SftpGetAction extends BaseAction {
 	private final static Logger logger=LoggerFactory.getLogger(SftpGetAction.class);
 
-	public SftpGetAction(BasicTaskDefinition taskdef, Props props) { 
-		super(taskdef, props, getSourceField(taskdef));
+	public SftpGetAction(Props props) { 
+		super(props);
 	}
 
 

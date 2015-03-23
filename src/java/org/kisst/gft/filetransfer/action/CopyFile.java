@@ -5,12 +5,11 @@ import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.filetransfer.FileLocation;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.ssh.SshFileServer;
-import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 
 public class CopyFile extends BaseAction {
-	public CopyFile(BasicTaskDefinition taskdef, Props props) { super(taskdef, props); }
+	public CopyFile(Props props) { super(props); }
 
 	public boolean safeToRetry() { return true; }
 

@@ -7,32 +7,26 @@ import org.kisst.flow4j.BasicLinearFlow;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.admin.WritesHtml;
-import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.Props;
 import org.kisst.util.ReflectionUtil;
 
 public class BasicGftFlow extends BasicLinearFlow implements Action, WritesHtml {
-	private final BasicTaskDefinition taskdef;
-	public BasicGftFlow(BasicTaskDefinition taskdef, Props props) { 
-		super(createChannelProps(taskdef.gft,props));
-		this.taskdef=taskdef;
+	private final GftContainer gft;
+	public BasicGftFlow(GftContainer gft, Props props) { 
+		super(props);
+		this.gft=gft;
 	}
-	public BasicTaskDefinition getTaskDef() { return taskdef; }
-	public GftContainer getGft() { return taskdef.gft; }
-	private static Props createChannelProps(GftContainer gft, Props props) {
-		LayeredProps lprops=new LayeredProps(gft.props.getProps("global"));
-		lprops.addLayer(props);
-		return lprops;
-	}
+	//public BasicTaskDefinition getTaskDef() { return taskdef; }
+	public GftContainer getGft() { return gft; }
 	
-	protected Action myCreateAction(Class<?> clz, Props props) {
-		Constructor<?> c=ReflectionUtil.getFirstCompatibleConstructor(clz, new Class<?>[] {BasicTaskDefinition.class, Props.class} );
-		if (c!=null)
-			return (Action) ReflectionUtil.createObject(c, new Object[] {taskdef, props} );
+	@Override protected Action myCreateAction(Class<?> clz, Props props) {
+		//Constructor<?> c=ReflectionUtil.getFirstCompatibleConstructor(clz, new Class<?>[] {BasicTaskDefinition.class, Props.class} );
+		//if (c!=null)
+		//	return (Action) ReflectionUtil.createObject(c, new Object[] {taskdef, props} );
 
-		c=ReflectionUtil.getConstructor(clz, new Class<?>[] {GftContainer.class, Props.class} );
+		Constructor<?> c=ReflectionUtil.getConstructor(clz, new Class<?>[] {GftContainer.class, Props.class} );
 		if (c!=null)
-			return (Action) ReflectionUtil.createObject(c, new Object[] {taskdef.gft, props} );
+			return (Action) ReflectionUtil.createObject(c, new Object[] {gft, props} );
 		return super.myCreateAction(clz, props); 
 	}
 	

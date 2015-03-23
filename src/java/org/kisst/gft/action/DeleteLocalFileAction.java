@@ -22,7 +22,6 @@ package org.kisst.gft.action;
 import java.io.File;
 
 import org.kisst.gft.task.BasicTask;
-import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
@@ -32,7 +31,7 @@ public class DeleteLocalFileAction extends BaseAction {
 	private final static Logger logger=LoggerFactory.getLogger(DeleteLocalFileAction.class);
 
 	
-	public DeleteLocalFileAction(BasicTaskDefinition taskdef, Props props) { super(taskdef, props); }
+	public DeleteLocalFileAction(Props props) { super(props); }
         
 	public Object execute(Task task) {
 		BasicTask ft= (BasicTask) task;

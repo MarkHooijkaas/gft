@@ -23,6 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 public class ReflectionUtil {
 
@@ -117,11 +118,8 @@ public class ReflectionUtil {
 		return createObject(findClass(classname), args);
 	}
 	public static Object createObject(Class<?> c, Object[] args) {
-		try {
-			Constructor<?> cons= c.getConstructor(getSignature(args));
-			return createObject(cons,args);
-		}
-		catch (NoSuchMethodException e) { throw new RuntimeException(e); } 
+		Constructor<?> cons= getFirstCompatibleConstructor(c,getSignature(args));
+		return createObject(cons,args);
 	}
 			
 	public static Object createObject(Constructor<?> cons, Object[] args) {
@@ -170,15 +168,17 @@ public class ReflectionUtil {
 		if (obj instanceof Number)
 			return obj.toString();
 		if (depth<0)
-			return obj.toString();
+			return obj.getClass().getSimpleName()+"()";
 		depth--;
 		StringBuilder result= new StringBuilder();
-		result.append(obj.getClass().getCanonicalName()+")");
+		result.append(obj.getClass().getSimpleName()+"(");
 		String sep="";
 		for (Field field : obj.getClass().getFields()) {
 			try {
-				result.append(sep+field.getName()+"="+field.get(toString(obj, depth)));
-				sep=", ";
+				if ( (field.getModifiers()&Modifier.STATIC)==0) {
+					result.append(sep+field.getName()+"="+field.get(toString(obj, depth)));
+					sep=", ";
+				}
 			} 
 			catch (IllegalArgumentException e) { throw new RuntimeException(e);} 
 			catch (IllegalAccessException e) { throw new RuntimeException(e);}

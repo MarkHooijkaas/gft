@@ -3,13 +3,12 @@ package org.kisst.gft.filetransfer.action;
 import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.filetransfer.FileLocation;
 import org.kisst.gft.filetransfer.FileServerConnection;
-import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.kisst.util.exception.BasicFunctionalException;
 
 public class MoveDestFileToFinalDestination extends BaseAction {
-	public MoveDestFileToFinalDestination(BasicTaskDefinition taskdef, Props props) { super(taskdef, props); }
+	public MoveDestFileToFinalDestination(Props props) { super(props); }
 
 	public class Problem extends BasicFunctionalException {
 		private static final long serialVersionUID = 1L;

@@ -6,12 +6,11 @@ import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.filetransfer.FileLocation;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileServerConnection.FileAttributes;
-import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 
 public class DeleteSourceDirectoryIfEmpty extends BaseAction {
-	public DeleteSourceDirectoryIfEmpty(BasicTaskDefinition taskdef, Props props) { super(taskdef, props); }
+	public DeleteSourceDirectoryIfEmpty(Props props) { super(props); }
 
 	public boolean safeToRetry() { return true; }
 
