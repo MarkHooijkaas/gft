@@ -4,6 +4,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 
 
@@ -20,7 +21,7 @@ public class OptionalField implements OnDemandField {
 		this.name=name;
 		this.alias=name;
 		this.defaultValue=defaultValue;
-		this.dateFormat="MM/dd/yy";
+		this.dateFormat="yyyy-MM-dd";
 	}
 
 	public OptionalField(String name, Props props) {
@@ -32,8 +33,8 @@ public class OptionalField implements OnDemandField {
 
 	
 	@Override public String getName() { return name; } 
-	@Override public String getValue(OnDemandTask task) {
-		Object result= task.getOnDemandFieldValue(alias);
+	@Override public String getValue(Task task) {
+		Object result= task.getFieldValue(alias);
 		if (result instanceof Date) {
 			DateFormat date2odwek = new SimpleDateFormat(dateFormat);
 			result = date2odwek.format((Date) result);

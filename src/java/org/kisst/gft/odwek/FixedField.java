@@ -1,5 +1,7 @@
 package org.kisst.gft.odwek;
 
+import org.kisst.gft.task.Task;
+
 
 public class FixedField implements OnDemandField {
 	private final String name;
@@ -10,6 +12,6 @@ public class FixedField implements OnDemandField {
 		this.fixedValue=fixedValue;
 	}
 	@Override public String getName() { return name; } 
-	@Override public String getValue(OnDemandTask task) { return fixedValue; }
+	@Override public String getValue(Task task) { return fixedValue; }
 	@Override public String toString() { return "FixedValue("+fixedValue+")"; }
 }

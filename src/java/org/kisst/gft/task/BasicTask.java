@@ -53,6 +53,7 @@ public class BasicTask implements Task {
 	public String getLastAction() { return lastAction; }
 	public void setLastAction(String act) {	this.lastAction=act; }
 
+	@Override public Object getFieldValue(String name) { throw new RuntimeException("getFieldValue not implemented for "+this.getClass()); }
 	public Object getVar(String name) { return vars.get(name,null); }
 	public String getStringVar(String name) { 
 		Object result = vars.get(name,null);
