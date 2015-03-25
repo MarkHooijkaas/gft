@@ -97,7 +97,15 @@ public class GftRunner {
 		}
 		CryptoUtil.setKey("-P34{-[u-C5x<I-v'D_^{79'3g;_2I-P_L0£_j3__5`y§%M£_C");
 		File configfile=new File(config.get());
-		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
+		try {
+			PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
+		}
+		catch (UnsatisfiedLinkError e) { // TODO: a bit of a hack to prevent log4j Link error
+			if (backup.isSet() || jgit.isSet() || git.isSet())
+				System.out.println("WARNING: could not initialize log4j properly:"+e.getMessage());
+			else
+				throw e;
+		}
 		SimpleProps props=new SimpleProps();
 		props.load(configfile);
 		props=(SimpleProps) props.getProps(topname);
