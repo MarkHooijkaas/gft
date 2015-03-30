@@ -101,7 +101,8 @@ public class GftRunner {
 			PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
 		}
 		catch (UnsatisfiedLinkError e) { // TODO: a bit of a hack to prevent log4j Link error
-			if (backup.isSet() || jgit.isSet() || git.isSet())
+			System.out.println("Linking Error initializing log4j, probably you should execute \"set PATH=%PATH%;lib\"");
+			if (backup.isSet() || jgit.isSet() || git.isSet() | mvmsg.isSet() | delmsg.isSet() | putmsg.isSet() | encrypt.isSet() | decrypt.isSet())
 				System.out.println("WARNING: could not initialize log4j properly:"+e.getMessage());
 			else
 				throw e;
