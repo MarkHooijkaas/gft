@@ -29,15 +29,18 @@ public class DirectoryServlet extends BaseServlet {
 		//response.setStatus(HttpServletResponse.SC_OK);
 		PrintWriter out = response.getWriter();
 		String url=request.getRequestURI();
+		String path="";
+		if (! url.endsWith("/"))
+			path=url.substring(url.lastIndexOf('/')+1)+"/";
 		String name=url.substring("/dir/".length());
 		int pos=name.indexOf("/");
 		String dir="";
 		if (pos>0) {
 			dir=name.substring(pos+1);
 			name=name.substring(0,pos);
-			if (name.endsWith(":"))
-				name=name.substring(0,pos-1);
 		}
+		if (name.endsWith(":"))
+			name=name.substring(0,pos-1);
 		if (dir.length()>1024)
 			throw new BasicFunctionalException("Dirname length should not exceed 1024 characters");
 		if (! validCharacters.matcher(dir).matches())
@@ -45,7 +48,7 @@ public class DirectoryServlet extends BaseServlet {
 		if (dir.indexOf("..")>=0)
 			throw new BasicFunctionalException("Dirname ["+dir+"] is not allowed to contain .. pattern");
 
-		out.println("<h1>Directory "+name+"</h1>");
+		out.println("<h1>Directory "+name+":/"+dir+"</h1>");
 		out.println("<table>");
 		out.println("<tr><td><b>filename</b></td><td width=100 ALIGN=RIGHT><b>filesize</b></td><td><b>modification date</b></td></tr>");
 		FileServerConnection conn = gft.getFileServer(name).openConnection();
@@ -61,7 +64,7 @@ public class DirectoryServlet extends BaseServlet {
 				filename=filename.replaceAll(">", "&gt;");
 				String txt = null;
 				if (attr.isDirectory)
-					txt = "<tr><td><a href="+filename+">" + filename + "</td><td ALIGN=RIGHT>DIR</td>";
+					txt = "<tr><td><a href=\""+path+filename+"\">" + filename + "</td><td ALIGN=RIGHT>DIR</td>";
 				else
 					txt = "<tr><td>" + filename + "</td><td ALIGN=RIGHT>"+attr.size+"</td>";
 				txt=txt+"<td>"+new Date(attr.modifyTimeMilliSecs*1000)+ "</td></tr>";
