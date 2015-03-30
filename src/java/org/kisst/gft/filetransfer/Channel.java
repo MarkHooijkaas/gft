@@ -77,14 +77,11 @@ public abstract class Channel extends BasicTaskDefinition  implements SourceFile
 			return task.toString();
 	}
 	
-	@Override public void writeHtml(PrintWriter out) {
-		writeHtmlHeader(out);
+	@Override protected void writeHtmlBody(PrintWriter out) {
 		out.println("<h2>Directories</h2>");
 		out.println("<ul>");
 		out.println("<li>FROM: <a href=\"/dir/"+src.getShortString()+"\">"+src.getShortString()+"</a>");
 		out.println("<li>TO:   <a href=\"/dir/"+dest.getShortString()+"\">"+dest.getShortString()+"</a>");
 		out.println("</ul>");
-	
-		writeHtmlFooter(out);
 	}
 }

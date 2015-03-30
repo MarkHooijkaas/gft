@@ -81,6 +81,9 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 		if (getFlow() instanceof WritesHtml)
 			((WritesHtml)getFlow()).writeHtml(out);
 	}
+
+	protected void writeHtmlBody(PrintWriter out) {}
+
 	protected void writeHtmlFooter(PrintWriter out) {
 		out.println("<h2>Config</h2>");
 		out.println("<pre>");
@@ -92,6 +95,7 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 
 	@Override public void writeHtml(PrintWriter out) {
 		writeHtmlHeader(out);
+		writeHtmlBody(out);
 		writeHtmlFooter(out);
 	}
 }

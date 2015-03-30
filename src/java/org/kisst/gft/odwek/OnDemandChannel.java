@@ -23,10 +23,8 @@ public abstract class OnDemandChannel extends BasicTaskDefinition {
 
 	public OnDemandDefinition getOnDemandDefinition() { return def; }
 	
-	@Override public void writeHtml(PrintWriter out) {
-		writeHtmlHeader(out);
+	@Override protected void writeHtmlBody(PrintWriter out) {
 		def.writeHtml(out);
-		writeHtmlFooter(out);
 	}
 	public String getDestDescription() { return def.toString();}
 	@Override public Action getFlow() {  return this.flow; }
