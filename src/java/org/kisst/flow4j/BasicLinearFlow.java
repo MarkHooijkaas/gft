@@ -89,6 +89,7 @@ public class BasicLinearFlow {
 	}
 	
 	public Object execute(Task task) {
+		logger.info("Flow start "+this.getClass().getCanonicalName());
 		for (String name: actions.keySet()) {
 			if (isSkippedAction(name)) {
 				logger.info("action {} skipped",name);
@@ -141,6 +142,7 @@ public class BasicLinearFlow {
 					logger.info("action "+name+" succesful");
 			}
 		}
+		logger.info("Flow succeeded "+this.getClass().getCanonicalName());
 		return null;
 	}
 	protected Action myCreateAction(Class<?> clz, Props props) {
