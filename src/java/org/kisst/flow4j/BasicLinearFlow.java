@@ -1,11 +1,13 @@
 package org.kisst.flow4j;
 
+import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.action.Action;
+import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.MultiProps;
 import org.kisst.props4j.Props;
@@ -18,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 
-public class BasicLinearFlow {
+public class BasicLinearFlow implements WritesHtml {
 	final static Logger logger=LoggerFactory.getLogger(BasicLinearFlow.class); 
 
 	protected final LinkedHashMap<String, Action> actions= new LinkedHashMap<String, Action>();;
@@ -52,11 +54,8 @@ public class BasicLinearFlow {
 	}*/
 
 	protected boolean isSkippedAction(String name) { return skippedActions .contains(name); }
-	protected boolean isDisabledAction(String name) { return false; }
 	
 	private<T> T addAction(String name, T act) {
-		if (isDisabledAction(name))
-			return null;
 		if (! (act instanceof Action))
 			throw new IllegalArgumentException("Trying to add action "+act+" of type"+act.getClass().getName()+", which does not implement the Action interface");
 		Action act2 = actions.get(name);
@@ -68,8 +67,6 @@ public class BasicLinearFlow {
 	
 	@SuppressWarnings("unchecked")
 	protected<T> T addAction(String name, Class<T> cls) {
-		if (isDisabledAction(name))
-			return null;
 		Props props = getActionConstructorProps((Class<? extends Action>) cls);
 		if (props.getBoolean("skip", false))
 			skippedActions.add(name);
@@ -153,5 +150,24 @@ public class BasicLinearFlow {
 		return (Action) ReflectionUtil.createObject(clz);
 	}
 
+	@Override public void writeHtml(PrintWriter out) {
+		out.println("<h2>Flow</h2>");
+		out.println("<table>");
+		out.print("<tr>");
+		out.print("<td><b>name</b></td>");
+		out.print("<td><b>class</b></td>");
+		out.print("<td><b>skipped?</b></td>");
+		out.println("</tr>");
+		for (String name: actions.keySet()) { 
+			Action act=actions.get(name);
+			out.print("<tr>");
+			out.print("<td>"+name+"</td>");
+			out.print("<td>"+act.toString()+"</td>");
+			if (isSkippedAction(name))
+				out.print("<td>SKIPPED</td>");
+			out.println("</tr>");
+		}
+		out.println("</table>");
+	}
 	
 }

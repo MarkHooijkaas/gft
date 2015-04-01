@@ -1,16 +1,14 @@
 package org.kisst.gft.task;
 
-import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 
 import org.kisst.flow4j.BasicLinearFlow;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
-import org.kisst.gft.admin.WritesHtml;
 import org.kisst.props4j.Props;
 import org.kisst.util.ReflectionUtil;
 
-public class BasicGftFlow extends BasicLinearFlow implements Action, WritesHtml {
+public class BasicGftFlow extends BasicLinearFlow implements Action {
 	private final GftContainer gft;
 	public BasicGftFlow(GftContainer gft, Props props) { 
 		super(props);
@@ -28,25 +26,5 @@ public class BasicGftFlow extends BasicLinearFlow implements Action, WritesHtml 
 		if (c!=null)
 			return (Action) ReflectionUtil.createObject(c, new Object[] {gft, props} );
 		return super.myCreateAction(clz, props); 
-	}
-	
-	@Override public void writeHtml(PrintWriter out) {
-		out.println("<h2>Flow</h2>");
-		out.println("<table>");
-		out.print("<tr>");
-		out.print("<td><b>name</b></td>");
-		out.print("<td><b>class</b></td>");
-		out.print("<td><b>skipped?</b></td>");
-		out.println("</tr>");
-		for (String name: actions.keySet()) { 
-			Action act=actions.get(name);
-			out.print("<tr>");
-			out.print("<td>"+name+"</td>");
-			out.print("<td>"+act.toString()+"</td>");
-			if (isSkippedAction(name))
-				out.print("<td>SKIPPED</td>");
-			out.println("</tr>");
-		}
-		out.println("</table>");
 	}
 }
