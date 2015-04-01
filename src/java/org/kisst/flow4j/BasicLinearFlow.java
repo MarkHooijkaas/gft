@@ -7,7 +7,7 @@ import java.util.LinkedHashMap;
 import org.kisst.gft.RetryableException;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.task.Task;
-import org.kisst.props4j.LayeredProps;
+import org.kisst.props4j.MultiProps;
 import org.kisst.props4j.Props;
 import org.kisst.util.ReflectionUtil;
 import org.kisst.util.ThreadUtil;
@@ -83,9 +83,7 @@ public class BasicLinearFlow {
 		Props actionprops = props.getProps(actionName,null);
 		if (actionprops==null)
 			return props;
-		LayeredProps lprops=new LayeredProps(props);
-		lprops.addLayer(actionprops);
-		return lprops;
+		return new MultiProps(actionprops,props);
 	}
 	
 	public Object execute(Task task) {

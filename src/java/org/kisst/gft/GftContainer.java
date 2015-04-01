@@ -37,6 +37,7 @@ import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.MultiListener;
 import org.kisst.props4j.LayeredProps;
+import org.kisst.props4j.MultiProps;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.util.CryptoUtil;
@@ -265,8 +266,7 @@ public class GftContainer implements HttpHostMap {
 	}
 
 	private void addChannel(String name, Props channelprops) {
-		LayeredProps lprops=new LayeredProps(getGlobalProps());
-		lprops.addLayer(channelprops);
+		MultiProps lprops=new MultiProps(channelprops,getGlobalProps());
 
 		String type=lprops.getString("type","Default");
 		Constructor<?> cons=channelTypes.get(type);
@@ -405,7 +405,7 @@ public class GftContainer implements HttpHostMap {
 	
 	
 	private LayeredProps getActionProps(Props channelprops, Class<?> clz, String actionname) {
-		LayeredProps lprops=new LayeredProps(this.props.getProps("global"));
+		LayeredProps lprops=new LayeredProps(getGlobalProps());
 		SimpleProps top=new SimpleProps();
 		//top.put("action",taskdef.gft.actions.get(name));
 		top.put("channel",channelprops);
