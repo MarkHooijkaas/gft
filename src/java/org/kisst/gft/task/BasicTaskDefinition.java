@@ -7,6 +7,7 @@ import org.kisst.gft.LogService;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.admin.WritesHtml;
 import org.kisst.props4j.Props;
+import org.kisst.util.IndentUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -87,7 +88,7 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	protected void writeHtmlFooter(PrintWriter out) {
 		out.println("<h2>Config</h2>");
 		out.println("<pre>");
-		out.println(props);
+		out.println(IndentUtil.toIndentedString(props, ""));
 		out.println("</pre>");
 	}
 

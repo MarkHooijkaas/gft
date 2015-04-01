@@ -27,11 +27,13 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.kisst.util.FileUtil;
+import org.kisst.util.IndentUtil;
+import org.kisst.util.IndentUtil.Indentable;
 import org.kisst.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SimpleProps extends PropsBase {
+public class SimpleProps extends PropsBase implements IndentUtil.Indentable {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleProps.class);
 	//private static final long serialVersionUID = 1L;
 
@@ -169,14 +171,15 @@ public class SimpleProps extends PropsBase {
 	public void read(InputStream inp)  { new Parser(inp).fillMap(this);} 
 
 
-	public String toString() { return toString("");	}
-	public String toString(String indent) {
+	public String toString() { return "SimpleProps("+this.getFullName()+")";	}
+	public String toIndentedString() { return toIndentedString("");	}
+	public String toIndentedString(String indent) {
 		StringBuilder result=new StringBuilder("{\n");
 		for (String key: values.keySet()) {
 			result.append(indent+"\t"+key+": ");
 			Object o=values.get(key);
-			if (o instanceof SimpleProps)
-				result.append(((SimpleProps)o).toString(indent+"\t"));
+			if (o instanceof Indentable)
+				result.append(((Indentable)o).toIndentedString(indent+"\t"));
 			else if (o instanceof String)
 				result.append(StringUtil.doubleQuotedString((String)o)+";");
 			else if (o instanceof File)
