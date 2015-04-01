@@ -167,6 +167,8 @@ public class GftContainer implements HttpHostMap {
 	public HttpHost getHttpHost(String name) { return httpHosts.getHttpHost(name); }
 	public Set<String> getHttpHostNames() { return httpHosts.getHttpHostNames(); }
 	public boolean isConfigBroken() { return configBroken; }
+	public Props getGlobalProps() { return props.getProps("global"); }
+
 	
 	private boolean init() {
 		boolean configBroken=false;
@@ -219,10 +221,8 @@ public class GftContainer implements HttpHostMap {
 
 		Props channelProps=props.getProps("channel");
 		for (String name: channelProps.keys()) {
-			Props p=channelProps.getProps(name);
 			try {
-				TaskDefinition channel = createChannel(name, p);
-				channels.put(name, channel);
+				addChannel(name, channelProps.getProps(name));
 			}
 			catch (RuntimeException e) {
 				logger.error("Error when loading channel "+name, e);
@@ -264,12 +264,11 @@ public class GftContainer implements HttpHostMap {
 		return configBroken;
 	}
 
+	private void addChannel(String name, Props channelprops) {
+		LayeredProps lprops=new LayeredProps(getGlobalProps());
+		lprops.addLayer(channelprops);
 
-	private TaskDefinition createChannel(String name, Props props) {
-		//LayeredProps lprops=new LayeredProps(this.props.getProps("global"));
-		//lprops.addLayer(props);
-
-		String type=props.getString("type","Default");
+		String type=lprops.getString("type","Default");
 		Constructor<?> cons=channelTypes.get(type);
 		if (cons==null) {
 			String typenames="";
@@ -280,8 +279,8 @@ public class GftContainer implements HttpHostMap {
 			}
 			throw new RuntimeException("Unknown Channel type in channel "+name+": "+type+" only the following types are allowed "+typenames);
 		}
-		TaskDefinition channel = (TaskDefinition) ReflectionUtil.createObject(cons, new Object[] {this, props} );
-		return channel;
+		TaskDefinition channel = (TaskDefinition) ReflectionUtil.createObject(cons, new Object[] {this, lprops} );
+		channels.put(name, channel);
 	}
 	public TaskDefinition getTaskDefinition(String name) { return channels.get(name); }
 	public String processTemplate(File template, Object context) { return TemplateUtil.processTemplate(template, context); }
@@ -426,7 +425,7 @@ public class GftContainer implements HttpHostMap {
 		return createAction(taskdef, actions.get(actionname), actionname);
 	}
 	public Action createAction(TaskDefinition taskdef, Class<?> cls) {
-		return createAction(taskdef, cls, null);
+		return createAction(taskdef, cls, cls.getSimpleName());
 	}
 	
 	private Action createAction(TaskDefinition taskdef, Class<?> clz, String actionname) {
