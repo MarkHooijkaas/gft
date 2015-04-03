@@ -167,6 +167,8 @@ public class ReflectionUtil {
 			return "\""+obj+"\""; // TODO: escape quotes?
 		if (obj instanceof Number)
 			return obj.toString();
+		if (obj instanceof Boolean)
+			return obj.toString();
 		if (depth<0)
 			return obj.getClass().getSimpleName()+"()";
 		depth--;
@@ -175,8 +177,8 @@ public class ReflectionUtil {
 		String sep="";
 		for (Field field : obj.getClass().getFields()) {
 			try {
-				if ( (field.getModifiers()&Modifier.STATIC)==0) {
-					result.append(sep+field.getName()+"="+field.get(toString(obj, depth)));
+				if (! Modifier.isStatic(field.getModifiers())) {
+					result.append(sep+field.getName()+"="+toString(field.get(obj), depth));
 					sep=", ";
 				}
 			} 
