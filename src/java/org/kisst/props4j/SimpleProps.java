@@ -37,13 +37,20 @@ public class SimpleProps extends PropsBase implements IndentUtil.Indentable {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleProps.class);
 	//private static final long serialVersionUID = 1L;
 
+	private final String desc;
 	private final SimpleProps parent;
 	private final String name; 
 	private final Map<String, Object> values=new LinkedHashMap<String, Object>();
 	public String stringValue=null;
 	
 	public SimpleProps() { this(null,null); }
-	public SimpleProps(File file) { this(null, null); load(file); }
+	public SimpleProps(String name) { this(null,name); }
+	public SimpleProps(File file) { 
+		this.parent=null; 
+		this.name=null;
+		this.desc="file:"+file.getAbsolutePath(); 
+		load(file); 
+	}
 
 	public SimpleProps(SimpleProps parent, String name) {
 		this.parent=parent;
@@ -51,6 +58,7 @@ public class SimpleProps extends PropsBase implements IndentUtil.Indentable {
 			this.name=name.substring(name.lastIndexOf(".")+1);
 		else
 			this.name=name;
+		this.desc=getFullName();
 	}
 	@Override public Props getParent() { return parent; }
 	@Override public String getLocalName() { return name; }
@@ -75,7 +83,7 @@ public class SimpleProps extends PropsBase implements IndentUtil.Indentable {
 
 	public Iterable<String> keys() { return values.keySet(); }
 
-	public void put(String key, Object value) {
+	public SimpleProps put(String key, Object value) {
 		int pos=key.indexOf('.');
 		if (pos<0) {
 			if (value==null) {
@@ -92,7 +100,7 @@ public class SimpleProps extends PropsBase implements IndentUtil.Indentable {
 				else
 					values.put(key, value);
 			}
-			return;
+			return this;
 		}
 		String keystart=key.substring(0,pos);
 		String keyremainder=key.substring(pos+1);
@@ -108,6 +116,7 @@ public class SimpleProps extends PropsBase implements IndentUtil.Indentable {
 			((SimpleProps)o).put(keyremainder, value);
 		else
 			throw new RuntimeException("key "+getFullName()+"."+key+" already has value "+o+" when adding subkey "+keyremainder);
+		return this;
 	}
 
 	// TODO: code duplication with function above
@@ -171,7 +180,7 @@ public class SimpleProps extends PropsBase implements IndentUtil.Indentable {
 	public void read(InputStream inp)  { new Parser(inp).fillMap(this);} 
 
 
-	public String toString() { return "SimpleProps("+this.getFullName()+")";	}
+	public String toString() { return "SimpleProps("+this.desc+")";	}
 	public String toIndentedString() { return toIndentedString("");	}
 	public String toIndentedString(String indent) {
 		StringBuilder result=new StringBuilder("{\n");

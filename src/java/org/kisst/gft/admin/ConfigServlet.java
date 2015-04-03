@@ -19,6 +19,7 @@ public class ConfigServlet extends BaseServlet {
 		response.setContentType("text/html;charset=utf-8");
 		PrintWriter out = response.getWriter();
 		out.println("<pre>");
+		out.println(""+gft.props.getParent());
 		filteredOutput(out, ((SimpleProps)gft.props).toIndentedString());
 		filteredOutput(out, ((SimpleProps)gft.props).toPropertiesString());
 		out.println("</pre>");

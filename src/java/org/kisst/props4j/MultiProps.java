@@ -69,7 +69,7 @@ public class MultiProps extends PropsBase implements IndentUtil.Indentable {
 		StringBuilder result=new StringBuilder("MultiProps(");
 		String sep="";
 		for (Props layer: propsList) {
-			result.append(layer.toString()).append(sep);
+			result.append(sep).append(layer.toString());
 			sep=",";
 		}
 		result.append(")");
@@ -78,7 +78,7 @@ public class MultiProps extends PropsBase implements IndentUtil.Indentable {
 	public String toIndentedString(String indent) {
 		StringBuilder result=new StringBuilder();
 		for (Props layer: propsList)
-			result.append(indent+"#layer: "+layer+"\n").append(IndentUtil.toIndentedString(layer, indent)).append("\n");
+			result.append("\n"+indent+"#layer: "+layer+" ").append(IndentUtil.toIndentedString(layer, indent+"\t"));
 		return result.toString(); 
 	}
 }

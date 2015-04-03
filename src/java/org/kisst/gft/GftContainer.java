@@ -117,8 +117,7 @@ public class GftContainer implements HttpHostMap {
 		context.put(topname, this);
 	
 		this.configfile = configfile;
-		topProps = new SimpleProps();
-		topProps.load(this.configfile);
+		topProps = new SimpleProps(this.configfile);
 		props=topProps.getProps(this.topname);
 		
 		addAction("local_command", LocalCommandAction.class);
