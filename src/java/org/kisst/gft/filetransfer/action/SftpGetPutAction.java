@@ -19,15 +19,22 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.filetransfer.action;
 
+import java.io.InputStream;
+
 import org.kisst.gft.action.BaseAction;
+import org.kisst.gft.filetransfer.FileLocation;
 import org.kisst.gft.filetransfer.FileServerConnection;
+import org.kisst.gft.ssh.SshFileServerConnection;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.SftpException;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
 
 public class SftpGetPutAction extends BaseAction {
-	private final static Logger logger=LoggerFactory.getLogger(SftpGetPutAction.class);
+	//private final static Logger logger=LoggerFactory.getLogger(SftpGetPutAction.class);
 
 	private final boolean resumeAllowed;
 	public SftpGetPutAction(Props props) { 
@@ -37,15 +44,23 @@ public class SftpGetPutAction extends BaseAction {
 
 
 	public Object execute(Task task) {
-		SourceFile src= (SourceFile) task;
-		DestinationFile dest = (DestinationFile) task;
+		FileLocation src= ((SourceFile) task).getSourceFile();
+		FileLocation dest = ((DestinationFile) task).getDestinationFile();
 
-		FileServerConnection srcfsconn=src.getSourceFile().getFileServer().openConnection();
+		int mode=ChannelSftp.OVERWRITE;
+	      if(resumeAllowed)
+	    	  	mode=ChannelSftp.RESUME;
+
 		FileServerConnection destfsconn=null;
+		FileServerConnection srcfsconn=src.getFileServer().openConnection();
 		try {
-			destfsconn=dest.getDestinationFile().getFileServer().openConnection();
-			String remotefile = src.getSourceFile().getPath();
-		}
+			destfsconn=dest.getFileServer().openConnection();
+			ChannelSftp srcchan = ((SshFileServerConnection)srcfsconn).getSftpChannel();
+			ChannelSftp destchan = ((SshFileServerConnection)destfsconn).getSftpChannel();
+			InputStream inp = srcchan.get(src.getPath());
+			destchan.put(inp, dest.getPath(), mode);
+		} 
+		catch (SftpException e) { throw new RuntimeException(e); }
 		finally {
 			if (srcfsconn!=null)
 				srcfsconn.close();
