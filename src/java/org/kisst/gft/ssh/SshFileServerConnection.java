@@ -37,7 +37,8 @@ public class SshFileServerConnection implements FileServerConnection {
 			sftp.connect();
 		} catch (JSchException e) { throw new RuntimeException(e);}
 	}
-
+	public ChannelSftp getSftpChannel() { return sftp; }
+	
 	@Override
 	public void close() {
 		logger.info("Closing session on host: {}",host);
