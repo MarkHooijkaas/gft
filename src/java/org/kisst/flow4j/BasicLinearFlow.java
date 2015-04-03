@@ -154,17 +154,23 @@ public class BasicLinearFlow implements WritesHtml {
 		out.println("<h2>Flow</h2>");
 		out.println("<table>");
 		out.print("<tr>");
-		out.print("<td><b>name</b></td>");
-		out.print("<td><b>class</b></td>");
 		out.print("<td><b>skipped?</b></td>");
+		out.print("<td><b>name</b></td>");
+		out.print("<td><b>details</b></td>");
 		out.println("</tr>");
 		for (String name: actions.keySet()) { 
 			Action act=actions.get(name);
-			out.print("<tr>");
-			out.print("<td>"+name+"</td>");
-			out.print("<td>"+act.toString()+"</td>");
 			if (isSkippedAction(name))
-				out.print("<td>SKIPPED</td>");
+				out.print("<tr bgcolor=\"orange\"><td><b>SKIPPED</b></td>");
+			else
+				out.print("<tr><td></td>");
+			out.print("<td>"+name+"</td>");
+			out.print("<td>");
+			if (act instanceof WritesHtml)
+				((WritesHtml)act).writeHtml(out);
+			else
+				out.print(act.toString());
+			out.print("</td>");
 			out.println("</tr>");
 		}
 		out.println("</table>");
