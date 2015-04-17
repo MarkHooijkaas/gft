@@ -67,6 +67,14 @@ public class SshFileServerConnection implements FileServerConnection {
 	public long fileSize(String path) { return getFileAttributes(path).size; }
 	public long lastModified(String path) { return getFileAttributes(path).modifyTimeMilliSecs; }
 	public boolean isDirectory(String path) { return getFileAttributes(path).isDirectory; }
+	public boolean isLocked(String path) { 
+		path=fileserver.unixPath(path);
+		try {
+			sftp.rename(path, path);
+			return false;
+		}
+		catch (SftpException e) { e.printStackTrace(); return true; } // TODO: check specific Exception
+	}
 	
 	public FileAttributes getFileAttributes(String path) {
 		path=fileserver.unixPath(path);

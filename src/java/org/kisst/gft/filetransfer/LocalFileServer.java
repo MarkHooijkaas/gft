@@ -24,6 +24,10 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 	@Override public long fileSize(String path) { return file(path).length(); }
 	@Override public long lastModified(String path) { return file(path).lastModified(); }
 	@Override public boolean isDirectory(String path) { return file(path).isDirectory(); }
+	@Override public boolean isLocked(String path) { 
+		File f = file(path);
+		return ! f.renameTo(f);
+	}
 
 	public LinkedHashMap<String, FileAttributes> getDirectoryEntries(String path) {
 		LinkedHashMap<String, FileAttributes>  result= new LinkedHashMap<String,FileAttributes>();
