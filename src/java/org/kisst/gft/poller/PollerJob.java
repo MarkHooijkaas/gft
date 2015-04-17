@@ -29,6 +29,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private final int maxNrofMoveTries;
 	private final boolean deleteInProgressFile;
 	private final boolean pollForEntireDirectories;
+	private final long minimumSize;
 	// TODO: the map of known files should be cleared once a file disappears outside of the poller,
 	// e.g. when it has been handled by a poller on another machine.
 
@@ -61,6 +62,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		moveToDir = TemplateUtil.processTemplate(props.getString("moveToDirectory"),gft.getContext());
 		deleteInProgressFile = props.getBoolean("deleteInProgressFile",	true);
 		pollForEntireDirectories = props.getBoolean("pollForEntireDirectories",	false);
+		minimumSize= props.getLong("minimumSize", 0);
 		paused = props.getBoolean("paused", false);
 		maxNrofMoveTries=props.getInt("maxNrofMoveTries", 3);
 		if (pollForEntireDirectories)
@@ -201,8 +203,10 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		} 
 		if (snapshot.equals(otherSnapshot)) {
 			long timestamp = new java.util.Date().getTime();
-			if (otherSnapshot.getTimestamp() + delay < timestamp)
-				return true;
+			if (otherSnapshot.getTimestamp() + delay < timestamp) {
+				if (minimumSize<=0 || fsconn.fileSize(dir+"/"+fsconn)>=minimumSize)
+					return true;
+			}
 		} else {
 			known.put(filename, snapshot);
 			retries.put(filename, 1);
