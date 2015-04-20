@@ -440,6 +440,10 @@ public class GftContainer implements HttpHostMap {
 		c = ReflectionUtil.getConstructor(clz, new Class<?>[] {GftContainer.class, Props.class} );
 		if (c!=null)
 			return (Action) ReflectionUtil.createObject(c, new Object[] {this, actionprops} );
+
+		c = ReflectionUtil.getConstructor(clz, new Class<?>[] {Props.class} );
+		if (c!=null)
+			return (Action) ReflectionUtil.createObject(c, new Object[] {actionprops} );
 		
 		return (Action) ReflectionUtil.createObject(clz);
 	}
