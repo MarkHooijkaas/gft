@@ -119,7 +119,8 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	public int getNumberOfDetectedFiles() { return nrofDetectedFiles; }
 	public int getNumberOfProblematicFiles() { return nrofIgnoredFiles; }
 	public int getNumberOfInProgressFiles() { return nrofInProgressFiles; }
-
+	public synchronized void reset() { known.clear(); retries.clear(); }
+	
 	public void setListener(PollerJobListener listener) { this.listener = listener; }
 
 	private void pollOnce(FileServerConnection fsconn) {
@@ -165,8 +166,10 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 			logger.info(getFullName() + " - "+logname+" " + filename + " is verplaatst naar " + moveToDir);
 			run(task);
 			completed = true;
-			known.remove(filename);
-			retries.remove(filename);
+			synchronized (this) {
+				known.remove(filename);
+				retries.remove(filename);
+			}
 			listener.updateGuiSuccess(name, successes++);
 		}
 		finally {
@@ -191,7 +194,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		return false;
 	}
 
-	private boolean isFileNotChangingAnymore(FileServerConnection fsconn, String filename) {
+	private synchronized boolean isFileNotChangingAnymore(FileServerConnection fsconn, String filename) {
 		Snapshot snapshot; 
 		if (pollForEntireDirectories)
 			snapshot= new DirectorySnapshot(fsconn, dir + "/"+ filename);
@@ -241,24 +244,28 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	}
 	
 	private void rememberFailedMove(String filename) {
-		int trycount=getTryCount(filename);
+		int trycount=getTryCount(filename)+1;
 		listener.updateGuiErrors(name, errors++);
 		logger.debug("retrynummer {} van {}", trycount, filename);
 		if (trycount < maxNrofMoveTries) {
-			LogService.log("WARN", "failed_move", getFullName(), "poller", "failed to move file "+filename+" to "+moveToDir);
+			//LogService.log("WARN", "failed_move", getFullName(), "poller", "failed to move file "+filename+" to "+moveToDir);
 			logger.warn(getFullName() + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt. Dit wordt later nog een keer geprobeerd.");
 		} else {
 			LogService.log("ERROR", "failed_move", getFullName(), "poller", "failed to move file "+filename+" to "+moveToDir);
 			logger.error(getFullName() + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt niet na " + trycount + " keer proberen.");
-			known.remove(filename); // Zodat het weer vanaf begin opnieuw gaat, maar er is wel en Error gegeven.
+			//known.remove(filename); // Zodat het weer vanaf begin opnieuw gaat, maar er is wel en Error gegeven.
 		}
-		retries.put(filename, trycount + 1);
+		retries.put(filename, trycount);
 	}
 
 	
 	@Override public void writeHtml(PrintWriter out) {
 		out.println("<H1>PollerJob</H1>");
-		out.println("No specific data");
+		out.println("<table>");
+		out.println("\t<tr><td><b>file</b></td><td><b>retries</b></td></tr>");
+		for (String file: retries.keySet()) 
+			out.println("\t<tr><td>"+file+"</td><td>"+retries.get(file)+"</td></tr>");
+		out.println("</table>");
 	}
 
 	@Override public String getSrcDescription() { return dir; }

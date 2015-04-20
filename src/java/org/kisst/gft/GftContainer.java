@@ -312,6 +312,8 @@ public class GftContainer implements HttpHostMap {
 		logger.info("Resetting GftContainer on host "+hostName);
 		JamonUtil.jamonLog(props, "RESET called, dumping all statistics");
 		jamonThread.reset();
+		for (Poller p: pollers.values())
+			p.reset();
 	}
 	
 	public void stop() {

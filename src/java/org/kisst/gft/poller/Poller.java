@@ -64,7 +64,10 @@ public class Poller implements Runnable {
 	public int getInterval() { return interval; }
 	public Props getProps() { return props; }
 	public FileServer getFileServer() { return this.fileserver; }
-
+	public void reset() {
+		for (PollerJob job: jobs)
+			job.reset();
+	}
 	
 	public PollerJob[] getJobs() { return jobs; }
 	
