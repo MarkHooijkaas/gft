@@ -1,6 +1,7 @@
 package org.kisst.gft;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.HashMap;
@@ -82,6 +83,7 @@ public class GftRunner {
 	private static Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
 	private static Cli.StringOption encrypt = cli.stringOption("e","encrypt","key", null);
 	private static Cli.StringOption decrypt = cli.stringOption("d","decrypt","key", null);
+	private static Cli.StringOption decode = cli.stringOption(null,"decode","decode a base64 string", null);
 	private static Cli.SubCommand jgit =cli.subCommand("jgit", "run jgit CLI");
 	private static Cli.SubCommand git =cli.subCommand("git", "run jgit CLI");
 	private static Cli.SubCommand backup =cli.subCommand("backup", "backup the config directory to git");
@@ -125,6 +127,12 @@ public class GftRunner {
 		else if (decrypt.get()!=null) {
 			System.out.println("OPTION DISABLED");
 			//System.out.println(CryptoUtil.decrypt(decrypt.get()));
+		}
+		else if (decode.get()!=null) {
+			try {
+				System.out.println(new String(org.kisst.util.Base64.decode(decode.get())));
+			} 
+			catch (IOException e) { throw new RuntimeException(e); }
 		}
 		else if (putmsg.isSet())	
 			putmsg(props,putmsg.get());
