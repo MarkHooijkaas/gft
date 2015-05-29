@@ -24,7 +24,7 @@ public class GftService  implements WrapperListener  {
 			configfile=new File("../config/gft.properties");
 		else
 			configfile=new File(args[0]);
-		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
+		PropertyConfigurator.configure(configfile.getParent()+"/gft.log4j.properties");
 		runner= new GftRunner("gft", configfile);
 		runner.start();
 		return null;

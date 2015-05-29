@@ -100,7 +100,7 @@ public class GftRunner {
 		CryptoUtil.setKey("-P34{-[u-C5x<I-v'D_^{79'3g;_2I-P_L0£_j3__5`y§%M£_C");
 		File configfile=new File(config.get());
 		try {
-			PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
+			PropertyConfigurator.configure(configfile.getParent()+"/"+topname+"."+"log4j.properties");
 		}
 		catch (UnsatisfiedLinkError e) { // TODO: a bit of a hack to prevent log4j Link error
 			System.out.println("Linking Error initializing log4j, probably you should execute \"set PATH=%PATH%;lib\"");
