@@ -50,6 +50,8 @@ import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import freemarker.template.Template;
+
 
 
 
@@ -284,6 +286,7 @@ public class GftContainer implements HttpHostMap {
 	public TaskDefinition getTaskDefinition(String name) { return channels.get(name); }
 	public String processTemplate(File template, Object context) { return TemplateUtil.processTemplate(template, context); }
 	public String processTemplate(String templateText, Object context) { return TemplateUtil.processTemplate(templateText, context); }
+	public String processTemplate(Template template, Object context) { return TemplateUtil.processTemplate(template, context); }
 
 	public void addServlet(String url, BaseServlet servlet) { admin.addServlet(url, servlet); }
 
