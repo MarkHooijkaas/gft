@@ -20,7 +20,7 @@ import org.kisst.props4j.Props;
 public class JarLoader {
 	public static class ModuleSetting extends CompositeSetting {
 		public ModuleSetting(CompositeSetting parent, String name) { super(parent, name); }
-		public final BooleanSetting skip = new BooleanSetting(this, "skip", false);
+		public final BooleanSetting disabled = new BooleanSetting(this, "disabled", false);
 	}
 	
 	public static class Settings extends CompositeSetting {
@@ -59,8 +59,17 @@ public class JarLoader {
 		if (! dir.isDirectory())
 			throw new IllegalArgumentException(dir+" should be a directory");
 		for (File f:dir.listFiles()) {
-			if (f.isFile() && f.getName().endsWith(".jar"))
-				modules.add(new ModuleInfo(f));
+			if (f.isFile() && f.getName().endsWith(".jar")) {
+				ModuleInfo info = new ModuleInfo(f);
+				String modulename=info.mainClassname;
+				int pos=modulename.lastIndexOf('.');
+				if (pos>0)
+					modulename=modulename.substring(pos+1);
+				if (settings.module.get(modulename).disabled.get(props))
+					System.out.println("Skipping disabled module "+modulename);
+				else
+					modules.add(info);
+			}
 		}
 		int i=0;
 		URL[] urls = new URL[modules.size()];
