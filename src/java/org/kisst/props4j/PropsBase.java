@@ -20,6 +20,8 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 package org.kisst.props4j;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.kisst.util.FileUtil;
 
@@ -103,5 +105,24 @@ public abstract class PropsBase implements Props {
 	public Props getProps(String name) { return (Props) get(name); }
 	public Sequence getSequence(String name) { return (Sequence) get(name); }
 
-
+	public List<String> fullKeys() { 
+		ArrayList<String> result= new ArrayList<String>();
+		fillFullKeys(this,null, result);
+		return result;
+	}
+	
+	private static void fillFullKeys(Props props, String prefix, ArrayList<String> result) {
+		for (String key: props.keys()) {
+			String newkey;
+			if (prefix==null)
+				newkey=key;
+			else
+				newkey=prefix+"."+key;
+			Object obj=props.get(key);
+			if (obj instanceof Props)
+				fillFullKeys((Props) obj, newkey, result);
+			else
+				result.add(newkey);
+		}
+	}
 }
