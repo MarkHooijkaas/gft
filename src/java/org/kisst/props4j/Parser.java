@@ -179,14 +179,20 @@ public class Parser {
 				continue;
 			else if (ch=='"')
 				return replaceVars(readDoubleQuotedString(), parent, name);
-			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':')
-				return replaceVars(ch+readUnquotedString(),parent, name);
+			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':') {
+				String result=ch+readUnquotedString();
+				if (parent==null || name==null)
+					return result;
+				return replaceVars(result,parent, name);
+			}
 			else if (ch=='@')
 				return readSpecialObject();
 		}
 		return null;
 	}
-	private Object replaceVars(String str, Props props, String name) {
+	private String replaceVars(String str, Props props, String logname) {
+		if (logname==null)
+			throw new RuntimeException(str+"\t"+props);
 		if (str.startsWith("dynamic:"))
 			return str;
 		int pos=str.indexOf("${");
@@ -214,7 +220,7 @@ public class Parser {
 				p=p.getParent();
 			}
 			if (value==null) {
-				logger.error("In property "+name+" could not substitute variable ${"+var+"} in expression "+str);
+				logger.error("In ***"+logname+" could not substitute variable ${"+var+"} in expression "+str);
 				value="??"+var+"??";
 			}
 			if (toLowerCase)
@@ -224,7 +230,7 @@ public class Parser {
 			pos=str.indexOf("${",pos0);
 		}
 		result.append(str.substring(pos0));
-		logger.info("Variable substitution for var {} from {} to "+result.toString(), name, str);
+		logger.info("Variable substitution for var {} from {} to "+result.toString(), logname, str);
 		return result.toString();
 	}
 	
@@ -310,6 +316,8 @@ public class Parser {
 			f=(File) o;
 		else if (o instanceof String) {
 			String name=(String) o;
+			if (name.indexOf("${")>0)
+				name=replaceVars(name,map,"@include");
 			int pos=name.indexOf('*');
 			if (pos>0) {
 				postfix=name.substring(pos+1);

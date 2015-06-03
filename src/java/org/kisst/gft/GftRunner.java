@@ -41,10 +41,24 @@ public class GftRunner {
 	private GftContainer gft;
 
 	
-	public GftRunner(String topname, File configfile) {
+	public GftRunner(String topname) { this(topname,null); }
+	public GftRunner(String topname, String configfilename) {
 		this.topname=topname;
-		this.configfile = configfile;
+		if (configfilename==null)
+			this.configfile=findConfigFile(topname);
+		else
+			this.configfile = new File(configfilename);
+		PropertyConfigurator.configure(this.configfile.getParent()+"/"+topname+".log4j.properties");
 	}
+	
+	private static File findConfigFile(String topname) {
+		File result=new File("config."+topname+"/"+topname+".properties");
+		if (result.exists())
+			return result;
+		return new File("config/"+topname+".properties");
+	}
+
+	
 
 	public void start() {
 		if (gft!=null)
@@ -91,16 +105,21 @@ public class GftRunner {
 	public static void main(String[] args) { main("gft", args); }
 	
 	public static void main(String topname, String[] args) {
-		config = cli.stringOption("c","config","configuration file", "config/"+topname+".properties");
+		config = cli.stringOption("c","config","configuration file", null);
 		String[] newargs = cli.parse(args);
 		if (help.isSet()) {
 			showHelp();
 			return;
 		}
 		CryptoUtil.setKey("-P34{-[u-C5x<I-v'D_^{79'3g;_2I-P_L0£_j3__5`y§%M£_C");
-		File configfile=new File(config.get());
+		String configfilename = config.get();
+		GftRunner runner;
+		if (configfilename==null)
+			runner=new GftRunner(topname);
+		else
+			runner=new GftRunner(topname, configfilename);
 		try {
-			PropertyConfigurator.configure(configfile.getParent()+"/"+topname+"."+"log4j.properties");
+			PropertyConfigurator.configure(runner.configfile.getParent()+"/"+topname+".log4j.properties");
 		}
 		catch (UnsatisfiedLinkError e) { // TODO: a bit of a hack to prevent log4j Link error
 			System.out.println("Linking Error initializing log4j, probably you should execute \"set PATH=%PATH%;lib\"");
@@ -110,7 +129,7 @@ public class GftRunner {
 				throw e;
 		}
 		SimpleProps props=new SimpleProps();
-		props.load(configfile);
+		props.load(runner.configfile);
 		props=(SimpleProps) props.getProps(topname);
 		if (jgit.isSet() || git.isSet()) {
 			if (System.getProperty("jgit.gitprefix")==null)
@@ -121,7 +140,7 @@ public class GftRunner {
 			backup(newargs, props); 
 		}
 		else if (keygen.isSet())
-			GenerateKey.generateKey(configfile.getParentFile().getAbsolutePath()+"/ssh/id_dsa_gft"); // TODO: should be from config file
+			GenerateKey.generateKey(runner.configfile.getParentFile().getAbsolutePath()+"/ssh/id_dsa_gft"); // TODO: should be from config file
 		else if (encrypt.get()!=null)
 			System.out.println(CryptoUtil.encrypt(encrypt.get()));
 		else if (decrypt.get()!=null) {
@@ -141,10 +160,7 @@ public class GftRunner {
 		else if (mvmsg.isSet())
 			moveMessage(props, mvmsg.get());
 		else {
-			// Run GFT
-			GftRunner runner= new GftRunner(topname, configfile);
 			runner.run();
-
 			System.out.println("GFT stopped");
 		}
 	}
