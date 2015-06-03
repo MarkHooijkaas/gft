@@ -24,8 +24,10 @@ import java.util.concurrent.TimeUnit;
 
 import org.apache.http.ParseException;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.NTCredentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.AuthSchemes;
 import org.apache.http.client.config.RequestConfig;
@@ -35,6 +37,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -97,6 +100,7 @@ public class HttpCaller {
     protected final HttpHost host;
     private final int timeout;
 	private final int[] returnCodesToIgnore;
+	private final Credentials credentials;
 	private static final int[] EMPTY_INT_ARRAY = new int[0];
 
     // private final String urlPostfix;
@@ -115,7 +119,7 @@ public class HttpCaller {
         host = hostMap.getHttpHost(hostname.trim());
         timeout = settings.timeout.get(props);
         // urlPostfix=settings.urlPostfix.get(props);
-        Credentials credentials = host.getCredentials();
+        credentials = host.getCredentials();
 		if (credentials!=null) {
 	        AuthScope scope;
         	if (credentials instanceof NTCredentials) 
@@ -152,7 +156,13 @@ public class HttpCaller {
         return httpCall(method).getResponseString();
     }
 
-    protected Response httpCall(final HttpRequestBase method) {
+    @SuppressWarnings("deprecation")
+	protected Response httpCall(final HttpRequestBase method) {
+    	try {
+    		if (credentials instanceof UsernamePasswordCredentials)
+			method.addHeader(new BasicScheme().authenticate(credentials, method));
+		} 
+    	catch (AuthenticationException e) { throw new RuntimeException(e);}
         method.setConfig(RequestConfig.custom().setSocketTimeout(timeout).build());// setStaleConnectionCheckEnabled()?
         try {
             if (closeIdleConnections >= 0) { // Hack because often some idle connections were closed which resulted in 401 errors
