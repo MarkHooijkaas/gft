@@ -23,10 +23,11 @@ import java.io.InputStream;
 
 import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.filetransfer.FileLocation;
-import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.ssh.SshFileServerConnection;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.jcraft.jsch.ChannelSftp;
 import com.jcraft.jsch.SftpException;
@@ -34,31 +35,34 @@ import com.jcraft.jsch.SftpException;
 //import org.slf4j.LoggerFactory;
 
 public class SftpGetPutAction extends BaseAction {
-	//private final static Logger logger=LoggerFactory.getLogger(SftpGetPutAction.class);
+	private final static Logger logger=LoggerFactory.getLogger(SftpGetPutAction.class);
 
 	private final boolean resumeAllowed;
 	public SftpGetPutAction(Props props) { 
 		super(props);
-		this.resumeAllowed=props.getBoolean("resumeAllowed", true);
+		this.resumeAllowed=props.getBoolean("resumeAllowed", false);
 	}
 
+	@Override public String toString() { return SftpGetPutAction.class.getSimpleName()+"(resumeAllowed="+resumeAllowed+")"; } 
 
 	public Object execute(Task task) {
 		FileLocation src= ((SourceFile) task).getSourceFile();
 		FileLocation dest = ((DestinationFile) task).getDestinationFile();
 
 		int mode=ChannelSftp.OVERWRITE;
-	      if(resumeAllowed)
-	    	  	mode=ChannelSftp.RESUME;
+		if(resumeAllowed)
+			mode=ChannelSftp.RESUME;
 
-		FileServerConnection destfsconn=null;
-		FileServerConnection srcfsconn=src.getFileServer().openConnection();
+		SshFileServerConnection destfsconn=null;
+		SshFileServerConnection srcfsconn=(SshFileServerConnection) src.getFileServer().openConnection();
 		try {
-			destfsconn=dest.getFileServer().openConnection();
-			ChannelSftp srcchan = ((SshFileServerConnection)srcfsconn).getSftpChannel();
-			ChannelSftp destchan = ((SshFileServerConnection)destfsconn).getSftpChannel();
-			InputStream inp = srcchan.get(src.getPath());
-			destchan.put(inp, dest.getPath(), mode);
+			destfsconn=(SshFileServerConnection) dest.getFileServer().openConnection();
+			ChannelSftp srcchan = srcfsconn.getSftpChannel();
+			ChannelSftp destchan = destfsconn.getSftpChannel();
+			logger.info("opening sftp-get stream from {}",src.toString());
+			InputStream inp = srcchan.get(src.getFullPath());
+			logger.info("opening sftp-put stream to {}",dest.toString());
+			destchan.put(inp, dest.getFullPath(), mode);
 		} 
 		catch (SftpException e) { throw new RuntimeException(e); }
 		finally {

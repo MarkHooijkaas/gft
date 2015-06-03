@@ -5,7 +5,7 @@ import org.kisst.gft.Module;
 import org.kisst.gft.filetransfer.action.CheckCopiedFile;
 import org.kisst.gft.filetransfer.action.CheckDestFileDoesNotExist;
 import org.kisst.gft.filetransfer.action.CheckSourceFile;
-import org.kisst.gft.filetransfer.action.CopyFile;
+import org.kisst.gft.filetransfer.action.SftpGetPutAction;
 import org.kisst.gft.filetransfer.action.DeleteSourceDirectoryIfEmpty;
 import org.kisst.gft.filetransfer.action.DeleteSourceFile;
 import org.kisst.gft.filetransfer.action.FixPermissions;
@@ -28,7 +28,7 @@ public class FileTransferModule implements Module {
 	@Override public void init(Props props) {
 		gft.addAction("check_src",CheckSourceFile.class);
 		gft.addAction("check_dest",CheckDestFileDoesNotExist.class);
-		gft.addAction("copy",CopyFile.class);
+		gft.addAction("copy",SftpGetPutAction.class);
 		gft.addAction("check_copy",CheckCopiedFile.class);
 		gft.addAction("remove",DeleteSourceFile.class);
 		gft.addAction("remove_src_dir_if_empty",DeleteSourceDirectoryIfEmpty.class);

@@ -16,11 +16,12 @@ public class FileLocation {
 		this.path=path;
 	}
 
-	@Override public String toString() { return "FileLocation("+fileServer+":"+path+")"; }
+	@Override public String toString() { return "FileLocation("+fileServer+":"+getFullPath()+")"; }
 	public String getShortString() { return fileServer.getName()+":"+path; }
 
 	public FileServer getFileServer() { return fileServer; }
-	public String getPath() { return path; } 
+	public String getPath() { return path; }
+	public String getFullPath() { return fileServer.unixPath(path); }
 	public FileLocation getParentDirectory() { 
 		int pos=path.lastIndexOf('/');
 		if (pos>0)
