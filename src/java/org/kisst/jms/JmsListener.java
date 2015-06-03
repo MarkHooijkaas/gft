@@ -382,7 +382,10 @@ public class JmsListener implements Runnable {
 				}
 				producer.send(errmsg);
 				producer.close();
-				logger.info("message send to queue {} with id {}",queue,errmsg.getJMSMessageID());
+				String id = errmsg.getJMSMessageID();
+				if (id.startsWith("ID:"))
+					id=id.substring(3);
+				logger.info("message send to queue {} with id {}",queue,id);
 				messageHandled=true;
 			}
             catch (JMSException e2) { throw JmsUtil.wrapJMSException(e2); }
