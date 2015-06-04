@@ -211,14 +211,7 @@ public class Parser {
 				var=var.substring(0, var.length()-11);
 				toLowerCase = true;
 			}
-			Props p=props;
-			String value=null;
-			while (p!=null) {
-				value=p.getString(var, null); // TODO: should also work if not a String
-				if (value!=null)
-					break;
-				p=p.getParent();
-			}
+			String value= searchValue(var, props);
 			if (value==null) {
 				logger.error("In ***"+logname+" could not substitute variable ${"+var+"} in expression "+str);
 				value="??"+var+"??";
@@ -232,6 +225,24 @@ public class Parser {
 		result.append(str.substring(pos0));
 		logger.info("Variable substitution for var {} from {} to "+result.toString(), logname, str);
 		return result.toString();
+	}
+	private String searchValue(String var, Props props) {
+		if (var.trim().startsWith("ENV:")) {
+			var=var.trim().substring(4);
+			String result = System.getProperty(var);
+			if (result!=null)
+				return result;
+			return System.getenv(var);
+		}
+		Props p=props;
+		String value=null;
+		while (p!=null) {
+			value=p.getString(var, null); // TODO: should also work if not a String
+			if (value!=null)
+				break;
+			p=p.getParent();
+		}
+		return value;
 	}
 	
 	private Object readSpecialObject() {

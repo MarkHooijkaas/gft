@@ -264,6 +264,7 @@ public class GftRunner {
 		queueSystem.getQueue(queuename).send(data);
 		logger.info("send the following message to the queue {}",queuename);
 		logger.debug("data send was {}",data);
+		System.out.println("Sent message to "+queuename);
 		queueSystem.close();
 	}
 
