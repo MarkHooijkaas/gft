@@ -48,10 +48,9 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 	@Override public String getIdentification() { return getFilename(); }
 
 
-	public String toString() { return toString(" from:"+src+", to: "+dest);
-} 
-	public void run() { channel.run(this); }
-	public File getTempFile() { return getTempFile(filename); }
+	@Override public String toString() { return toString(" from:"+getSourceFile()+", to: "+getDestinationFile()); } 
+	@Override public void run() { channel.run(this); }
+	@Override public File getTempFile() { return getTempFile(filename); }
 
 	@Override public FileLocation getSourceFile() { return src;}
 	@Override public FileLocation getDestinationFile() { return dest; }
