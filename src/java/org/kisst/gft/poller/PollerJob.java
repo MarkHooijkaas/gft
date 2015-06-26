@@ -55,7 +55,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	public PollerJob(Poller parent,Props props) {
 		super(parent.gft, props);
-		this.flow=ActionList.createAction(this, defaultAction);
+		this.flow=ActionList.createAction(gft, this, defaultAction);
 		this.parent=parent;
 		this.fileserver = null; // TODO: remove
 		delay = props.getInt("delay", 10000);

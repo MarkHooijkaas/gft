@@ -4,8 +4,8 @@ import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 
 import org.kisst.gft.admin.WritesHtml;
-import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
+import org.kisst.gft.task.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,30 +14,30 @@ public class ActionList extends ActionExecutor implements Action, WritesHtml {
 	
 	private final LinkedHashMap<String,Action> actions=new LinkedHashMap<String,Action>();
 
-	private final BasicTaskDefinition taskdef;
+	private final TaskDefinition taskdef;
 	
-	public ActionList(BasicTaskDefinition taskdef, String[] parts) {
+	public ActionList(ActionCreator creator, TaskDefinition taskdef, String[] parts) {
 		super(taskdef.getProps());
 		this.taskdef=taskdef;
 		for (String name: parts) {
 			name=name.trim();
-			Action a=createAction(name);
+			Action a=createAction(creator, name);
 			if (a==null)
 				throw new RuntimeException("Unknown action "+name);
 			this.actions.put(name,a);
 		}
 	}
 	
-	public static Action createAction(BasicTaskDefinition taskdef, Class<?> defaultActionClass) {
+	public static Action createAction(ActionCreator creator, TaskDefinition taskdef, Class<?> defaultActionClass) {
 		String actions=taskdef.getProps().getString("actions", null);
 		if (actions==null)
-			return taskdef.gft.createAction(taskdef, defaultActionClass);
+			return creator.createAction(taskdef, defaultActionClass);
 		String[] parts=actions.split(",");
 		if (parts.length==1) {
-			return taskdef.gft.createAction(taskdef,parts[0].trim());
+			return creator.createAction(taskdef,parts[0].trim());
 		}
 		else 
-			return new ActionList(taskdef, parts);
+			return new ActionList(creator, taskdef, parts);
 	}
 	
 	
@@ -59,9 +59,9 @@ public class ActionList extends ActionExecutor implements Action, WritesHtml {
 		return false;
 	}
 	
-	public Action createAction(String name) {
+	public Action createAction(ActionCreator creator, String name) {
 		try {
-			return taskdef.gft.createAction(taskdef, name);
+			return creator.createAction(taskdef, name);
 		}
 		catch (RuntimeException e) {
 			throw new RuntimeException("Error when creating action "+name+" in channel "+name,e);

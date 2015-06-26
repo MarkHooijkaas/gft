@@ -17,6 +17,7 @@ import org.kisst.cfg4j.BooleanSetting;
 import org.kisst.cfg4j.CompositeSetting;
 import org.kisst.gft.TaskStarter.JmsTaskCreator;
 import org.kisst.gft.action.Action;
+import org.kisst.gft.action.ActionCreator;
 import org.kisst.gft.action.DeleteLocalFileAction;
 import org.kisst.gft.action.LocalCommandAction;
 import org.kisst.gft.action.SendMessageFromFileAction;
@@ -55,7 +56,7 @@ import freemarker.template.Template;
 
 
 
-public class GftContainer implements HttpHostMap {
+public class GftContainer implements HttpHostMap, ActionCreator {
 	final static Logger logger=LoggerFactory.getLogger(GftContainer.class); 
 	
 	public static class Settings extends CompositeSetting {
