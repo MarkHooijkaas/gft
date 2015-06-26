@@ -52,13 +52,17 @@ started on ${gft.startupTime?datetime}<br>
     <td><b>to</b></td>
   </tr>
 <#list channels?keys as name>
+  <#if channels[name].errorCount gt 0>
+  <tr bgcolor="orange">
+  <#else>
   <tr>
+  </#if>
     <td><a href="channel/${name}"><b>${name}</b></a></td>
     <td>${channels[name].class.simpleName}</td>
     <td>${channels[name].totalCount}</td>
     <td>${channels[name].errorCount}</td>
-    <td>${channels[name].srcDescription}</td>
-    <td>${channels[name].destDescription}</td>
+    <td>${channels[name].sourceFile.shortString}</td>
+    <td>${channels[name].destinationFile.shortString}</td>
   </tr>
 </#list> 
 </table> 
@@ -86,7 +90,14 @@ started on ${gft.startupTime?datetime}<br>
 <#list pollers?keys as name>
 <tr><td>${pollers[name].interval}</td><td><a href=poller/${name}>${name}</a></td></tr> 
 <#list pollers[name].jobs as job>
-<tr><td></td><td>${job.name}</td>
+  <#if job.errors gt 0>
+    <tr bgcolor="orange">
+  <#elseif job.numberOfProblematicFiles gt 0>
+    <tr bgcolor="orange">
+  <#else>
+    <tr>
+  </#if>
+  <td></td><td>${job.name}</td>
   <td>${job.runs}</td>
   <td>${job.successes}</td>
   <td>${job.errors}</td>

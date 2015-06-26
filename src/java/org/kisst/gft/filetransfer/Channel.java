@@ -54,10 +54,8 @@ public abstract class Channel extends BasicTaskDefinition  implements SourceFile
 	@Override public FileLocation getFinalDestinationFile() { return finalDest; }
 
 	@Override public Action getFlow() { return this.flow;} 
-	public String getSrcDescription() {	return src.getShortString(); } // TODO:remove
-	public String getDestDescription() { return dest.getShortString(); }
 
-	public String toString() { return this.getClass().getSimpleName()+"("+name+" from "+getSrcDescription()+" to "+getDestDescription()+")";}
+	public String toString() { return this.getClass().getSimpleName()+"("+name+" from "+getSourceFile().getShortString()+" to "+getDestinationFile().getShortString()+")";}
 	public void checkSystemsAvailable(FileTransferTask ft) {
 		if (! src.getFileServer().isAvailable())
 			throw new RetryableException("Source system "+src.getFileServer()+" is not available to transfer file "+ft.filename+" for channel "+name);

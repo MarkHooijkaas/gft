@@ -11,8 +11,6 @@ public interface TaskDefinition extends WritesHtml {
 	public Props getProps();
 	public Action getFlow();
 	
-	public String getSrcDescription(); 
-	public String getDestDescription();
 	public long getTotalCount();
 	public long getErrorCount();
 }

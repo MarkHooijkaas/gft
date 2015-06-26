@@ -267,15 +267,4 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 			out.println("\t<tr><td>"+file+"</td><td>"+retries.get(file)+"</td></tr>");
 		out.println("</table>");
 	}
-
-	@Override public String getSrcDescription() { return dir; }
-	@Override public String getDestDescription() { return moveToDir;}
-	/*
-	public String getKanaalNaam() {
-		if (flow instanceof SendGftMessageAction)
-			return ((SendGftMessageAction)flow).getKanaalNaam();
-		else
-			return "";
-	}
-	*/
 }

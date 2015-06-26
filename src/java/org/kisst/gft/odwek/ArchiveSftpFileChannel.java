@@ -13,7 +13,6 @@ public abstract class ArchiveSftpFileChannel extends OnDemandChannel implements 
 		super(flow, def);
 		this.src=new FileLocation(gft.sshhosts.get(props.getString("src.host")),props.getString("src.dir",  ""));
 	}
-	@Override public String getSrcDescription() { return src.getShortString(); }
 	@Override public FileLocation getSourceFile() { return src;}
 	
 	@Override protected void writeHtmlBody(PrintWriter out) {
