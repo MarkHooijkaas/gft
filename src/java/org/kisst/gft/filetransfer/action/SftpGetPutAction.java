@@ -64,7 +64,7 @@ public class SftpGetPutAction extends BaseAction {
 			logger.info("opening sftp-put stream to {}",dest.toString());
 			destchan.put(inp, dest.getFullPath(), mode);
 		} 
-		catch (SftpException e) { throw new RuntimeException(e); }
+		catch (SftpException e) { throw new RuntimeException("Sftp problem when copying from "+src.getShortString()+", to "+dest.getShortString()+": "+e.getMessage(),e); }
 		finally {
 			if (srcfsconn!=null)
 				srcfsconn.close();
