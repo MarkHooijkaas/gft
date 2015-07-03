@@ -23,6 +23,7 @@ import org.kisst.jms.MultiListener;
 import org.kisst.util.XmlNode;
 
 public class ListenerServlet extends BaseServlet {
+	private static int maxErroTextLength=200;
 	public ListenerServlet(GftContainer gft) { super(gft);	}
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
@@ -64,9 +65,10 @@ public class ListenerServlet extends BaseServlet {
 			session = listener.getQueueSystem().getConnection().createSession(true, Session.AUTO_ACKNOWLEDGE);
 			String q=listener.getQueue(qname);
 
+			int index=1;
 			out.println("<h2>"+q+"</h2>");
 			out.println("<table>");
-			out.println("<tr><td><b>time</b></td><td><b>channel</b></td><td><b>msgid</b></td><td><b>info</b></td><td><b>action</b></td><td><b>error</b></td></tr>");
+			out.println("<tr><th>index</th><th style=\"width:200px\">time</th><th align=\"left\">channel</th><th align=\"left\">msgid</th><th align=\"left\">info</th><th align=\"left\">action</th><th align=\"left\">error</th></tr>");
 			Queue destination = session.createQueue(q);
 			QueueBrowser browser = session.createBrowser(destination);
 			Enumeration<?> e = browser.getEnumeration();
@@ -102,13 +104,21 @@ public class ListenerServlet extends BaseServlet {
 				catch (RuntimeException ex) {
 					channel="Unknown format";
 				}
+				String errorText = msg.getStringProperty("state_LAST_ERROR");
+				if (errorText!=null) {
+					if (errorText.length()>maxErroTextLength)
+						errorText=errorText.substring(0,maxErroTextLength);
+					errorText=quoteXml(errorText);
+				}
 				String msgid=msg.getJMSMessageID();
-				out.println("<tr><td width=150> "+format.format(new Date(msg.getJMSTimestamp()))+"</td>");
+				out.println("<tr>");
+				out.println("<td>"+(index++)+"</td>");
+				out.println("<td style=\"width: 200px\"> "+format.format(new Date(msg.getJMSTimestamp()))+"</td>");
 				out.println("<td>"+channel+"</td>");
 				out.println("<td><a href=\"/message/"+listener.getName()+"/"+qname+"/"+msgid+"\">"+msgid+"</a></td>");
 				out.println("<td>"+id+"</td>");
 				out.println("<td>"+msg.getStringProperty("state_LAST_ACTION")+"</td>");
-				out.println("<td>"+msg.getStringProperty("state_LAST_ERROR")+"</td>");
+				out.println("<td>"+errorText+"</td>");
 				out.println("</tr>");
 
 			}

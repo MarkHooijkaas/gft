@@ -11,4 +11,11 @@ public abstract class BaseServlet extends AbstractServlet {
 		super(gft.props);
 		this.gft=gft;
 	}
+	public static String quoteXml(String s) {
+		s=s.replaceAll("&", "&amp;");
+		s=s.replaceAll("<", "&lt;");
+		s=s.replaceAll(">", "&gt;");
+		return s;
+	}
+	
 }

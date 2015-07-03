@@ -68,11 +68,7 @@ public class JmsMessageServlet extends BaseServlet {
 				if ( o instanceof TextMessage) {
 					out.println("<pre>");
 					TextMessage msg = (TextMessage) o; 
-					String txt=msg.getText();
-					txt= txt.replaceAll("&", "&amp;");
-					txt= txt.replaceAll(">", "&gt;");
-					txt= txt.replaceAll("<", "&lt;");
-					out.println(txt);
+					out.println(quoteXml(msg.getText()));
 					out.println("</pre>");
 				}
 			}
