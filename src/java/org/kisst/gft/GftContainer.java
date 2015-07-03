@@ -173,9 +173,18 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 	public Props getGlobalProps() { return props.getProps("global"); }
 
 	
+	
+	
 	private boolean init() {
 		boolean configBroken=false;
 		context.put("global", props.get("global", null));
+		//String omgeving = getGlobalProps().getString("omgeving",null);
+		//SimpleProps var=new SimpleProps(); 
+		//var.put("omgevingNaar", omgeving);
+		//var.put("herkomstOmgeving", omgeving);
+		Object defaultVars = props.get("defaultVars", null);
+		if (defaultVars instanceof Props)
+			context.put("var", defaultVars);
 		
 		for (Module mod: modules.values()) {
 			if (settings.modules.module.get(mod.getName()).disabled.get(topProps)) {

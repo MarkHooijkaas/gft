@@ -4,7 +4,11 @@ import java.io.File;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.action.Action;
+import org.kisst.gft.filetransfer.FileLocation;
+import org.kisst.props4j.MultiProps;
+import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
+import org.kisst.util.TemplateUtil;
 import org.kisst.util.exception.MappedStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +29,11 @@ public class BasicTask implements Task {
 	public BasicTask(GftContainer gft, TaskDefinition taskdef) {
 		this.gft = gft;
 		this.context=gft.getContext().shallowClone();
-		this.context.put("var", vars);
+		Object defaultVars = taskdef.getProps().get("defaultVars", null);
+		if (defaultVars instanceof Props)
+			this.context.put("var", new MultiProps(vars, (Props) defaultVars));
+		else
+			this.context.put("var", vars);
 		this.context.put("task", this);
 		this.taskdef = taskdef;
 	}
@@ -73,7 +81,14 @@ public class BasicTask implements Task {
 		// TODO: check for more unsafe constructs
 		return dir+"/"+file;
 	}
-
+	protected FileLocation subsituteDynamicPath(FileLocation loc) {
+		String path = loc.getPath();
+		if (!path.startsWith("dynamic:"))
+			return loc;
+		//System.out.print(getContext().toPropertiesString());
+		path=TemplateUtil.processTemplate(path.substring(8), getContext());
+		return new FileLocation(loc.getFileServer(),path);
+	}
 	public void addState(MappedStateException mse) {
 		mse.addState("CHANNEL", getTaskDefinition().getName());
 		mse.addState("ID", getIdentification());

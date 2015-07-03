@@ -12,10 +12,13 @@ import javax.servlet.http.HttpServletResponse;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileServerConnection.FileAttributes;
+import org.kisst.util.TemplateUtil;
 import org.kisst.util.exception.BasicFunctionalException;
 
 public class DirectoryServlet extends BaseServlet {
-	public DirectoryServlet(GftContainer gft) { super(gft);	}
+	public DirectoryServlet(GftContainer gft) { 
+		super(gft);
+	}
 
 	
 	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
@@ -33,12 +36,21 @@ public class DirectoryServlet extends BaseServlet {
 		if (! url.endsWith("/"))
 			path=url.substring(url.lastIndexOf('/')+1)+"/";
 		String name=url.substring("/dir/".length());
-		int pos=name.indexOf("/");
+		int pos=name.indexOf(":");
 		String dir="";
 		if (pos>0) {
 			dir=name.substring(pos+1);
 			name=name.substring(0,pos);
 		}
+		// TODO: this hack makes dynamic path names sometimes work in a static context
+		if (dir.startsWith("dynamic:")) {
+			dir=dir.substring(8);
+			dir=dir.replaceAll("%7B", "{");
+			dir=dir.replaceAll("%7D", "}");
+			dir=TemplateUtil.processTemplate(dir, gft.getContext());
+		}
+		
+		
 		if (name.endsWith(":"))
 			name=name.substring(0,pos-1);
 		if (dir.length()>1024)
@@ -48,7 +60,7 @@ public class DirectoryServlet extends BaseServlet {
 		if (dir.indexOf("..")>=0)
 			throw new BasicFunctionalException("Dirname ["+dir+"] is not allowed to contain .. pattern");
 
-		out.println("<h1>Directory "+name+":/"+dir+"</h1>");
+		out.println("<h1>Directory "+name+":"+dir+"</h1>");
 		out.println("<table>");
 		out.println("<tr><td><b>filename</b></td><td width=100 ALIGN=RIGHT><b>filesize</b></td><td><b>modification date</b></td></tr>");
 		FileServerConnection conn = gft.getFileServer(name).openConnection();
