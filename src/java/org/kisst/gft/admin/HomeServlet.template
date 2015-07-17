@@ -1,13 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+a:hover   { text-decoration: underline; color: #000000; background-color: #FF704D;}
+a:active  { text-decoration: underline; color: #000000; background-color: #FF704D;}
+</style>
+
 <#if gft.configBroken>
   <body bgcolor="#FF4444">
   <h1>Warning Configuration is Broken</h1>
 </#if>
 
 <h1>${gft.topname?upper_case} version ${gft.version}</h1> 
-started on ${gft.startupTime?datetime}<br>
-<a href="config">Configuration</a><br> 
-
-<a href="reset">Reset JAMON logging</a><br>
 
 <table> 
   <tr>
@@ -24,6 +28,14 @@ started on ${gft.startupTime?datetime}<br>
 </#list> 
 </table> 
 <br/>
+
+<h2>Status</h2> 
+<ul>
+<li><a href="logging/hours=24&channel=${gft.topname?upper_case}-Service">started on ${gft.startupTime?datetime}</a></li>
+<li><a href="logging/hours=1">View ALL Logging in LOGB</a></li>
+<li><a href="logging/hours=1&level=error">View ERROR Logging in LOGB</a></li>
+</ul>
+
 <table> 
   <tr>
     <td><b>STATUS</b></td>
@@ -38,6 +50,7 @@ started on ${gft.startupTime?datetime}<br>
   </tr>
 </#list> 
 </table> 
+
 
 
 
@@ -66,12 +79,6 @@ started on ${gft.startupTime?datetime}<br>
   </tr>
 </#list> 
 </table> 
-
-<h2>Logging</h2> 
-<ul>
-<li><a href=logging/hours=1>View ALL Logging in LOGB</a></li>
-<li><a href=logging/hours=1&level=error>View ERROR Logging in LOGB</a></li>
-</ul>
 
 <h2>Pollers</h2> 
 <table> 
@@ -138,3 +145,11 @@ started on ${gft.startupTime?datetime}<br>
 </#list> 
 </table> 
 
+<h2>Beheer</h2> 
+<ul>
+<li><a href="config">Configuration</a></li>
+<li><a href="reset">Reset JAMON logging</a></li>
+</ul>
+
+</body>
+</html>

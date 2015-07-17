@@ -5,7 +5,7 @@ import org.kisst.gft.action.Transaction;
 import org.kisst.gft.poller.PollerJob;
 import org.kisst.gft.task.BasicTask;
 
-public class FoundFileTask extends BasicTask  {
+public class PollerTask extends BasicTask  {
 	
 	public final FileServerConnection fsconn;
 	public final String filename;
@@ -13,8 +13,8 @@ public class FoundFileTask extends BasicTask  {
 	private final PollerJob job;
 	private boolean inprogress=false;
 
-	public FoundFileTask(PollerJob taskdef, FileServerConnection fsconn, String filename) {
-		super(taskdef.gft, taskdef);
+	public PollerTask(PollerJob taskdef, FileServerConnection fsconn, String filename) {
+		super(taskdef.gft, taskdef, filename);
 		this.job=taskdef;
 		this.fsconn=fsconn;
 		this.filename = filename;
@@ -24,8 +24,6 @@ public class FoundFileTask extends BasicTask  {
         else
         	transaction=null;
 	}
-	@Override public String toString() { return toString(filename); }
-	@Override public String getIdentification() { return filename; }
 
 	public void moveToInProgress() throws FileCouldNotBeMovedException {
 		fsconn.move(getOrigPath(),	getInprogressPath());

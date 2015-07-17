@@ -3,7 +3,6 @@ package org.kisst.gft.task;
 import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.LogService;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.admin.WritesHtml;
 import org.kisst.props4j.Props;
@@ -61,15 +60,14 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	
 	
 	private void logStart(Task task) {
-		LogService.log("info", "start", task.getTaskDefinition().getName(), "started", "Started "+getLogDetails(task)); 
+		task.logInfo("Started "+getLogDetails(task)); 
 	}
 	
 	private void logCompleted(Task task) {
-		LogService.log("info", "done", task.getTaskDefinition().getName(), "completed","Completed "+getLogDetails(task));
+		task.logInfo("Completed "+getLogDetails(task));
 	}
 	private void logError(Task task, RuntimeException e) {
-		String details = "Fout bij actie:"+task.getLastAction()+" fout:"+e.getMessage()+getLogDetails(task);
-		LogService.log("error", task.getLastAction(), task.getTaskDefinition().getName(), "error", details);
+		task.logError( "Fout:"+e.getMessage()+": "+getLogDetails(task));
 	}
 
 	protected void writeHtmlHeader(PrintWriter out) {
@@ -92,7 +90,11 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 		out.println("</pre>");
 	}
 
-	protected void executeTask(Task task) { getFlow().execute(task); }
+	protected void executeTask(Task task) {
+		Action action = getFlow();
+		task.setCurrentAction(action.toString());
+		action.execute(task);
+	}
 
 	@Override public void writeHtml(PrintWriter out) {
 		writeHtmlHeader(out);

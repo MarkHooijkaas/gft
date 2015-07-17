@@ -59,6 +59,7 @@ public class ActionExecutor {
 			String channelName= task.getTaskDefinition().getName();
 			mon2=MonitorFactory.start("channel:"+channelName+":action:"+name);
 			try {
+				task.setCurrentAction(name);
 				tryToExecute(a, task);
 				done=true;
 			}
@@ -88,9 +89,6 @@ public class ActionExecutor {
 			finally {
 				mon1.stop();
 				if (mon2!=null) mon2.stop();
-				// This needs to be done here, otherwise the log_error will always log the log_error action as last action.
-				// TODO: a more elegant solution is desired
-				task.setLastAction(name);
 			}
 			if (done && logger.isInfoEnabled())
 				logger.info("action "+name+" succesful");

@@ -3,6 +3,7 @@ package org.kisst.gft.task;
 import java.io.File;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.LogService;
 import org.kisst.gft.action.Action;
 import org.kisst.gft.filetransfer.FileLocation;
 import org.kisst.props4j.MultiProps;
@@ -19,15 +20,17 @@ public class BasicTask implements Task {
 
 	public final GftContainer gft;
 	private final TaskDefinition taskdef;
+	private final String identification;
 	
 	private final SimpleProps vars=new SimpleProps();;
 	private final SimpleProps context;
 
 	private Exception lastError=null;
-	private String lastAction=null;
+	private String currentAction="StartingTask";
 	
-	public BasicTask(GftContainer gft, TaskDefinition taskdef) {
+	public BasicTask(GftContainer gft, TaskDefinition taskdef, String id) {
 		this.gft = gft;
+		this.identification=id;
 		this.context=gft.getContext().shallowClone();
 		Object defaultVars = taskdef.getProps().get("defaultVars", null);
 		if (defaultVars instanceof Props)
@@ -38,8 +41,7 @@ public class BasicTask implements Task {
 		this.taskdef = taskdef;
 	}
 
-	@Override
-	public String toString() { return toString(""); }
+	@Override public String toString() { return toString(identification); }
 	protected String toString(String details) {	return this.getClass().getSimpleName()+"("+this.taskdef.getName()+":"+details+")"; }
 	
 	public String toFullString() {
@@ -49,8 +51,14 @@ public class BasicTask implements Task {
 		return result.toString();
 	}
 	
+	public void logError(String msg) { LogService.log("error",getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
+	public void logWarn(String msg)  { LogService.log("warn", getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
+	public void logInfo(String msg)  { LogService.log("info", getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
+	
+	
+	
 	public TaskDefinition getTaskDefinition() { return taskdef; }
-	@Override	public String getIdentification() { return toString(""); }
+	@Override final public String getIdentification() { return identification; }
 	public void run() { taskdef.run(this); }
 	
 	public void save() {  throw new RuntimeException("save not implemented yet"); }
@@ -58,8 +66,8 @@ public class BasicTask implements Task {
 	public Exception getLastError() { return lastError; }
 	public void setLastError(Exception e) {	this.lastError=e; }
 	
-	public String getLastAction() { return lastAction; }
-	public void setLastAction(String act) {	this.lastAction=act; }
+	public String getCurrentAction() { return currentAction; }
+	public void setCurrentAction(String act) {	this.currentAction=act; }
 
 	@Override public Object getFieldValue(String name) { throw new RuntimeException("getFieldValue not implemented for "+this.getClass()); }
 	public Object getVar(String name) { return vars.get(name,null); }
@@ -91,8 +99,10 @@ public class BasicTask implements Task {
 	}
 	public void addState(MappedStateException mse) {
 		mse.addState("CHANNEL", getTaskDefinition().getName());
-		mse.addState("ID", getIdentification());
-		mse.addState("LAST_ACTION", getLastAction());
+		try {
+			mse.addState("ID", getIdentification());
+		} catch (RuntimeException e) {} // ignore
+		mse.addState("LAST_ACTION", getCurrentAction());
 		mse.addState("LAST_ERROR", getLastError().getMessage());
 		for (String key: vars.keys())
 			mse.addState("VAR_"+key, ""+vars.get(key, null));

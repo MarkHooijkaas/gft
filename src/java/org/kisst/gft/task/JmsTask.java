@@ -4,11 +4,11 @@ import org.kisst.gft.GftContainer;
 import org.kisst.jms.JmsMessage;
 
 
-public class JmsTask extends BasicTask implements TextTask {
+public abstract class JmsTask extends BasicTask implements TextTask {
 	private final JmsMessage msg;
 	
-	public JmsTask(GftContainer gft, TaskDefinition taskdef, JmsMessage msg) {
-		super(gft, taskdef);
+	public JmsTask(GftContainer gft, TaskDefinition taskdef, String id, JmsMessage msg) {
+		super(gft, taskdef, id);
 		this.msg=msg;
 	}
 
@@ -16,9 +16,5 @@ public class JmsTask extends BasicTask implements TextTask {
 	
 	public JmsMessage getJmsMessage() { return msg; }
 
-	@Override
-	public String getText() { return getJmsMessage().getData();} 
-	
-	@Override public String getIdentification() { return ""; }
-
+	@Override public String getText() { return getJmsMessage().getData();} 
 }

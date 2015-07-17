@@ -10,7 +10,7 @@ import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
-import org.kisst.gft.filetransfer.FoundFileTask;
+import org.kisst.gft.filetransfer.PollerTask;
 import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
@@ -113,7 +113,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		logger.info("Folder {} pause = {}", dir, paused);
 	}
 	public String getFullName() { return parent.getName()+"."+name; }
-	public String getName() { return name; }
+	public String getName() { return parent.getName()+"."+name; }
 	public String getDir() { return dir; }
 	public String getMoveToDir() { return moveToDir; }
 	public int getRuns() { return runs; }
@@ -157,11 +157,11 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	private void processFile(FileServerConnection fsconn, String filename) {
 		logger.info(getFullName()+" - {} {} is klaar om verplaatst te worden.",logname, dir + "/" + filename);
-		FoundFileTask task=null;
+		PollerTask task=null;
 		if (pollForEntireDirectories)
-			task=new FoundFileTask(this, fsconn, dir + "/" + filename);
+			task=new PollerTask(this, fsconn, dir + "/" + filename);
 		else
-			task=new FoundFileTask(this, fsconn, filename);
+			task=new PollerTask(this, fsconn, filename);
 		
 		task.startTransaction();
 		boolean completed=false;
@@ -227,13 +227,13 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	}
 	
 	
-	private void tryToMove(FoundFileTask task) throws FileCouldNotBeMovedException {
+	private void tryToMove(PollerTask task) throws FileCouldNotBeMovedException {
 		try {
 			task.moveToInProgress();
 		}
 		catch (RuntimeException e) { 
 			logger.warn(getFullName()+" Could not move "+logname+" "+task.filename+" to " +moveToDir, e);
-			rememberFailedMove(task.filename);
+			rememberFailedMove(task.filename, e);
 			if (e instanceof FileCouldNotBeMovedException)
 				throw e;
 			throw new FileCouldNotBeMovedException(task.filename, e);
@@ -247,15 +247,15 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		return tmp;
 	}
 	
-	private void rememberFailedMove(String filename) {
+	private void rememberFailedMove(String filename, RuntimeException e) {
 		int trycount=getTryCount(filename)+1;
 		listener.updateGuiErrors(name, errors++);
 		logger.debug("retrynummer {} van {}", trycount, filename);
 		if (trycount < maxNrofMoveTries) {
 			//LogService.log("WARN", "failed_move", getFullName(), "poller", "failed to move file "+filename+" to "+moveToDir);
-			logger.warn(getFullName() + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt. Dit wordt later nog een keer geprobeerd.");
+			logger.warn(getFullName() + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt. Dit wordt later nog een keer geprobeerd."+e.getMessage());
 		} else {
-			LogService.log("ERROR", "failed_move", getFullName(), "poller", "failed to move file "+filename+" to "+moveToDir);
+			LogService.log("error", "MoveToInProgress", getFullName(), filename, "failed "+trycount+" times to move file from "+dir+" to "+moveToDir+": "+e.getMessage());
 			logger.error(getFullName() + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt niet na " + trycount + " keer proberen.");
 			//known.remove(filename); // Zodat het weer vanaf begin opnieuw gaat, maar er is wel en Error gegeven.
 		}

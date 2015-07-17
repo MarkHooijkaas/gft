@@ -26,7 +26,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FoundFileTask;
+import org.kisst.gft.filetransfer.PollerTask;
 import org.kisst.gft.poller.PollerJob;
 import org.kisst.gft.task.Task;
 import org.kisst.jms.JmsSystem;
@@ -84,7 +84,7 @@ public abstract class SendTransactedMessageAction implements PollerJob.Action, T
         catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
 	@Override public void execute(Task task) {
-    	FoundFileTask fftask=(FoundFileTask) task;
+    	PollerTask fftask=(PollerTask) task;
     	boolean succesfull=false;
 		try {
 	    	if (getSession(fftask)==null)

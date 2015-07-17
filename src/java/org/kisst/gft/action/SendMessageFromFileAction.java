@@ -20,7 +20,7 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 package org.kisst.gft.action;
 
 import org.kisst.gft.GftContainer;
-import org.kisst.gft.filetransfer.FoundFileTask;
+import org.kisst.gft.filetransfer.PollerTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 
@@ -37,7 +37,7 @@ public class SendMessageFromFileAction extends SendTransactedMessageAction {
 	@Override public boolean deleteInProgressFile() { return true; }
 
 	@Override protected String getMessageContent(Task task) {
-		FoundFileTask fftask=(FoundFileTask) task;
+		PollerTask fftask=(PollerTask) task;
         return fftask.fsconn.getFileContentAsString(fftask.getActivePath());
 	}
 }

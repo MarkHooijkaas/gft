@@ -21,14 +21,11 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 	
 	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
 
-	public FileTransferTask(Channel channel, JmsMessage msg) {
-		super(channel.gft, channel, msg); 
+	public FileTransferTask(Channel channel, JmsMessage msg, String xmlPath) {
+		super(channel.gft, channel, msg, getContent(msg), xmlPath); 
 		
 		this.channel= channel; 
-		//if (channel==null)
-		//	throw new FunctionalException("Could not find channel with name "+getContent().getChildText("kanaal"));
-		// Strip preceding slashes to normalize the path.
-		this.filename = getFilename(); 
+		this.filename = getContent().getChildText(xmlPath); 
 
 		if ( filename.length()>1024)
 			throw new BasicFunctionalException("Filename length should not exceed 1024 characters, in channel "+channel.getName()+", filename "+filename);
@@ -43,10 +40,6 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 		else
 			this.finaldest=new FileLocation(channel.getFinalDestinationFile(),filename);
 	}
-
-	abstract protected  String getFilename();
-	@Override public String getIdentification() { return getFilename(); }
-
 
 	@Override public String toString() { return toString(" from:"+getSourceFile()+", to: "+getDestinationFile()); } 
 	@Override public void run() { channel.run(this); }

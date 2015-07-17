@@ -57,11 +57,11 @@ public class TaskStarter implements MessageHandler {
 					return task;
 			}
 			catch (RuntimeException e) {
-				LogService.log("error", "jms", "handle", "exception", e.getMessage());
+				LogService.log("error", "ReceivingMessage", "JmsTaskStarter", msg.getMessageId(), e.getMessage());
 				throw e;
 			}
 		}	
-		LogService.log("error", "jms", "handle", "exception", "could not determine task type of message "+msg);
+		LogService.log("error", "ReceivingMessage", "JmsTaskStarter", msg.getMessageId(), "could not determine task type of message "+msg);
 		throw new RuntimeException("could not determine task type of message "+msg);
 	}
 }

@@ -8,10 +8,15 @@ public interface Task {
 	
 	public void run();
 
+	public void logError(String msg);
+	public void logWarn(String msg);
+	public void logInfo(String msg);
+
+	public String getCurrentAction();
+	public void setCurrentAction(String name);
+
 	public void setLastError(Exception e);
 	public Exception getLastError();
-	public String getLastAction();
-	public void setLastAction(String name);
 	
 	public void setVar(String name, Object value);
 	public Object getVar(String name);

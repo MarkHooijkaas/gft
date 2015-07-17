@@ -302,7 +302,7 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 
 	public void start() {
 		logger.info("Starting GftContainer on host "+hostName);
-		LogService.log("info", "start", getTopname().toUpperCase()+" Service", hostName, "Starting "+getTopname().toUpperCase()+" Service on host "+ hostName);
+		LogService.log("info", "StartingContainer", getTopname().toUpperCase()+"-Service", hostName, "Starting "+getTopname().toUpperCase()+" Service on host "+ hostName);
 
 		this.jamonThread = new JamonThread(props);
 		Thread t = new Thread(jamonThread);
@@ -323,6 +323,7 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 	}
 	public void reset() {
 		logger.info("Resetting GftContainer on host "+hostName);
+		LogService.log("info", "Resetting", getTopname().toUpperCase()+"-Service", hostName, "Reset called for "+getTopname().toUpperCase()+" Service on host "+ hostName);
 		JamonUtil.jamonLog(props, "RESET called, dumping all statistics");
 		jamonThread.reset();
 		for (Poller p: pollers.values())
@@ -331,7 +332,7 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 	
 	public void stop() {
 		logger.info("Stopping GftContainer on host "+hostName);
-		LogService.log("info", "stop", getTopname().toUpperCase()+" Service", hostName, "Stopping "+getTopname().toUpperCase()+" Service on host "+ hostName);
+		LogService.log("info", "Stopping", getTopname().toUpperCase()+"-Service", hostName, "Stopping "+getTopname().toUpperCase()+" Service on host "+ hostName);
 		JamonUtil.jamonLog(props, "STOP called, dumping all statistics");
 		jamonThread.stop();
 		for (MultiListener q : listeners.values() )
