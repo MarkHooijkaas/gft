@@ -34,8 +34,7 @@ public class SftpGetAction extends BaseAction {
 		super(props);
 	}
 
-
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		SourceFile src= (SourceFile) task;
 
 		FileServerConnection fsconn=src.getSourceFile().getFileServer().openConnection();
@@ -49,8 +48,5 @@ public class SftpGetAction extends BaseAction {
 			if (fsconn!=null)
 				fsconn.close();
 		}
-
-		return null;
 	}
-
 }

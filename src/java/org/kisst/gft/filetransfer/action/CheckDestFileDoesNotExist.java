@@ -15,9 +15,9 @@ public class CheckDestFileDoesNotExist extends BaseAction {
 		public Problem(FileLocation loc) { super("On host "+loc.getFileServer()+" there already is a file "+loc.getPath()); }
 	}
 
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		FileLocation dest = ft.getDestinationFile();
 		FileLocation finaldest = ft.getFinalDestinationFile();
@@ -25,7 +25,6 @@ public class CheckDestFileDoesNotExist extends BaseAction {
 			throw new Problem(dest);
 		if (finaldest!=null && finaldest.fileExists())
 			throw new Problem(finaldest);
-		return null;
 	}
 
 }

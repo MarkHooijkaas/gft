@@ -35,11 +35,11 @@ public class HttpAction extends HttpCaller implements Action {
 		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 
-	public boolean safeToRetry() { return safeToRetry; }
+	@Override public boolean safeToRetry() { return safeToRetry; }
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		BasicTask basictask= (BasicTask) task;
 		String body= gft.processTemplate(templateName, basictask.getActionContext(this));
-		return httpCall(body);
+		httpCall(body); // TODO: do something with response?????
 	}
 }

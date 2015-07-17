@@ -12,9 +12,9 @@ import org.kisst.props4j.Props;
 public class DeleteSourceDirectoryIfEmpty extends BaseAction {
 	public DeleteSourceDirectoryIfEmpty(Props props) { super(props); }
 
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		FileLocation file = ((SourceFile) task).getSourceFile();
 		FileLocation dir = file.getParentDirectory();
 		FileServerConnection fsconn = dir.getFileServer().openConnection();
@@ -28,7 +28,6 @@ public class DeleteSourceDirectoryIfEmpty extends BaseAction {
 		if (count==0)
 			fsconn.deleteFile(dir.getPath());
 		// TODO: throw an error if directory is not empty????
-		return null;
 	}
 
 }

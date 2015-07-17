@@ -18,7 +18,7 @@ public class LocalCommandAction implements Action{
 		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		if (command != null) {
 			logger.info("{} - Starten met action {}", name, command);
 
@@ -49,11 +49,8 @@ public class LocalCommandAction implements Action{
 		}else{
 			logger.error("geen actie of command gevonden voor poller {}", name);
 		}		
-		
-		return null;
 	}
 
-	@Override
-	public boolean safeToRetry() { return safeToRetry; }
+	@Override public boolean safeToRetry() { return safeToRetry; }
 
 }

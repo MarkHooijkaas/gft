@@ -33,7 +33,7 @@ public class SftpPutAction extends BaseAction {
 
 	private final static Logger logger=LoggerFactory.getLogger(SftpPutAction.class);
 	
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		
 		FileServer fileserver= ft.getDestinationFile().getFileServer();
@@ -48,8 +48,6 @@ public class SftpPutAction extends BaseAction {
 			if (fsconn!=null)
 				fsconn.close();
 		}
-
-		return null;
 	}
 
 }

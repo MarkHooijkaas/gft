@@ -30,17 +30,15 @@ public class LogCompleted implements Action {
 
 	public LogCompleted(GftContainer gft, Props props) {}
 
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
 
-	public Object execute(Task t) {
+	@Override public void execute(Task t) {
 		String details="";
 		if (t instanceof FileTransferTask) {
 			FileTransferTask ft = (FileTransferTask) t;
 			details= "GFT geslaagd, kanaal: "+ft.channel.name+", bestand: "+ft.filename+ ", van: "+ft.getSourceFile()+" naar: "+ft.getDestinationFile();
 		}
 		LogService.log("info", "done", t.getTaskDefinition().getName(), "completed",details); 
-				
-		return null;
 	}
 }

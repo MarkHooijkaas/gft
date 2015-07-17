@@ -29,10 +29,9 @@ import org.kisst.props4j.Props;
 public class LogStart  implements Action {
 	public LogStart(GftContainer gft, Props props) {}
 	
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
-
-	public Object execute(Task t) {
+	@Override public void execute(Task t) {
 		String details="";
 		if (t instanceof FileTransferTask) {
 			FileTransferTask ft = (FileTransferTask) t;
@@ -41,6 +40,5 @@ public class LogStart  implements Action {
 				+", naar:"+ft.getDestinationFile();
 		}
 		LogService.log("info", "start", t.getTaskDefinition().getName(), "started", details); 
-		return null;
 	}
 }

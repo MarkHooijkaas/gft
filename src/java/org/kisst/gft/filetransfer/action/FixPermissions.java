@@ -11,9 +11,9 @@ public class FixPermissions extends BaseAction {
 	public FixPermissions(Props props) { super(props); }
 
 
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		String path = ft.getDestinationFile().getPath();
 		String destdir=path.substring(0,path.lastIndexOf('/'));
@@ -29,7 +29,6 @@ public class FixPermissions extends BaseAction {
 			throw new RuntimeException("Problem parsing dspaut output: "+s);
 		String autlist=s.substring(pos+1, pos2).trim();
 		dest.call("system chgaut \"obj('"+path+"') autl("+autlist+")\"");
-		return null;
 	}
 
 }

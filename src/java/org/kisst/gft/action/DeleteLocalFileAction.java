@@ -33,7 +33,7 @@ public class DeleteLocalFileAction extends BaseAction {
 	
 	public DeleteLocalFileAction(Props props) { super(props); }
         
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		BasicTask ft= (BasicTask) task;
 	
 		// Deletes all files and subdirectories under dir.
@@ -45,7 +45,6 @@ public class DeleteLocalFileAction extends BaseAction {
 			logger.info("removal of directory {}, including files succeeded", ft.getTempFile().getPath());
 		else
 			logger.error("removal of directory {}, including files failed", ft.getTempFile().getPath());	
-		return null;
 	}
 	
 	public static boolean deleteDir(File dir) {

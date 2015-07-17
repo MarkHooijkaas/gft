@@ -41,14 +41,13 @@ public class ActionList extends ActionExecutor implements Action, WritesHtml {
 	}
 	
 	
-	public boolean safeToRetry() { return false; } // TODO: 
+	@Override public boolean safeToRetry() { return false; } // TODO: 
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		for (String name: actions.keySet()) {
 			Action a=actions.get(name);
 			execute(a,name,task);
 		}
-		return null;
 	}
 	
 	public boolean contains(Class<?> cls) {

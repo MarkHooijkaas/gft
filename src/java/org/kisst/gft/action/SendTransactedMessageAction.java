@@ -72,9 +72,7 @@ public abstract class SendTransactedMessageAction implements Action, Transaction
 
     abstract String getMessageContent(Task task);
     
-    public boolean safeToRetry() {
-        return false;
-    }
+    @Override public boolean safeToRetry() { return false; }
 
     private Session getSession(Task task) { return (Session) task.getVar(VAR_JMS_SESSION); }
     
@@ -85,7 +83,7 @@ public abstract class SendTransactedMessageAction implements Action, Transaction
         }
         catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
-    public Object execute(Task task) {
+	@Override public void execute(Task task) {
     	FoundFileTask fftask=(FoundFileTask) task;
     	boolean succesfull=false;
 		try {
@@ -100,7 +98,6 @@ public abstract class SendTransactedMessageAction implements Action, Transaction
     		else
     			rollbackTransaction(fftask);
     	}
-    	return null;
     }
 
     @Override public void commitTransaction(Task task) {

@@ -33,7 +33,7 @@ public class SendMessageFromFileAction extends SendTransactedMessageAction {
 		sendMessage(task);
 	}
 	
-    public Object execute(Task task) { return null; } // the message is already sent in the prepare statement
+	@Override public void execute(Task task) {  } // the message is already sent in the prepare statement
 	
 	@Override protected String getMessageContent(Task task) {
 		FoundFileTask fftask=(FoundFileTask) task;

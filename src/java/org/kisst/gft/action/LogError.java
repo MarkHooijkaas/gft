@@ -29,16 +29,14 @@ import org.kisst.props4j.Props;
 public class LogError implements Action {
 	public LogError(GftContainer gft, Props props) {}
 	
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
-
-	public Object execute(Task t) {
+	@Override public void execute(Task t) {
 		String details = t.getLastError().getMessage();
 		if (t instanceof FileTransferTask) {
 			FileTransferTask ft = (FileTransferTask) t;
 			details = "Fout bij GFT filetransfer, kanaal: "+ft.channel.name+", van: "+ft.getSourceFile()+" naar: "+ft.getDestinationFile()+" actie:"+ft.getLastAction()+" fout:"+ft.getLastError().getMessage();
 		}
 		LogService.log("error", t.getLastAction(), t.getTaskDefinition().getName(), "error", details);
-		return null;
 	}
 }

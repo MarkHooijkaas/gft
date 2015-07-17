@@ -8,13 +8,12 @@ import org.kisst.props4j.Props;
 public class CheckCopiedFile extends BaseAction {
 	public CheckCopiedFile(Props props) { super(props); }
 
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		// TODO: remember filesize
 		if (! ft.getDestinationFile().fileExists())
 				throw new RuntimeException("Copied file "+ft.getDestinationFile()+" does not seem to exist");
-		return null;
 	}
 }

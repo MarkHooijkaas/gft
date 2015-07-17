@@ -20,7 +20,7 @@ import org.slf4j.LoggerFactory;
 import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 
-public class BasicLinearFlow implements WritesHtml {
+public class BasicLinearFlow implements WritesHtml, Action {
 	final static Logger logger=LoggerFactory.getLogger(BasicLinearFlow.class); 
 
 	protected final LinkedHashMap<String, Action> actions= new LinkedHashMap<String, Action>();;
@@ -38,7 +38,7 @@ public class BasicLinearFlow implements WritesHtml {
 		retryNonFunctionalExceptions = props.getBoolean("retryNonFunctionalExceptions", false);
 	}
 	public Props getProps() { return props; }
-	public boolean safeToRetry() { 
+	@Override public boolean safeToRetry() { 
 		for (Action a: actions.values()) {
 			if (! a.safeToRetry())
 				return false;
@@ -83,7 +83,7 @@ public class BasicLinearFlow implements WritesHtml {
 		return new MultiProps(actionprops,props);
 	}
 	
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		logger.info("Flow start "+this.getClass().getCanonicalName());
 		for (String name: actions.keySet()) {
 			if (isSkippedAction(name)) {
@@ -138,7 +138,6 @@ public class BasicLinearFlow implements WritesHtml {
 			}
 		}
 		logger.info("Flow succeeded "+this.getClass().getCanonicalName());
-		return null;
 	}
 	protected Action myCreateAction(Class<?> clz, Props props) {
 		Constructor<?> c=ReflectionUtil.getConstructor(clz, new Class<?>[] {BasicLinearFlow.class, Props.class} );

@@ -7,11 +7,10 @@ import org.kisst.props4j.Props;
 public class DeleteSourceFile extends BaseAction {
 	public DeleteSourceFile(Props props) { super(props); }
 
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		((SourceFile) task).getSourceFile().deleteFile();
-		return null;
 	}
 
 }

@@ -29,15 +29,14 @@ public class SshAction implements Action {
 		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 
-	public boolean safeToRetry() { return safeToRetry; }
+	@Override public boolean safeToRetry() { return safeToRetry; }
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		BasicTask basictask= (BasicTask) task;
 		String command=gft.processTemplate(commandTemplate, basictask.getActionContext(this));
 		logger.info("ssh call to {} with command {}", host, command);
 		String result=host.call(command);
 		logger.info("ssh result {}",result);
-		return null;
 	}
 
 }

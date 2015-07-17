@@ -11,9 +11,9 @@ import org.kisst.props4j.Props;
 public class CopyFile extends BaseAction {
 	public CopyFile(Props props) { super(props); }
 
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		Channel chan=ft.channel;
 		FileLocation src=ft.getSourceFile();
@@ -26,7 +26,6 @@ public class CopyFile extends BaseAction {
 			srcsrv.copyFileTo(src.getPath(), destsrv, dest.getPath());
 		else if ("pull".equals(mode))
 			destsrv.copyFileFrom(srcsrv, src.getPath(), dest.getPath());
-		return null;
 	}
 
 }

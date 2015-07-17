@@ -45,7 +45,7 @@ public class SftpGetPutAction extends BaseAction {
 
 	@Override public String toString() { return SftpGetPutAction.class.getSimpleName()+"(resumeAllowed="+resumeAllowed+")"; } 
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		FileLocation src= ((SourceFile) task).getSourceFile();
 		FileLocation dest = ((DestinationFile) task).getDestinationFile();
 
@@ -71,8 +71,6 @@ public class SftpGetPutAction extends BaseAction {
 			if (destfsconn!=null)
 				destfsconn.close();
 		}
-
-		return null;
 	}
 
 }

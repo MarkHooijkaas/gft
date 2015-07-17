@@ -17,14 +17,13 @@ public class EchoAction implements Action {
 		template =props.getString("template");
 	}
 
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		BasicTask basictask= (BasicTask) task;
 		String result=gft.processTemplate(template, basictask.getActionContext(this));
 
 		System.out.println(result);
-		return null;
 	}
 
 }

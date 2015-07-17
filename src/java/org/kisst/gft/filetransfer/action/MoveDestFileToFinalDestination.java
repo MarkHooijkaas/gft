@@ -15,14 +15,14 @@ public class MoveDestFileToFinalDestination extends BaseAction {
 		public Problem(FileLocation loc) { super("On host "+loc.getFileServer()+" there already is a file "+loc.getPath()); }
 	}
 
-	public boolean safeToRetry() { return true; }
+	@Override public boolean safeToRetry() { return true; }
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		DestinationFile desttask= (DestinationFile) task;
 		FileLocation dest = desttask.getDestinationFile();
 		FileLocation finaldest = desttask.getFinalDestinationFile();
 		if (finaldest==null || finaldest.getPath().equals(dest.getPath()))
-			return null; // nothing to do
+			return; // nothing to do
 		// TODO: check if fileservers are the same
 		FileServerConnection fsconn=dest.getFileServer().openConnection();
 		try {
@@ -32,7 +32,6 @@ public class MoveDestFileToFinalDestination extends BaseAction {
 			if (fsconn!=null)
 				fsconn.close();
 		}
-		return null;
 	}
 
 }
