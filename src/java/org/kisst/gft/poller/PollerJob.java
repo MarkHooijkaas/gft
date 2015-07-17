@@ -4,7 +4,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 
 import org.kisst.gft.LogService;
-import org.kisst.gft.action.Action;
+//import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
@@ -21,6 +21,10 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private static final Logger logger = LoggerFactory.getLogger(PollerJob.class);
 	private static Class<?> defaultAction=null; // TODO: better defaultAction
 	public static void setDefaultAcion(Class<?> defaultAction) { PollerJob.defaultAction=defaultAction; }
+	
+	public interface Action extends org.kisst.gft.action.Action {
+		public boolean deleteInProgressFile();
+	}
 	
 	private final Action flow;
 	private final Poller parent;
@@ -55,13 +59,13 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	public PollerJob(Poller parent,Props props) {
 		super(parent.gft, props);
-		this.flow=ActionList.createAction(gft, this, defaultAction);
+		this.flow=(Action) ActionList.createAction(gft, this, defaultAction);
 		this.parent=parent;
 		this.fileserver = null; // TODO: remove
 		delay = props.getInt("delay", 10000);
 		dir = TemplateUtil.processTemplate(props.getString("pollerDirectory"),gft.getContext());
 		moveToDir = TemplateUtil.processTemplate(props.getString("moveToDirectory"),gft.getContext());
-		deleteInProgressFile = props.getBoolean("deleteInProgressFile",	true);
+		deleteInProgressFile = props.getBoolean("deleteInProgressFile",	flow.deleteInProgressFile());
 		pollForEntireDirectories = props.getBoolean("pollForEntireDirectories",	false);
 		checkIfFileIsLocked = props.getBoolean("checkIfFileIsLocked",	false);
 		minimumSize= props.getLong("minimumSize", 0);

@@ -27,6 +27,7 @@ import javax.jms.TextMessage;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.filetransfer.FoundFileTask;
+import org.kisst.gft.poller.PollerJob;
 import org.kisst.gft.task.Task;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.JmsUtil;
@@ -34,7 +35,6 @@ import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /**
  * This class is a base class for sending messages transactionally, specifically from the PollerJob, using a FoundFileTask.
@@ -51,7 +51,7 @@ import org.slf4j.LoggerFactory;
  * or message is already sent it will not start over again.
  *
  */
-public abstract class SendTransactedMessageAction implements Action, Transaction {
+public abstract class SendTransactedMessageAction implements PollerJob.Action, Transaction {
 
     private static final String VAR_JMS_SESSION = "_jms_session";
     private static final String VAR_MESSAGE_SENT = "_message_sent";
@@ -73,7 +73,7 @@ public abstract class SendTransactedMessageAction implements Action, Transaction
     abstract String getMessageContent(Task task);
     
     @Override public boolean safeToRetry() { return false; }
-
+	
     private Session getSession(Task task) { return (Session) task.getVar(VAR_JMS_SESSION); }
     
 	@Override public void prepareTransaction(Task task) {
