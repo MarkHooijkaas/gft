@@ -18,10 +18,15 @@ public class MoveDestFileToFinalDestination extends BaseAction {
 	public boolean safeToRetry() { return true; }
 
 	public Object execute(Task task) {
-		DestinationFile dest= (DestinationFile) task;
-		FileServerConnection fsconn=dest.getDestinationFile().getFileServer().openConnection();
+		DestinationFile desttask= (DestinationFile) task;
+		FileLocation dest = desttask.getDestinationFile();
+		FileLocation finaldest = desttask.getFinalDestinationFile();
+		if (finaldest==null || finaldest.getPath().equals(dest.getPath()))
+			return null; // nothing to do
+		// TODO: check if fileservers are the same
+		FileServerConnection fsconn=dest.getFileServer().openConnection();
 		try {
-			fsconn.move(dest.getDestinationFile().getPath(), dest.getFinalDestinationFile().getPath());
+			fsconn.move(dest.getPath(), finaldest.getPath());
 		}
 		finally {
 			if (fsconn!=null)

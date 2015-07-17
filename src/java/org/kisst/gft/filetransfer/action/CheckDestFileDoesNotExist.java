@@ -19,8 +19,12 @@ public class CheckDestFileDoesNotExist extends BaseAction {
 
 	public Object execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
-		if (ft.getDestinationFile().fileExists())
-				throw new Problem(ft.getDestinationFile());
+		FileLocation dest = ft.getDestinationFile();
+		FileLocation finaldest = ft.getFinalDestinationFile();
+		if (dest.fileExists())
+			throw new Problem(dest);
+		if (finaldest!=null && finaldest.fileExists())
+			throw new Problem(finaldest);
 		return null;
 	}
 
