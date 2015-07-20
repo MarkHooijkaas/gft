@@ -104,8 +104,16 @@ public class ListenerServlet extends BaseServlet {
 				catch (RuntimeException ex) {
 					channel="Unknown format";
 				}
-				String errorText = msg.getStringProperty("state_LAST_ERROR");
+				String action = msg.getStringProperty("state_ACTION");
+				if (action==null)
+					action = msg.getStringProperty("state_LAST_ACTION");
+				String errorText = msg.getStringProperty("state_ERROR");
+				if (errorText==null)
+					errorText = msg.getStringProperty("state_LAST_ERROR");
 				if (errorText!=null) {
+					errorText = errorText.replace("++++++++++++++++++++++++++ IE filler+++++++++++++++++++++++++++++++++++++++", "");
+					errorText = errorText.replace("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", "");
+					errorText = errorText.replace("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", "");
 					if (errorText.length()>maxErroTextLength)
 						errorText=errorText.substring(0,maxErroTextLength);
 					errorText=quoteXml(errorText);
@@ -117,7 +125,7 @@ public class ListenerServlet extends BaseServlet {
 				out.println("<td>"+channel+"</td>");
 				out.println("<td><a href=\"/message/"+listener.getName()+"/"+qname+"/"+msgid+"\">"+msgid+"</a></td>");
 				out.println("<td>"+id+"</td>");
-				out.println("<td>"+msg.getStringProperty("state_LAST_ACTION")+"</td>");
+				out.println("<td>"+action+"</td>");
 				out.println("<td>"+errorText+"</td>");
 				out.println("</tr>");
 

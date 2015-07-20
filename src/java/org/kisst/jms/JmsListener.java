@@ -1,7 +1,9 @@
 package org.kisst.jms;
 
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Enumeration;
 
 import javax.jms.Destination;
@@ -360,32 +362,7 @@ public class JmsListener implements Runnable {
 					if (e!=null)
 						logger.error("LinkedException: ", linked);
 				}
-				String queue=errorqueue;
-				//if (e instanceof RetryableException)
-				//	queue=retryqueue;
-				Destination errordestination = session.createQueue(queue+system.sendParams);
-				MessageProducer producer = session.createProducer(errordestination);
-				Message errmsg=JmsUtil.cloneMessage(session, message);
-				if (useJmsPropsForErrorMessages && e instanceof MappedStateException) {
-					try { ((MQQueue) errordestination).setTargetClient(JMSC.MQJMS_CLIENT_JMS_COMPLIANT); } catch (Exception e2) { /* ignore */}
-					MappedStateException me = (MappedStateException) e;
-					for (String key: me.getKeys()) {
-						String value=null;
-						try{
-							value=me.getState(key);
-							if (value==null)
-								value="";
-							errmsg.setStringProperty("state_"+key, value);
-						}
-						catch (RuntimeException e2) { logger.warn("could not set JMS property ["+key+"] to value ["+value+"]",e2); }
-					}
-				}
-				producer.send(errmsg);
-				producer.close();
-				String id = errmsg.getJMSMessageID();
-				if (id.startsWith("ID:"))
-					id=id.substring(3);
-				logger.info("message send to queue {} with id {}",queue,id);
+				putInErrorQueue(message, e);
 				messageHandled=true;
 			}
             catch (JMSException e2) { throw JmsUtil.wrapJMSException(e2); }
@@ -402,6 +379,48 @@ public class JmsListener implements Runnable {
 				catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 			}
 		}
+	}
+
+	private void putInErrorQueue(Message message, Exception e) throws JMSException {
+		String equeue=errorqueue;
+		//if (e instanceof RetryableException)
+		//	queue=retryqueue;
+		Destination errordestination = session.createQueue(equeue+system.sendParams);
+		MessageProducer producer = session.createProducer(errordestination);
+		Message errmsg=JmsUtil.cloneMessage(session, message);
+		if (useJmsPropsForErrorMessages && e instanceof MappedStateException) {
+			try { ((MQQueue) errordestination).setTargetClient(JMSC.MQJMS_CLIENT_JMS_COMPLIANT); } catch (Exception e2) { /* ignore */}
+			Object prevTry = errmsg.getObjectProperty("state_TIME");
+			String prevdate="unknowndate";
+			if (prevTry instanceof String)
+				prevdate=(String) prevTry;
+			MappedStateException me = (MappedStateException) e;
+			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS");
+			String timestamp=formatter.format(new Date());
+			for (String key: me.getKeys()) {
+				String value=null;
+				try{
+					value=me.getState(key);
+					key="state_"+key;
+					if (value==null || value.length()==0)
+						continue;
+					Object oldValue=errmsg.getObjectProperty(key);
+					if (oldValue!=null) {
+						if (key.equals("state_ACTION") || key.equals("state_ERROR") || ! oldValue.equals(value) )
+							errmsg.setObjectProperty(key+"_"+prevdate, oldValue);// remember old value with a key that should be unique
+					}
+					errmsg.setStringProperty(key, value);
+				}
+				catch (RuntimeException e2) { logger.warn("could not set JMS property ["+key+"] to value ["+value+"]",e2); }
+			}
+			errmsg.setStringProperty("state_TIME", timestamp);
+		}
+		producer.send(errmsg);
+		producer.close();
+		String id = errmsg.getJMSMessageID();
+		if (id.startsWith("ID:"))
+			id=id.substring(3);
+		logger.info("message sent to error queue {} with id {}",equeue,id);
 	}
 
 }

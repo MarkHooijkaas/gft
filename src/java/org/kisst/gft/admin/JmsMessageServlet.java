@@ -59,8 +59,16 @@ public class JmsMessageServlet extends BaseServlet {
 					ArrayList<String> keys = Collections.list(msg.getPropertyNames());
 					Collections.sort(keys);
 					for (String key: keys) {
-						if( key.startsWith( "state_" ) )
-							out.println("<tr><td>"+key+"</td><td>"+msg.getObjectProperty(key)+"</td></tr>");
+						if( key.startsWith( "state_" ) ) {
+							Object value = msg.getObjectProperty(key);
+							if (key.contains("ERROR") && value instanceof String) {
+								String errorText = ((String) value).replace("++++++++++++++++++++++++++ IE filler+++++++++++++++++++++++++++++++++++++++", "");
+								errorText = errorText.replace("+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", "");
+								errorText = errorText.replace("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", "");
+								value=errorText;
+							}
+							out.println("<tr><td>"+key+"</td><td>"+value+"</td></tr>");
+						}
 					} 
 					out.println("</table>");
 				}

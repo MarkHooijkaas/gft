@@ -111,8 +111,8 @@ public class BasicTask implements Task {
 		try {
 			mse.addState("ID", getIdentification());
 		} catch (RuntimeException e) {} // ignore
-		mse.addState("LAST_ACTION", getCurrentAction());
-		mse.addState("LAST_ERROR", getLastError().getMessage());
+		mse.addState("ACTION", getCurrentAction());
+		mse.addState("ERROR", getLastError().getMessage());
 		for (String key: vars.keys())
 			mse.addState("VAR_"+key, ""+vars.get(key, null));
 		if (tempFile!=null)
