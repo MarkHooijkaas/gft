@@ -324,7 +324,7 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 	}
 	public void reset() {
 		logger.info("Resetting GftContainer on host "+getHostName());
-		LogService.log("info", "Resetting", getTopname().toUpperCase()+"-Service", getHostName(), "Reset called for "+getTopname().toUpperCase()+" Service");
+		LogService.log("info", "ResettingContainer", getTopname().toUpperCase()+"-Service", getHostName(), "Reset called for "+getTopname().toUpperCase()+" Service");
 		JamonUtil.jamonLog(props, "RESET called, dumping all statistics");
 		jamonThread.reset();
 		for (Poller p: pollers.values())
@@ -333,7 +333,7 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 	
 	public void stop() {
 		logger.info("Stopping GftContainer on host "+getHostName());
-		LogService.log("info", "Stopping", getTopname().toUpperCase()+"-Service", getHostName(), "Stopping "+getTopname().toUpperCase()+" Service");
+		LogService.log("info", "StoppingContainer", getTopname().toUpperCase()+"-Service", getHostName(), "Stopping "+getTopname().toUpperCase()+" Service");
 		JamonUtil.jamonLog(props, "STOP called, dumping all statistics");
 		jamonThread.stop();
 		for (MultiListener q : listeners.values() )

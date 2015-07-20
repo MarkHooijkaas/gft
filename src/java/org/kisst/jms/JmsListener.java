@@ -141,7 +141,7 @@ public class JmsListener implements Runnable {
 			try {
 				hostName = java.net.InetAddress.getLocalHost().getHostName();
 			} catch (UnknownHostException e1) {/* ignore, is only nice to have info for logging purposes */ }
-			LogService.log("error", "stop", "Listener", hostName, "Unrecoverable error during listening, stopped listening thread "+thread.getName()+" on host "+ hostName+": "+e.getMessage());
+			LogService.log("error", "StoppingListener", "Listener", hostName, "Unrecoverable error during listening, stopped listening thread "+thread.getName()+" on host "+ hostName+": "+e.getMessage());
 
 			if (props.getBoolean("exitOnUnrecoverableListenerError", false))
 				System.exit(1);
