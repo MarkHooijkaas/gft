@@ -12,6 +12,7 @@ import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.PollerTask;
 import org.kisst.gft.task.BasicTaskDefinition;
+import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
@@ -79,7 +80,6 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	}
 
 	@Override public Action getFlow() { return this.flow;}
-
 
 	public FileServer getFileServer() { 
 		if (fileserver==null)
@@ -155,6 +155,10 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	}
 	
 
+	// override to prevent logging (unless there is an error). processFile will log which task is ececuted
+	@Override protected void logStart(Task task) {}
+	@Override protected void logCompleted(Task task) {}
+
 	private void processFile(FileServerConnection fsconn, String filename) {
 		logger.info(getFullName()+" - {} {} is klaar om verplaatst te worden.",logname, dir + "/" + filename);
 		PollerTask task=null;
@@ -175,6 +179,8 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 				retries.remove(filename);
 			}
 			listener.updateGuiSuccess(name, successes++);
+			String msg=deleteInProgressFile? " and then removed" :"";
+			LogService.log("info", getFlow().getClass().getSimpleName(), getFullName(), filename, "Polled file is succesfully moved from "+dir+" to "+moveToDir+" and handled "+msg);
 		}
 		finally {
 			if (completed) {
