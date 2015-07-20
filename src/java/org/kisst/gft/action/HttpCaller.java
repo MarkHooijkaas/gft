@@ -149,6 +149,9 @@ public class HttpCaller {
 
             
             if (response.getStatusLine().getStatusCode() >= 300) {
+				result = result.replace(" ++++++++++++++++++++++++++ IE filler+++++++++++++++++++++++++++++++++++++++", "");
+				result = result.replace(" +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", "");
+				result = result.replace(" ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++", "");
                 throw new RuntimeException("HTTP call returned " + response.getStatusLine().getStatusCode() + "\n" + result);
             }
             return result;
