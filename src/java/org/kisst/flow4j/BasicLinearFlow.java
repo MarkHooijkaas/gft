@@ -100,7 +100,7 @@ public class BasicLinearFlow implements WritesHtml, Action {
 				String channelName= task.getTaskDefinition().getName();
 				mon2=MonitorFactory.start("channel:"+channelName+":action:"+name);
 				try {
-					task.setCurrentAction(name);
+					task.setCurrentAction(a);
 					a.execute(task);
 					done=true;
 				}

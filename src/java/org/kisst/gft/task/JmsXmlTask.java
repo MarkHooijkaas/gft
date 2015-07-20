@@ -8,8 +8,8 @@ import org.kisst.util.XmlNode;
 public class JmsXmlTask extends JmsTask implements SoapTask {
 	private final XmlNode content; 		
 	
-	public JmsXmlTask(GftContainer gft, TaskDefinition taskdef, JmsMessage msg, XmlNode content, String xmlPath) {
-		super(gft, taskdef, content.getChildText(xmlPath), msg);
+	public JmsXmlTask(GftContainer gft, TaskDefinition taskdef, String id, JmsMessage msg, XmlNode content) {
+		super(gft, taskdef, id, msg);
 		this.content=content;
 	}
 

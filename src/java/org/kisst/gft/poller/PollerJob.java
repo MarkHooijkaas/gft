@@ -255,8 +255,8 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 			//LogService.log("WARN", "failed_move", getFullName(), "poller", "failed to move file "+filename+" to "+moveToDir);
 			logger.warn(getFullName() + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt. Dit wordt later nog een keer geprobeerd."+e.getMessage());
 		} else {
-			LogService.log("error", "MoveToInProgress", getFullName(), filename, "failed "+trycount+" times to move file from "+dir+" to "+moveToDir+": "+e.getMessage());
-			logger.error(getFullName() + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt niet na " + trycount + " keer proberen.");
+			LogService.log("error", "MoveToInProgress", getFullName(), filename, "failed "+(trycount-1)+" times to move file from "+dir+" to "+moveToDir+": "+e.getMessage());
+			logger.error(getFullName() + " - verplaatsen van file " + filename + " naar " + moveToDir + " is niet gelukt niet na " + (trycount-1) + " keer proberen.");
 			//known.remove(filename); // Zodat het weer vanaf begin opnieuw gaat, maar er is wel en Error gegeven.
 		}
 		retries.put(filename, trycount);

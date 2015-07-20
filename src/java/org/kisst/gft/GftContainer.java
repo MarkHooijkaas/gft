@@ -149,6 +149,7 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 		}
 	}
 	
+	public String getHostName() { return hostName; }
 
 	public Set<String> getFileServerNames() { return sshhosts.keySet(); } 
 	public FileServer getFileServer(String name) { 
@@ -301,8 +302,8 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 	public void addServlet(String url, BaseServlet servlet) { admin.addServlet(url, servlet); }
 
 	public void start() {
-		logger.info("Starting GftContainer on host "+hostName);
-		LogService.log("info", "StartingContainer", getTopname().toUpperCase()+"-Service", hostName, "Starting "+getTopname().toUpperCase()+" Service on host "+ hostName);
+		logger.info("Starting GftContainer on host "+getHostName());
+		LogService.log("info", "StartingContainer", getTopname().toUpperCase()+"-Service", getHostName(), "Starting "+getTopname().toUpperCase()+" Service");
 
 		this.jamonThread = new JamonThread(props);
 		Thread t = new Thread(jamonThread);
@@ -322,8 +323,8 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 		admin.join();
 	}
 	public void reset() {
-		logger.info("Resetting GftContainer on host "+hostName);
-		LogService.log("info", "Resetting", getTopname().toUpperCase()+"-Service", hostName, "Reset called for "+getTopname().toUpperCase()+" Service on host "+ hostName);
+		logger.info("Resetting GftContainer on host "+getHostName());
+		LogService.log("info", "Resetting", getTopname().toUpperCase()+"-Service", getHostName(), "Reset called for "+getTopname().toUpperCase()+" Service");
 		JamonUtil.jamonLog(props, "RESET called, dumping all statistics");
 		jamonThread.reset();
 		for (Poller p: pollers.values())
@@ -331,8 +332,8 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 	}
 	
 	public void stop() {
-		logger.info("Stopping GftContainer on host "+hostName);
-		LogService.log("info", "Stopping", getTopname().toUpperCase()+"-Service", hostName, "Stopping "+getTopname().toUpperCase()+" Service on host "+ hostName);
+		logger.info("Stopping GftContainer on host "+getHostName());
+		LogService.log("info", "Stopping", getTopname().toUpperCase()+"-Service", getHostName(), "Stopping "+getTopname().toUpperCase()+" Service");
 		JamonUtil.jamonLog(props, "STOP called, dumping all statistics");
 		jamonThread.stop();
 		for (MultiListener q : listeners.values() )

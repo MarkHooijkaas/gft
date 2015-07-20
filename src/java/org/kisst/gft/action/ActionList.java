@@ -72,9 +72,8 @@ public class ActionList extends ActionExecutor implements Action, WritesHtml {
 	@Override public void writeHtml(PrintWriter out) {
 		out.println("<h2>Actions</h2>");
 		out.println("<table>");
-		//out.println("<tr><td>"+name+"</td><td>"+actions.get(name).toString()+"</td></tr>")
-		for (String name: actions.keySet()) {
-			out.println("<tr><td>"+name+"</td><td>"+actions.get(name).toString()+"</td></tr>");
+		for (Action act: actions.values()) {
+			out.println("<tr><td>"+act.toString()+"</td></tr>");
 		}
 		out.println("</table>");
 	}

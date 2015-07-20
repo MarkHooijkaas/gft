@@ -59,7 +59,7 @@ public class ActionExecutor {
 			String channelName= task.getTaskDefinition().getName();
 			mon2=MonitorFactory.start("channel:"+channelName+":action:"+name);
 			try {
-				task.setCurrentAction(name);
+				task.setCurrentAction(a);
 				tryToExecute(a, task);
 				done=true;
 			}

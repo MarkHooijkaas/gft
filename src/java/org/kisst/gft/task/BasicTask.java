@@ -27,6 +27,8 @@ public class BasicTask implements Task {
 
 	private Exception lastError=null;
 	private String currentAction="StartingTask";
+
+	private final boolean logAllActions;
 	
 	public BasicTask(GftContainer gft, TaskDefinition taskdef, String id) {
 		this.gft = gft;
@@ -39,6 +41,7 @@ public class BasicTask implements Task {
 			this.context.put("var", vars);
 		this.context.put("task", this);
 		this.taskdef = taskdef;
+		this.logAllActions=taskdef.getProps().getBoolean("logAllActions", false);
 	}
 
 	@Override public String toString() { return toString(identification); }
@@ -51,9 +54,10 @@ public class BasicTask implements Task {
 		return result.toString();
 	}
 	
-	public void logError(String msg) { LogService.log("error",getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
-	public void logWarn(String msg)  { LogService.log("warn", getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
-	public void logInfo(String msg)  { LogService.log("info", getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
+	@Override public void logError(String msg) { LogService.log("error",getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
+	@Override public void logWarn(String msg)  { LogService.log("warn", getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
+	@Override public void logInfo(String msg)  { LogService.log("info", getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
+	public void logDebug(String msg) { LogService.log("debug", getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
 	
 	
 	
@@ -66,8 +70,13 @@ public class BasicTask implements Task {
 	public Exception getLastError() { return lastError; }
 	public void setLastError(Exception e) {	this.lastError=e; }
 	
-	public String getCurrentAction() { return currentAction; }
-	public void setCurrentAction(String act) {	this.currentAction=act; }
+	@Override public void setCompleted() {this.currentAction="CompletedTask";}
+	@Override public String getCurrentAction() { return currentAction; }
+	@Override public void setCurrentAction(Action act) {
+		this.currentAction=act.getClass().getSimpleName();
+		if (logAllActions)
+			logDebug("starting action "+act);
+	}
 
 	@Override public Object getFieldValue(String name) { throw new RuntimeException("getFieldValue not implemented for "+this.getClass()); }
 	public Object getVar(String name) { return vars.get(name,null); }

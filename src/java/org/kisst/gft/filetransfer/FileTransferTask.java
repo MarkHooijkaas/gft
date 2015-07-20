@@ -7,6 +7,7 @@ import org.kisst.gft.filetransfer.action.DestinationFile;
 import org.kisst.gft.filetransfer.action.SourceFile;
 import org.kisst.gft.task.JmsXmlTask;
 import org.kisst.jms.JmsMessage;
+import org.kisst.util.XmlNode;
 import org.kisst.util.exception.BasicFunctionalException;
 
 public abstract class FileTransferTask extends JmsXmlTask implements SourceFile, DestinationFile {
@@ -21,11 +22,11 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 	
 	private static Pattern validCharacters = Pattern.compile("[A-Za-z0-9./_-]*");
 
-	public FileTransferTask(Channel channel, JmsMessage msg, String xmlPath) {
-		super(channel.gft, channel, msg, getContent(msg), xmlPath); 
+	public FileTransferTask(Channel channel, String id, JmsMessage msg, XmlNode content) {
+		super(channel.gft, channel, id, msg, content); 
 		
 		this.channel= channel; 
-		this.filename = getContent().getChildText(xmlPath); 
+		this.filename = getFilename(); 
 
 		if ( filename.length()>1024)
 			throw new BasicFunctionalException("Filename length should not exceed 1024 characters, in channel "+channel.getName()+", filename "+filename);
@@ -40,6 +41,8 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 		else
 			this.finaldest=new FileLocation(channel.getFinalDestinationFile(),filename);
 	}
+
+	abstract protected String getFilename();
 
 	@Override public String toString() { return toString(" from:"+getSourceFile()+", to: "+getDestinationFile()); } 
 	@Override public void run() { channel.run(this); }

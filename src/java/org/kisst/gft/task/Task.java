@@ -1,5 +1,7 @@
 package org.kisst.gft.task;
 
+import org.kisst.gft.action.Action;
+
 
 
 public interface Task {
@@ -13,7 +15,7 @@ public interface Task {
 	public void logInfo(String msg);
 
 	public String getCurrentAction();
-	public void setCurrentAction(String name);
+	public void setCurrentAction(Action a);
 
 	public void setLastError(Exception e);
 	public Exception getLastError();
@@ -23,4 +25,5 @@ public interface Task {
 	public String getStringVar(String name);
 
 	public Object getFieldValue(String name); // A field is different from a variable, and usually based on the input (thus not variable)
+	public void setCompleted();
 }

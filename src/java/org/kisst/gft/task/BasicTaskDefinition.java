@@ -60,14 +60,15 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	
 	
 	private void logStart(Task task) {
-		task.logInfo("Started "+getLogDetails(task)); 
+		task.logInfo("Started: "+getLogDetails(task)); 
 	}
 	
 	private void logCompleted(Task task) {
-		task.logInfo("Completed "+getLogDetails(task));
+		task.setCompleted();
+		task.logInfo("Completed: "+getLogDetails(task));
 	}
 	private void logError(Task task, RuntimeException e) {
-		task.logError( "Fout:"+e.getMessage()+": "+getLogDetails(task));
+		task.logError("Fout: "+e.getMessage()+": "+getLogDetails(task));
 	}
 
 	protected void writeHtmlHeader(PrintWriter out) {
@@ -92,7 +93,7 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 
 	protected void executeTask(Task task) {
 		Action action = getFlow();
-		task.setCurrentAction(action.toString());
+		task.setCurrentAction(action);
 		action.execute(task);
 	}
 
