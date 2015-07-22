@@ -74,8 +74,8 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
     <td>${channels[name].class.simpleName}</td>
     <td>${channels[name].totalCount}</td>
     <td>${channels[name].errorCount}</td>
-    <td>${channels[name].sourceFile.shortString}</td>
-    <td>${channels[name].destinationFile.shortString}</td>
+    <td><a href="/dir/${channels[name].sourceFile.shortString}">${channels[name].sourceFile.shortString}</a></td>
+    <td><a href="/dir/${channels[name].destinationFile.shortString}">${channels[name].destinationFile.shortString}</a></td>
   </tr>
 </#list> 
 </table> 
@@ -85,6 +85,7 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
 <tr>
   <td><b>interval</b></td>
   <td><b>poller/job name</b></td>
+  <td><b>consecutive problems</b></td>
   <td><b>runs</b></td>
   <td><b>successes</b></td>
   <td><b>errors</b></td>
@@ -95,16 +96,19 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
   <td><b>inprogress directory</b></td>
 <tr>
 <#list pollers?keys as name>
-<tr><td>${pollers[name].interval}</td><td><a href=poller/${name}>${name}</a></td></tr> 
+<tr><td>${pollers[name].interval}</td><td><a href=poller/${name}>${name}</a></td><td><a href=dir/${pollers[name].fileServer.name}>${pollers[name].fileServer.name}<a></td></tr> 
 <#list pollers[name].jobs as job>
   <#if job.errors gt 0>
     <tr bgcolor="orange">
   <#elseif job.numberOfProblematicFiles gt 0>
     <tr bgcolor="orange">
+  <#elseif job.numberOfConsecutiveProblems gt 0>
+    <tr bgcolor="orange">
   <#else>
     <tr>
   </#if>
-  <td></td><td>${job.name}</td>
+  <td></td><td>${job.shortName}</td>
+  <td>${job.numberOfConsecutiveProblems}</td>
   <td>${job.runs}</td>
   <td>${job.successes}</td>
   <td>${job.errors}</td>

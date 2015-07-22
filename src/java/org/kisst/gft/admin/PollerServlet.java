@@ -26,12 +26,14 @@ public class PollerServlet extends BaseServlet {
 		Poller poller=gft.pollers.get(name);
 
 		out.println("<h1>Poller "+poller.getName()+"</h1>");
+		out.println("Host: "+poller.getFileServer().getName()+"<br>");
 		out.println("Interval: "+poller.getInterval()+"<br>");
 		out.println("Paused: "+poller.isPaused()+"<br>");
 		out.println("Running: "+poller.isRunning()+"<br>");
 		out.println("<table>");
 		out.println("<tr>");
 		out.println("<td>name</td>");
+		out.println("<td>problems</td>");
 		out.println("<td>runs</td>");
 		out.println("<td>Successes</td>");
 		out.println("<td>Errors</td>");
@@ -42,7 +44,8 @@ public class PollerServlet extends BaseServlet {
 
 		for (PollerJob job : poller.getJobs()) {
 			out.println("<tr>");
-			out.println("<td>"+job.getName()+"</td>");
+			out.println("<td>"+job.getShortName()+"</td>");
+			out.println("<td>"+job.getNumberOfConsecutiveProblems()+"</td>");
 			out.println("<td>"+job.getRuns()+"</td>");
 			out.println("<td>"+job.getSuccesses()+"</td>");
 			out.println("<td>"+job.getErrors()+"</td>");

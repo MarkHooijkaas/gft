@@ -43,6 +43,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private final HashMap<String, Integer> retries = new HashMap<String, Integer>();
 	private final FileServer fileserver;
 	private final String logname;
+	private final int maxNrofConsecutivePollProblems;
 
 	private int delay;
 	private boolean paused = false;
@@ -53,6 +54,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private int nrofDetectedFiles=0;
 	private int nrofIgnoredFiles=0;
 	private int nrofInProgressFiles=0;
+	private int nrofConsecutivePollProblems=0;
 	
 	public String currentFile;
 	
@@ -71,7 +73,8 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		checkIfFileIsLocked = props.getBoolean("checkIfFileIsLocked",	false);
 		minimumSize= props.getLong("minimumSize", 0);
 		paused = props.getBoolean("paused", false);
-		maxNrofMoveTries=props.getInt("maxNrofMoveTries", 3);
+		this.maxNrofConsecutivePollProblems=props.getInt("maxNrofMoveTries", 10);
+		this.maxNrofMoveTries=props.getInt("maxNrofMoveTries", 3);
 		if (pollForEntireDirectories)
 			logname="directory";
 		else
@@ -89,19 +92,29 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	}
 
 	public void runOnce(FileServerConnection parentfsconn) {
-		if (paused)
+		if (isPaused())
 			return;
 
 		listener.updateGuiStatus(name, true);
 		listener.updateGuiRuns(name, runs++);
 
 		FileServerConnection fsconn = parentfsconn;
+		boolean success=false;
 		if (fileserver != null)
 			fsconn = fileserver.openConnection();
 		try {
 			pollOnce(fsconn);
 			listener.updateGuiStatus(name, false);
+			success=true;
 		} finally {
+			if (success)
+				nrofConsecutivePollProblems=0;
+			else {
+				nrofConsecutivePollProblems++;
+				if (nrofConsecutivePollProblems>maxNrofConsecutivePollProblems)
+					LogService.log("error", "PausingPoller", getFullName(), dir, "Pausing pollerJob after "+nrofConsecutivePollProblems+" problems");
+
+			}
 			if (fileserver != null && fsconn != null)
 				fsconn.close();
 		}
@@ -113,17 +126,19 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		logger.info("Folder {} pause = {}", dir, paused);
 	}
 	public String getFullName() { return parent.getName()+"."+name; }
+	public String getShortName() { return name; }
 	public String getName() { return parent.getName()+"."+name; }
 	public String getDir() { return dir; }
 	public String getMoveToDir() { return moveToDir; }
 	public int getRuns() { return runs; }
 	public int getSuccesses() { return successes; }
 	public int getErrors() { return errors; }
-	public boolean isPaused() { return paused; }
+	public boolean isPaused() { return paused || nrofConsecutivePollProblems>maxNrofConsecutivePollProblems; }
 	public int getNumberOfDetectedFiles() { return nrofDetectedFiles; }
 	public int getNumberOfProblematicFiles() { return nrofIgnoredFiles; }
 	public int getNumberOfInProgressFiles() { return nrofInProgressFiles; }
-	public synchronized void reset() { known.clear(); retries.clear(); }
+	public int getNumberOfConsecutiveProblems() { return nrofConsecutivePollProblems; }
+	public synchronized void reset() { known.clear(); retries.clear(); nrofConsecutivePollProblems=0; }
 	
 	public void setListener(PollerJobListener listener) { this.listener = listener; }
 

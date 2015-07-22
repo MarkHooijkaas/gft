@@ -36,12 +36,21 @@ public class DirectoryServlet extends BaseServlet {
 		if (! url.endsWith("/"))
 			path=url.substring(url.lastIndexOf('/')+1)+"/";
 		String name=url.substring("/dir/".length());
+		while (name.startsWith("/"))
+			name=name.substring(1);
 		int pos=name.indexOf(":");
+		int pos2=name.indexOf("/");
+		if (pos<=0)
+			pos=pos2;
+		if (pos2>0 && pos2<pos)
+			pos=pos2;
 		String dir="";
 		if (pos>0) {
 			dir=name.substring(pos+1);
 			name=name.substring(0,pos);
 		}
+		while (name.startsWith("/"))
+			name=name.substring(1);
 		// TODO: this hack makes dynamic path names sometimes work in a static context
 		if (dir.startsWith("dynamic:")) {
 			dir=dir.substring(8);
