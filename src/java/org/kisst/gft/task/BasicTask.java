@@ -29,6 +29,7 @@ public class BasicTask implements Task {
 	private String currentAction="StartingTask";
 
 	private final boolean logAllActions;
+	private boolean taskCanBeRetried=true;
 	
 	public BasicTask(GftContainer gft, TaskDefinition taskdef, String id) {
 		this.gft = gft;
@@ -74,6 +75,8 @@ public class BasicTask implements Task {
 	@Override public String getCurrentAction() { return currentAction; }
 	@Override public void setCurrentAction(Action act) {
 		this.currentAction=act.getClass().getSimpleName();
+		if (!act.safeToRetry())
+			taskCanBeRetried=false;
 		if (logAllActions)
 			logDebug("starting action "+act);
 	}
@@ -117,6 +120,7 @@ public class BasicTask implements Task {
 			mse.addState("VAR_"+key, ""+vars.get(key, null));
 		if (tempFile!=null)
 			mse.addState("TEMPFILE", tempFile.getAbsolutePath());
+		mse.addState("RETRY_SAFELY", ""+taskCanBeRetried);
 	}
 	
 	public SimpleProps getActionContext(Action action) {

@@ -68,7 +68,14 @@ public class ListenerServlet extends BaseServlet {
 			int index=1;
 			out.println("<h2>"+q+"</h2>");
 			out.println("<table>");
-			out.println("<tr><th>index</th><th style=\"width:200px\">time</th><th align=\"left\">channel</th><th align=\"left\">msgid</th><th align=\"left\">info</th><th align=\"left\">action</th><th align=\"left\">error</th></tr>");
+			out.println("<tr><th>index</th>");
+			out.println("<th style=\"width:200px\">time</th>");
+			out.println("<th align=\"left\">channel</th>");
+			out.println("<th align=\"left\">msgid</th>");
+			out.println("<th align=\"left\">info</th>");
+			out.println("<th align=\"left\">action</th>");
+			out.println("<th align=\"left\">safe retry</th>");
+			out.println("<th align=\"left\">error</th></tr>");
 			Queue destination = session.createQueue(q);
 			QueueBrowser browser = session.createBrowser(destination);
 			Enumeration<?> e = browser.getEnumeration();
@@ -107,6 +114,9 @@ public class ListenerServlet extends BaseServlet {
 				String action = msg.getStringProperty("state_ACTION");
 				if (action==null)
 					action = msg.getStringProperty("state_LAST_ACTION");
+				String retrySafely = msg.getStringProperty("state_RETRY_SAFELY");
+				if (retrySafely==null)
+					retrySafely="unknown";
 				String errorText = msg.getStringProperty("state_ERROR");
 				if (errorText==null)
 					errorText = msg.getStringProperty("state_LAST_ERROR");
@@ -119,13 +129,15 @@ public class ListenerServlet extends BaseServlet {
 					errorText=quoteXml(errorText);
 				}
 				String msgid=msg.getJMSMessageID();
+				long timestamp = msg.getJMSTimestamp();
 				out.println("<tr>");
 				out.println("<td>"+(index++)+"</td>");
-				out.println("<td style=\"width: 200px\"> "+format.format(new Date(msg.getJMSTimestamp()))+"</td>");
-				out.println("<td>"+channel+"</td>");
+				out.println("<td style=\"width: 120px\"><a href=\"/logging/minutes=2&endTime="+(timestamp+60000)+"\">"+format.format(new Date(timestamp))+"</td>");
+				out.println("<td><a href=\"/channel/"+channel+"\">"+channel+"</a></td>");
 				out.println("<td><a href=\"/message/"+listener.getName()+"/"+qname+"/"+msgid+"\">"+msgid+"</a></td>");
-				out.println("<td>"+id+"</td>");
+				out.println("<td><a href=\"/logging/hours=1&eventtype="+id+"\">"+id+"</a></td>");
 				out.println("<td>"+action+"</td>");
+				out.println("<td>"+retrySafely+"</td>");
 				out.println("<td>"+errorText+"</td>");
 				out.println("</tr>");
 
