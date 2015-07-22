@@ -395,7 +395,7 @@ public class JmsListener implements Runnable {
 			if (prevTry instanceof String)
 				prevdate=(String) prevTry;
 			MappedStateException me = (MappedStateException) e;
-			me.addState("QUEUE", queue);
+			me.addState("INPUT_QUEUE", queue);
 			SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMdd_HHmmss_SSS");
 			String timestamp=formatter.format(new Date());
 			for (String key: me.getKeys()) {
