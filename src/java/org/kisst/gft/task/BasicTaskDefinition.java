@@ -93,7 +93,7 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 
 	protected void executeTask(Task task) {
 		Action action = getFlow();
-		task.setCurrentAction(action);
+		//task.setCurrentAction(action);
 		action.execute(task);
 	}
 

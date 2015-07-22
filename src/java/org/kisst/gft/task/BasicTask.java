@@ -55,11 +55,15 @@ public class BasicTask implements Task {
 		return result.toString();
 	}
 	
-	@Override public void logError(String msg) { LogService.log("error",getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
-	@Override public void logWarn(String msg)  { LogService.log("warn", getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
-	@Override public void logInfo(String msg)  { LogService.log("info", getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
-	public void logDebug(String msg) { LogService.log("debug", getCurrentAction(), taskdef.getName(), getIdentification(), msg); }
-	
+	@Override public void logError(String msg) { LogService.log("error",getCurrentAction(), taskdef.getName(), getIdentification(), prepend(msg)); }
+	@Override public void logWarn(String msg)  { LogService.log("warn", getCurrentAction(), taskdef.getName(), getIdentification(), prepend(msg)); }
+	@Override public void logInfo(String msg)  { LogService.log("info", getCurrentAction(), taskdef.getName(), getIdentification(), prepend(msg)); }
+	public void logDebug(String msg) { LogService.log("debug", getCurrentAction(), taskdef.getName(), getIdentification(), prepend(msg)); }
+	private String prepend(String msg) {
+		if (taskCanBeRetried)
+			return "RETRYABLE: "+msg;
+		return msg;
+	}
 	
 	
 	public TaskDefinition getTaskDefinition() { return taskdef; }
