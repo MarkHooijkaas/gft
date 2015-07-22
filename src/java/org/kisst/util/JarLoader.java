@@ -7,6 +7,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.jar.Manifest;
@@ -35,6 +36,7 @@ public class JarLoader {
 		public final String mainClassname;
 		public final String version;
 		public File getFile() { return file;}
+		public Date getDate() { return new Date(file.lastModified()); } 
 		public String getVersion() { return version; }
 		public String getMainClassname() { return mainClassname; }
 		public ModuleInfo(File f) {

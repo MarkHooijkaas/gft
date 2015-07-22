@@ -13,22 +13,6 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
 
 <h1>${gft.topname?upper_case} version ${gft.version}</h1> 
 
-<table> 
-  <tr>
-    <td><b>MODULE</b></td>
-    <td><b>version</b></td>
-    <td><b>main class</b></td>
-  </tr>
-<#list modules as mod>
-  <tr>
-    <td>${mod.file.name}</td>
-    <td>${mod.version!"no version"}</td>
-    <td>${mod.mainClassname}</td>
-  </tr>
-</#list> 
-</table> 
-<br/>
-
 <h2><a href="logging/hours=24&channel=${gft.topname?upper_case}-Service">Started on ${gft.startupTime?datetime}</a></h2> 
 <table>
 <tr>
@@ -156,7 +140,25 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
 </#list> 
 </table> 
 
-<h2>Beheer</h2> 
+<h2>Technisch Beheer</h2> 
+<table> 
+	<tr>
+		<th>MODULE</th>
+		<th>version</th>
+		<th>main class</th>
+		<th>date</th>
+	</tr>
+<#list modules as mod>
+	<tr>
+		<td>${mod.file.name}</td>
+		<td>${mod.version!"no version"}</td>
+		<td>${mod.mainClassname}</td>
+		<td>${mod.date?datetime}</td>
+	</tr>
+</#list> 
+</table> 
+<br/>
+
 <ul>
 <li><a href="config">Configuration</a></li>
 <li><a href="reset">Reset JAMON logging</a></li>
