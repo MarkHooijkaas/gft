@@ -106,6 +106,8 @@ public class BasicTask implements Task {
 		return dir+"/"+file;
 	}
 	protected FileLocation subsituteDynamicPath(FileLocation loc) {
+		if (loc==null)
+			return null;
 		String path = loc.getPath();
 		if (!path.startsWith("dynamic:"))
 			return loc;
