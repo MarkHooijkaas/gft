@@ -10,8 +10,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Properties;
 import java.util.Set;
+import java.util.TimeZone;
 
 import org.kisst.cfg4j.BooleanSetting;
 import org.kisst.cfg4j.CompositeSetting;
@@ -122,6 +124,11 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 		this.configfile = configfile;
 		topProps = new SimpleProps(this.configfile);
 		props=topProps.getProps(this.topname);
+
+		if (props.getString("timezone", null)!=null)
+			TimeZone.setDefault(TimeZone.getTimeZone(props.getString("timezone")));
+		if (props.getString("locale", null)!=null)
+			Locale.setDefault(new Locale(props.getString("locale")));
 		
 		addAction("local_command", LocalCommandAction.class);
 		addAction("delete_local_file", DeleteLocalFileAction.class);
