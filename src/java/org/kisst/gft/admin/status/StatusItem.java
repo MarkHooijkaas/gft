@@ -34,6 +34,8 @@ public abstract class StatusItem extends BaseServlet {
 	public String getColor() {
 		if (problemCount==0)
 			return "white"; 
+		else if (problemCount<0)
+			return "lightgrey";
 		else
 			return "orange";
 	}
