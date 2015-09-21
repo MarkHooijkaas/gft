@@ -16,14 +16,14 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
 <h2><a href="logging/hours=24&channel=${gft.topname?upper_case}-Service">Started on ${gft.startupTime?datetime}</a></h2> 
 <table>
 <tr>
-	<td><a href="logging/minutes=1"><button type="submit" method="get" >ALL Logging last minute</button></a></td>
-	<td><a href="logging/hours=1"><button type="submit" method="get" >ALL Logging last hour</button></a></td>
-	<td><a href="logging/days=1"><button type="submit" method="get" >ALL Logging last day</button></a></td>
+	<td><a href="/logging/minutes=1">ALL Logging last minute</a></td>
+	<td><a href="/logging/hours=1">ALL Logging last hour</a></td>
+	<td><a href="/logging/days=1">ALL Logging last day</a></td>
 </tr>
 <tr>
-	<td><a href="logging/level=error&minutes=1"><button type="submit" method="get" >ERROR Logging last minute</button></a></td>
-	<td><a href="logging/level=error&hours=1"><button type="submit" method="get" >ERROR Logging last hour</button></a></td>
-	<td><a href="logging/level=error&days=1"><button type="submit" method="get" >ERROR Logging last day</button></a></td>
+	<td><a href="/logging/level=error&minutes=1">ERROR Logging last minute</a></td>
+	<td><a href="/logging/level=error&hours=1">ERROR Logging last hour</a></td>
+	<td><a href="/logging/level=error&days=1">ERROR Logging last day</a></td>
 </tr>
 </table>
 
