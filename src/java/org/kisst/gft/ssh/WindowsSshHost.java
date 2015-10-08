@@ -11,11 +11,10 @@ public class WindowsSshHost extends SshFileServer {
 	@Override public String nativePath(String path) { return FileUtil.joinPaths(basePath, path).replace('/','\\'); }
 	@Override public String unixPath(String path) {
 		path=basePath+path;
-		if (path.charAt(1)!=':') // check for drive letter, e.g. E:
-			return path;
-		else
+		if (path.length()>1 && path.charAt(1)==':') // check for drive letter, e.g. E:
 			// this should replace E:/temp by /E/temp
 			return "/"+path.charAt(0)+path.substring(2);
+		return path;
 	}
 	@Override public String escape(String str) { return str; }
 
