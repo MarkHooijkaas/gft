@@ -301,7 +301,7 @@ public class GftContainer implements HttpHostMap, ActionCreator {
 		TaskDefinition channel = (TaskDefinition) ReflectionUtil.createObject(cons, new Object[] {this, lprops} );
 		channels.put(name, channel);
 	}
-	public TaskDefinition getTaskDefinition(String name) { return channels.get(name); }
+	public TaskDefinition getTaskDefinition(String name) { if (name==null) return null; else return channels.get(name.trim()); }
 	public String processTemplate(File template, Object context) { return TemplateUtil.processTemplate(template, context); }
 	public String processTemplate(String templateText, Object context) { return TemplateUtil.processTemplate(templateText, context); }
 	public String processTemplate(Template template, Object context) { return TemplateUtil.processTemplate(template, context); }
