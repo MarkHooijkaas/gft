@@ -31,6 +31,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private final Poller parent;
 	private final String dir;
 	private final String moveToDir;
+	private final String extension;
 	private final int maxNrofMoveTries;
 	private final boolean deleteInProgressFile;
 	private final boolean pollForEntireDirectories;
@@ -67,6 +68,10 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		this.fileserver = null; // TODO: remove
 		delay = props.getInt("delay", 10000);
 		dir = TemplateUtil.processTemplate(props.getString("pollerDirectory"),gft.getContext());
+		String ext = props.getString("extension",null);
+		if (ext!=null && ext.startsWith("*"))
+			ext=ext.substring(1);
+		this.extension=ext;
 		moveToDir = TemplateUtil.processTemplate(props.getString("moveToDirectory"),gft.getContext());
 		deleteInProgressFile = props.getBoolean("deleteInProgressFile",	flow.deleteInProgressFile());
 		pollForEntireDirectories = props.getBoolean("pollForEntireDirectories",	false);
@@ -150,6 +155,10 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		for (String filename : fsconn.getDirectoryEntries(dir).keySet()) {
 			if (".".equals(filename) || "..".equals(filename))
 				continue;
+			
+			if (extension!=null && ! filename.endsWith(extension))
+				continue;
+			
 			tmpnrofDetectedFiles++;
 
 			if (shouldFileBeIgnored(fsconn,filename)) {
