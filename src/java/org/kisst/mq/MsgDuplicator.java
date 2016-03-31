@@ -1,5 +1,6 @@
-import java.io.File;
+package org.kisst.mq;
 
+import com.ibm.mq.MQEnvironment;
 //import com.ibm.mq.MQC;
 import com.ibm.mq.MQException;
 import com.ibm.mq.MQGetMessageOptions;
@@ -8,7 +9,6 @@ import com.ibm.mq.MQPutMessageOptions;
 import com.ibm.mq.MQQueue;
 import com.ibm.mq.MQQueueManager;
 import com.ibm.mq.constants.MQConstants;
-import com.ibm.mq.MQEnvironment;
 
 public class MsgDuplicator
 {
