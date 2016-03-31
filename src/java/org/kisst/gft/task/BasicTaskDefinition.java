@@ -60,15 +60,15 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	
 	
 	protected void logStart(Task task) {
-		task.logInfo("Started: "+getLogDetails(task)); 
+		task.logInfo("Started: "+task); 
 	}
 	
 	protected void logCompleted(Task task) {
 		task.setCompleted();
-		task.logInfo("Completed: "+getLogDetails(task));
+		task.logInfo("Completed: "+task);
 	}
 	protected void logError(Task task, RuntimeException e) {
-		task.logError("Fout: "+e.getMessage()+": "+getLogDetails(task));
+		task.logError("Fout: "+e.getMessage()+": "+task);
 	}
 
 	protected void writeHtmlHeader(PrintWriter out) {
