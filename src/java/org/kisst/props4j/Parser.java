@@ -179,7 +179,7 @@ public class Parser {
 				continue;
 			else if (ch=='"')
 				return replaceVars(readDoubleQuotedString(), parent, name);
-			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':') {
+			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':' || ch=='$') {
 				String result=ch+readUnquotedString();
 				if (parent==null || name==null)
 					return result;
