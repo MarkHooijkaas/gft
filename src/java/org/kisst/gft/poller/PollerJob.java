@@ -32,6 +32,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	private final String dir;
 	private final String moveToDir;
 	private final String extension;
+	private final String[] ignorePatterns;
 	private final int maxNrofMoveTries;
 	private final boolean deleteInProgressFile;
 	private final boolean pollForEntireDirectories;
@@ -72,6 +73,16 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		if (ext!=null && ext.startsWith("*"))
 			ext=ext.substring(1);
 		this.extension=ext;
+		String tmp = props.getString("ignorePatterns",null);
+		if (tmp==null || tmp.trim().length()==0)
+			this.ignorePatterns=new String[0];
+		else {
+			String[] parts = tmp.split("[|]");
+			this.ignorePatterns=new String[parts.length];
+			for (int i=0; i<parts.length; i++)
+				ignorePatterns[i]=parts[i].trim();
+		}
+
 		moveToDir = TemplateUtil.processTemplate(props.getString("moveToDirectory"),gft.getContext());
 		deleteInProgressFile = props.getBoolean("deleteInProgressFile",	flow.deleteInProgressFile());
 		pollForEntireDirectories = props.getBoolean("pollForEntireDirectories",	false);
@@ -158,7 +169,18 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 			
 			if (extension!=null && ! filename.endsWith(extension))
 				continue;
-			
+			boolean ignore=false;
+			for (String pattern : ignorePatterns) {
+				if (pattern.startsWith("*") && filename.endsWith(pattern.substring(1)))
+					ignore=true;
+				else if (pattern.endsWith("*") && filename.startsWith(pattern.substring(0, pattern.length()-1)))
+					ignore=true;
+				else if (filename.equals(pattern))
+					ignore=true;
+			}
+			if (ignore)
+				continue;
+
 			tmpnrofDetectedFiles++;
 
 			if (shouldFileBeIgnored(fsconn,filename)) {
