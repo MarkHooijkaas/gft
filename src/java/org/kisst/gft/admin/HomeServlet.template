@@ -129,7 +129,7 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
 <h2>SSH Hosts</h2> 
 <table> 
 <#list gft.fileServerNames as name>
-<tr><td><a href=rest/sshhost/${name}>${name}</a></td><td>${gft.getFileServer(name)!""}</td><td><a href=dir/${name}>DIR</a></td></tr> 
+<tr><td><a href=rest/sshhost/${name}>${name}</a></td><td>${gft.getFileServer(name)!""}/${gft.getFileServer(name).basePath!""}</td><td><a href=dir/${name}>DIR</a></td></tr> 
 </#list> 
 </table> 
 
