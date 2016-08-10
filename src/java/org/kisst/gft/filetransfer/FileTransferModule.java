@@ -2,16 +2,7 @@ package org.kisst.gft.filetransfer;
 
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.Module;
-import org.kisst.gft.filetransfer.action.CheckCopiedFile;
-import org.kisst.gft.filetransfer.action.CheckDestFileDoesNotExist;
-import org.kisst.gft.filetransfer.action.CheckSourceFile;
-import org.kisst.gft.filetransfer.action.SftpGetPutAction;
-import org.kisst.gft.filetransfer.action.DeleteSourceDirectoryIfEmpty;
-import org.kisst.gft.filetransfer.action.DeleteSourceFile;
-import org.kisst.gft.filetransfer.action.FixPermissions;
-import org.kisst.gft.filetransfer.action.MoveDestFileToFinalDestination;
-import org.kisst.gft.filetransfer.action.SftpGetAction;
-import org.kisst.gft.filetransfer.action.SftpPutAction;
+import org.kisst.gft.filetransfer.action.*;
 import org.kisst.props4j.Props;
 
 public class FileTransferModule implements Module {
@@ -31,6 +22,7 @@ public class FileTransferModule implements Module {
 		gft.addAction("copy",SftpGetPutAction.class);
 		gft.addAction("check_copy",CheckCopiedFile.class);
 		gft.addAction("remove",DeleteSourceFile.class);
+		gft.addAction("archive_src",ArchiveSourceFile.class);
 		gft.addAction("remove_src_dir_if_empty",DeleteSourceDirectoryIfEmpty.class);
 		gft.addAction("fix_permissions",FixPermissions.class);
 		gft.addAction("sftp_get", SftpGetAction.class);
