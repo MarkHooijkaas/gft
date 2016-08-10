@@ -11,11 +11,11 @@ import java.text.SimpleDateFormat;
 
 public class ArchiveSourceFile extends BaseAction {
 	private final String archiveDir;
-	private final String datePrefixPattern;
+	private final String datePrefixFormat;
 	public ArchiveSourceFile(Props props) {
 		super(props);
 		this.archiveDir=props.getString("archiveDir");
-		this.datePrefixPattern=props.getString("datePrefixPattern",null);
+		this.datePrefixFormat=props.getString("datePrefixFormat",null);
 	}
 
 	@Override public boolean safeToRetry() { return true; }
@@ -25,10 +25,10 @@ public class ArchiveSourceFile extends BaseAction {
 		FileLocation src = ((SourceFile) task).getSourceFile();
 		FileServerConnection fsconn=src.getFileServer().openConnection();
 		try {
-			if (datePrefixPattern==null)
+			if (datePrefixFormat==null)
 				fsconn.move(src.getPath(), archiveDir);
 			else {
-				DateFormat formatter = new SimpleDateFormat(datePrefixPattern);
+				DateFormat formatter = new SimpleDateFormat(datePrefixFormat);
 				String path=src.getPath();
 				int pos=path.lastIndexOf('/');
 				if (pos>0)
