@@ -18,7 +18,7 @@ public class ResetServlet extends BaseServlet {
 		response.setContentType("text/html;charset=utf-8");
 		PrintWriter out = response.getWriter();
 		out.println("<pre>");
-		out.println("Resetting JAMON");
+		out.println("Resetting JAMON and poller statistics");
 		out.println("</pre>");
 		response.setStatus(HttpServletResponse.SC_OK);
 		gft.reset();
