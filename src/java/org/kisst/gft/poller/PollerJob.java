@@ -2,11 +2,9 @@ package org.kisst.gft.poller;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.kisst.gft.LogService;
-//import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
 import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.filetransfer.FileCouldNotBeMovedException;
@@ -45,6 +43,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	private final ConcurrentHashMap<String, Snapshot> known = new ConcurrentHashMap<String, Snapshot>();
 	private final ConcurrentHashMap<String, Integer> retries = new ConcurrentHashMap<String, Integer>();
+	private HashMap<String,String> ignoredFiles = new HashMap<String,String>();
 	private final FileServer fileserver;
 	private final String logname;
 	private final int maxNrofConsecutivePollProblems;
@@ -162,6 +161,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	private void pollOnce(FileServerConnection fsconn) {
 		// Verwerking voor een bestand in een directory
+		HashMap<String,String> tmpIgnoredFiles=new HashMap<String,String>();
 		logger.debug("getting {}-list in directory {}", logname, dir);
 		int tmpnrofIgnoredFiles=0;
 		int tmpnrofDetectedFiles=0;
@@ -171,21 +171,18 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 			
 			if (extension!=null && ! filename.endsWith(extension))
 				continue;
-			boolean ignore=false;
-			for (String pattern : ignorePatterns) {
-				if (pattern.startsWith("*") && filename.endsWith(pattern.substring(1)))
-					ignore=true;
-				else if (pattern.endsWith("*") && filename.startsWith(pattern.substring(0, pattern.length()-1)))
-					ignore=true;
-				else if (filename.equals(pattern))
-					ignore=true;
-			}
-			if (ignore)
+
+			String pattern=ignoreFileByPattern(filename);
+			if (pattern!=null) {
+				tmpIgnoredFiles.put(filename, "this file fits the ignorePattern: "+pattern);
 				continue;
+			}
 
 			tmpnrofDetectedFiles++;
 
-			if (shouldFileBeIgnored(fsconn,filename)) {
+			String reason = shouldFileBeIgnored(fsconn, filename);
+			if (reason!=null) {
+				tmpIgnoredFiles.put(filename, reason);
 				tmpnrofIgnoredFiles++;
 				continue;
 			}
@@ -196,12 +193,25 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		}
 		this.nrofDetectedFiles=tmpnrofDetectedFiles;
 		this.nrofIgnoredFiles=tmpnrofIgnoredFiles;
+		this.ignoredFiles=tmpIgnoredFiles;
 		try {
 			this.nrofInProgressFiles=fsconn.getDirectoryEntries(moveToDir).size()-2;
 		}
 		catch (Exception e) { this.nrofInProgressFiles=9999; } // signal problem (e.g. missing directory)
 	}
-	
+
+	private String ignoreFileByPattern(String filename) {
+		for (String pattern : ignorePatterns) {
+			if (pattern.startsWith("*") && filename.endsWith(pattern.substring(1)))
+				return pattern;
+			else if (pattern.endsWith("*") && filename.startsWith(pattern.substring(0, pattern.length()-1)))
+				return pattern;
+			else if (filename.equals(pattern))
+				return pattern;
+		}
+		return null;
+	}
+
 
 	// override to prevent logging (unless there is an error). processFile will log which task is ececuted
 	@Override protected void logStart(Task task) {}
@@ -241,15 +251,15 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 		}
 	}
 	
-	private boolean shouldFileBeIgnored(FileServerConnection fsconn, String filename) {
-		if (getTryCount(filename) >= maxNrofMoveTries ) {
-			return true; // this file has been tried to move too many times (probably a file is in the way), it should not clog the logfile
-		}
+	private String shouldFileBeIgnored(FileServerConnection fsconn, String filename) {
+		int nroftries=getTryCount(filename);
+		if (nroftries >= maxNrofMoveTries )
+			return "this file has been tried to move too many times ("+nroftries+">"+maxNrofMoveTries+") (probably a file is in the way), it should not clog the logfile";
 		if (fsconn.isDirectory(dir + "/" + filename) && ! pollForEntireDirectories){
 			logger.debug("directory {} gevonden, deze wordt overgeslagen bij alleen file verwerking.", dir + "/" + filename);
-			return true;
+			return "this file is a directory";
 		}
-		return false;
+		return null;
 	}
 
 	private synchronized boolean isFileNotChangingAnymore(FileServerConnection fsconn, String filename) {
@@ -318,19 +328,33 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	
 	@Override public void writeHtml(PrintWriter out) {
-		out.println("<h1>Active files</h1>");
-		out.println("<table>");
-		out.println("\t<tr><td><b>file</b></td><td><b>retries</b></td></tr>");
-		for (String file: retries.keySet()) 
-			out.println("\t<tr><td>"+file+"</td><td>"+retries.get(file)+"</td></tr>");
-		out.println("</table>");
+		out.println("<h2>Active files</h2>");
+		if (retries.size()>0) {
+			out.println("<table>");
+			out.println("\t<tr><td><b>file</b></td><td><b>retries</b></td></tr>");
+			for (String file : retries.keySet())
+				out.println("\t<tr><td>" + file + "</td><td>" + retries.get(file) + "</td></tr>");
+			out.println("</table>");
+		}
+		out.println("no active files");
 
-		if (ignorePatterns!=null) {
-			out.println("<h2>Ignore Patterns</h2>");
+		out.println("<h2>Ignored files</h2>");
+		if (ignoredFiles.size()>0) {
+			out.println("<ul>");
+			for (String file : ignoredFiles.keySet())
+				out.println("<li>" + file + ": " + ignoredFiles.get(file) + "</li>");
+			out.println("</ul>");
+		}
+		else
+		out.println("no ignored files");
+
+		out.println("<h2>Ignore Patterns</h2>");
+		if (ignorePatterns!=null && ignoredFiles.size()>0) {
 			out.println("<ul>");
 			for (String pat : ignorePatterns)
 				out.println("<li>" + pat + "</li>");
 			out.println("</ul>");
 		}
+		out.println("no ignore patterns");
 	}
 }

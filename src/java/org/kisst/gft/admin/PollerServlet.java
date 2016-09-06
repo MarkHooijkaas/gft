@@ -102,8 +102,8 @@ public class PollerServlet extends BaseServlet {
 		out.println("<li>Running: "+poller.isRunning()+"</li>");
 		out.println("</ul>");
 
-		out.println("<h2>Job Details<h2>");
-		out.println("</ul>");
+		out.println("<h2>Job Details</h2>");
+		out.println("<ul>");
 		out.println("<li>Src: <a href=\"/dir/"+job.getFileServer().getName()+job.getDir()+"\">"+job.getDir()+"</a></li>");
 		out.println("<li>Dest: <a href=\"/dir/"+job.getFileServer().getName()+job.getMoveToDir()+"\">"+job.getMoveToDir()+"</a></li>");
 		out.println("<li>Name: "+job.getShortName()+"</li>");

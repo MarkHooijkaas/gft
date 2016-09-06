@@ -98,7 +98,7 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
   <#else>
     <tr>
   </#if>
-  <td></td><td>* <a href="poller/${name}/${job.name}">${job.shortName}</a></td>
+  <td></td><td>* <a href="poller/${name}/${job.shortName}">${job.shortName}</a></td>
   <td>${job.numberOfConsecutiveProblems}</td>
   <td>${job.runs}</td>
   <td>${job.successes}</td>
