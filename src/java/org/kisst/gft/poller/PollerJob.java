@@ -2,6 +2,8 @@ package org.kisst.gft.poller;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.kisst.gft.LogService;
 //import org.kisst.gft.action.Action;
@@ -41,8 +43,8 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	// TODO: the map of known files should be cleared once a file disappears outside of the poller,
 	// e.g. when it has been handled by a poller on another machine.
 
-	private final HashMap<String, Snapshot> known = new HashMap<String, Snapshot>();
-	private final HashMap<String, Integer> retries = new HashMap<String, Integer>();
+	private final ConcurrentHashMap<String, Snapshot> known = new ConcurrentHashMap<String, Snapshot>();
+	private final ConcurrentHashMap<String, Integer> retries = new ConcurrentHashMap<String, Integer>();
 	private final FileServer fileserver;
 	private final String logname;
 	private final int maxNrofConsecutivePollProblems;
@@ -316,11 +318,19 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 
 	
 	@Override public void writeHtml(PrintWriter out) {
-		out.println("<H1>PollerJob</H1>");
+		out.println("<h1>Active files</h1>");
 		out.println("<table>");
 		out.println("\t<tr><td><b>file</b></td><td><b>retries</b></td></tr>");
 		for (String file: retries.keySet()) 
 			out.println("\t<tr><td>"+file+"</td><td>"+retries.get(file)+"</td></tr>");
 		out.println("</table>");
+
+		if (ignorePatterns!=null) {
+			out.println("<h2>Ignore Patterns</h2>");
+			out.println("<ul>");
+			for (String pat : ignorePatterns)
+				out.println("<li>" + pat + "</li>");
+			out.println("</ul>");
+		}
 	}
 }
