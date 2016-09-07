@@ -62,4 +62,10 @@ public abstract class AbstractServlet {
 		} catch (IOException e) { throw new RuntimeException(e);}
 		return null;
 	}
-}
+
+	public static String quoteXml(String s) {
+		s=s.replaceAll("&", "&amp;");
+		s=s.replaceAll("<", "&lt;");
+		s=s.replaceAll(">", "&gt;");
+		return s;
+	}}

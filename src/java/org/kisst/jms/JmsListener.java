@@ -34,7 +34,7 @@ public class JmsListener implements Runnable {
 	private final static Logger logger=LoggerFactory.getLogger(JmsListener.class); 
 
 	private final JmsSystem system;
-	private final MessageHandler handler;
+	private MessageHandler handler;
 	private final Props props;
 	public final String queue;
 	public final String errorqueue;

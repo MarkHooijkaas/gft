@@ -11,7 +11,7 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
   <h1>Warning Configuration is Broken</h1>
 </#if>
 
-<h1>${gft.topname?upper_case} version ${gft.version}</h1> 
+<h1>${gft.topname?upper_case} version ${wrapper.version}</h1>
 
 <h2><a href="logging/hours=24&channel=${gft.topname?upper_case}-Service">Started on ${gft.startupTime?datetime}</a></h2> 
 <table>

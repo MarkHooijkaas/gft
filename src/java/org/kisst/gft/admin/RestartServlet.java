@@ -7,9 +7,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 
 public class RestartServlet extends BaseServlet {
-	public RestartServlet(GftContainer gft) { super(gft);	}
+	public RestartServlet(GftWrapper wrapper) { super(wrapper);	}
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {

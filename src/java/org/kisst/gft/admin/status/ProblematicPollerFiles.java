@@ -3,18 +3,19 @@ package org.kisst.gft.admin.status;
 import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.gft.poller.Poller;
 import org.kisst.gft.poller.PollerJob;
 
 public class ProblematicPollerFiles extends StatusItem {
 	private String message;
-	public ProblematicPollerFiles(GftContainer gft) {
+	public ProblematicPollerFiles(GftWrapper gft) {
 		super(gft, ProblematicPollerFiles.class.getSimpleName());
 	}
 	@Override public void refresh() {
 		int count=0;
 		String message="";
-		for (Poller poller: gft.pollers.values()) {
+		for (Poller poller: wrapper.getCurrentGft().pollers.values()) {
 			for (PollerJob job: poller.getJobs()) {
 				int tmp = job.getNumberOfProblematicFiles();
 				if (job.getNumberOfProblematicFiles()>0) {
@@ -33,7 +34,7 @@ public class ProblematicPollerFiles extends StatusItem {
 	@Override public void writeDetails(PrintWriter out) {
 		super.writeDetails(out);
 		out.write("<table><tr><td><b>Poller</b></td><td><b>Job</b></td><td><b>dir</b></td><td><b>count</b></td></tr></h3>\n");
-		for (Poller poller: gft.pollers.values()) {
+		for (Poller poller: wrapper.getCurrentGft().pollers.values()) {
 			for (PollerJob job: poller.getJobs()) {
 				int tmp = job.getNumberOfProblematicFiles();
 				out.write("<tr><td>"+poller.getName()+"</td>");

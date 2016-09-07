@@ -16,11 +16,19 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.jms.JmsUtil;
 import org.kisst.jms.MultiListener;
+import org.kisst.props4j.Props;
+import org.kisst.servlet4j.AbstractServlet;
 
-public class JmsMessageServlet extends BaseServlet {
-	public JmsMessageServlet(GftContainer gft) { super(gft);	}
+public class JmsMessageServlet extends AbstractServlet {
+	private final GftWrapper wrapper;
+
+	public JmsMessageServlet(GftWrapper wrapper, Props props) { 
+		super(props);
+		this.wrapper=wrapper;
+	}
 
 	@SuppressWarnings("unchecked")
 	public void handle(HttpServletRequest request, HttpServletResponse response)
@@ -42,7 +50,7 @@ public class JmsMessageServlet extends BaseServlet {
 		//SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		out.println("<h1>Queue "+queuename+", msg"+msgid+"</h1>");
 		
-		MultiListener lstnr = (MultiListener) gft.listeners.get(listenername);
+		MultiListener lstnr = (MultiListener) wrapper.listeners.get(listenername);
 		Session session=null;
 		try {
 			session = lstnr.getQueueSystem().getConnection().createSession(true, Session.AUTO_ACKNOWLEDGE);

@@ -70,13 +70,16 @@ public class ServletContainer extends AbstractHandler {
 		String path=request.getRequestURI();
         baseRequest.setHandled(true);
         try {
+			if ("/".equals(path))
+				path="default";
         	for (String prefix : handlerMap.keySet()) {
         		if (path.startsWith(prefix)) {
         			handlerMap.get(prefix).handle(request, response);
         			return;
         		}
         	}
-        	handlerMap.get("default").handle(request, response);
+        	//handlerMap.get("default").handle(request, response);
+			throw new RuntimeException("No servlet for path ["+path+"}");
         }
         catch (Exception e) {
         	try {

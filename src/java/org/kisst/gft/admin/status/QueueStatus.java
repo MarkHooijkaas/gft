@@ -3,6 +3,7 @@ package org.kisst.gft.admin.status;
 import java.io.PrintWriter;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.gft.admin.ListenerServlet;
 import org.kisst.jms.MultiListener;
 import org.kisst.mq.QueueManager;
@@ -21,8 +22,8 @@ public class QueueStatus extends StatusItem {
 	private final String url;
 	private final MultiListener listener;
 	
-	public QueueStatus(GftContainer gft, MultiListener listener, String queuename) {
-		super(gft, listener.getQueue(queuename).substring(listener.getQueue(queuename).lastIndexOf('/')+1));
+	public QueueStatus(GftWrapper wrapper, MultiListener listener, String queuename) {
+		super(wrapper, listener.getQueue(queuename).substring(listener.getQueue(queuename).lastIndexOf('/')+1));
 		this.url=listener.getName()+"/"+queuename;
 		this.name=queuename;
 		qmgr=listener.getQueueSystem().createMQQueueManager();

@@ -10,14 +10,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileServerConnection.FileAttributes;
 import org.kisst.util.TemplateUtil;
 import org.kisst.util.exception.BasicFunctionalException;
 
 public class DirectoryServlet extends BaseServlet {
-	public DirectoryServlet(GftContainer gft) { 
-		super(gft);
+	public DirectoryServlet(GftWrapper wrapper) {
+		super(wrapper);
 	}
 
 	
@@ -56,7 +57,7 @@ public class DirectoryServlet extends BaseServlet {
 			dir=dir.substring(8);
 			dir=dir.replaceAll("%7B", "{");
 			dir=dir.replaceAll("%7D", "}");
-			dir=TemplateUtil.processTemplate(dir, gft.getContext());
+			dir=TemplateUtil.processTemplate(dir, wrapper.getCurrentGft().getContext());
 		}
 		
 		
@@ -72,7 +73,7 @@ public class DirectoryServlet extends BaseServlet {
 		out.println("<h1>Directory "+name+":"+dir+"</h1>");
 		out.println("<table>");
 		out.println("<tr><td><b>filename</b></td><td width=100 ALIGN=RIGHT><b>filesize</b></td><td><b>modification date</b></td></tr>");
-		FileServerConnection conn = gft.getFileServer(name).openConnection();
+		FileServerConnection conn = wrapper.getCurrentGft().getFileServer(name).openConnection();
 		int count = 0;
 		try {
 			LinkedHashMap<String, FileAttributes> entries = conn.getDirectoryEntries(dir);

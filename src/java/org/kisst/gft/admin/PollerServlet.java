@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.gft.poller.Poller;
 import org.kisst.gft.poller.PollerJob;
 import org.kisst.props4j.MultiProps;
@@ -15,7 +16,7 @@ import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 
 public class PollerServlet extends BaseServlet {
-	public PollerServlet(GftContainer gft) { super(gft);	}
+	public PollerServlet(GftWrapper wrapper) { super(wrapper);	}
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
@@ -30,10 +31,10 @@ public class PollerServlet extends BaseServlet {
 		if (pos>0) {
 			String polljob = name.substring(pos + 1);
 			name=name.substring(0,pos);
-			handlePollerJob(out, gft.pollers.get(name),polljob);
+			handlePollerJob(out, wrapper.getCurrentGft().pollers.get(name),polljob);
 		}
 		else
-			handlePoller(out, gft.pollers.get(name));
+			handlePoller(out, wrapper.getCurrentGft().pollers.get(name));
 	}
 
 
@@ -129,7 +130,6 @@ public class PollerServlet extends BaseServlet {
 
 	private PollerJob findJob(Poller poller, String polljob) {
 		for (PollerJob job : poller.getJobs()){
-			System.out.println(polljob+"=?="+job.getShortName());
 			if (polljob.equals(job.getShortName()))
 				return job;
 		}

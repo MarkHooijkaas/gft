@@ -23,7 +23,8 @@ import org.kisst.props4j.Props;
 
 public interface Module {
 	public String getName();
-	public void init(Props props);
+	public void init(GftWrapper wrapper, Props props);
 	public void reset(Props props);
 	public void destroy();
+	public void initGft(GftContainer gft);
 }

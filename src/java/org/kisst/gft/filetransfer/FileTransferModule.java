@@ -1,22 +1,20 @@
 package org.kisst.gft.filetransfer;
 
+import nl.duo.gft.filetransfer.SendGftMessageAction;
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.gft.Module;
 import org.kisst.gft.filetransfer.action.*;
+import org.kisst.gft.poller.PollerJob;
 import org.kisst.props4j.Props;
 
 public class FileTransferModule implements Module {
-	private final GftContainer gft;
-
-	public FileTransferModule(GftContainer gft, Props props) {
-		this.gft=gft;
-	}
-	
+	@Override public void reset(Props props) {}
 	@Override public void destroy() { }
-
 	@Override public String getName() { return "FileTransferModule"; }
 
-	@Override public void init(Props props) {
+	@Override public void init(GftWrapper wrapper, Props props) {}
+	@Override public void initGft(GftContainer gft) {
 		gft.addAction("check_src",CheckSourceFile.class);
 		gft.addAction("check_dest",CheckDestFileDoesNotExist.class);
 		gft.addAction("copy",SftpGetPutAction.class);
@@ -29,6 +27,4 @@ public class FileTransferModule implements Module {
 		gft.addAction("sftp_put", SftpPutAction.class);
 		gft.addAction("move_to_final_dest", MoveDestFileToFinalDestination.class);
 	}
-
-	@Override public void reset(Props props) {}
 }

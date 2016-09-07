@@ -7,10 +7,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.gft.task.TaskDefinition;
 
 public class ChannelServlet extends BaseServlet {
-	public ChannelServlet(GftContainer gft) { super(gft);	}
+	public ChannelServlet(GftWrapper wrapper) { super(wrapper);	}
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
@@ -21,7 +22,7 @@ public class ChannelServlet extends BaseServlet {
 		PrintWriter out = response.getWriter();
 		String url=request.getRequestURI();
 		String name=url.substring("/channel/".length());
-		TaskDefinition def=gft.getTaskDefinition(name);
+		TaskDefinition def=wrapper.getCurrentGft().getTaskDefinition(name);
 		def.writeHtml(out);
 	}
 }

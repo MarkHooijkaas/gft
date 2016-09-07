@@ -56,6 +56,7 @@ public class JarLoader {
 	private final URLClassLoader loader; 
 
 	@SuppressWarnings("deprecation")
+	public JarLoader(Props props, String topName) { this(new Settings(null,topName), props);}
 	public JarLoader(Settings settings, Props props) {
 		this.dir=new File(settings.moduleDirectory.get(props));
 		if (! dir.isDirectory())

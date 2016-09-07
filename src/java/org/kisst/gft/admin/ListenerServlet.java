@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.HashMap;
 
 import javax.jms.JMSException;
 import javax.jms.Message;
@@ -20,11 +21,18 @@ import org.kisst.jms.ControlMessage;
 import org.kisst.jms.JmsListener;
 import org.kisst.jms.JmsUtil;
 import org.kisst.jms.MultiListener;
+import org.kisst.props4j.Props;
+import org.kisst.servlet4j.AbstractServlet;
 import org.kisst.util.XmlNode;
 
-public class ListenerServlet extends BaseServlet {
+public class ListenerServlet extends AbstractServlet {
 	private static int maxErroTextLength=200;
-	public ListenerServlet(GftContainer gft) { super(gft);	}
+	private final HashMap<String, MultiListener> listeners;
+
+	public ListenerServlet(HashMap<String, MultiListener> listeners, Props props) {
+		super(props);
+		this.listeners=listeners;
+	}
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {
@@ -45,7 +53,7 @@ public class ListenerServlet extends BaseServlet {
 			showListeners=false;
 		}
 
-		MultiListener lstnr = (MultiListener) gft.listeners.get(name);
+		MultiListener lstnr = (MultiListener) listeners.get(name);
 		if (showListeners) {
 			out.println("<h1>Listener "+name+"</h1>");
 			out.println("<h2>Status of Listener threads</h2>");

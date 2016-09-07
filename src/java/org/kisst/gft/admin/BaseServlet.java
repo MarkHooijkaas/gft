@@ -1,21 +1,15 @@
 package org.kisst.gft.admin;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.servlet4j.AbstractServlet;
 
 
 
 public abstract class BaseServlet extends AbstractServlet {
-	protected final GftContainer gft;
-	public BaseServlet(GftContainer gft) {
-		super(gft.props);
-		this.gft=gft;
+	protected final GftWrapper wrapper;
+	public BaseServlet(GftWrapper wrapper) {
+		super(wrapper.getProps());
+		this.wrapper=wrapper;
 	}
-	public static String quoteXml(String s) {
-		s=s.replaceAll("&", "&amp;");
-		s=s.replaceAll("<", "&lt;");
-		s=s.replaceAll(">", "&gt;");
-		return s;
-	}
-	
 }

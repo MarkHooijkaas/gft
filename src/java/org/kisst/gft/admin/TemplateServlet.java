@@ -13,6 +13,7 @@ import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+import org.kisst.gft.GftWrapper;
 
 public class TemplateServlet extends BaseServlet {
 	private static final Configuration cfg= new Configuration();;
@@ -25,13 +26,13 @@ public class TemplateServlet extends BaseServlet {
 
 	private final String templateName;
 
-	public TemplateServlet(GftContainer gft) {
-		super(gft);
+	public TemplateServlet(GftWrapper wrapper) {
+		super(wrapper);
 		this.templateName=this.getClass().getName().replace('.', '/')+".template";
 	}
 
-	public TemplateServlet(GftContainer gft, String templateName) {
-		super(gft);
+	public TemplateServlet(GftWrapper wrapper, String templateName) {
+		super(wrapper);
 		this.templateName=templateName;
 	}
 
@@ -41,7 +42,7 @@ public class TemplateServlet extends BaseServlet {
 			return;
 		try {
 			HashMap<String, Object> root=new HashMap<String, Object>();
-			root.put("gft", gft);
+			root.put("gft", wrapper.getCurrentGft());
 			addContext(root);
 
 			Template temp = cfg.getTemplate(templateName);

@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.gft.admin.BaseServlet;
 
 public abstract class StatusItem extends BaseServlet {
@@ -18,9 +19,9 @@ public abstract class StatusItem extends BaseServlet {
 	private String timestamp;
 	protected int problemCount;
 	
-	protected StatusItem(GftContainer gft, String name) { this(gft, name, name); }
-	protected StatusItem(GftContainer gft, String name, String description) {
-		super(gft);
+	protected StatusItem(GftWrapper wrapper, String name) { this(wrapper, name, name); }
+	protected StatusItem(GftWrapper wrapper, String name, String description) {
+		super(wrapper);
 		this.name=name;
 		this.description=description;
 	}

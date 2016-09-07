@@ -26,6 +26,7 @@ import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.util.CryptoUtil;
 import org.kisst.util.FileUtil;
+import org.kisst.util.JarLoader;
 import org.kisst.util.TemplateUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class GftRunner {
 	private final File configfile;
 	private boolean running=false;
 	private final String topname;
-	private GftContainer gft;
+	private GftWrapper gft;
 
 	
 	public GftRunner(String topname) { this(topname,null); }
@@ -64,7 +65,7 @@ public class GftRunner {
 		if (gft!=null)
 			throw new RuntimeException("Gft already running");
 		running=true;
-		gft=new GftContainer(topname, configfile);
+		gft=new GftWrapper(topname, configfile);
 		gft.start();
 	}
 
@@ -111,7 +112,7 @@ public class GftRunner {
 			showHelp();
 			return;
 		}
-		CryptoUtil.setKey("-P34{-[u-C5x<I-v'D_^{79'3g;_2I-P_L0£_j3__5`y§%M£_C");
+		CryptoUtil.setKey("-P34{-[u-C5x<I-v'D_^{79'3g;_2I-P_L0ï¿½_j3__5`yï¿½%Mï¿½_C");
 		String configfilename = config.get();
 		GftRunner runner;
 		if (configfilename==null)
@@ -237,6 +238,7 @@ public class GftRunner {
 	}
 
 	private static JmsSystem getQueueSystem(Props props) {
+		new JarLoader(props, "gft").getMainClasses();
 		Props qmprops=props.getProps("mq.host.main");
 		String type=qmprops.getString("type");
 		if ("ActiveMq".equals(type))
