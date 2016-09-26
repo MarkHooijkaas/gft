@@ -187,10 +187,14 @@ public class GftWrapper implements MessageHandler {
 	}
 
 	public String reload() {
+		if (gft!=null) {
+			LogService.log("info", "ReloadingContainer", getTopname().toUpperCase() + "-Service", getHostName(), "Reloading " + getTopname().toUpperCase());
+			logger.info("Reloading GftContainer on host "+getHostName());
+		}
 		return loadGft(false);
 	}
 
-	private synchronized String loadGft(boolean conitnueIfBroken) {
+	private synchronized String loadGft(boolean continueIfBroken) {
 		GftContainer oldGft=gft;
 
 		Props topProps = new SimpleProps(this.configfile);
@@ -198,13 +202,15 @@ public class GftWrapper implements MessageHandler {
 
 		GftContainer newGft=new GftContainer(this, topname, topProps);
 
-		if (newGft.configBroken && ! conitnueIfBroken) {
+		if (newGft.configBroken && ! continueIfBroken) {
 			return "TODO: reason";
 		}
 		gft=newGft;
 		gft.start();
-		if (oldGft!=null)
+		if (oldGft!=null) {
+			LogService.log("info", "ReloadingContainer", getTopname().toUpperCase() + "-Service", getHostName(), "Start of new Container successful, now stopping old Container");
 			oldGft.stop();
+		}
 		return null;
 	}
 

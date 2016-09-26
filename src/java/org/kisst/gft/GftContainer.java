@@ -216,7 +216,7 @@ public class GftContainer implements HttpHostMap, ActionCreator, MessageHandler 
 
 	public void start() {
 		logger.info("Starting GftContainer on host "+getHostName());
-		LogService.log("info", "StartingContainer", getTopname().toUpperCase()+"-Service", getHostName(), "Starting "+getTopname().toUpperCase()+" Service");
+		LogService.log("info", "StartingContainer", getTopname().toUpperCase()+"-Service", getHostName(), "Starting "+getTopname().toUpperCase()+" Container");
 
 		this.jamonThread = new JamonThread(props);
 		Thread t = new Thread(jamonThread);
@@ -224,14 +224,14 @@ public class GftContainer implements HttpHostMap, ActionCreator, MessageHandler 
 		t.start();
 		
 		if (logger.isDebugEnabled()){
-			logger.debug("Starting GftContainer with props {}", props.toString());
+			logger.debug("Starting new GftContainer with props {}", props.toString());
 		}
 		for (Poller p : pollers.values())
 			p.start();
 	}
 	public void reset() {
 		logger.info("Resetting GftContainer on host "+getHostName());
-		LogService.log("info", "ResettingContainer", getTopname().toUpperCase()+"-Service", getHostName(), "Reset called for "+getTopname().toUpperCase()+" Service");
+		LogService.log("info", "ResettingContainer", getTopname().toUpperCase()+"-Service", getHostName(), "Reset called for "+getTopname().toUpperCase()+" Container");
 		JamonUtil.jamonLog(props, "RESET called, dumping all statistics");
 		jamonThread.reset();
 		for (Poller p: pollers.values())
@@ -239,8 +239,8 @@ public class GftContainer implements HttpHostMap, ActionCreator, MessageHandler 
 	}
 	
 	public void stop() {
-		logger.info("Stopping GftContainer on host "+getHostName());
-		LogService.log("info", "StoppingContainer", getTopname().toUpperCase()+"-Service", getHostName(), "Stopping "+getTopname().toUpperCase()+" Service");
+		logger.info("Stopping existing GftContainer on host "+getHostName());
+		LogService.log("info", "StoppingContainer", getTopname().toUpperCase()+"-Service", getHostName(), "Stopping "+getTopname().toUpperCase()+" Container");
 		for (Poller p : pollers.values())
 			p.stop();
 	}
