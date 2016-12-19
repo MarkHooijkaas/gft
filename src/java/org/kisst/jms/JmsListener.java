@@ -1,21 +1,7 @@
 package org.kisst.jms;
 
-import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-
-import javax.jms.Destination;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
-import javax.jms.MessageProducer;
-import javax.jms.Queue;
-import javax.jms.QueueBrowser;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-
+import com.ibm.mq.jms.MQQueue;
+import com.ibm.msg.client.wmq.WMQConstants;
 import org.kisst.gft.LogService;
 import org.kisst.props4j.Props;
 import org.kisst.util.TemplateUtil;
@@ -26,8 +12,13 @@ import org.kisst.util.exception.MappedStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.ibm.mq.jms.JMSC;
-import com.ibm.mq.jms.MQQueue;
+import javax.jms.*;
+import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+
 
 @SuppressWarnings("deprecation")
 public class JmsListener implements Runnable {
@@ -389,7 +380,7 @@ public class JmsListener implements Runnable {
 		MessageProducer producer = session.createProducer(errordestination);
 		Message errmsg=JmsUtil.cloneMessage(session, message);
 		if (useJmsPropsForErrorMessages && e instanceof MappedStateException) {
-			try { ((MQQueue) errordestination).setTargetClient(JMSC.MQJMS_CLIENT_JMS_COMPLIANT); } catch (Exception e2) { /* ignore */}
+			try { ((MQQueue) errordestination).setTargetClient(WMQConstants.WMQ_CLIENT_JMS_COMPLIANT); } catch (Exception e2) { /* ignore */}
 			Object prevTry = errmsg.getObjectProperty("state_TIME");
 			String prevdate="unknowndate";
 			if (prevTry instanceof String)

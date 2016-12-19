@@ -1,15 +1,11 @@
 package org.kisst.util;
 
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-
 import freemarker.template.Configuration;
 import freemarker.template.DefaultObjectWrapper;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
+
+import java.io.*;
 
 public class TemplateUtil {
 	private static final Configuration freemarkerConfig= new Configuration();
@@ -33,7 +29,7 @@ public class TemplateUtil {
 	
 	public static String processTemplate(File template, Object context) {
 		try {
-			Template templ = new Template(((File) template).getName(), new FileReader(template),freemarkerConfig);
+			Template templ = new Template((template).getName(), new FileReader(template),freemarkerConfig);
 			return processTemplate(templ, context);
 		}
 		catch (IOException e) { throw new RuntimeException(e);} 

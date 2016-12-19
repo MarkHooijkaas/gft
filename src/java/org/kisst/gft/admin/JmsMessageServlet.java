@@ -1,26 +1,19 @@
 package org.kisst.gft.admin;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Queue;
-import javax.jms.QueueBrowser;
-import javax.jms.Session;
-import javax.jms.TextMessage;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.kisst.gft.GftContainer;
 import org.kisst.gft.GftWrapper;
 import org.kisst.jms.JmsUtil;
 import org.kisst.jms.MultiListener;
 import org.kisst.props4j.Props;
 import org.kisst.servlet4j.AbstractServlet;
+
+import javax.jms.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 
 public class JmsMessageServlet extends AbstractServlet {
 	private final GftWrapper wrapper;
@@ -50,7 +43,7 @@ public class JmsMessageServlet extends AbstractServlet {
 		//SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		out.println("<h1>Queue "+queuename+", msg"+msgid+"</h1>");
 		
-		MultiListener lstnr = (MultiListener) wrapper.listeners.get(listenername);
+		MultiListener lstnr = wrapper.listeners.get(listenername);
 		Session session=null;
 		try {
 			session = lstnr.getQueueSystem().getConnection().createSession(true, Session.AUTO_ACKNOWLEDGE);

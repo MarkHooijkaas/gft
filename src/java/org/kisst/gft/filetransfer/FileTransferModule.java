@@ -1,11 +1,9 @@
 package org.kisst.gft.filetransfer;
 
-import nl.duo.gft.filetransfer.SendGftMessageAction;
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.GftWrapper;
 import org.kisst.gft.Module;
 import org.kisst.gft.filetransfer.action.*;
-import org.kisst.gft.poller.PollerJob;
 import org.kisst.props4j.Props;
 
 public class FileTransferModule implements Module {

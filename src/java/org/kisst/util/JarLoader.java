@@ -1,22 +1,18 @@
 package org.kisst.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLClassLoader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.jar.Manifest;
-
 import org.kisst.cfg4j.BooleanSetting;
 import org.kisst.cfg4j.CompositeSetting;
 import org.kisst.cfg4j.MappedSetting;
 import org.kisst.cfg4j.StringSetting;
 import org.kisst.props4j.Props;
+
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
+import java.util.jar.Manifest;
 
 public class JarLoader {
 	public static class ModuleSetting extends CompositeSetting {
@@ -55,7 +51,6 @@ public class JarLoader {
 	private final ArrayList<ModuleInfo> modules=new ArrayList<ModuleInfo>();
 	private final URLClassLoader loader; 
 
-	@SuppressWarnings("deprecation")
 	public JarLoader(Props props, String topName) { this(new Settings(null,topName), props);}
 	public JarLoader(Settings settings, Props props) {
 		this.dir=new File(settings.moduleDirectory.get(props));
@@ -86,8 +81,8 @@ public class JarLoader {
 				alreadyLoadedModules.put(m.mainClassname, m);
 			}
 			try {
-				urls[i++]=m.file.toURL();
-			} 
+				urls[i++]=m.file.toURI().toURL();
+			}
 			catch (MalformedURLException e) { throw new RuntimeException(e); }
 		}
 		loader = new URLClassLoader(urls);
