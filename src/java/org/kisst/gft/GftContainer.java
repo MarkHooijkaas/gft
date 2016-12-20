@@ -14,7 +14,9 @@ import org.kisst.gft.task.TaskDefinition;
 import org.kisst.http4j.BasicHttpHostMap;
 import org.kisst.http4j.HttpHost;
 import org.kisst.http4j.HttpHostMap;
-import org.kisst.jms.*;
+import org.kisst.jms.JmsMessage;
+import org.kisst.jms.JmsSystem;
+import org.kisst.jms.MessageHandler;
 import org.kisst.props4j.LayeredProps;
 import org.kisst.props4j.MultiProps;
 import org.kisst.props4j.Props;
@@ -27,12 +29,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.reflect.Constructor;
-import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 
 
@@ -216,7 +218,9 @@ public class GftContainer implements HttpHostMap, ActionCreator, MessageHandler 
 
 	public void start() {
 		logger.info("Starting GftContainer on host "+getHostName());
+		logger.info("Trying to log to LogService, if this hangs the database user might be disabled");
 		LogService.log("info", "StartingContainer", getTopname().toUpperCase()+"-Service", getHostName(), "Starting "+getTopname().toUpperCase()+" Container");
+		logger.info("Succeeded to log to LogService");
 
 		this.jamonThread = new JamonThread(props);
 		Thread t = new Thread(jamonThread);
