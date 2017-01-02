@@ -320,6 +320,7 @@ public class Parser {
 
 
 	private void include(SimpleProps map, Parser inp) {
+		boolean recurse=false;
 		String postfix=null;
 		Object o=readObject();
 		File f=null;
@@ -329,7 +330,13 @@ public class Parser {
 			String name=(String) o;
 			if (name.indexOf("${")>0)
 				name=replaceVars(name,map,"@include");
-			int pos=name.indexOf('*');
+			int pos=name.indexOf("**/*");
+			if (pos>0) {
+				postfix=name.substring(pos+4);
+				recurse=true;
+				name=name.substring(0,pos);
+			}
+			pos=name.indexOf('*');
 			if (pos>0) {
 				postfix=name.substring(pos+1);
 				name=name.substring(0,pos);
@@ -340,9 +347,15 @@ public class Parser {
 			throw inp.new ParseException("unknown type of object to include "+o);
 		if (f.isFile())
 			map.load(f);
-		else if (f.isDirectory()) {
-			File[] files = f.listFiles(); // TODO: filter
-			for (File f2: files) {
+		else if (f.isDirectory())
+			includeDir(map, f, postfix, recurse);
+	}
+	private void includeDir(SimpleProps map, File dir, String postfix, boolean recurse) {
+		File[] files = dir.listFiles(); // TODO: filter
+		for (File f2: files) {
+			if (f2.isDirectory() && recurse)
+				includeDir(map, f2, postfix, recurse);
+			else {
 				if (postfix!=null && ! f2.getName().endsWith(postfix))
 					continue;
 				if (f2.isFile())
