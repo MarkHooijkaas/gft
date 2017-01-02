@@ -44,7 +44,12 @@ public class CryptoUtil {
 	
 	// The following method is public, so that any program using this library can set it's
 	// own key (preferably one that isn't publicly available worldwide through github :-) 
-	public static void setKey(String keystring) { key=calcKey(keystring.getBytes()); }
+	public static void setKey(String keystring) {
+		key=calcKey(keystring.getBytes());
+	}
+	public static void setHexKey(String keystring) {
+		key=calcKey(fromHex(keystring));
+	}
 	private static Key calcKey(byte[] keyValue) {
 		// Make sure the key is 128-bits, if it is too long an Exception will be thrown
 		byte[] bytes= new byte[16];
