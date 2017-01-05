@@ -21,7 +21,8 @@ import com.jamonapi.Monitor;
 import com.jamonapi.MonitorFactory;
 
 public class BasicLinearFlow implements WritesHtml, Action {
-	final static Logger logger=LoggerFactory.getLogger(BasicLinearFlow.class); 
+	final static Logger logger=LoggerFactory.getLogger(BasicLinearFlow.class);
+	protected final static boolean SKIPPED=true;
 
 	protected final LinkedHashMap<String, Action> actions= new LinkedHashMap<String, Action>();;
 	private final HashSet<String> skippedActions = new HashSet<String>();
@@ -65,16 +66,17 @@ public class BasicLinearFlow implements WritesHtml, Action {
 		return act;
 	}
 	
-	@SuppressWarnings("unchecked")
-	protected<T> T addAction(String name, Class<T> cls) {
+	protected<T> T addAction(String name, Class<T> cls) { return addAction(name,cls, ! SKIPPED); }
+	protected<T> T addAction(String name, Class<T> cls, boolean skipped) {
 		Props props = getActionConstructorProps((Class<? extends Action>) cls);
-		if (props.getBoolean("skip", false))
+		if (props.getBoolean("skip", skipped))
 			skippedActions.add(name);
 		T act=(T) myCreateAction(cls, props);
 		return addAction(name, act);
 	}
-	protected<T> T addAction(Class<T> cls) { return this.addAction(cls.getSimpleName(), cls); }
-	
+	protected<T> T addAction(Class<T> cls, boolean skipped) { return this.addAction(cls.getSimpleName(), cls, skipped); }
+	protected<T> T addAction(Class<T> cls) { return addAction(cls, ! SKIPPED); }
+
 	private Props getActionConstructorProps(Class<? extends Action> cls) {
 		String actionName= cls.getSimpleName();
 		Props actionprops = props.getProps(actionName,null);
