@@ -58,7 +58,7 @@ public class GftWrapper implements MessageHandler {
 	private final HashMap<String,JmsSystem> queueSystem = new LinkedHashMap<String,JmsSystem>();
 	private final ArrayList<StatusItem> statusItems =new ArrayList<StatusItem>();
 
-	public GftWrapper(String topname, File configfile) {
+	public GftWrapper(String topname, File configfile, Class<? extends Module>[] moduleClasses) {
 		this.topname = topname;
 		this.settings = new Settings(null, topname);
 		this.configfile = configfile;
@@ -72,6 +72,8 @@ public class GftWrapper implements MessageHandler {
 
 		jarloader = new JarLoader(settings.modules, topProps);
 		addDynamicModules(props);
+		for (Class<? extends Module> mod: moduleClasses)
+			addModule(mod, props);
 		loadModuleSpecificCryptoKey();
 		for (Module mod : modules.values())
 			mod.init(this, props);
@@ -94,7 +96,7 @@ public class GftWrapper implements MessageHandler {
 
 	public GftContainer getCurrentGft()	{ return gft; }
 	public Date getStartupTime() { return startupTime; }
-	public ClassLoader getSpecialClassLoader() { return jarloader.getClassLoader();	}
+	//public ClassLoader getSpecialClassLoader() { return jarloader.getClassLoader();	}
 	public String getTopname() { return topname; }
 	public String getHostName() { return hostName; }
 	@Override public boolean handle(JmsMessage msg) { return gft.handle(msg);}
@@ -263,12 +265,12 @@ public class GftWrapper implements MessageHandler {
 
 	@SuppressWarnings("unchecked")
 	private void addDynamicModules(Props props) {
-		addModule(FileTransferModule.class, props);
-
+		//addModule(FileTransferModule.class, props);
 		for (Class<?> cls: jarloader.getMainClasses()) {
 			addModule((Class<? extends Module>) cls, props);
 		}
 	}
+
 
 	private void addModule(Class<? extends Module> cls, Props props) {
 		boolean disabled = props.getBoolean("module."+cls.getSimpleName()+".disabled", false);

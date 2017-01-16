@@ -37,7 +37,7 @@ public class SimpleProps extends PropsBase implements IndentUtil.Indentable {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleProps.class);
 	//private static final long serialVersionUID = 1L;
 
-	private final String desc;
+	public final String desc;
 	private final SimpleProps parent;
 	private final String name; 
 	private final Map<String, Object> values=new LinkedHashMap<String, Object>();

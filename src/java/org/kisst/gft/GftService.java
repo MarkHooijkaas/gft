@@ -1,5 +1,13 @@
 package org.kisst.gft;
 
+import nl.duo.gft.algemeen.GftDuoAlgemeenModule;
+import nl.duo.gft.chesicc.ChesiccKanaal;
+import nl.duo.gft.chesicc.ChesiccModule;
+import nl.duo.gft.dasf.ArchiveerDasfModule;
+import nl.duo.gft.gas.GasModule;
+import nl.duo.gft.scanstraat.ScanstraatModule;
+import nl.duo.gft.vzub.VzubModule;
+import org.kisst.gft.filetransfer.FileTransferModule;
 import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
 
@@ -16,10 +24,14 @@ public class GftService  implements WrapperListener  {
 
 	public Integer start(String[] args) {
 		System.out.println("Starting GFT service with working dir "+System.getProperty("user.dir"));
-		if (args.length==0)
-			runner= new GftRunner("gft");
-		else
-			runner= new GftRunner("gft", args[0]);
+		String configFile=null;
+		if (args.length>0)
+			configFile=args[0];
+		runner= new GftRunner("gft", configFile,
+				GftDuoAlgemeenModule.class,
+				FileTransferModule.class,
+				ChesiccModule.class,
+				VzubModule.class);
 		runner.start();
 		return null;
 	}

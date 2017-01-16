@@ -37,13 +37,15 @@ public class GftRunner {
 	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
 
 	private final File configfile;
+	private final Class<? extends Module> [] modules;
 	private boolean running=false;
 	private final String topname;
 	private GftWrapper gft;
 
 	
-	public GftRunner(String topname) { this(topname,null); }
-	public GftRunner(String topname, String configfilename) {
+	//public GftRunner(String topname, Class<? extends Module> ... modules) { this(topname,null, modules); }
+	public GftRunner(String topname, String configfilename, Class<? extends Module> ... modules) {
+		this.modules=modules;
 		this.topname=topname;
 		if (configfilename==null)
 			this.configfile=findConfigFile(topname);
@@ -65,7 +67,7 @@ public class GftRunner {
 		if (gft!=null)
 			throw new RuntimeException("Gft already running");
 		running=true;
-		gft=new GftWrapper(topname, configfile);
+		gft=new GftWrapper(topname, configfile, modules);
 		gft.start();
 	}
 
@@ -105,7 +107,7 @@ public class GftRunner {
 
 	public static void main(String[] args) { main("gft", args); }
 	
-	public static void main(String topname, String[] args) {
+	public static void main(String topname, String[] args, Class<? extends Module> ... modules) {
 		config = cli.stringOption("c","config","configuration file", null);
 		String[] newargs = cli.parse(args);
 		if (help.isSet()) {
@@ -114,11 +116,7 @@ public class GftRunner {
 		}
 		CryptoUtil.setKey("-P34{-[u-C5x<I-v'D_^{79'3g;_2I-P_L0�_j3__5`y�%M�_C");
 		String configfilename = config.get();
-		GftRunner runner;
-		if (configfilename==null)
-			runner=new GftRunner(topname);
-		else
-			runner=new GftRunner(topname, configfilename);
+		GftRunner runner =new GftRunner(topname, configfilename, modules);
 		try {
 			PropertyConfigurator.configure(runner.configfile.getParent()+"/"+topname+".log4j.properties");
 		}
