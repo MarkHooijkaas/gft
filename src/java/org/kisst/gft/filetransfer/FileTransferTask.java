@@ -7,6 +7,8 @@ import org.kisst.gft.filetransfer.action.DestinationFile;
 import org.kisst.gft.filetransfer.action.SourceFile;
 import org.kisst.gft.task.JmsXmlTask;
 import org.kisst.jms.JmsMessage;
+import org.kisst.props4j.SimpleProps;
+import org.kisst.util.StringUtil;
 import org.kisst.util.XmlNode;
 import org.kisst.util.exception.BasicFunctionalException;
 
@@ -35,11 +37,26 @@ public abstract class FileTransferTask extends JmsXmlTask implements SourceFile,
 		if (filename.indexOf("..")>=0)
 			throw new BasicFunctionalException("Filename ["+filename+"] is not allowed to contain .. pattern, , in channel "+channel.getName());
 		this.src=new FileLocation(channel.getSourceFile(), filename);
-		this.dest=new FileLocation(channel.getDestinationFile(), filename);
+		String destfilename=filename;
+		if (channel.renamePattern!=null)
+			destfilename=replaceFileName(channel.renamePattern, filename);
+		this.dest=new FileLocation(channel.getDestinationFile(), destfilename);
 		if (channel.getFinalDestinationFile()==null)
 			this.finaldest=null;
 		else
-			this.finaldest=new FileLocation(channel.getFinalDestinationFile(),filename);
+			this.finaldest=new FileLocation(channel.getFinalDestinationFile(),destfilename);
+	}
+
+	private String replaceFileName(String renamePattern, String filename) {
+		SimpleProps props=new SimpleProps();
+		props.put("filename", filename);
+		int pos=filename.lastIndexOf('.');
+		if (pos>0) {
+			props.put("extension", filename.substring(pos + 1));
+			props.put("basename", filename.substring(0, pos));
+		}
+		renamePattern = StringUtil.substituteDate(renamePattern);
+		return StringUtil.substitute(renamePattern,props);
 	}
 
 	abstract protected String getFilename();

@@ -27,6 +27,7 @@ public abstract class Channel extends BasicTaskDefinition  implements SourceFile
 	//public final String srcdir;
 	//public final String destdir;
 	public final String mode;
+	public final String renamePattern;
 	private final Action flow;
 
 	public Channel(GftContainer gft, Props props) { this(gft, props, null); }
@@ -46,7 +47,7 @@ public abstract class Channel extends BasicTaskDefinition  implements SourceFile
 		this.mode=props.getString("mode", "push");
 		if (!("pull".equals(mode) || "push".equals(mode)))
 			throw new RuntimeException("mode should be push or pull, not "+mode);
-		
+		this.renamePattern=props.getString("renamePattern",null);
 	}
 
 	@Override public FileLocation getSourceFile() { return src; }
