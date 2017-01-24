@@ -207,9 +207,14 @@ public class Parser {
 			result.append(str.subSequence(pos0, pos));
 			String var=str.substring(pos+2,pos2);
 			boolean toLowerCase=false;
+			boolean toUpperCase=false;
 			if (var.endsWith("?lower_case")) {
 				var=var.substring(0, var.length()-11);
 				toLowerCase = true;
+			}
+			if (var.endsWith("?upper_case")) {
+				var=var.substring(0, var.length()-11);
+				toUpperCase = true;
 			}
 			String value= searchValue(var, props);
 			if (value==null) {
@@ -218,6 +223,8 @@ public class Parser {
 			}
 			if (toLowerCase)
 				value=value.toLowerCase();
+			else if (toUpperCase)
+				value=value.toUpperCase();
 			result.append(value);
 			pos0=pos2+1;
 			pos=str.indexOf("${",pos0);
