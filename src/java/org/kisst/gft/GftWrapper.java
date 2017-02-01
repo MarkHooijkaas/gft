@@ -4,12 +4,10 @@ import org.kisst.cfg4j.BooleanSetting;
 import org.kisst.cfg4j.CompositeSetting;
 import org.kisst.gft.admin.*;
 import org.kisst.gft.admin.status.*;
-import org.kisst.gft.filetransfer.FileTransferModule;
 import org.kisst.jms.*;
 import org.kisst.props4j.Props;
 import org.kisst.props4j.SimpleProps;
 import org.kisst.servlet4j.AbstractServlet;
-import org.kisst.servlet4j.ServletContainer;
 import org.kisst.util.*;
 import org.kisst.util.JamonUtil.JamonThread;
 import org.kisst.util.JarLoader.ModuleInfo;
@@ -41,7 +39,7 @@ public class GftWrapper implements MessageHandler {
 
 	private final Settings settings;
 	private final String topname;
-	private final ServletContainer admin;
+	private final AdminServer admin;
 	//public final Props props;
 	//private final SimpleProps topProps;
 	GftContainer gft=null;
@@ -68,7 +66,7 @@ public class GftWrapper implements MessageHandler {
 		Props topProps = new SimpleProps(this.configfile);
 		props = topProps.getProps(this.topname);
 		setLocale(props);
-		admin = new ServletContainer(props);
+		admin = new AdminServer(props);
 
 		jarloader = new JarLoader(settings.modules, topProps);
 		addDynamicModules(props);
@@ -123,7 +121,7 @@ public class GftWrapper implements MessageHandler {
 		statusItems.add(new ProblematicPollerFiles(this));
 		statusItems.add(new InProgressPollerFiles(this));
 		statusItems.add(new NotListeningListenerThreads(this,listeners));
-		admin.addServlet("/listener", new ListenerServlet(listeners, props));
+		addServlet("/listener", new ListenerServlet(listeners, props));
 		addServlet("/channel", new ChannelServlet(this));
 		addServlet("/poller", new PollerServlet(this));
 		addServlet("/dir", new DirectoryServlet(this));
