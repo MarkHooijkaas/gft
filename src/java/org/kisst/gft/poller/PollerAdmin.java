@@ -23,42 +23,7 @@ public class PollerAdmin extends AbstractHandler {
 	{
 		this.props=props;
 	}
-	
-	public void startListening() {
-		int port=props.getInt("admin.port",8080);
-		logger.info("admin site running on port {}",port);
-		server = new Server(port);
-        server.setHandler(this);
-        //handlerMap.put("default", new ConfigServlet());  //new HomeServlet(gft));
-        
-		try {
-			server.start();
-		} catch (Exception e) { throw new RuntimeException(e);}
-	}
 
-	public void join() {
-		try {
-			server.join();
-		} catch (Exception e) { throw new RuntimeException(e);}
-		logger.info("web server stopped");
-		server=null;
-	}
-
-	public void stopListening() {
-		final Server server=this.server; // remember it, because it will set it self to null
-		logger.info("Stopping web server");
-		try {
-			//server.setGracefulShutdown(1000);
-			//Thread.sleep(1000);
-			server.stop();
-			//Thread.sleep(3000);
-			for (Connector conn : server.getConnectors())
-				conn.close();
-			server.destroy();
-		} catch (Exception e) { throw new RuntimeException(e);}
-	}
-
-	
 	private HashMap<String, BaseServlet> handlerMap=new HashMap<String, BaseServlet>();
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
 	{
