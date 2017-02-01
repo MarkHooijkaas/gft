@@ -27,32 +27,34 @@ public class Poller implements Runnable {
 	private final FileServer fileserver;
 	
 	public Poller(GftContainer gft, String name, Props props) {
-		this.gft=gft;
-		this.props=props;
-		this.name=name;
+		this.gft = gft;
+		this.props = props;
+		this.name = name;
 		this.interval = props.getInt("interval", 1000);
-		if (gft!=null) {
-			String hostname=props.getString("host",null);
-			if (hostname!=null) {
-				logger.info("using remote host {}",hostname);
-				fileserver= gft.getFileServer(hostname);
-			}
-			else {
+		if (gft != null) {
+			String hostname = props.getString("host", null);
+			if (hostname != null) {
+				logger.info("using remote host {}", hostname);
+				fileserver = gft.getFileServer(hostname);
+			} else {
 				logger.info("using local host");
-				fileserver=new LocalFileServer(props);
+				fileserver = new LocalFileServer(props);
 			}
+		} else
+			fileserver = new LocalFileServer(props);
+
+		Props pollerProps = props.getProps("job", null);
+		if (pollerProps == null)
+			jobs = new PollerJob[0];
+		else {
+			int count = 0;
+			for (@SuppressWarnings("unused") String jobname : pollerProps.keys())
+				count++;
+			jobs = new PollerJob[count];
+			int i = 0;
+			for (String jobname : pollerProps.keys())
+				jobs[i++] = new PollerJob(this, pollerProps.getProps(jobname));
 		}
-		else
-			fileserver=new LocalFileServer(props);
-		
-		Props pollerProps=props.getProps("job");
-		int count=0;
-		for (@SuppressWarnings("unused") String jobname: pollerProps.keys())
-			count++;
-		jobs=new PollerJob[count];
-		int i=0;
-		for (String jobname: pollerProps.keys())
-			jobs[i++]=new PollerJob(this, pollerProps.getProps(jobname));		
 	}
 	public Poller(String name, Props props) {
 		this(null, name, props);
