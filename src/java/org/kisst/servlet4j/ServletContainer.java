@@ -57,8 +57,8 @@ public class ServletContainer extends AbstractHandler {
 			//Thread.sleep(1000);
 			server.stop();
 			//Thread.sleep(3000);
-			for (Connector conn : server.getConnectors())
-				conn.close();
+			//TODO: for (Connector conn : server.getConnectors())
+			//	conn.close();
 			server.destroy();
 		} catch (Exception e) { throw new RuntimeException(e);}
 	}
@@ -67,6 +67,7 @@ public class ServletContainer extends AbstractHandler {
 	private HashMap<String, AbstractServlet> handlerMap=new HashMap<String, AbstractServlet>();
 	public void handle(String target,Request baseRequest,HttpServletRequest request,HttpServletResponse response) 
 	{
+		logger.info("Handling request {}",request.getQueryString());
 		String path=request.getRequestURI();
         baseRequest.setHandled(true);
         try {
