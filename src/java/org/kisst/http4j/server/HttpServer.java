@@ -60,7 +60,7 @@ public class HttpServer extends AbstractHandler {
 		// https
 		if (this.config.httpsEnabled) {
 			HttpConfiguration httpConfiguration = new HttpConfiguration();
-			httpConfiguration.setSecurePort(this.config.sslPort);
+			httpConfiguration.setSecurePort(this.config.httpsPort);
 			httpConfiguration.addCustomizer(new SecureRequestCustomizer());
 			HttpConnectionFactory httpConnectionFactory = new HttpConnectionFactory(httpConfiguration);
 			SslContextFactory sslContextFactory = createSslContextFactory();
@@ -68,10 +68,10 @@ public class HttpServer extends AbstractHandler {
 
 			ServerConnector sslServerConnector = new ServerConnector(server, sslConnectionFactory, httpConnectionFactory);
 			sslServerConnector.setHost(this.config.host);
-			sslServerConnector.setPort(this.config.sslPort);
+			sslServerConnector.setPort(this.config.httpsPort);
 			sslServerConnector.setIdleTimeout(this.config.idleTimeout);
 			server.addConnector(sslServerConnector);
-			logger.info("HTTPS enabled on port: " + config.sslPort);
+			logger.info("HTTPS enabled on port: " + config.httpsPort);
 		} else
 			logger.info("HTTPS disabled");
 

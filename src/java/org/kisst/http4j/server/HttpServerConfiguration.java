@@ -11,7 +11,7 @@ public class HttpServerConfiguration {
 	public final boolean redirectToHttps;
 	public final boolean httpEnabled;
 	public final boolean httpsEnabled;
-	public final int sslPort;
+	public final int httpsPort;
 	public final String sslKeyStorePath;
 	public final String sslKeyStorePassword;
 	public final String sslKeyManagerPassword;
@@ -26,7 +26,7 @@ public class HttpServerConfiguration {
 		this.redirectToHttps= props.getBoolean("redirectToHttps",false);
 		this.httpEnabled = props.getBoolean("httpEnabled", true);
 		this.httpsEnabled = props.getBoolean("httpsEnabled", false);
-		this.sslPort = httpsEnabled ? props.getInt("sslPort", 8443) : -1;
+		this.httpsPort = httpsEnabled ? props.getInt("httpsPort", 8443) : -1;
 		this.sslKeyStorePath = httpsEnabled ? props.getString("sslKeyStorePath") : null;
 		this.sslKeyStorePassword = httpsEnabled ? props.getString("sslKeyStorePassword") : null;
 		this.sslKeyManagerPassword = httpsEnabled ? props.getString("sslKeyManagerPassword") : null;
