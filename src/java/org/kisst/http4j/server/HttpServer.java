@@ -23,7 +23,6 @@ public class HttpServer extends AbstractHandler {
 		public PageRedirectedException(String url) { super("call redirected to "+url); this.url=url; }
 	}
 	
-	
 	private final static Logger logger=LoggerFactory.getLogger(HttpServer.class);
 
 	private Server server=null;
@@ -50,10 +49,10 @@ public class HttpServer extends AbstractHandler {
 		if (this.config.httpEnabled) {
 			ServerConnector httpServerConnector = new ServerConnector(server);
 			httpServerConnector.setHost(this.config.host);
-			httpServerConnector.setPort(config.port);
+			httpServerConnector.setPort(config.httpPort);
 			httpServerConnector.setIdleTimeout(this.config.idleTimeout);
 			server.addConnector(httpServerConnector);
-			logger.info("HTTP enabled on port: " + config.port);
+			logger.info("HTTP enabled on port: " + config.httpPort);
 		} else
 			logger.info("HTTP disabled");
 
@@ -94,11 +93,11 @@ public class HttpServer extends AbstractHandler {
 	private SslContextFactory createSslContextFactory() {
 
 		SslContextFactory factory = new SslContextFactory();
-		factory.setKeyStorePath(config.sslKeyStorePath);
-		factory.setKeyStorePassword(config.sslKeyStorePassword);
-		factory.setKeyManagerPassword(config.sslKeyManagerPassword);
-		factory.setTrustStorePath(config.sslTrustStorePath);
-		factory.setTrustStorePassword(config.sslTrustStorePassword);
+		factory.setKeyStorePath(config.httpsKeyStorePath);
+		factory.setKeyStorePassword(config.httpsKeyStorePassword);
+		factory.setKeyManagerPassword(config.httpsKeyManagerPassword);
+		factory.setTrustStorePath(config.httpsTrustStorePath);
+		factory.setTrustStorePassword(config.httpsTrustStorePassword);
 		factory.setIncludeCipherSuites("TLS_DHE_RSA.*", "TLS_ECDHE.*");
 		factory.setExcludeCipherSuites(".*NULL.*", ".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*");
 		factory.setRenegotiationAllowed(false);
@@ -131,9 +130,10 @@ public class HttpServer extends AbstractHandler {
 	public void handle(String path, Request baseRequest , HttpServletRequest request, HttpServletResponse response) {
 		try {
 			String host=request.getServerName();
-			if (config.redirectToHttps && ! request.isSecure()) {
+			if (config.httpRedirectToHttps && ! request.isSecure()) {
 				StringBuilder url = new StringBuilder("https://");
 				url.append(request.getServerName());
+				url.append(":"+config.httpsPort);
 				if (request.getRequestURI() != null)
 					url.append(request.getRequestURI());
 				if (request.getQueryString() != null) 

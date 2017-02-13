@@ -10,7 +10,7 @@ public class AdminServer extends HttpServer {
 
 
 	public AdminServer(Props props) {
-		super(props.getProps("http"), new ServletContainer());
+		super(props.getProps("admin"), new ServletContainer());
 		this.servlets= (ServletContainer) handler;
 	}
 
