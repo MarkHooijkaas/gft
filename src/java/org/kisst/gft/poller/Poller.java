@@ -70,7 +70,15 @@ public class Poller implements Runnable {
 		for (PollerJob job: jobs)
 			job.reset();
 	}
-	
+
+	public boolean hasTag(String tag) {
+		for (PollerJob job: jobs) {
+			if (job.hasTag(tag))
+				return true;
+		}
+		return false;
+	}
+
 	public PollerJob[] getJobs() { return jobs; }
 	
 	public synchronized void start() {

@@ -43,7 +43,11 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
 </table> 
 
 
+<h2>Tags</h2>
 
+<#list tags?keys as name>
+<a href="/?tag=${name}">${name} (${tags[name]})</a>
+</#list>
 
 <h2>Channels</h2> 
 <table> 
@@ -56,6 +60,7 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
     <td><b>to</b></td>
   </tr>
 <#list channels?keys as name>
+<#if channels[name].hasTag(tag)>
   <#if channels[name].errorCount gt 0>
   <tr bgcolor="orange">
   <#else>
@@ -68,6 +73,7 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
     <td><a href="/dir/${channels[name].sourceFile.shortString}">${channels[name].sourceFile.shortString}</a></td>
     <td><a href="/dir/${channels[name].destinationFile.shortString}">${channels[name].destinationFile.shortString}</a></td>
   </tr>
+</#if>
 </#list> 
 </table> 
 
@@ -87,8 +93,10 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
   <td><b>inprogress directory</b></td>
 <tr>
 <#list pollers?keys as name>
-<tr><td>${pollers[name].interval}</td><td><a href=poller/${name}>${name}</a></td><td><a href=dir/${pollers[name].fileServer.name}>${pollers[name].fileServer.name}<a></td></tr> 
+<#if pollers[name].hasTag(tag)>
+<tr><td>${pollers[name].interval}</td><td><a href=poller/${name}>${name}</a></td><td><a href=dir/${pollers[name].fileServer.name}>${pollers[name].fileServer.name}<a></td></tr>
 <#list pollers[name].jobs as job>
+<#if job.hasTag(tag)>
   <#if job.errors gt 0>
     <tr bgcolor="orange">
   <#elseif job.numberOfProblematicFiles gt 0>
@@ -109,7 +117,9 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
   <td><a href="/dir/${pollers[name].fileServer.name}/${job.dir}">${job.dir}</a></td>
   <td><a href="/dir/${pollers[name].fileServer.name}/${job.moveToDir}">${job.moveToDir}</a></td>
   </tr>
-</#list> 
+</#if>
+</#list>
+</#if>
 </#list> 
 </table> 
 

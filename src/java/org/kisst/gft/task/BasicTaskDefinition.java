@@ -18,6 +18,8 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 	
 	public final GftContainer gft;
 	public final String name;
+	public final String tags;
+	public final String comment;
 
 
 	public final Props props;
@@ -29,6 +31,18 @@ public abstract class BasicTaskDefinition implements TaskDefinition {
 		this.gft=gft;
 		this.props=props;
 		this.name=props.getLocalName();
+		this.tags=props.getString("tags","").trim();
+		this.comment =props.getString("comment",null);
+		gft.addTags(this, tags);
+	}
+
+	public boolean hasTag(String tag) {
+		if (tag==null)
+			return false;
+		tag=tag.trim();
+		if ("*".equals(tag))
+			return true;
+		return (","+tags+",").indexOf(","+tag+",")>=0;
 	}
 
 	@Override public Props getProps() { return props; }

@@ -43,7 +43,7 @@ public class TemplateServlet extends BaseServlet {
 		try {
 			HashMap<String, Object> root=new HashMap<String, Object>();
 			root.put("gft", wrapper.getCurrentGft());
-			addContext(root);
+			addContext(request, root);
 
 			Template temp = cfg.getTemplate(templateName);
 			Writer out = response.getWriter();
@@ -55,5 +55,5 @@ public class TemplateServlet extends BaseServlet {
 	}
 
 
-	protected void addContext(HashMap<String, Object> root) {}
+	protected void addContext(HttpServletRequest request, HashMap<String, Object> root) {}
 }

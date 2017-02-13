@@ -170,6 +170,7 @@ public class GftWrapper implements MessageHandler {
 		root.put("listeners", listeners);
 		root.put("modules", getModuleInfo());
 		root.put("statusItems", statusItems);
+		root.put("tags", getCurrentGft().tags);
 		for (StatusItem item :statusItems)
 			item.refresh();
 	}

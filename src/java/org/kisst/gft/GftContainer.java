@@ -53,13 +53,14 @@ public class GftContainer implements HttpHostMap, ActionCreator, MessageHandler 
 	public final Props props;
 	private final Props topProps;
 	public final boolean configBroken;
-	
+
 	private final BasicHttpHostMap httpHosts;
 	
 	public final HashMap<String, TaskDefinition> channels= new LinkedHashMap<String, TaskDefinition>();
 	private final HashMap<String, Class<?>>   actions= new LinkedHashMap<String, Class<?>>();
 	//public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
-	
+	public final LinkedHashMap<String, Integer> tags= new LinkedHashMap<>();
+
 	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>(); 	 // TODO: make private
 	//private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
 	private final HashMap<String, Constructor<?>> channelTypes=new LinkedHashMap<String, Constructor<?>>();
@@ -319,5 +320,21 @@ public class GftContainer implements HttpHostMap, ActionCreator, MessageHandler 
 			return (Action) ReflectionUtil.createObject(c, new Object[] {actionprops} );
 		
 		return (Action) ReflectionUtil.createObject(clz);
+	}
+
+	public void addTags(Object obj, String tags) {
+		if (tags==null)
+			return;
+		tags=tags.trim();
+		if (tags.length()==0)
+			return;
+		for (String t: tags.split("[,]")) {
+			t = t.trim();
+			Integer old = this.tags.get(t);
+			if (old == null)
+				this.tags.put(t, 1);
+			else
+				this.tags.put(t, 1 + old);
+		}
 	}
 }
