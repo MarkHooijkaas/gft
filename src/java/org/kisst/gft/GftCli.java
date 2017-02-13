@@ -32,35 +32,37 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 
 public class GftCli {
-    final static Logger logger= LoggerFactory.getLogger(Channel.class);
+    final Logger logger= LoggerFactory.getLogger(Channel.class);
 
-    private static Cli cli=new Cli();
-    private static Cli.StringOption config;
-    private static Cli.StringOption putmsg = cli.stringOption("p","putmsg", "puts a message from the named file on the input queue",null);
-    private static Cli.StringOption delmsg = cli.stringOption("d","delmsg","selector", null);
-    private static Cli.StringOption mvmsg = cli.stringOption("m","mvmsg","move message with <str> as msgid (or @all) from errorqueue to main queue", null);
-    private static Cli.Flag help =cli.flag("h", "help", "show this help");
-    private static Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
-    private static Cli.StringOption encrypt = cli.stringOption("e","encrypt","key", null);
-    private static Cli.StringOption decrypt = cli.stringOption("d","decrypt","key", null);
-    private static Cli.StringOption decode = cli.stringOption(null,"decode","decode a base64 string", null);
-    private static Cli.SubCommand jgit =cli.subCommand("jgit", "run jgit CLI");
-    private static Cli.SubCommand git =cli.subCommand("git", "run jgit CLI");
-    private static Cli.SubCommand backup =cli.subCommand("backup", "backup the config directory to git");
+    private final Cli cli=new Cli();
+    private final  Cli.StringOption config;
+    private final Cli.StringOption putmsg = cli.stringOption("p","putmsg", "puts a message from the named file on the input queue",null);
+    private final Cli.StringOption delmsg = cli.stringOption("d","delmsg","selector", null);
+    private final Cli.StringOption mvmsg = cli.stringOption("m","mvmsg","move message with <str> as msgid (or @all) from errorqueue to main queue", null);
+    private final Cli.Flag help =cli.flag("h", "help", "show this help");
+    private final Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
+    private final Cli.StringOption encrypt = cli.stringOption("e","encrypt","key", null);
+    private final Cli.StringOption decrypt = cli.stringOption("d","decrypt","key", null);
+    private final Cli.StringOption decode = cli.stringOption(null,"decode","decode a base64 string", null);
+    private final Cli.SubCommand jgit =cli.subCommand("jgit", "run jgit CLI");
+    private final Cli.SubCommand git =cli.subCommand("git", "run jgit CLI");
+    private final Cli.SubCommand backup =cli.subCommand("backup", "backup the config directory to git");
+    private final String[] newargs;
 
-
-    public static void main(String topname, String[] args, Class<? extends Module> ... modules) {
+    public GftCli(String args[]) {
+        CryptoUtil.setKey("AB451204BD47vgtznh4r8-9yr45blfrui6093782");
         config = cli.stringOption("c","config","configuration file", null);
-        String[] newargs = cli.parse(args);
+        newargs = cli.parse(args);
         if (help.isSet()) {
             showHelp();
             return;
         }
-        CryptoUtil.setKey("-P34{-[u-C5x<I-v'D_^{79'3g;_2I-P_L0�_j3__5`y�%M�_C");
-        String configfilename = config.get();
-        GftRunner runner =new GftRunner(topname, configfilename, modules);
+    }
+
+    public String getConfigFile() { return config.get(); }
+    public void main(BaseRunner runner) {
         try {
-            PropertyConfigurator.configure(runner.configfile.getParent()+"/"+topname+".log4j.properties");
+            PropertyConfigurator.configure(runner.configfile.getParent()+"/"+runner.topname+".log4j.properties");
         }
         catch (UnsatisfiedLinkError e) { // TODO: a bit of a hack to prevent log4j Link error
             System.out.println("Linking Error initializing log4j, probably you should execute \"set PATH=%PATH%;lib\"");
@@ -71,7 +73,7 @@ public class GftCli {
         }
         SimpleProps props=new SimpleProps();
         props.load(runner.configfile);
-        props=(SimpleProps) props.getProps(topname);
+        props=(SimpleProps) props.getProps(runner.topname);
         if (jgit.isSet() || git.isSet()) {
             if (System.getProperty("jgit.gitprefix")==null)
                 System.setProperty("jgit.gitprefix",props.getString("jgit.gitprefix","D:\\git"));
@@ -106,7 +108,7 @@ public class GftCli {
         }
     }
 
-    private static void backup(String[] args, SimpleProps props) {
+    private void backup(String[] args, SimpleProps props) {
         if (System.getProperty("jgit.gitprefix")==null)
             System.setProperty("jgit.gitprefix",props.getString("jgit.gitprefix","D:\\git"));
         try {
@@ -154,7 +156,7 @@ public class GftCli {
         catch (Exception e) { throw new RuntimeException(e); }
     }
 
-    private static String getGitComment(String[] args) {
+    private String getGitComment(String[] args) {
         if (args.length==0) {
             System.out.println("commit commentaar is verplicht, type een regel die beschrijft waarom of wat er veranderd is, b.v. een RFC nummer");
             return System.console().readLine().trim();
@@ -165,19 +167,19 @@ public class GftCli {
         return comment;
     }
 
-    private static String getQueue(SimpleProps props) {
+    private String getQueue(SimpleProps props) {
         HashMap<String, Object> context = new HashMap<String, Object>();
         context.put("global", props.get("global", null));
         String queuename = TemplateUtil.processTemplate(props.getString("listener.main.queue"), context);
         return queuename;
     }
 
-    private static void showHelp() {
+    private void showHelp() {
         System.out.println("usage: java -jar gft.jar [options]");
         System.out.println(cli.getSyntax(""));
     }
 
-    private static JmsSystem getQueueSystem(Props props) {
+    private JmsSystem getQueueSystem(Props props) {
         new JarLoader(props, "gft").getMainClasses();
         Props qmprops=props.getProps("mq.host.main");
         String type=qmprops.getString("type");
@@ -189,7 +191,7 @@ public class GftCli {
             throw new RuntimeException("Unknown type of queueing system "+type);
     }
 
-    private static void putmsg(SimpleProps props, String filename) {
+    private void putmsg(SimpleProps props, String filename) {
         logger.info("gft put");
         JmsSystem queueSystem=getQueueSystem(props);
         String queuename = getQueue(props);
@@ -210,7 +212,7 @@ public class GftCli {
         queueSystem.close();
     }
 
-    private static void delmsg(SimpleProps props,String selector) {
+    private void delmsg(SimpleProps props,String selector) {
         JmsSystem queueSystem=getQueueSystem(props);
         String queuename = getQueue(props);
         logger.info("removing the following message "+selector);
@@ -229,7 +231,7 @@ public class GftCli {
         catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
     }
 
-    private static void moveMessage(Props props, String msgid) {
+    private void moveMessage(Props props, String msgid) {
         String src=props.getString("listener.main.errorqueue");
         String dest=props.getString("listener.main.queue");
         try {
