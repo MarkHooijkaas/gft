@@ -94,7 +94,12 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
 <tr>
 <#list pollers?keys as name>
 <#if pollers[name].hasTag(tag)>
-<tr><td>${pollers[name].interval}</td><td><a href=poller/${name}>${name}</a></td><td><a href=dir/${pollers[name].fileServer.name}>${pollers[name].fileServer.name}<a></td></tr>
+  <#if pollers[name].paused>
+  <tr bgcolor="lightgrey">
+  <#else>
+  <tr>
+  </#if>
+<td>${pollers[name].interval}</td><td><a href=poller/${name}>${name}</a></td><td><a href=dir/${pollers[name].fileServer.name}>${pollers[name].fileServer.name}<a></td></tr>
 <#list pollers[name].jobs as job>
 <#if job.hasTag(tag)>
   <#if job.errors gt 0>
@@ -103,6 +108,8 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
     <tr bgcolor="orange">
   <#elseif job.numberOfConsecutiveProblems gt 0>
     <tr bgcolor="orange">
+  <#elseif job.paused>
+    <tr bgcolor="lightgrey">
   <#else>
     <tr>
   </#if>

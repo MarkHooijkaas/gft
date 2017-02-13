@@ -20,7 +20,6 @@ public class HomeServlet extends TemplateServlet {
 		if (tag==null)
 			tag="*";
 		root.put("tag", tag.trim());
-		System.out.println("looging for tag["+tag+"]");
 		//root.put("tags", wrapper.getCurrentGft().tags);
 		wrapper.addContext(root);
 	}

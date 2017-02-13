@@ -43,6 +43,7 @@ public class Poller implements Runnable {
 		} else
 			fileserver = new LocalFileServer(props);
 
+		paused=props.getBoolean("paused", false);
 		Props pollerProps = props.getProps("job", null);
 		if (pollerProps == null)
 			jobs = new PollerJob[0];
@@ -119,7 +120,7 @@ public class Poller implements Runnable {
 						}
 					}
 				}
-				if (fileserver!=null)
+				if (fsconn!=null)
 					fsconn.close();
 			} 
 			catch (Exception e) {

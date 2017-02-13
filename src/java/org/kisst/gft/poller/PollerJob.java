@@ -150,7 +150,7 @@ public class PollerJob extends BasicTaskDefinition implements WritesHtml {
 	public int getRuns() { return runs; }
 	public int getSuccesses() { return successes; }
 	public int getErrors() { return errors; }
-	public boolean isPaused() { return paused || nrofConsecutivePollProblems>maxNrofConsecutivePollProblems; }
+	public boolean isPaused() { return paused || nrofConsecutivePollProblems>maxNrofConsecutivePollProblems || parent.isPaused(); }
 	public int getNumberOfDetectedFiles() { return nrofDetectedFiles; }
 	public int getNumberOfProblematicFiles() { return nrofIgnoredFiles; }
 	public int getNumberOfInProgressFiles() { return nrofInProgressFiles; }
