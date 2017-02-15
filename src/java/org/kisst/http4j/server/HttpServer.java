@@ -96,8 +96,8 @@ public class HttpServer extends AbstractHandler {
 		factory.setKeyStorePath(config.httpsKeyStorePath);
 		factory.setKeyStorePassword(config.httpsKeyStorePassword);
 		factory.setKeyManagerPassword(config.httpsKeyManagerPassword);
-		factory.setTrustStorePath(config.httpsTrustStorePath);
-		factory.setTrustStorePassword(config.httpsTrustStorePassword);
+		//factory.setTrustStorePath(config.httpsTrustStorePath);
+		//factory.setTrustStorePassword(config.httpsTrustStorePassword);
 		factory.setIncludeCipherSuites("TLS_DHE_RSA.*", "TLS_ECDHE.*");
 		factory.setExcludeCipherSuites(".*NULL.*", ".*RC4.*", ".*MD5.*", ".*DES.*", ".*DSS.*");
 		factory.setRenegotiationAllowed(false);

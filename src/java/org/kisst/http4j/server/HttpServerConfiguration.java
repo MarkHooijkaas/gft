@@ -15,8 +15,8 @@ public class HttpServerConfiguration {
 	public final String httpsKeyStorePath;
 	public final String httpsKeyStorePassword;
 	public final String httpsKeyManagerPassword;
-	public final String httpsTrustStorePath;
-	public final String httpsTrustStorePassword;
+	//public final String httpsTrustStorePath;
+	//public final String httpsTrustStorePassword;
 
 	public HttpServerConfiguration(Props props) {
 		this.host = props.getString("host", null);
@@ -31,8 +31,8 @@ public class HttpServerConfiguration {
 		this.httpsKeyStorePath = props.getString("https.keyStorePath", null);
 		this.httpsKeyStorePassword = props.getString("https.keyStorePassword", null);
 		this.httpsKeyManagerPassword = props.getString("https.keyManagerPassword", null);
-		this.httpsTrustStorePath = props.getString("https.trustStorePath", null);
-		this.httpsTrustStorePassword = props.getString("https.trustStorePassword", null);
+		//this.httpsTrustStorePath = props.getString("https.trustStorePath", null);
+		//this.httpsTrustStorePassword = props.getString("https.trustStorePassword", null);
 	}
 
 }
