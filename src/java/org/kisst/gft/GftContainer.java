@@ -31,12 +31,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Set;
-
-
+import java.util.*;
 
 
 public class GftContainer implements HttpHostMap, ActionCreator, MessageHandler {
@@ -59,7 +54,7 @@ public class GftContainer implements HttpHostMap, ActionCreator, MessageHandler 
 	public final HashMap<String, TaskDefinition> channels= new LinkedHashMap<String, TaskDefinition>();
 	private final HashMap<String, Class<?>>   actions= new LinkedHashMap<String, Class<?>>();
 	//public final HashMap<String, HttpHost>   httphosts= new LinkedHashMap<String, HttpHost>();
-	public final LinkedHashMap<String, Integer> tags= new LinkedHashMap<>();
+	public final Map<String, Integer> tags= new TreeMap<>();
 
 	public final HashMap<String, SshFileServer>    sshhosts= new LinkedHashMap<String, SshFileServer>(); 	 // TODO: make private
 	//private final HashMap<String, Module > modules=new LinkedHashMap<String, Module>();
