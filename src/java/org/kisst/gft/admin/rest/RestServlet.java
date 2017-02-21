@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.gft.admin.BaseServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +17,8 @@ public class RestServlet extends BaseServlet {
 	private final Logger logger=LoggerFactory.getLogger(RestServlet.class);
 	private final String prefix;
 	private final LinkedHashMap<String, Resource> urls=new LinkedHashMap<String, Resource>();
-	public RestServlet(GftContainer gft, String path) { 
-		super(gft);
+	public RestServlet(GftWrapper wrapper, String path) {
+		super(wrapper);
 		this.prefix=path;
 	}
 	public String getPrefix() { return prefix; }

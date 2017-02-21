@@ -5,13 +5,13 @@ import java.util.LinkedHashMap;
 
 public interface FileServerConnection {
 	public static class FileAttributes {
-		public final long accessTime;
-		public final long  modifyTime;
+		public final long accessTimeMilliSecs;
+		public final long  modifyTimeMilliSecs;
 		public final boolean isDirectory;
 		public final long size;
 		public FileAttributes(long accessTime, long modifyTime, boolean isDirectory, long size) {
-			this.accessTime=accessTime;
-			this.modifyTime=modifyTime;
+			this.accessTimeMilliSecs=accessTime;
+			this.modifyTimeMilliSecs=modifyTime;
 			this.isDirectory=isDirectory;
 			this.size=size;
 		}
@@ -24,7 +24,10 @@ public interface FileServerConnection {
 	public long fileSize(String path);
 	public long lastModified(String path);
 	public boolean isDirectory(String path);
+	public boolean isLocked(String path);
 	public void move(String path, String newpath);
 	public void getToLocalFile(String remotepath, String localpath); 
 	public void putFromLocalFile(String localpath, String remotepath);
+	public String getFileContentAsString(String remotepath);
+	public void putStringAsFileContent(String remotepath, String content);
 }

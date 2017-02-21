@@ -22,7 +22,9 @@ package org.kisst.props4j;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class LayeredProps extends PropsBase {
+import org.kisst.util.IndentUtil;
+
+public class LayeredProps extends PropsBase implements IndentUtil.Indentable {
 	private final Props global; // TODO: better way to have global as always last layer
 	private final ArrayList<Props> layers = new ArrayList<Props>();
 
@@ -31,6 +33,11 @@ public class LayeredProps extends PropsBase {
 	}
 	public void addTopLayer(Props props) { if (props!=null) layers.add(0,props); }
 	public void addLayer(Props props)    { if (props!=null) layers.add(props); }
+
+	@Override public Props getParent() { return null; }
+	@Override public String getLocalName() { return layers.get(0).getLocalName(); }
+	@Override public String getFullName() { return layers.get(0).getFullName(); }
+
 	
 	public Object get(String key, Object defaultValue) {
 		for (Props p:layers) {
@@ -62,10 +69,18 @@ public class LayeredProps extends PropsBase {
 	}
 
 	public String toString() {
+		StringBuilder result=new StringBuilder("LayeredProps(");
+		for (Props layer: layers)
+			result.append(layer+",");
+		result.append(global+")");
+		return result.toString(); 
+	}
+	
+	public String toIndentedString(String indent) {
 		StringBuilder result=new StringBuilder();
 		for (Props layer: layers)
-			result.append(layer.toString()).append("\n");
-		result.append(global.toString()).append("\n");
+			result.append(indent+"#layer: "+layer+"\n").append(IndentUtil.toIndentedString(layer, indent)).append("\n");
+		result.append("#global: "+global+"\n").append(IndentUtil.toIndentedString(global, indent)).append("\n");
 		return result.toString(); 
 	}
 }

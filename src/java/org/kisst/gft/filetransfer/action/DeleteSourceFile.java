@@ -1,16 +1,16 @@
 package org.kisst.gft.filetransfer.action;
 
-import org.kisst.gft.action.Action;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.task.Task;
+import org.kisst.props4j.Props;
 
-public class DeleteSourceFile implements Action {
-	public boolean safeToRetry() { return true; }
+public class DeleteSourceFile extends BaseAction {
+	public DeleteSourceFile(Props props) { super(props); }
 
-	public Object execute(Task task) {
-		FileTransferTask ft= (FileTransferTask) task;
-		ft.channel.src.deleteFile(ft.srcpath);
-		return null;
+	@Override public boolean safeToRetry() { return true; }
+
+	@Override public void execute(Task task) {
+		((SourceFile) task).getSourceFile().deleteFile();
 	}
 
 }

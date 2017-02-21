@@ -7,10 +7,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.util.CryptoUtil;
 
 public class EncryptServlet extends BaseServlet {
-	public EncryptServlet(GftContainer gft) { super(gft);	}
+	public EncryptServlet(GftWrapper wrapper) { super(wrapper);	}
 
 	public void handle(HttpServletRequest request, HttpServletResponse response)
 			throws IOException {

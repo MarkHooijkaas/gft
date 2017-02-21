@@ -23,6 +23,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 public class ReflectionUtil {
 
@@ -52,7 +53,24 @@ public class ReflectionUtil {
 		}
 		return null;
 	}
-	
+
+	public static Constructor<?> getFirstCompatibleConstructor(Class<?> cls, Class<?>[] signature) {
+		Constructor<?>[] consarr = cls.getDeclaredConstructors();
+		for (int i=0; i<consarr.length; i++) {
+			Class<?>[] paramtypes = consarr[i].getParameterTypes();
+			if (paramtypes.length!=signature.length)
+				continue;
+			boolean compatible=true;
+			for (int j=0; j<signature.length; j++) {
+				if (!signature[j].isAssignableFrom(paramtypes[j]))
+					compatible=false;
+			}
+			if (compatible)
+				return consarr[i];
+		}
+		return null;
+	}
+
 	public static Constructor<?> getConstructor(Class<?> cls, Class<?>[] signature) {
 		Constructor<?>[] consarr = cls.getDeclaredConstructors();
 		for (int i=0; i<consarr.length; i++) {
@@ -100,11 +118,8 @@ public class ReflectionUtil {
 		return createObject(findClass(classname), args);
 	}
 	public static Object createObject(Class<?> c, Object[] args) {
-		try {
-			Constructor<?> cons= c.getConstructor(getSignature(args));
-			return createObject(cons,args);
-		}
-		catch (NoSuchMethodException e) { throw new RuntimeException(e); } 
+		Constructor<?> cons= getFirstCompatibleConstructor(c,getSignature(args));
+		return createObject(cons,args);
 	}
 			
 	public static Object createObject(Constructor<?> cons, Object[] args) {
@@ -127,5 +142,50 @@ public class ReflectionUtil {
 		catch (IllegalArgumentException e) { throw new RuntimeException(e); }
 		catch (IllegalAccessException e) { throw new RuntimeException(e); } 
 		catch (InstantiationException e) { throw new RuntimeException(e); }
+	}
+	
+	public static String toString(Object obj, String... fields) {
+		StringBuilder result= new StringBuilder(obj.getClass().getSimpleName()+"(");
+		String sep="";
+		if (fields!=null) for (String field: fields) {
+			if (field!=null) {
+				result.append(sep);
+				result.append(field);
+				sep=",";
+			}
+		}
+		result.append(")");
+		return result.toString();
+	}
+	
+	public static String toString(Object obj) { return toString(obj,0); }
+	public static String toString(Object obj, int depth) {
+		// TODO: special support for Hashmaps? Lists, etc. Better indentation, newline support etc?
+		if (obj==null)
+			return "null";
+		if (obj instanceof String)
+			return "\""+obj+"\""; // TODO: escape quotes?
+		if (obj instanceof Number)
+			return obj.toString();
+		if (obj instanceof Boolean)
+			return obj.toString();
+		if (depth<0)
+			return obj.getClass().getSimpleName()+"()";
+		depth--;
+		StringBuilder result= new StringBuilder();
+		result.append(obj.getClass().getSimpleName()+"(");
+		String sep="";
+		for (Field field : obj.getClass().getFields()) {
+			try {
+				if (! Modifier.isStatic(field.getModifiers())) {
+					result.append(sep+field.getName()+"="+toString(field.get(obj), depth));
+					sep=", ";
+				}
+			} 
+			catch (IllegalArgumentException e) { throw new RuntimeException(e);} 
+			catch (IllegalAccessException e) { throw new RuntimeException(e);}
+		}
+		result.append(")");
+		return result.toString();
 	}
 }

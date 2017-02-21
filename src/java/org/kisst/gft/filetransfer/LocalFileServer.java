@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.LinkedHashMap;
 
 import org.kisst.props4j.Props;
+import org.kisst.util.FileUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,13 +17,18 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 		this.basePath=props.getString("basePath","").trim();
 	}
 	
-	private File file(String path) { return new File(path); }
+	private File file(String path) { return new File(basePath+path); }
 	
 	@Override public boolean fileExists(String path) { return file(path).exists(); }
 	@Override public void deleteFile(String path) { file(path).delete(); }
 	@Override public long fileSize(String path) { return file(path).length(); }
 	@Override public long lastModified(String path) { return file(path).lastModified(); }
 	@Override public boolean isDirectory(String path) { return file(path).isDirectory(); }
+	@Override public String unixPath(String path) { return FileUtil.joinPaths(basePath, path); }
+	@Override public boolean isLocked(String path) { 
+		File f = file(path);
+		return ! f.renameTo(f);
+	}
 
 	public LinkedHashMap<String, FileAttributes> getDirectoryEntries(String path) {
 		LinkedHashMap<String, FileAttributes>  result= new LinkedHashMap<String,FileAttributes>();
@@ -45,7 +51,6 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 	@Override public FileServerConnection openConnection() { return this;}
 	@Override public void close() {}
 	@Override public boolean isAvailable() { return true; }
-	@Override public String getBasePath() { return basePath; }
 
 	@Override public FileAttributes getFileAttributes(String path) {
 		File f=new File(path);
@@ -59,8 +64,20 @@ public class LocalFileServer implements FileServer, FileServerConnection {
 		throw new RuntimeException("not implemented yet");  // TODO: implement
 	}
 
+	public String getFileContentAsString(String remotepath) {
+		return FileUtil.loadString(remotepath);
+	}
+	@Override
+	public void putStringAsFileContent(String remotepath, String content) {
+		FileUtil.saveString(new File(remotepath), content);
+	}
+
+	
 	@Override
 	public void putFromLocalFile(String localpath, String remotepath) {
 		throw new RuntimeException("not implemented yet"); //TODO implement
 	}
+
+	@Override
+	public String getName() { return "localhost"; }
 }

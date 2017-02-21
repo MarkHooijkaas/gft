@@ -1,103 +1,90 @@
 package org.kisst.gft.filetransfer;
 
+import java.io.PrintWriter;
+
 import org.kisst.gft.GftContainer;
 import org.kisst.gft.RetryableException;
+import org.kisst.gft.TaskStarter;
+import org.kisst.gft.action.Action;
 import org.kisst.gft.action.ActionList;
-import org.kisst.gft.action.DecodeBase64ToFileAction;
-import org.kisst.gft.ssh.SshFileServer;
-import org.kisst.gft.task.JmsTaskDefinition;
+import org.kisst.gft.admin.WritesHtml;
+import org.kisst.gft.filetransfer.action.DestinationFile;
+import org.kisst.gft.filetransfer.action.SourceFile;
+import org.kisst.gft.task.BasicTaskDefinition;
 import org.kisst.gft.task.Task;
-import org.kisst.jms.JmsMessage;
 import org.kisst.props4j.Props;
-import org.kisst.props4j.SimpleProps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Channel extends JmsTaskDefinition {
+public abstract class Channel extends BasicTaskDefinition  implements SourceFile, DestinationFile, WritesHtml, TaskStarter.JmsTaskCreator {
 	final static Logger logger=LoggerFactory.getLogger(Channel.class); 
 
-	public final SshFileServer src;
-	public final SshFileServer dest;
-	public final String srcdir;
-	public final String destdir;
+	private final FileLocation src; 
+	private final FileLocation dest; 
+	private final FileLocation finalDest; 
+	//public final SshFileServer src;
+	//public final SshFileServer dest;
+	//public final String srcdir;
+	//public final String destdir;
 	public final String mode;
-	private final boolean useDecode;
+	public final String renamePattern;
+	private final Action flow;
 
-	public Channel(GftContainer gft, Props props) {
+	public Channel(GftContainer gft, Props props) { this(gft, props, null); }
+	public Channel(GftContainer gft, Props props, Action flow) {
 		super(gft, props);
-		getContext().put("channel", this);
-		
-		this.src=gft.sshhosts.get(props.getString("src.host"));
-		this.dest=gft.sshhosts.get(props.getString("dest.host"));
-
-		String dir=props.getString("src.dir",  "");
-		if (dir.startsWith("dynamic:"))
-			this.srcdir=dir;
+		if (flow==null)
+			this.flow= ActionList.createAction(gft, this, null);
 		else
-			this.srcdir =gft.processTemplate(dir, getContext()); 
-
-		dir=props.getString("dest.dir",  "");
-		if (dir.startsWith("dynamic:"))
-			this.destdir=dir;
+			this.flow=flow;
+		this.src=new FileLocation(gft.getFileServer(props.getString("src.host")), props.getString("src.dir",  ""));
+		this.dest=new FileLocation(gft.getFileServer(props.getString("dest.host")), props.getString("dest.dir",  ""));
+		if (props.getString("finaldest.dir",  null)==null)
+			this.finalDest=null;
 		else
-			this.destdir =gft.processTemplate(dir, getContext());
+			this.finalDest=new FileLocation(dest.getFileServer(), props.getString("finaldest.dir",  ""));
 
 		this.mode=props.getString("mode", "push");
 		if (!("pull".equals(mode) || "push".equals(mode)))
 			throw new RuntimeException("mode should be push or pull, not "+mode);
-		
-		SimpleProps actprops=new SimpleProps();
-
-		actprops.put("actions", "log_error");
-		this.errorAction=new ActionList(this, actprops);
-
-		actprops.put("actions", "log_start");
-		this.startAction=new ActionList(this, actprops);
-		
-		actprops.put("actions", "log_completed");
-		this.endAction=new ActionList(this, actprops);
-		useDecode = ((ActionList) action).contains(DecodeBase64ToFileAction.class);
+		this.renamePattern=props.getString("renamePattern",null);
 	}
-	
 
-	public String getSrcDescription() {
-		if (useDecode)
-			return "encoded-in-message";
-		else
-			return src+":"+srcdir;
-	}
-	public String getDestDescription() { return dest+":"+destdir; }
+	@Override public FileLocation getSourceFile() { return src; }
+	@Override public FileLocation getDestinationFile() { return dest; }
+	@Override public FileLocation getFinalDestinationFile() { return finalDest; }
 
-	public String toString() { return this.getClass().getSimpleName()+"("+name+" from "+getSrcDescription()+" to "+getDestDescription()+")";}
+	@Override public Action getFlow() { return this.flow;} 
+
+	public String toString() { return this.getClass().getSimpleName()+"("+name+" from "+getSourceFile().getShortString()+" to "+getDestinationFile().getShortString()+")";}
 	public void checkSystemsAvailable(FileTransferTask ft) {
-		if (! src.isAvailable())
-			throw new RetryableException("Source system "+src+" is not available tot transfer file "+ft.srcpath+" for channel "+name);
-		if (! dest.isAvailable())
-			throw new RetryableException("Destination system "+dest+" is not available tot transfer file "+ft.destpath+" for channel "+name);
+		if (! src.getFileServer().isAvailable())
+			throw new RetryableException("Source system "+src.getFileServer()+" is not available to transfer file "+ft.filename+" for channel "+name);
+		if (! dest.getFileServer().isAvailable())
+			throw new RetryableException("Destination system "+dest.getFileServer()+" is not available to transfer file "+ft.filename+" for channel "+name);
 	}
 
-	private String calcPath(String dir, String file, FileTransferTask ft) {
-		while (file.startsWith("/"))
-			file=file.substring(1);
-		// TODO: check for more unsafe constructs
-		if (dir.startsWith("dynamic:"))
-			return gft.processTemplate(dir.substring(8)+"/"+file, ft.getContext());
-		else
-			return dir+"/"+file;
-	}
-
-	
-	public String getSrcPath(String file, FileTransferTask ft) { return calcPath(srcdir, file, ft); }
-	public String getDestPath(String file, FileTransferTask ft) {return calcPath(destdir, file, ft);	}
-
-	
-	public Task createNewTask(JmsMessage msg) { return new FileTransferTask(this, msg); }
-	
-	@Override
-	public void run(Task task) {
+	@Override public void run(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		checkSystemsAvailable(ft);
 		super.run(task);
 	}
 	
+	
+	@Override protected String getLogDetails(Task task) {
+		if (task instanceof FileTransferTask) {
+			FileTransferTask ft = (FileTransferTask) task;
+			return  "bestand: "+ft.filename+ ", van: "+ft.getSourceFile()+" naar: "+ft.getDestinationFile();
+		}
+		else
+			return task.toString();
+	}
+	
+	@Override protected void writeHtmlBody(PrintWriter out) {
+		out.println("<h2>Directories</h2>");
+		out.println("<ul>");
+		out.println("<li>FROM: <a href=\"/dir/"+src.getShortString()+"\">"+src.getShortString()+"</a>");
+		out.println("<li>TO:   <a href=\"/dir/"+dest.getShortString()+"\">"+dest.getShortString()+"</a>");
+		out.println("</ul>");
+	}
 }

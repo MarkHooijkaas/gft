@@ -7,7 +7,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class Parser {
+	private static final Logger logger = LoggerFactory.getLogger(SimpleProps.class);
 	private final File file;
 	private final BufferedReader inp;
 	private char lastchar;
@@ -26,8 +30,8 @@ public class Parser {
 	}
 	public Parser(InputStream inpstream) { this(new InputStreamReader(inpstream), null); }
 	
-	public File getFile() { return file; }
-	public File getPath(String path) {
+	//private File getFile() { return file; }
+	private File getPath(String path) {
 		if (file==null)
 			return new File(path);
 		else if (file.isDirectory())
@@ -36,11 +40,11 @@ public class Parser {
 			return new File(file.getParent(), path);
 	}
 	
-	public char getLastChar() { return lastchar; }
-	public boolean eof() {return eof; }
+	private char getLastChar() { return lastchar; }
+	private boolean eof() {return eof; }
 	
-	public void unread() { useLastChar=true; }
-	public char read() {
+	private void unread() { useLastChar=true; }
+	private char read() {
 		if (useLastChar) {
 			useLastChar=false;
 			return lastchar;
@@ -65,7 +69,8 @@ public class Parser {
 	}
 
 	
-	public String readIdentifier() {
+	@SuppressWarnings("unused")
+	private String readIdentifier() {
 		skipWhitespaceAndComments();
 		StringBuilder result=new StringBuilder();
 		while (! eof()){
@@ -79,7 +84,7 @@ public class Parser {
 		}
 		return result.toString();
 	}
-	public String readIdentifierPath() {
+	private String readIdentifierPath() {
 		skipWhitespaceAndComments();
 		StringBuilder result=new StringBuilder();
 		while (! eof()){
@@ -93,11 +98,11 @@ public class Parser {
 		}
 		return result.toString();
 	}
-	public String readDoubleQuotedString() { return readUntil("\"").trim(); }
-	public String readSingleQuotedString() { return readUntil("\'").trim(); }
-	public String readUnquotedString() { return readUntil("\n").trim(); }
+	private String readDoubleQuotedString() { return readUntil("\"").trim(); }
+	//private String readSingleQuotedString() { return readUntil("\'").trim(); }
+	private String readUnquotedString() { return readUntil("\n").trim(); }
 
-	public String readUntil(String endchars) {
+	private String readUntil(String endchars) {
 		StringBuilder result=new StringBuilder();
 		while (! eof()){
 			char ch=read();
@@ -123,7 +128,7 @@ public class Parser {
 		return result.toString();
 	}
 
-	public void skipWhitespaceAndComments() {
+	private void skipWhitespaceAndComments() {
 		while (! eof()){
 			char ch=read();
 			if (ch=='#') {
@@ -136,7 +141,7 @@ public class Parser {
 			}
 		}
 	}
-	public void skipLine() {
+	private void skipLine() {
 		while (! eof()){
 			char ch=read();
 			if (ch=='\n')
@@ -155,7 +160,7 @@ public class Parser {
 	}
 	
 
-	private Object readObject()  { return readObject(null,null); }
+	private Object readObject()  { return readObject(null, null); }
 
 	private Object readObject(SimpleProps parent, String name)  {
 		skipWhitespaceAndComments();
@@ -173,14 +178,80 @@ public class Parser {
 			else if (ch == ' ' || ch == '\t' || ch == '\n')
 				continue;
 			else if (ch=='"')
-				return readDoubleQuotedString();
-			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':')
-				return ch+readUnquotedString();
+				return replaceVars(readDoubleQuotedString(), parent, name);
+			else if (Character.isLetterOrDigit(ch) || ch=='/' || ch=='.' || ch==':' || ch=='$') {
+				String result=ch+readUnquotedString();
+				if (parent==null || name==null)
+					return result;
+				return replaceVars(result,parent, name);
+			}
 			else if (ch=='@')
 				return readSpecialObject();
 		}
 		return null;
 	}
+	private String replaceVars(String str, Props props, String logname) {
+		if (logname==null)
+			throw new RuntimeException(str+"\t"+props);
+		if (str.startsWith("dynamic:"))
+			return str;
+		int pos=str.indexOf("${");
+		if (pos<0)
+			return str;
+		StringBuilder result = new StringBuilder();
+		int pos0=0;
+		while (pos>=0) {
+			int pos2=str.indexOf("}",pos);
+			if (pos2<0)
+				throw new ParseException("${ without ending }");
+			result.append(str.subSequence(pos0, pos));
+			String var=str.substring(pos+2,pos2);
+			boolean toLowerCase=false;
+			boolean toUpperCase=false;
+			if (var.endsWith("?lower_case")) {
+				var=var.substring(0, var.length()-11);
+				toLowerCase = true;
+			}
+			if (var.endsWith("?upper_case")) {
+				var=var.substring(0, var.length()-11);
+				toUpperCase = true;
+			}
+			String value= searchValue(var, props);
+			if (value==null) {
+				logger.error("In ***"+logname+" could not substitute variable ${"+var+"} in expression "+str);
+				value="??"+var+"??";
+			}
+			if (toLowerCase)
+				value=value.toLowerCase();
+			else if (toUpperCase)
+				value=value.toUpperCase();
+			result.append(value);
+			pos0=pos2+1;
+			pos=str.indexOf("${",pos0);
+		}
+		result.append(str.substring(pos0));
+		logger.info("Variable substitution for var {} from {} to "+result.toString(), logname, str);
+		return result.toString();
+	}
+	private String searchValue(String var, Props props) {
+		if (var.trim().startsWith("ENV:")) {
+			var=var.trim().substring(4);
+			String result = System.getProperty(var);
+			if (result!=null)
+				return result;
+			return System.getenv(var);
+		}
+		Props p=props;
+		String value=null;
+		while (p!=null) {
+			value=p.getString(var, null); // TODO: should also work if not a String
+			if (value!=null)
+				break;
+			p=p.getParent();
+		}
+		return value;
+	}
+	
 	private Object readSpecialObject() {
 		String type=readUntil("(;").trim();
 		if (type.equals("file")) {
@@ -210,7 +281,7 @@ public class Parser {
 		return result;
 	}
 
-	public SimpleProps readMap(SimpleProps parent, String name)  {
+	private SimpleProps readMap(SimpleProps parent, String name)  {
 		SimpleProps map=new SimpleProps(parent, name);
 		fillMap(map);
 		return map;
@@ -233,8 +304,10 @@ public class Parser {
 				unread();
 				String key=readIdentifierPath();
 				skipWhitespaceAndComments();
-				if (getLastChar() == '=' || getLastChar() ==':' )
-					map.put(key, readObject(map, key));
+				if (getLastChar() == '=' || getLastChar() ==':' ) {
+					SimpleProps keyparent=map.getParentForKeyWithCreate(key);
+					map.put(key, readObject(keyparent, key));
+				}
 				else if (getLastChar() == '+') {
 					char ch2 = read();
 					if (ch2 != '=')
@@ -254,19 +327,44 @@ public class Parser {
 
 
 	private void include(SimpleProps map, Parser inp) {
+		boolean recurse=false;
+		String postfix=null;
 		Object o=readObject();
 		File f=null;
 		if (o instanceof File)
 			f=(File) o;
-		else if (o instanceof String)
-			f=inp.getPath(o.toString());
+		else if (o instanceof String) {
+			String name=(String) o;
+			if (name.indexOf("${")>0)
+				name=replaceVars(name,map,"@include");
+			int pos=name.indexOf("**/*");
+			if (pos>0) {
+				postfix=name.substring(pos+4);
+				recurse=true;
+				name=name.substring(0,pos);
+			}
+			pos=name.indexOf('*');
+			if (pos>0) {
+				postfix=name.substring(pos+1);
+				name=name.substring(0,pos);
+			}
+			f=inp.getPath(name);
+		}
 		else
 			throw inp.new ParseException("unknown type of object to include "+o);
 		if (f.isFile())
 			map.load(f);
-		else if (f.isDirectory()) {
-			File[] files = f.listFiles(); // TODO: filter
-			for (File f2: files) {
+		else if (f.isDirectory())
+			includeDir(map, f, postfix, recurse);
+	}
+	private void includeDir(SimpleProps map, File dir, String postfix, boolean recurse) {
+		File[] files = dir.listFiles(); // TODO: filter
+		for (File f2: files) {
+			if (f2.isDirectory() && recurse)
+				includeDir(map, f2, postfix, recurse);
+			else {
+				if (postfix!=null && ! f2.getName().endsWith(postfix))
+					continue;
 				if (f2.isFile())
 					map.load(f2);
 			}

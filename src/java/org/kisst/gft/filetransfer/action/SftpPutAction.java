@@ -19,8 +19,7 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft.filetransfer.action;
 
-import org.kisst.gft.GftContainer;
-import org.kisst.gft.action.Action;
+import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.filetransfer.FileServer;
 import org.kisst.gft.filetransfer.FileServerConnection;
 import org.kisst.gft.filetransfer.FileTransferTask;
@@ -29,27 +28,26 @@ import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SftpPutAction implements Action {
-	private final static Logger logger=LoggerFactory.getLogger(SftpPutAction.class);
-	private final boolean safeToRetry;
-	
-	public SftpPutAction(GftContainer gft, Props props) {
-		safeToRetry = props.getBoolean("safeToRetry", false);
-	}
+public class SftpPutAction extends BaseAction {
+	public SftpPutAction(Props props) { super(props); }
 
-	public boolean safeToRetry() { return safeToRetry; }
-        
-	public Object execute(Task task) {
+	private final static Logger logger=LoggerFactory.getLogger(SftpPutAction.class);
+	
+	@Override public void execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		
-		FileServer fileserver= ft.channel.dest;
+		FileServer fileserver= ft.getDestinationFile().getFileServer();
 		FileServerConnection fsconn=fileserver.openConnection();
-		String remotefile = ft.channel.destdir + "/" + ft.filename;
-		String localfile=ft.getTempFile().getPath();
-		logger.info("sftp put localfile {} to {}", localfile, remotefile);
-		fsconn.putFromLocalFile(localfile, remotefile);
-		
-		return null;
+		try {
+			String remotefile = ft.getDestinationFile().getPath();
+			String localfile=ft.getTempFile().getPath();
+			logger.info("sftp put localfile {} to {}", localfile, remotefile);
+			fsconn.putFromLocalFile(localfile, remotefile);
+		}
+		finally {
+			if (fsconn!=null)
+				fsconn.close();
+		}
 	}
 
 }

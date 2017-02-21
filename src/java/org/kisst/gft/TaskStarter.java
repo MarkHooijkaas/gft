@@ -1,12 +1,11 @@
 package org.kisst.gft;
 
-import nl.duo.gft.LogUtil;
+import java.util.ArrayList;
 
-import org.kisst.gft.task.JmsTaskDefinition;
-import org.kisst.gft.task.Task;
+import org.kisst.gft.task.JmsTask;
 import org.kisst.jms.JmsMessage;
 import org.kisst.jms.MessageHandler;
-import org.kisst.util.XmlNode;
+import org.kisst.util.exception.MappedStateException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,28 +15,31 @@ import com.jamonapi.MonitorFactory;
 public class TaskStarter implements MessageHandler {
 	final static Logger logger=LoggerFactory.getLogger(TaskStarter.class); 
 
-	private final GftContainer gft;
+	public static interface JmsTaskCreator {
+		public JmsTask createJmsTask(JmsMessage msg);
+	}
 	
-	public TaskStarter(GftContainer gft) { this.gft=gft; }
+	private final ArrayList<JmsTaskCreator> creators = new ArrayList<JmsTaskCreator>();
+	
+	public void appendCreator(JmsTaskCreator creator) { creators.add(creator); }
+	
 	public boolean handle(JmsMessage msg) {
-		Task task;
-		try {
-			XmlNode message=new XmlNode(msg.getData());
-			XmlNode content=message.getChild("Body").getChildren().get(0);
-			JmsTaskDefinition definition=(JmsTaskDefinition) gft.getTaskDefinition(content.getChildText("kanaal"));
-
-			task=definition.createNewTask(msg);
-		}
-		catch (RuntimeException e) {
-			LogUtil.log("error", "jms", "handle", "exception", e.getMessage());
-			throw e;
-		}
+		JmsTask task=createJmsTask(msg);
+		
 		if (logger.isInfoEnabled())
 			logger.info(task+" started");
 		
 		Monitor mon1 = MonitorFactory.start("channel:"+task.getTaskDefinition().getName());
 		try {
 			task.run();
+		}
+		catch (Exception e) {
+			MappedStateException mse = new MappedStateException(e);
+			try {
+				task.addState(mse);
+			}
+			catch (RuntimeException e2) { logger.error("Error when adding state info to Exception for task "+task,e2); }
+			throw(mse);
 		}
 		finally {
 			mon1.stop();
@@ -47,4 +49,19 @@ public class TaskStarter implements MessageHandler {
 		return true;
 	}
 
+	protected JmsTask createJmsTask(JmsMessage msg) {
+		for (JmsTaskCreator c : creators) {
+			try {
+				JmsTask task = c.createJmsTask(msg);
+				if (task !=null)
+					return task;
+			}
+			catch (RuntimeException e) {
+				LogService.log("error", "ReceivingMessage", "JmsTaskStarter", msg.getMessageId(), e.getMessage());
+				throw e;
+			}
+		}	
+		LogService.log("error", "ReceivingMessage", "JmsTaskStarter", msg.getMessageId(), "could not determine task type of message "+msg);
+		throw new RuntimeException("could not determine task type of message "+msg);
+	}
 }

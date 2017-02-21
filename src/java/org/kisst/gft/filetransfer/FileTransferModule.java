@@ -1,48 +1,28 @@
 package org.kisst.gft.filetransfer;
 
 import org.kisst.gft.GftContainer;
+import org.kisst.gft.GftWrapper;
 import org.kisst.gft.Module;
-import org.kisst.gft.filetransfer.action.CheckCopiedFile;
-import org.kisst.gft.filetransfer.action.CheckDestFileDoesNotExist;
-import org.kisst.gft.filetransfer.action.CheckSourceFile;
-import org.kisst.gft.filetransfer.action.CopyFile;
-import org.kisst.gft.filetransfer.action.DeleteSourceFile;
-import org.kisst.gft.filetransfer.action.FixPermissions;
-import org.kisst.gft.filetransfer.action.NotifyReceiver;
-import org.kisst.gft.filetransfer.action.SftpGetAction;
-import org.kisst.gft.filetransfer.action.SftpPutAction;
-import org.kisst.gft.task.TaskDefinition;
+import org.kisst.gft.filetransfer.action.*;
 import org.kisst.props4j.Props;
 
 public class FileTransferModule implements Module {
-	private final GftContainer gft;
-
-	public FileTransferModule(GftContainer gft, Props props) {
-		this.gft=gft;
-	}
-	
+	@Override public void reset(Props props) {}
 	@Override public void destroy() { }
-
 	@Override public String getName() { return "FileTransferModule"; }
 
-	@Override public void init(Props props) {
+	@Override public void init(GftWrapper wrapper, Props props) {}
+	@Override public void initGft(GftContainer gft) {
 		gft.addAction("check_src",CheckSourceFile.class);
 		gft.addAction("check_dest",CheckDestFileDoesNotExist.class);
-		gft.addAction("copy",CopyFile.class);
+		gft.addAction("copy",SftpGetPutAction.class);
 		gft.addAction("check_copy",CheckCopiedFile.class);
 		gft.addAction("remove",DeleteSourceFile.class);
-		gft.addAction("notify",NotifyReceiver.class);
+		gft.addAction("archive_src",ArchiveSourceFile.class);
+		gft.addAction("remove_src_dir_if_empty",DeleteSourceDirectoryIfEmpty.class);
 		gft.addAction("fix_permissions",FixPermissions.class);
 		gft.addAction("sftp_get", SftpGetAction.class);
 		gft.addAction("sftp_put", SftpPutAction.class);
-		gft.registerDefinitionType("FileTransferChannel", this);
+		gft.addAction("move_to_final_dest", MoveDestFileToFinalDestination.class);
 	}
-
-	@Override public void reset(Props props) {}
-
-	@Override
-	public TaskDefinition createDefinition(String type, Props props) {
-		return new Channel(gft, props);
-	}
-
 }

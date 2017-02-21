@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+a:hover   { text-decoration: underline; color: #000000; background-color: #FF704D;}
+a:active  { text-decoration: underline; color: #000000; background-color: #FF704D;}
+</style>
+
+<#if gft.configBroken>
+  <body bgcolor="#FF4444">
+  <h1>Warning Configuration is Broken</h1>
+</#if>
+
+<h1>${gft.topname?upper_case} version ${wrapper.version}</h1>
+
+<h2><a href="logging/hours=24&channel=${gft.topname?upper_case}-Service">Started on ${gft.startupTime?datetime}</a></h2> 
+<table>
+<tr>
+	<td><a href="/logging/minutes=1">ALL Logging last minute</a></td>
+	<td><a href="/logging/hours=1">ALL Logging last hour</a></td>
+	<td><a href="/logging/days=1">ALL Logging last day</a></td>
+</tr>
+<tr>
+	<td><a href="/logging/level=error&minutes=1">ERROR Logging last minute</a></td>
+	<td><a href="/logging/level=error&hours=1">ERROR Logging last hour</a></td>
+	<td><a href="/logging/level=error&days=1">ERROR Logging last day</a></td>
+</tr>
+</table>
+
+<table> 
+  <tr>
+    <td><b>STATUS</b></td>
+    <td><b>count</b></td>
+    <td><b>message</b></td>
+  </tr>
+<#list statusItems as item>
+  <tr bgcolor="${item.color!"white"}">
+    <td><a href="${item.url}">${item.name}</a></td>
+    <td>${item.problemCount}</td>
+    <td>${item.message!""}</td>
+  </tr>
+</#list> 
+</table> 
+
+
+<h2>Tags</h2>
+
+<#list tags?keys as name>
+<a href="/?tag=${name}">${name} (${tags[name]})</a>
+</#list>
+
+<h2>Channels</h2> 
+<table> 
+  <tr>
+    <td><b>name</b></td>
+    <td><b>type</b></td>
+    <td><b>#tasks</b></td>
+    <td><b>#errors</b></td>
+    <td><b>from</b></td>
+    <td><b>to</b></td>
+  </tr>
+<#list channels?keys as name>
+<#if channels[name].hasTag(tag)>
+  <#if channels[name].errorCount gt 0>
+  <tr bgcolor="orange">
+  <#else>
+  <tr>
+  </#if>
+    <td><a href="channel/${name}"><b>${name}</b></a></td>
+    <td>${channels[name].class.simpleName}</td>
+    <td>${channels[name].totalCount}</td>
+    <td>${channels[name].errorCount}</td>
+    <td><a href="/dir/${channels[name].sourceFile.shortString}">${channels[name].sourceFile.shortString}</a></td>
+    <td><a href="/dir/${channels[name].destinationFile.shortString}">${channels[name].destinationFile.shortString}</a></td>
+  </tr>
+</#if>
+</#list> 
+</table> 
+
+<h2>Pollers</h2> 
+<table> 
+<tr>
+  <td><b>interval</b></td>
+  <td><b>poller/job name</b></td>
+  <td><b>consecutive problems</b></td>
+  <td><b>runs</b></td>
+  <td><b>successes</b></td>
+  <td><b>errors</b></td>
+  <td><b>paused</b></td>
+  <td><b>#current files</b></td>
+  <td><b>#problematic files</b></td>
+  <td><b>directory</b></td>
+  <td><b>inprogress directory</b></td>
+<tr>
+<#list pollers?keys as name>
+<#if pollers[name].hasTag(tag)>
+  <#if pollers[name].paused>
+  <tr bgcolor="lightgrey">
+  <#else>
+  <tr>
+  </#if>
+<td>${pollers[name].interval}</td><td><a href=poller/${name}>${name}</a></td><td><a href=dir/${pollers[name].fileServer.name}>${pollers[name].fileServer.name}<a></td></tr>
+<#list pollers[name].jobs as job>
+<#if job.hasTag(tag)>
+  <#if job.errors gt 0>
+    <tr bgcolor="orange">
+  <#elseif job.numberOfProblematicFiles gt 0>
+    <tr bgcolor="orange">
+  <#elseif job.numberOfConsecutiveProblems gt 0>
+    <tr bgcolor="orange">
+  <#elseif job.paused>
+    <tr bgcolor="lightgrey">
+  <#else>
+    <tr>
+  </#if>
+  <td></td><td>* <a href="poller/${name}/${job.shortName}">${job.shortName}</a></td>
+  <td>${job.numberOfConsecutiveProblems}</td>
+  <td>${job.runs}</td>
+  <td>${job.successes}</td>
+  <td>${job.errors}</td>
+  <td>${job.paused?string("PAUSED","active")}</td>
+  <td>${job.numberOfDetectedFiles}</td>
+  <td>${job.numberOfProblematicFiles}</td>
+  <td><a href="/dir/${pollers[name].fileServer.name}/${job.dir}">${job.dir}</a></td>
+  <td><a href="/dir/${pollers[name].fileServer.name}/${job.moveToDir}">${job.moveToDir}</a></td>
+  </tr>
+</#if>
+</#list>
+</#if>
+</#list> 
+</table> 
+
+
+<h2>Listeners</h2> 
+<table> 
+<tr><td>name</td><td>queue</td><td>STATUS</td><td>threads</td><td>active</td></tr>
+<#list listeners?keys as name>
+<tr><td><a href=rest/listener/${name}>${name}</a></td><td>${listeners[name].queue}</td><td><a href=listener/${name}>VIEW STATUS and QUEUES</a></td>
+<td>${listeners[name].nrofListeners}</td>
+<td>${listeners[name].nrofActiveListeners}</td>
+</tr> 
+</#list> 
+</table> 
+
+
+<h2>SSH Hosts</h2> 
+<table> 
+<#list gft.fileServerNames as name>
+<tr><td><a href=rest/sshhost/${name}>${name}</a></td><td>${gft.getFileServer(name)!""}/${gft.getFileServer(name).basePath!""}</td><td><a href=dir/${name}>DIR</a></td></tr> 
+</#list> 
+</table> 
+
+<h2>HTTP Hosts</h2> 
+<table> 
+<#list gft.getHttpHostNames() as name>
+<tr><td><a href=rest/httphost/${name}>${name}</a></td><td>${gft.getHttpHost(name)}</td></tr> 
+</#list> 
+</table> 
+
+<h2>Technisch Beheer</h2> 
+<table> 
+	<tr>
+		<th>MODULE</th>
+		<th>version</th>
+		<th>main class</th>
+		<th>date</th>
+	</tr>
+<#list modules as mod>
+	<tr>
+		<td>${mod.file.name}</td>
+		<td>${mod.version!"no version"}</td>
+		<td>${mod.mainClassname}</td>
+		<td>${mod.date?datetime}</td>
+	</tr>
+</#list> 
+</table> 
+<br/>
+
+<ul>
+<li><a href="config">Configuration</a></li>
+<li><a href="reset">Reset JAMON logging</a></li>
+</ul>
+
+</body>
+</html>

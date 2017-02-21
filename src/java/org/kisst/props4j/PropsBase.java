@@ -20,11 +20,13 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 package org.kisst.props4j;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.kisst.util.FileUtil;
 
 public abstract class PropsBase implements Props {
-	private static final long serialVersionUID = 1L;
+	//private static final long serialVersionUID = 1L;
 	abstract public Object get(String key, Object defaultValue);
 
 	public boolean hasKey(String key) { return get(key,null)!=null;	}
@@ -39,7 +41,7 @@ public abstract class PropsBase implements Props {
 		if (result!=null)
 			return result;
 		else
-			throw new RuntimeException("Could not find property "+key+" in context "+getFullName()+"\n"+this);
+			throw new RuntimeException("Could not find property "+key+" in "+this);
 	}
 
 	public String getString(String key) { 
@@ -47,7 +49,7 @@ public abstract class PropsBase implements Props {
 		if (result!=null)
 			return result;
 		else
-			throw new RuntimeException("Could not find property "+key+" in context "+getFullName());
+			throw new RuntimeException("Could not find property "+key+" in "+this);
 	}
 
 	public String getString(String key, String defaultValue) {
@@ -99,8 +101,28 @@ public abstract class PropsBase implements Props {
 			throw new RuntimeException("property "+name+" should be true or false, not "+value);
 	}
 
+	public Props getProps(String name, Props defaultValue) { return (Props) get(name,defaultValue); }
 	public Props getProps(String name) { return (Props) get(name); }
 	public Sequence getSequence(String name) { return (Sequence) get(name); }
 
-
+	public List<String> fullKeys() { 
+		ArrayList<String> result= new ArrayList<String>();
+		fillFullKeys(this,null, result);
+		return result;
+	}
+	
+	private static void fillFullKeys(Props props, String prefix, ArrayList<String> result) {
+		for (String key: props.keys()) {
+			String newkey;
+			if (prefix==null)
+				newkey=key;
+			else
+				newkey=prefix+"."+key;
+			Object obj=props.get(key);
+			if (obj instanceof Props)
+				fillFullKeys((Props) obj, newkey, result);
+			else
+				result.add(newkey);
+		}
+	}
 }

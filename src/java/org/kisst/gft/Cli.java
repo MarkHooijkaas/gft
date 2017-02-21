@@ -55,10 +55,19 @@ public class Cli {
 		}
 		@Override public int parse(String[] args, int index) { set("true"); return index+1; }
 	}
+	public class SubCommand {
+		private final String desc;
+		private boolean isSet=false;
+		private SubCommand(String name, String desc) { this.desc=desc; subCommands.put(name,this); }
+		public boolean isSet() { return isSet;}
+	}
 	
 	
 	
 	private final LinkedHashMap<String, Option> options=new LinkedHashMap<String, Option>();
+	private final LinkedHashMap<String,SubCommand> subCommands = new LinkedHashMap<String,SubCommand>();
+
+	public SubCommand subCommand(String name, String syntax) { return new SubCommand(name, syntax); }
 	private void add(Option o) {
 		if (o.shortName!=null)
 			options.put(o.shortName, o);
@@ -86,6 +95,11 @@ public class Cli {
 				o=options.get(arg.substring(2));
 			else if (arg.startsWith("-") || arg.startsWith("+"))
 				o=options.get(arg.substring(1));
+			else if (subCommands.get(arg)!=null) {
+				SubCommand cmd = subCommands.get(arg);
+				cmd.isSet=true;
+				return subArgs(args, index+1);
+			}
 			else
 				return subArgs(args, index);
 			if (o==null)
@@ -95,7 +109,7 @@ public class Cli {
 		return new String[]{};
 	}
 	
-	protected static String[] subArgs(String[] args, int pos) {
+	public static String[] subArgs(String[] args, int pos) {
 		String result[]= new String[args.length-pos];
 		for (int i=pos; i<args.length; i++)
 			result[i-pos]=args[i];
@@ -118,6 +132,11 @@ public class Cli {
 				name+=" ";
 			result.append(prefix+name+"   "+opt.desc+"\n");
 			last=opt;
+		}
+		for (String name: subCommands.keySet()) {
+			while (name.length()<maxlen+5)
+				name+=" ";
+			result.append(name+"  "+subCommands.get(name.trim()).desc+"\n");
 		}
 		return result.toString();
 	}

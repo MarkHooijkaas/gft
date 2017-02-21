@@ -21,47 +21,30 @@ package org.kisst.gft.action;
 
 import java.io.File;
 
-import org.kisst.gft.GftContainer;
 import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class DeleteLocalFileAction implements Action {
+public class DeleteLocalFileAction extends BaseAction {
 	private final static Logger logger=LoggerFactory.getLogger(DeleteLocalFileAction.class);
-	private final boolean safeToRetry;
 
 	
-	public DeleteLocalFileAction(GftContainer gft, Props props) {
-		// TODO: we willen channel weten
-		//Channel chan=null;
-		//if (chan instanceof ArchiveerChannel)
-		//	throw new RuntimeException("ArchiveAction moet in een ArchiveerChannel zitten, en dat is "+chan.name+" niet");
-		safeToRetry = props.getBoolean("safeToRetry", false);
-			}
-
-	public boolean safeToRetry() { return safeToRetry; }
+	public DeleteLocalFileAction(Props props) { super(props); }
         
-	public Object execute(Task task) {
-		
+	@Override public void execute(Task task) {
 		BasicTask ft= (BasicTask) task;
 	
-		logger.info("deleteLocalFileAction is ruim localfile op!");
-		
 		// Deletes all files and subdirectories under dir.
 		// Returns true if all deletions were successful.
 		// If a deletion fails, the method stops attempting to delete and returns false.
 
-		boolean gelukt = deleteDir(ft.getTempFile().getParentFile());
-		if (gelukt){
-			logger.info("verwijderen van directorie {}, inclusief bestanden, is gelukt", ft.getTempFile().getPath());
-			}
-		else {
-			logger.error("verwijderen van directorie {} is niet gelukt", ft.getTempFile().getPath());	
-			}
-	
-		return null;
+		boolean succes = deleteDir(ft.getTempFile().getParentFile());
+		if (succes)
+			logger.info("removal of directory {}, including files succeeded", ft.getTempFile().getPath());
+		else
+			logger.error("removal of directory {}, including files failed", ft.getTempFile().getPath());	
 	}
 	
 	public static boolean deleteDir(File dir) {

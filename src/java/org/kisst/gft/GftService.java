@@ -1,13 +1,10 @@
 package org.kisst.gft;
 
-import java.io.File;
-
-import org.apache.log4j.PropertyConfigurator;
 import org.tanukisoftware.wrapper.WrapperListener;
 import org.tanukisoftware.wrapper.WrapperManager;
 
 public class GftService  implements WrapperListener  {
-	private GftRunner runner;
+	protected GftRunner runner;
 
 	public static void main(String[] args) {
 		// Start the application. If the JVM was launched from the native
@@ -19,13 +16,10 @@ public class GftService  implements WrapperListener  {
 
 	public Integer start(String[] args) {
 		System.out.println("Starting GFT service with working dir "+System.getProperty("user.dir"));
-		File configfile;
-		if (args.length==0)
-			configfile=new File("../config/gft.properties");
-		else
-			configfile=new File(args[0]);
-		PropertyConfigurator.configure(configfile.getParent()+"/log4j.properties");
-		runner= new GftRunner(configfile);
+		String configFile=null;
+		if (args.length>0)
+			configFile=args[0];
+		runner= new GftRunner(configFile);
 		runner.start();
 		return null;
 	}

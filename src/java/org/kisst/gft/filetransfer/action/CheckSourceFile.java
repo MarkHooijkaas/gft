@@ -1,19 +1,20 @@
 package org.kisst.gft.filetransfer.action;
 
-import org.kisst.gft.FunctionalException;
-import org.kisst.gft.action.Action;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.task.Task;
+import org.kisst.props4j.Props;
+import org.kisst.util.exception.BasicFunctionalException;
 
-public class CheckSourceFile implements Action {
-	public boolean safeToRetry() { return true; }
+public class CheckSourceFile extends BaseAction {
+	public CheckSourceFile(Props props) { super(props); }
 
-	public Object execute(Task task) {
-		FileTransferTask ft= (FileTransferTask) task;
+	@Override public boolean safeToRetry() { return true; }
+
+	@Override public void execute(Task task) {
+		SourceFile src= (SourceFile) task;
 		// TODO: remember filesize
-		if (! ft.channel.src.fileExists(ft.srcpath))
-				throw new FunctionalException("Source file "+ft.srcpath+" does not exist or is not accessible");
-		return null;
+		if (! src.getSourceFile().fileExists())
+				throw new BasicFunctionalException("Source file "+src.getSourceFile()+" does not exist or is not accessible");
 	}
 
 }

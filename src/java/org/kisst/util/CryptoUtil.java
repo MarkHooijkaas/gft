@@ -1,5 +1,7 @@
 package org.kisst.util;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.NoSuchAlgorithmException;
@@ -10,13 +12,44 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public class CryptoUtil {
+	final static Logger logger=LoggerFactory.getLogger(CryptoUtil.class); 
+
+	public static interface KeySetter {
+		public void setCryptoKey();
+	}
 	private static final String ALGORITHM = "AES";
 	private static Key key= calcKey("jF0OQtZ4PYlEzEyZCchJdIq22GUuV6U9LoLZYqRt".getBytes());
 	
+	
+	public static void checkKeySetter(Object obj) {
+		if (obj instanceof KeySetter)
+			((KeySetter) obj).setCryptoKey();
+		else {
+			// Old method for module that does not know yet of new CryptoUtil.KeySetter interface
+			// to be removed in future
+			Method method = ReflectionUtil.getMethod(obj.getClass(),"setKey", new Class<?>[]{});
+			if (method!=null) {
+				if (Modifier.isStatic(method.getModifiers())) {
+					logger.warn("Using old deprecated way (calling setKey through reflection) for setting cryptoKey in object "+obj);
+					ReflectionUtil.invoke(null, method, null);
+				}
+			}
+		}
+	}
+
+	
 	// The following method is public, so that any program using this library can set it's
 	// own key (preferably one that isn't publicly available worldwide through github :-) 
-	public static void setKey(String keystring) { key=calcKey(keystring.getBytes()); }
+	public static void setKey(String keystring) {
+		key=calcKey(keystring.getBytes());
+	}
+	public static void setHexKey(String keystring) {
+		key=calcKey(fromHex(keystring));
+	}
 	private static Key calcKey(byte[] keyValue) {
 		// Make sure the key is 128-bits, if it is too long an Exception will be thrown
 		byte[] bytes= new byte[16];

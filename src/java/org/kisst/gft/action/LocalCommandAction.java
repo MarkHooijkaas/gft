@@ -8,17 +8,17 @@ import org.slf4j.LoggerFactory;
 
 public class LocalCommandAction implements Action{
 	private static final Logger logger = LoggerFactory.getLogger(LocalCommandAction.class);
-	private String name;
-	private String command;
-
-
+	private final String name;
+	private final String command;
+	private final boolean safeToRetry;
 
 	public LocalCommandAction(GftContainer gft, Props props) {
 		name = props.getLocalName();
 		command = props.getString("command", null);
+		safeToRetry = props.getBoolean("safeToRetry", false);
 	}
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		if (command != null) {
 			logger.info("{} - Starten met action {}", name, command);
 
@@ -49,13 +49,8 @@ public class LocalCommandAction implements Action{
 		}else{
 			logger.error("geen actie of command gevonden voor poller {}", name);
 		}		
-		
-		return null;
 	}
 
-	@Override
-	public boolean safeToRetry() {
-		return false;
-	}
+	@Override public boolean safeToRetry() { return safeToRetry; }
 
 }

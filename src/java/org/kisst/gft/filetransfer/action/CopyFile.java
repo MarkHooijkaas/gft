@@ -1,26 +1,31 @@
 package org.kisst.gft.filetransfer.action;
 
-import org.kisst.gft.action.Action;
+import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.filetransfer.Channel;
+import org.kisst.gft.filetransfer.FileLocation;
 import org.kisst.gft.filetransfer.FileTransferTask;
 import org.kisst.gft.ssh.SshFileServer;
 import org.kisst.gft.task.Task;
+import org.kisst.props4j.Props;
 
-public class CopyFile implements Action {
-	public boolean safeToRetry() { return true; }
+public class CopyFile extends BaseAction {
+	public CopyFile(Props props) { super(props); }
 
-	public Object execute(Task task) {
+	@Override public boolean safeToRetry() { return true; }
+
+	@Override public void execute(Task task) {
 		FileTransferTask ft= (FileTransferTask) task;
 		Channel chan=ft.channel;
-		SshFileServer src=chan.src;
-		SshFileServer dest=chan.dest;
+		FileLocation src=ft.getSourceFile();
+		FileLocation dest=ft.getDestinationFile();
+		SshFileServer srcsrv= (SshFileServer) src.getFileServer();
+		SshFileServer destsrv= (SshFileServer) dest.getFileServer();
 		String mode=chan.mode;
 		
 		if ("push".equals(mode))
-			src.copyFileTo(ft.srcpath, dest, ft.destpath);
+			srcsrv.copyFileTo(src.getPath(), destsrv, dest.getPath());
 		else if ("pull".equals(mode))
-			dest.copyFileFrom(src, ft.srcpath, ft.destpath);
-		return null;
+			destsrv.copyFileFrom(srcsrv, src.getPath(), dest.getPath());
 	}
 
 }

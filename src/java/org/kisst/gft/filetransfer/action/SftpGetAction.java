@@ -15,41 +15,38 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with the RelayConnector framework.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
 package org.kisst.gft.filetransfer.action;
 
-import org.kisst.gft.GftContainer;
-import org.kisst.gft.action.Action;
-import org.kisst.gft.filetransfer.FileServer;
+import org.kisst.gft.action.BaseAction;
 import org.kisst.gft.filetransfer.FileServerConnection;
-import org.kisst.gft.filetransfer.FileTransferTask;
+import org.kisst.gft.task.BasicTask;
 import org.kisst.gft.task.Task;
 import org.kisst.props4j.Props;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SftpGetAction implements Action {
+public class SftpGetAction extends BaseAction {
 	private final static Logger logger=LoggerFactory.getLogger(SftpGetAction.class);
-	private final boolean safeToRetry;
-	
-	public SftpGetAction(GftContainer gft, Props props) {
-		safeToRetry = props.getBoolean("safeToRetry", false);
+
+	public SftpGetAction(Props props) { 
+		super(props);
 	}
 
-	public boolean safeToRetry() { return safeToRetry; }
-        
-	public Object execute(Task task) {
-		FileTransferTask ft= (FileTransferTask) task;
-		
-		FileServer fileserver= ft.channel.src;
-		FileServerConnection fsconn=fileserver.openConnection();
-		String remotefile = ft.channel.srcdir + "/" + ft.filename;
-		String localfile=ft.getTempFile().getPath();
-		logger.info("sftp get {} to localfile {}",remotefile, localfile);
-		fsconn.getToLocalFile(remotefile, localfile);
-		
-		return null;
-	}
+	@Override public void execute(Task task) {
+		SourceFile src= (SourceFile) task;
 
+		FileServerConnection fsconn=src.getSourceFile().getFileServer().openConnection();
+		try {
+			String remotefile = src.getSourceFile().getPath();
+			String localfile=((BasicTask)task).getTempFile().getPath();
+			logger.info("sftp get {} to localfile {}",remotefile, localfile);
+			fsconn.getToLocalFile(remotefile, localfile);
+		}
+		finally {
+			if (fsconn!=null)
+				fsconn.close();
+		}
+	}
 }

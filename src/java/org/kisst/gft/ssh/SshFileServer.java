@@ -22,8 +22,8 @@ public class SshFileServer implements FileServer {
 		return new SshFileServerConnection(this);
 	}
 	public boolean isAvailable() { return host.isAvailable();}
-	public String getBasePath() { return basePath; }
 	public SshHost getSshHost() { return host; }
+	public String getName() { return host.name; }
 
 	public String toString() { return host.toString(); }
 	//public String getBasePath() { return basePath; }

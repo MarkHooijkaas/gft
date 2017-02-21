@@ -1,68 +1,27 @@
 package org.kisst.gft.admin;
 
-import java.io.IOException;
-import java.io.PrintWriter;
+import org.kisst.gft.GftWrapper;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.HashMap;
 
-import org.kisst.gft.GftContainer;
+import static org.eclipse.jgit.lib.ObjectChecker.tag;
 
-public class HomeServlet extends BaseServlet {
-	public HomeServlet(GftContainer gft) { super(gft); }
+public class HomeServlet extends TemplateServlet {
 
-	public void handle(HttpServletRequest request, HttpServletResponse response)
-			throws IOException {
-		if (getUser(request, response)==null)
-			return;
-		response.setContentType("text/html;charset=utf-8");
-		response.setStatus(HttpServletResponse.SC_OK);
-		PrintWriter out = response.getWriter();
-		out.println("<h1>GFT</h1>");
 
-		out.println("<a href=\"config\">Configuration</a><br>");
-		out.println("<h2>Channels</h2>");
-		out.println("<table>");
-		for (String name : gft.channels.keySet()) {
-			out.println("<tr><td><a href=\"channel/"+name+"\">"+name+"</a></td><td>"+gft.channels.get(name)+"</td></tr>");
-		}
-		out.println("</table>");
-		
-		out.println("<h2>Actions</h2>");
-		out.println("<table>");
-		for (String name : gft.actions.keySet()) {
-			out.println("<tr><td>"+name+"</td><td>"+gft.actions.get(name)+"</td></tr>");
-		}
-		out.println("</table>");
+	public HomeServlet(GftWrapper wrapper) {
+		super(wrapper);
+	}
 
-		out.println("<h2>Listener</h2>");
-		out.println("<table>");
-		for (String name : gft.listeners.keySet()) {
-			out.println("<tr><td>"+name+"</td><td>"+gft.listeners.get(name)+"</td></tr>");
-		}
-		out.println("</table>");
 
-		out.println("<h2>Pollers</h2>");
-		out.println("<table>");
-		for (String name : gft.pollers.keySet()) {
-			out.println("<tr><td>"+name+"</td><td>"+gft.pollers.get(name)+"</td></tr>");
-		}
-		out.println("</table>");
-		
-		out.println("<h2>SSH Hosts</h2>");
-		out.println("<table>");
-		for (String name : gft.sshhosts.keySet()) {
-			out.println("<tr><td>"+name+"</td><td>"+gft.sshhosts.get(name)+"</td></tr>");
-		}
-		out.println("</table>");
-
-		out.println("<h2>HTTP Hosts</h2>");
-		out.println("<table>");
-		for (String name : gft.httphosts.keySet()) {
-			out.println("<tr><td>"+name+"</td><td>"+gft.httphosts.get(name)+"</td></tr>");
-		}
-		out.println("</table>");
-
+	@Override protected void addContext(HttpServletRequest request, HashMap<String, Object> root) {
+		String tag=request.getParameter("tag");
+		if (tag==null)
+			tag="*";
+		root.put("tag", tag.trim());
+		//root.put("tags", wrapper.getCurrentGft().tags);
+		wrapper.addContext(root);
 	}
 
 }

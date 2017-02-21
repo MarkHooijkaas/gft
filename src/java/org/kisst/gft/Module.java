@@ -19,13 +19,12 @@ along with the RelayConnector framework.  If not, see <http://www.gnu.org/licens
 
 package org.kisst.gft;
 
-import org.kisst.gft.task.TaskDefinition;
 import org.kisst.props4j.Props;
 
 public interface Module {
 	public String getName();
-	public void init(Props props);
+	public void init(GftWrapper wrapper, Props props);
 	public void reset(Props props);
 	public void destroy();
-	public TaskDefinition createDefinition(String type, Props props);
+	public void initGft(GftContainer gft);
 }

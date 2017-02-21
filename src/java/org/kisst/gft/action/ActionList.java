@@ -1,97 +1,53 @@
 package org.kisst.gft.action;
 
+import java.io.PrintWriter;
 import java.util.LinkedHashMap;
 
-import org.kisst.gft.RetryableException;
-import org.kisst.gft.task.BasicTaskDefinition;
+import org.kisst.gft.admin.WritesHtml;
 import org.kisst.gft.task.Task;
-import org.kisst.props4j.LayeredProps;
-import org.kisst.props4j.Props;
-import org.kisst.props4j.SimpleProps;
-import org.kisst.util.ThreadUtil;
+import org.kisst.gft.task.TaskDefinition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.jamonapi.Monitor;
-import com.jamonapi.MonitorFactory;
-
-public class ActionList  implements Action {
+public class ActionList extends ActionExecutor implements Action, WritesHtml {
 	final static Logger logger=LoggerFactory.getLogger(ActionList.class); 
 	
 	private final LinkedHashMap<String,Action> actions=new LinkedHashMap<String,Action>();
 
-	private final int maxNrofTries;
-	private final long retryDelay;
-
-	public ActionList(BasicTaskDefinition taskdef, Props props) {
-		this(taskdef, props, null);
-	}
-	public ActionList(BasicTaskDefinition taskdef, Props props, String defaultActions) {
-		maxNrofTries = props.getInt("maxNrofTries", 3);
-		retryDelay = props.getLong("retryDelay", 30000);
-		String actions=props.getString("actions",defaultActions);
-		String[] parts=actions.split(",");
-		//this.actions=new Action[parts.length];
+	private final TaskDefinition taskdef;
+	
+	public ActionList(ActionCreator creator, TaskDefinition taskdef, String[] parts) {
+		super(taskdef.getProps());
+		this.taskdef=taskdef;
 		for (String name: parts) {
 			name=name.trim();
-			LayeredProps lprops=new LayeredProps(taskdef.gft.props.getProps("gft.global"));
-			SimpleProps top=new SimpleProps();
-			top.put("action",taskdef.gft.actions.get(name));
-			top.put("channel",props);
-			lprops.addLayer(top);
-			if (props.get(name,null) instanceof Props)
-				lprops.addLayer(props.getProps(name));
-			lprops.addLayer(taskdef.gft.actions.get(name));
-			lprops.addLayer(props);
-			//lprops.addLayer(taskdef.gft.props.getProps("gft.global"));
-				
-			Action a=taskdef.createAction(lprops);
+			Action a=createAction(creator, name);
 			if (a==null)
 				throw new RuntimeException("Unknown action "+name);
 			this.actions.put(name,a);
 		}
 	}
-	public boolean safeToRetry() { return false; } // TODO: 
+	
+	public static Action createAction(ActionCreator creator, TaskDefinition taskdef, Class<?> defaultActionClass) {
+		String actions=taskdef.getProps().getString("actions", null);
+		if (actions==null)
+			return creator.createAction(taskdef, defaultActionClass);
+		String[] parts=actions.split(",");
+		if (parts.length==1) {
+			return creator.createAction(taskdef,parts[0].trim());
+		}
+		else 
+			return new ActionList(creator, taskdef, parts);
+	}
+	
+	
+	@Override public boolean safeToRetry() { return false; } // TODO: 
 
-	public Object execute(Task task) {
+	@Override public void execute(Task task) {
 		for (String name: actions.keySet()) {
 			Action a=actions.get(name);
-			if (logger.isDebugEnabled())
-				logger.debug("action "+name+" started");
-			boolean done=false;
-			int nrofTries=0;
-			while (! done){
-				Monitor mon1=MonitorFactory.start("action:"+name);
-				Monitor mon2=null;
-				String channelName= task.getTaskDefinition().getName();
-				mon2=MonitorFactory.start("channel:"+channelName+":action:"+name);
-				try {
-					a.execute(task);
-					done=true;
-				}
-				catch (RetryableException e) {
-					if (a.safeToRetry() && nrofTries <= maxNrofTries) {
-						logger.warn("Error during action "+name+", try number "+nrofTries+", will retry after "+retryDelay/1000+" seconds, error was ", e);
-						nrofTries++;
-						ThreadUtil.sleep(retryDelay);
-					}
-					else {
-						logger.error("action "+name+" had error: "+e.getMessage());
-						throw e;
-					}
-				}
-				finally {
-					mon1.stop();
-					if (mon2!=null) mon2.stop();
-					// This needs to be done here, otherwise the log_error will always log the log_error action as last action.
-					// TODO: a more elegant solution is desired
-					task.setLastAction(name);
-				}
-				if (logger.isInfoEnabled())
-					logger.info("action "+name+" succesful");
-			}
+			execute(a,name,task);
 		}
-		return null;
 	}
 	
 	public boolean contains(Class<?> cls) {
@@ -101,4 +57,25 @@ public class ActionList  implements Action {
 		}
 		return false;
 	}
+	
+	public Action createAction(ActionCreator creator, String name) {
+		try {
+			return creator.createAction(taskdef, name);
+		}
+		catch (RuntimeException e) {
+			throw new RuntimeException("Error when creating action "+name+" in channel "+name,e);
+		}
+	}
+	
+
+	
+	@Override public void writeHtml(PrintWriter out) {
+		out.println("<h2>Actions</h2>");
+		out.println("<table>");
+		for (Action act: actions.values()) {
+			out.println("<tr><td>"+act.toString()+"</td></tr>");
+		}
+		out.println("</table>");
+	}
+
 }

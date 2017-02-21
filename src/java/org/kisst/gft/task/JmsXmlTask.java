@@ -5,19 +5,16 @@ import org.kisst.jms.JmsMessage;
 import org.kisst.util.XmlNode;
 
 
-public class JmsXmlTask extends BasicTask implements SoapTask {
-	private final JmsMessage msg;
-	private final XmlNode message;
+public class JmsXmlTask extends JmsTask implements SoapTask {
 	private final XmlNode content; 		
 	
-	public JmsXmlTask(GftContainer gft, TaskDefinition taskdef, JmsMessage msg) {
-		super(gft, taskdef);
-		this.msg=msg;
-		this.message=new XmlNode(msg.getData());
-		this.content=message.getChild("Body").getChildren().get(0);
+	public JmsXmlTask(GftContainer gft, TaskDefinition taskdef, String id, JmsMessage msg, XmlNode content) {
+		super(gft, taskdef, id, msg);
+		this.content=content;
 	}
 
-	public JmsMessage getJmsMessage() { return msg; } 
+	public static XmlNode getContent(JmsMessage msg) { return new XmlNode(msg.getData()).getChild("Body").getChildren().get(0); }
+
 	@Override public XmlNode getContent() { return content; }
-	@Override public XmlNode getMessage() { return message;}
+	@Override public XmlNode getMessage() { return content.getRoot();}
 }

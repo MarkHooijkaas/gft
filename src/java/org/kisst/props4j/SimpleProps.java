@@ -27,27 +27,40 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.kisst.util.FileUtil;
+import org.kisst.util.IndentUtil;
+import org.kisst.util.IndentUtil.Indentable;
 import org.kisst.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class SimpleProps extends PropsBase {
+public class SimpleProps extends PropsBase implements IndentUtil.Indentable {
 	private static final Logger logger = LoggerFactory.getLogger(SimpleProps.class);
-	private static final long serialVersionUID = 1L;
+	//private static final long serialVersionUID = 1L;
 
+	public final String desc;
 	private final SimpleProps parent;
 	private final String name; 
 	private final Map<String, Object> values=new LinkedHashMap<String, Object>();
 	public String stringValue=null;
 	
 	public SimpleProps() { this(null,null); }
+	public SimpleProps(String name) { this(null,name); }
+	public SimpleProps(File file) { 
+		this.parent=null; 
+		this.name=null;
+		this.desc="file:"+file.getAbsolutePath(); 
+		load(file); 
+	}
+
 	public SimpleProps(SimpleProps parent, String name) {
 		this.parent=parent;
 		if (name!=null && name.lastIndexOf(".")>0)
 			this.name=name.substring(name.lastIndexOf(".")+1);
 		else
 			this.name=name;
+		this.desc=getFullName();
 	}
+	@Override public Props getParent() { return parent; }
 	@Override public String getLocalName() { return name; }
 	@Override public String getFullName() {
 		if (parent==null)
@@ -70,7 +83,7 @@ public class SimpleProps extends PropsBase {
 
 	public Iterable<String> keys() { return values.keySet(); }
 
-	public void put(String key, Object value) {
+	public SimpleProps put(String key, Object value) {
 		int pos=key.indexOf('.');
 		if (pos<0) {
 			if (value==null) {
@@ -87,7 +100,7 @@ public class SimpleProps extends PropsBase {
 				else
 					values.put(key, value);
 			}
-			return;
+			return this;
 		}
 		String keystart=key.substring(0,pos);
 		String keyremainder=key.substring(pos+1);
@@ -103,8 +116,31 @@ public class SimpleProps extends PropsBase {
 			((SimpleProps)o).put(keyremainder, value);
 		else
 			throw new RuntimeException("key "+getFullName()+"."+key+" already has value "+o+" when adding subkey "+keyremainder);
+		return this;
 	}
 
+	// TODO: code duplication with function above
+	SimpleProps getParentForKeyWithCreate(String key) {
+		int pos=key.indexOf('.');
+		if (pos<0)
+			return this;
+		String keystart=key.substring(0,pos);
+		String keyremainder=key.substring(pos+1);
+		Object o=values.get(keystart);
+		if (o==null || o instanceof String) {
+			SimpleProps props=new SimpleProps(this,keystart);
+			values.put(keystart, props);
+			if (o instanceof String)
+				props.stringValue= (String) o;
+			return props.getParentForKeyWithCreate(keyremainder);
+		}
+		else if (o instanceof SimpleProps)
+			return ((SimpleProps)o).getParentForKeyWithCreate(keyremainder);
+		else
+			throw new RuntimeException("key "+getFullName()+"."+key+" already has value "+o+" when adding subkey "+keyremainder);
+
+	}
+	
 	public Object get(String key, Object defaultValue) {
 		logger.debug("getting {}",key);
 		int pos=key.indexOf('.');
@@ -128,6 +164,7 @@ public class SimpleProps extends PropsBase {
 			return defaultValue;
 	}
 
+
 	public void load(String filename)  { load(new File(filename));	}
 	public void load(File file) {
 		InputStreamReader f = new InputStreamReader(FileUtil.open(file));
@@ -143,14 +180,15 @@ public class SimpleProps extends PropsBase {
 	public void read(InputStream inp)  { new Parser(inp).fillMap(this);} 
 
 
-	public String toString() { return toString("");	}
-	public String toString(String indent) {
+	public String toString() { return "SimpleProps("+this.desc+")";	}
+	public String toIndentedString() { return toIndentedString("");	}
+	public String toIndentedString(String indent) {
 		StringBuilder result=new StringBuilder("{\n");
 		for (String key: values.keySet()) {
 			result.append(indent+"\t"+key+": ");
 			Object o=values.get(key);
-			if (o instanceof SimpleProps)
-				result.append(((SimpleProps)o).toString(indent+"\t"));
+			if (o instanceof Indentable)
+				result.append(((Indentable)o).toIndentedString(indent+"\t"));
 			else if (o instanceof String)
 				result.append(StringUtil.doubleQuotedString((String)o)+";");
 			else if (o instanceof File)
@@ -180,5 +218,4 @@ public class SimpleProps extends PropsBase {
 		}
 		return result.toString();
 	}
-
 }
