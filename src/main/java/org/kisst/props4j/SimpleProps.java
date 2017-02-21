@@ -81,7 +81,8 @@ public class SimpleProps extends PropsBase implements IndentUtil.Indentable {
 		return result;
 	}
 
-	public Iterable<String> keys() { return values.keySet(); }
+	@Override public Iterable<String> keys() { return values.keySet(); }
+	@Override public int nrofKeys() { return values.keySet().size();}
 
 	public SimpleProps put(String key, Object value) {
 		int pos=key.indexOf('.');

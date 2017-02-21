@@ -43,13 +43,7 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
 </table> 
 
 
-<h2>Tags</h2>
-
-<#list tags?keys as name>
-<a href="/?tag=${name}">${name} (${tags[name]})</a>
-</#list>
-
-<h2>Channels</h2> 
+<h2>Channels</h2>
 <table> 
   <tr>
     <td><b>name</b></td>
@@ -180,6 +174,12 @@ a:active  { text-decoration: underline; color: #000000; background-color: #FF704
 <li><a href="config">Configuration</a></li>
 <li><a href="reset">Reset JAMON logging</a></li>
 </ul>
+
+<h2>Tags</h2>
+
+<#list tags?keys as name>
+<a href="/?tag=${name}">${name} (${tags[name]})</a>
+</#list>
 
 </body>
 </html>

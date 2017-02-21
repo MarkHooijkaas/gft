@@ -191,6 +191,10 @@ public class GftContainer implements HttpHostMap, ActionCreator, MessageHandler 
 	}
 
 	private void addChannel(String name, Props channelprops) {
+		if (channelprops.nrofKeys()==1 && channelprops.getString("tags",null)!=null) {
+			logger.warn("Ignoring channel "+name+" because it only has tags");
+			return;
+		}
 		MultiProps lprops=new MultiProps(channelprops,getGlobalProps());
 
 		String type=lprops.getString("type","Default");

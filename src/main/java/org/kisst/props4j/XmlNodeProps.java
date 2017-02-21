@@ -1,6 +1,7 @@
 package org.kisst.props4j;
 
 import java.util.HashSet;
+import java.util.Set;
 
 import org.kisst.util.XmlNode;
 
@@ -24,11 +25,14 @@ public class XmlNodeProps extends PropsBase {
 		return new XmlNodeProps(result);
 	}
 
-	public Iterable<String> keys() {
+	public Set<String> keySet() {
 		HashSet<String> result= new HashSet<String>();
 		for (XmlNode child: node.getChildren())
 			result.add(child.getName());
 		return result; 
 	}
+	@Override public Iterable<String> keys() { return keySet();}
+	@Override public int nrofKeys() { return keySet().size();}
+
 
 }

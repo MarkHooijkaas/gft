@@ -21,6 +21,7 @@ package org.kisst.props4j;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
 import org.kisst.util.IndentUtil;
 
@@ -57,7 +58,7 @@ public class LayeredProps extends PropsBase implements IndentUtil.Indentable {
 	}
 
 
-	public Iterable<String> keys() {
+	public Set<String> keySet() {
 		HashSet<String> result= new HashSet<String>();
 		for (Props layer: layers) {
 			for (String key: layer.keys())
@@ -67,6 +68,9 @@ public class LayeredProps extends PropsBase implements IndentUtil.Indentable {
 			result.add(key);
 		return result; 
 	}
+	@Override public Iterable<String> keys() { return keySet();}
+	@Override public int nrofKeys() { return keySet().size();}
+
 
 	public String toString() {
 		StringBuilder result=new StringBuilder("LayeredProps(");
