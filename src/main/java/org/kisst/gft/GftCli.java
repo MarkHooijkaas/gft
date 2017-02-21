@@ -77,7 +77,8 @@ public class GftCli {
         if (jgit.isSet() || git.isSet()) {
             if (System.getProperty("jgit.gitprefix")==null)
                 System.setProperty("jgit.gitprefix",props.getString("jgit.gitprefix","D:\\git"));
-            Main.main(newargs);
+            try {Main.main(newargs);}
+            catch (Exception e) { throw new RuntimeException(e); }  
         }
         else if (backup.isSet()) {
             backup(newargs, props);

@@ -13,7 +13,7 @@ import org.kisst.util.CryptoUtil;
 
 
 public abstract class AbstractServlet {
-	private final WindowsAuthentication ntlm; 
+	private final WindowsAuthentication ntlm;
 	private final String adminPassword; 
 	private final boolean useNtlm;
 	
@@ -35,7 +35,7 @@ public abstract class AbstractServlet {
 
 	protected String getUser(HttpServletRequest req, HttpServletResponse res) {
 		if (useNtlm)
-			return ntlm.getUser(req,res);
+			return null; //ntlm.getUser(req,res);
 		else
 			return getBasicUser(req,res);
 	}

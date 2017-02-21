@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+/*
 import waffle.util.AuthorizationHeader;
 import waffle.util.Base64;
 import waffle.util.NtlmServletRequest;
@@ -19,13 +19,14 @@ import waffle.windows.auth.IWindowsAuthProvider;
 import waffle.windows.auth.IWindowsIdentity;
 import waffle.windows.auth.IWindowsSecurityContext;
 import waffle.windows.auth.impl.WindowsAuthProviderImpl;
+*/
 
 /**
  * A negotiate security filter provider.
  * @author dblock[at]dblock[dot]org
  */
 public class WindowsAuthentication {
-
+/*
     private static final Logger _log = LoggerFactory.getLogger(WindowsAuthentication.class);
 	private final List<String> _protocols = new ArrayList<String>();
 	private final IWindowsAuthProvider _auth= new WindowsAuthProviderImpl();
@@ -119,5 +120,5 @@ public class WindowsAuthentication {
 		} catch (IOException e) { throw new RuntimeException(e);}
 		return null;
 	}
-
+*/
 }

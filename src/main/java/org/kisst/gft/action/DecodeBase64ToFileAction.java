@@ -16,7 +16,7 @@ public class DecodeBase64ToFileAction implements Action{
 	public DecodeBase64ToFileAction(GftContainer gft, Props props) {}
 
 	@Override
-	public Object execute(Task task) {
+	public void execute(Task task) {
 		SoapTask soaptask =  (SoapTask) task;
 		BasicTask basictask = (BasicTask) task;
 		try {
@@ -26,7 +26,6 @@ public class DecodeBase64ToFileAction implements Action{
 				byte[] bytes = Base64.decode(encoded);
 				fos = new FileOutputStream(basictask.getTempFile());
 				fos.write(bytes);
-				return null;
 			}
 			finally {
 				if (fos!=null)
