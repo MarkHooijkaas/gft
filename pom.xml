@@ -84,12 +84,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>commons-dbcp</groupId>
-			<artifactId>commons-dbcp</artifactId>
-			<version>1.4</version>
-		</dependency>
-
-		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.3</version>
@@ -104,17 +98,6 @@
 			<groupId>org.eclipse.jgit</groupId>
 			<artifactId>org.eclipse.jgit.pgm</artifactId>
 			<version>4.6.0.201612231935-r</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.dblock.waffle</groupId>
-			<artifactId>waffle-jna</artifactId>
-			<version>1.5</version>
-		</dependency>
-
-		<dependency>
-			<groupId>tanukisoft</groupId>
-			<artifactId>wrapper</artifactId>
-			<version>3.2.3</version>
 		</dependency>
 
 		<dependency>
@@ -152,11 +135,6 @@
 			<groupId>com.ibm</groupId>
 			<artifactId>mq.pcf</artifactId>
 			<version>${ibm-mq-version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.ibm</groupId>
-			<artifactId>ODApi</artifactId>
-			<version>9.0.0.5</version>
 		</dependency>
 	</dependencies>
 
