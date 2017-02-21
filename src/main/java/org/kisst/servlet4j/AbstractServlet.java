@@ -13,31 +13,21 @@ import org.kisst.util.CryptoUtil;
 
 
 public abstract class AbstractServlet {
-	private final WindowsAuthentication ntlm;
-	private final String adminPassword; 
-	private final boolean useNtlm;
-	
+	private final String adminPassword;
+
 	public AbstractServlet(Props props) {
 		String password=props.getString("admin.password", null);
-		useNtlm=props.getBoolean("admin.useNtlm", false);
-		
+
 		if (password==null)
 			password=CryptoUtil.decrypt(props.getString("admin.encryptedPassword"));
 		this.adminPassword=password;
-		if (useNtlm)
-			ntlm=new WindowsAuthentication();
-		else
-			ntlm=null;
 	}
 
 	abstract public void handle(HttpServletRequest request, HttpServletResponse response)
 	throws ServletException, IOException;
 
 	protected String getUser(HttpServletRequest req, HttpServletResponse res) {
-		if (useNtlm)
-			return null; //ntlm.getUser(req,res);
-		else
-			return getBasicUser(req,res);
+		return getBasicUser(req,res);
 	}
 
 	private  String getBasicUser(HttpServletRequest req, HttpServletResponse res) {
