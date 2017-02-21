@@ -14,3 +14,10 @@ externalize:
     jgit GftCli
 
     ActiveMqsystem, GftCli,
+
+release 4.0:
+    - no odwek, tanuki, dbcp
+    - ibm,mq for the time being
+    - test resources needed
+    - no GftCli? SpringBoot provides runnable jar
+    - jetty replaced by Spring Boot?

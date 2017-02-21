@@ -9,9 +9,4 @@ public class GftRunner extends BaseRunner {
 				FileTransferModule.class
 		);
 	}
-
-	public static void main(String[] args) {
-		GftCli cli=new GftCli(args);
-		cli.main(new GftRunner(cli.getConfigFile()));
-	}
 }
