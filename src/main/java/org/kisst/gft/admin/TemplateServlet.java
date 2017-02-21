@@ -15,6 +15,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import org.kisst.gft.GftWrapper;
 
+@SuppressWarnings("deprecation")
 public class TemplateServlet extends BaseServlet {
 	private static final Configuration cfg= new Configuration();;
 	static {

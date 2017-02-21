@@ -8,9 +8,11 @@ import freemarker.template.TemplateException;
 import java.io.*;
 
 public class TemplateUtil {
+	@SuppressWarnings("deprecation")
 	private static final Configuration freemarkerConfig= new Configuration();
 
 
+	@SuppressWarnings("deprecation")
 	public static void init(File templ_dir) {
 		freemarkerConfig.setTemplateLoader(new TemplateUtilLoader(templ_dir));
 		DefaultObjectWrapper wrapper = new DefaultObjectWrapper();

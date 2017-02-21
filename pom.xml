@@ -31,11 +31,27 @@
 			<artifactId>spring-boot-starter-freemarker</artifactId>
 		</dependency>
 
+
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+
+		<!-- No idea why hibernate is needed, but otherwise I get a Bean Validator error in testing -->
+		<!--
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>5.2.4.Final</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.freemarker</groupId>
+			<artifactId>freemarker</artifactId>
+			<version>2.3.23</version>
+		</dependency>
+		-->
 
 		<dependency>
 			<groupId>javax</groupId>
