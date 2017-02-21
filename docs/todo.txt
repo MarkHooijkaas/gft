@@ -5,7 +5,6 @@ externalize:
     odwek package (ODApi)
 
     mq package (MsgMover)
-    admin QueueStatus
     GftCli (move message option, indirect via JmsSystem)
     JmsListener (setTargetClient in error message)
     JmsSystem createMqManager only used in gftCli.moveMessage and QueueStatus
