@@ -4,7 +4,6 @@ import com.ibm.mq.MQException;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.Status;
 import org.eclipse.jgit.pgm.Main;
-import org.kisst.gft.filetransfer.Channel;
 import org.kisst.jms.ActiveMqSystem;
 import org.kisst.jms.JmsSystem;
 import org.kisst.jms.JmsUtil;
@@ -28,7 +27,7 @@ import java.io.PrintWriter;
 import java.util.HashMap;
 
 public class GftCli2 extends GftCli {
-    final Logger logger= LoggerFactory.getLogger(Channel.class);
+    final Logger logger= LoggerFactory.getLogger(GftCli2.class);
 
     private final Cli.StringOption putmsg = cli.stringOption("p","putmsg", "puts a message from the named file on the input queue",null);
     private final Cli.StringOption delmsg = cli.stringOption("d","delmsg","selector", null);
@@ -47,8 +46,9 @@ public class GftCli2 extends GftCli {
         return backup.isSet() || jgit.isSet() || git.isSet() | mvmsg.isSet() | delmsg.isSet() | putmsg.isSet() || super.localCommand();
     }
 
-    public void main() {
-        super.main();
+    public boolean handle() {
+        if (super.handle())
+            return true;
         SimpleProps props=new SimpleProps();
         props.load(getConfigFile());
         props=(SimpleProps) props.getProps(topname);
@@ -67,6 +67,9 @@ public class GftCli2 extends GftCli {
             delmsg(props, delmsg.get());
         else if (mvmsg.isSet())
             moveMessage(props, mvmsg.get());
+        else
+            return false;
+        return true;
     }
 
     private void backup(String[] args, SimpleProps props) {

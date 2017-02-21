@@ -1,19 +1,12 @@
 package org.kisst.gft;
 
-import org.apache.log4j.PropertyConfigurator;
-import org.kisst.gft.filetransfer.Channel;
 import org.kisst.gft.ssh.GenerateKey;
-import org.kisst.props4j.SimpleProps;
 import org.kisst.util.CryptoUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 
 public class GftCli {
-    final Logger logger= LoggerFactory.getLogger(Channel.class);
-
     protected final Cli cli=new Cli();
     private final  Cli.StringOption config;
     private final Cli.Flag help =cli.flag("h", "help", "show this help");
@@ -31,24 +24,10 @@ public class GftCli {
 	}
 
     public File getConfigFile() { return new File(config.get()); }
-    public void main() {
-        if (help.isSet()) {
+    public boolean handle() {
+        if (help.isSet())
             showHelp();
-            return;
-
-        }
-        try {
-            PropertyConfigurator.configure(getConfigFile().getParent()+"/log4j.properties");
-        }
-        catch (UnsatisfiedLinkError e) { // TODO: a bit of a hack to prevent log4j Link error
-            System.out.println("Linking Error initializing log4j, probably you should execute \"set PATH=%PATH%;lib\"");
-            if (localCommand())
-                System.out.println("WARNING: could not initialize log4j properly:"+e.getMessage());
-            else
-                throw e;
-        }
-
-        if (keygen.isSet())
+        else if (keygen.isSet())
             GenerateKey.generateKey(getConfigFile().getParentFile().getAbsolutePath()+"/ssh/id_dsa_gft"); // TODO: should be from config file
         else if (encrypt.get()!=null)
             System.out.println(CryptoUtil.encrypt(encrypt.get()));
@@ -62,6 +41,9 @@ public class GftCli {
             }
             catch (IOException e) { throw new RuntimeException(e); }
         }
+        else
+			return false;
+        return true;
     }
 
 	public boolean localCommand() {
