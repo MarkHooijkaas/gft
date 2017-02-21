@@ -1,6 +1,7 @@
 package org.kisst.http4j.server;
 
 import org.kisst.props4j.Props;
+import org.kisst.util.CryptoUtil;
 
 public class HttpServerConfiguration {
 
@@ -15,8 +16,6 @@ public class HttpServerConfiguration {
 	public final String httpsKeyStorePath;
 	public final String httpsKeyStorePassword;
 	public final String httpsKeyManagerPassword;
-	//public final String httpsTrustStorePath;
-	//public final String httpsTrustStorePassword;
 
 	public HttpServerConfiguration(Props props) {
 		this.host = props.getString("host", null);
@@ -29,10 +28,8 @@ public class HttpServerConfiguration {
 		this.httpsEnabled = props.getBoolean("https.enabled", false);
 		this.httpsPort = props.getInt("https.port", 8443);
 		this.httpsKeyStorePath = props.getString("https.keyStorePath", null);
-		this.httpsKeyStorePassword = props.getString("https.keyStorePassword", null);
-		this.httpsKeyManagerPassword = props.getString("https.keyManagerPassword", null);
-		//this.httpsTrustStorePath = props.getString("https.trustStorePath", null);
-		//this.httpsTrustStorePassword = props.getString("https.trustStorePassword", null);
+		this.httpsKeyStorePassword = CryptoUtil.parse(props.getString("https.keyStorePassword", null));
+		this.httpsKeyManagerPassword = CryptoUtil.parse(props.getString("https.keyManagerPassword", null));
 	}
 
 }

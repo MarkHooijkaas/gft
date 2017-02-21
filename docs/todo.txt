@@ -1,12 +1,6 @@
 
 externalize:
-    GftService (tanuki wrapper)
-    util.Database (dbcp)
-    odwek package (ODApi)
-    jgit GftCli
-
     mq package (MsgMover)
-    GftCli (move message option, indirect via JmsSystem)
 
     JmsListener (setTargetClient in error message)
     JmsSystem createMqManager only used in gftCli.moveMessage and QueueStatus

@@ -111,7 +111,15 @@ public class CryptoUtil {
 		}
 		return hex.toString();
 	}
-
+	
+	public static String parse(String str) {
+		if (str==null)
+			return null;
+		if (str.startsWith("encrypted:"))
+			return CryptoUtil.decrypt(str.substring(10));
+		else if (str.startsWith("cleartext:"))
+			return str.substring(10);
+		else
+			throw new RuntimeException("Password property should start with encrypted: or cleartext:");
+	}
 }
-
-
