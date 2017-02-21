@@ -3,20 +3,20 @@ externalize:
     GftService (tanuki wrapper)
     util.Database (dbcp)
     odwek package (ODApi)
+    jgit GftCli
 
     mq package (MsgMover)
     GftCli (move message option, indirect via JmsSystem)
+
     JmsListener (setTargetClient in error message)
     JmsSystem createMqManager only used in gftCli.moveMessage and QueueStatus
     ?? jndi based config ??
 
-    jgit GftCli
 
-    ActiveMqsystem, GftCli,
+    ??ActiveMqsystem
 
 release 4.0:
-    - no odwek, tanuki, dbcp
-    - ibm,mq for the time being
+    - no odwek, tanuki, dbcp, jgit
+    - ibm.mq for the time being
     - test resources needed
-    - no GftCli? SpringBoot provides runnable jar
     - jetty replaced by Spring Boot?
