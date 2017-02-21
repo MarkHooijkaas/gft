@@ -5,8 +5,6 @@ import org.kisst.gft.GftWrapper;
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
 
-import static org.eclipse.jgit.lib.ObjectChecker.tag;
-
 public class HomeServlet extends TemplateServlet {
 
 

@@ -23,16 +23,11 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 import org.apache.commons.dbcp.BasicDataSource;
-import org.kisst.gft.GftContainer;
 import org.kisst.props4j.Props;
 
 
 public class Database  {
 	private final BasicDataSource ds= new BasicDataSource();
-
-	// The following constructor is needed until all classes using this constructor are upgraded 
-	@Deprecated
-	public Database(GftContainer gft,Props props) { this(props); }
 
 	public Database(Props props) {
 		ds.setMinEvictableIdleTimeMillis(props.getLong("minEvictableIdleTimeMillis",10*60*1000));
