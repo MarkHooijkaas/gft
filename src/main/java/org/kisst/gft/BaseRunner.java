@@ -12,26 +12,13 @@ public class BaseRunner {
 	private GftWrapper gft;
 
 
-	@SuppressWarnings("unchecked")
-	protected BaseRunner(String topname, String configfilename, Class<? extends Module> ... modules) {
+	protected BaseRunner(String topname, File configfilename, Class<? extends Module> ... modules) {
 		this.modules=modules;
 		this.topname=topname;
-		if (configfilename==null)
-			this.configfile=findConfigFile(topname);
-		else
-			this.configfile = new File(configfilename);
+		this.configfile = configfilename;
 		PropertyConfigurator.configure(this.configfile.getParent()+"/"+topname+".log4j.properties");
 	}
 	
-	private File findConfigFile(String topname) {
-		File result=new File("config."+topname+"/"+topname+".properties");
-		if (result.exists())
-			return result;
-		return new File("config/"+topname+".properties");
-	}
-
-	
-
 	public void start() {
 		if (gft!=null)
 			throw new RuntimeException("Gft already running");

@@ -8,7 +8,7 @@ import java.io.IOException;
 
 public class GftCli {
     protected final Cli cli=new Cli();
-    private final  Cli.StringOption config;
+    protected final  Cli.StringOption config;
     private final Cli.Flag help =cli.flag("h", "help", "show this help");
     private final Cli.Flag keygen =cli.flag("k", "keygen", "generate a public/private keypair");
     private final Cli.StringOption encrypt = cli.stringOption("e","encrypt","key", null);
@@ -19,11 +19,22 @@ public class GftCli {
     public GftCli(String topname, String args[]) {
 		this.topname = topname;
 		CryptoUtil.setKey("AB451204BD47vgtznh4r8-9yr45blfrui6093782");
-		config = cli.stringOption("c", "config", "configuration file", "gft.properties");
+		config = cli.stringOption("c", "config", "configuration file", null);
 		cli.parse(args);
 	}
 
-    public File getConfigFile() { return new File(config.get()); }
+	public File getConfigFile() {
+		String fname= config.get();
+		if (fname!=null)
+			return new File(fname);
+		File result=new File(topname+".properties");
+		if (result.exists())
+			return result;
+		result=new File("config/"+topname+".properties");
+		if (result.exists())
+			return result;
+		return new File("config."+topname+"/"+topname+".properties");
+	}
     public boolean handle() {
         if (help.isSet())
             showHelp();
