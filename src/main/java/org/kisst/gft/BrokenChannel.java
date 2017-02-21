@@ -43,4 +43,6 @@ public class BrokenChannel implements TaskDefinition, SourceFile, DestinationFil
 	@Override public FileLocation getDestinationFile() { return errorloc; }
 	@Override public FileLocation getFinalDestinationFile() { return errorloc; }
 	@Override public FileLocation getSourceFile() {return errorloc; }
+
+	public boolean hasTag(String tag) { return false; }
 }
