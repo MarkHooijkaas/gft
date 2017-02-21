@@ -12,6 +12,7 @@ public class BaseRunner {
 	private GftWrapper gft;
 
 
+	@SuppressWarnings("unchecked")
 	protected BaseRunner(String topname, String configfilename, Class<? extends Module> ... modules) {
 		this.modules=modules;
 		this.topname=topname;

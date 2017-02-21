@@ -19,6 +19,7 @@ public class OnDemandHost {
 	private final int tracelevel;
 	private final String arslib;
 
+	@SuppressWarnings("unchecked")
 	private final GenericObjectPool pool=new GenericObjectPool(new OnDemandConnectionFactory());
 
 	public OnDemandHost(Props props) {
@@ -40,12 +41,14 @@ public class OnDemandHost {
 			return (ODServer) pool.borrowObject();
 		} catch (Exception e) { throw new RuntimeException(e); }
 	}
+	@SuppressWarnings("unchecked")
 	public void releaseConnection(ODServer conn) {
 		try {
 			pool.returnObject(conn);
 		} catch (Exception e) {throw new RuntimeException(e); }
 	}
-	
+
+	@SuppressWarnings("unchecked")
 	public void invalidateConnection(ODServer conn) {
 		try {
 			pool.invalidateObject(conn);

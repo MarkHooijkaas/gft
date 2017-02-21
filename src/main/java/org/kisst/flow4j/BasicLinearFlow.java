@@ -67,6 +67,7 @@ public class BasicLinearFlow implements WritesHtml, Action {
 	}
 	
 	protected<T> T addAction(String name, Class<T> cls) { return addAction(name,cls, ! SKIPPED); }
+	@SuppressWarnings("unchecked")
 	protected<T> T addAction(String name, Class<T> cls, boolean skipped) {
 		Props props = getActionConstructorProps((Class<? extends Action>) cls);
 		if (props.getBoolean("skip", skipped))
