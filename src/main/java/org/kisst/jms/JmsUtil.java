@@ -2,12 +2,9 @@ package org.kisst.jms;
 
 import java.util.Enumeration;
 
-import javax.jms.BytesMessage;
-import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.Session;
-import javax.jms.TextMessage;
+import javax.jms.*;
 
+import org.kisst.util.ReflectionUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,5 +68,14 @@ public class JmsUtil {
 		if (linked!=null && linked!=e)
 			return new RuntimeException(e.getMessage()+"\nLinkedException: "+linked.getMessage(),e);
 		return new RuntimeException(e);
+	}
+
+	public static void prepareDestinationForJmsHeaders(Destination dest) {
+		if (! dest.getClass().getName().equals("com.ibm.mq.jms.MQQueue"))
+			return;
+		try {
+			ReflectionUtil.invoke(dest, "setTargetClient", new Object[]{0});
+		}
+		catch (Exception e) { /* ignore */ }
 	}
 }
