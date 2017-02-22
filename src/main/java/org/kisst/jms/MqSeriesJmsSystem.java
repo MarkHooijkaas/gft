@@ -15,7 +15,7 @@ public class MqSeriesJmsSystem extends JmsSystem {
 
 	public MqSeriesJmsSystem(Props props) { super(props); }
 
-	@Override protected QueueConnectionFactory createConnectionFactory() {
+	@Override public QueueConnectionFactory createConnectionFactory() {
 		return jantje(props.getString("jndiQueuemanager"));
 	}
 	/*

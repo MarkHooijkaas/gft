@@ -8,7 +8,7 @@ import org.kisst.props4j.Props;
 public class ActiveMqSystem extends JmsSystem {
 	public ActiveMqSystem(Props props) { super(props); }
 
-	@Override protected QueueConnectionFactory createConnectionFactory() {
+	@Override public QueueConnectionFactory createConnectionFactory() {
 		String user=props.getString("user",null);
 		String password=props.getString("password",null);
 		String url=props.getString("url");
