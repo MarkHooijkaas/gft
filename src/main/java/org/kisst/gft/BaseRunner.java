@@ -12,7 +12,7 @@ public class BaseRunner {
 	private GftWrapper gft;
 
 
-	protected BaseRunner(String topname, File configfilename, Class<? extends Module> ... modules) {
+	public BaseRunner(String topname, File configfilename, Class<? extends Module> ... modules) {
 		this.modules=modules;
 		this.topname=topname;
 		this.configfile = configfilename;
