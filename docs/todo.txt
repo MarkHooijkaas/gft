@@ -1,16 +1,25 @@
 
 externalize:
-    mq package (MsgMover)
-
-    JmsListener (setTargetClient in error message)
-    JmsSystem createMqManager only used in gftCli.moveMessage and QueueStatus
     ?? jndi based config ??
-
-
     ??ActiveMqsystem
 
 release 4.0:
-    - no odwek, tanuki, dbcp, jgit
-    - ibm.mq for the time being
+	- gft-core? gft-war, gft-runner
     - test resources needed
     - jetty replaced by Spring Boot?
+
+	
+freemarker
+	- is used for simple subsitution
+	- sometimes ?lower_case
+	- var mechanism is used in tasks (NotifyReceiver)
+	- replaceVars in Parser can do same (with lower_case), but may not work well with beans as Context
+	- StringUtil.subsitute does with Props as context, but no lower_case yet
+		var.
+		global.
+	- HomeServlet.template
+		<#if>
+		<#list>
+		complex variable.beans
+		should be easy to replace with any other template engine, or angular with api
+	
