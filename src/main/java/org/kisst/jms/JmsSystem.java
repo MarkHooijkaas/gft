@@ -18,7 +18,7 @@ import org.slf4j.LoggerFactory;
 public class JmsSystem {
 	private final static Logger logger=LoggerFactory.getLogger(JmsSystem.class); 
 	protected final Props props;
-	public final ConnectionFactory connectionFactory;
+	private final ConnectionFactory connectionFactory;
 	private final Connection connection;
 	public final String sendParams;
 	
@@ -44,7 +44,7 @@ public class JmsSystem {
 		catch (JMSException e) { throw JmsUtil.wrapJMSException(e); }
 	}
 
-	protected ConnectionFactory createConnectionFactory() {
+	public ConnectionFactory createConnectionFactory() {
         Hashtable<String, String> env= new Hashtable<String,String>();
         env.put( "java.naming.factory.initial", "com.sun.jndi.fscontext.RefFSContextFactory" );
         Object jndifile = props.get("jndifile");
